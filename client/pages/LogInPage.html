@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SkillForge – Sign In</title>
+  <head>
+  <link rel="stylesheet" href="../css/LogInPage.css">
+</head>
+
+  
+</head>
+<body>
+
+<div class="sf-wrapper">
+  <div class="sf-card">
+
+    <!-- LEFT: Sign In Form -->
+    <div class="sf-left">
+      <div class="sf-logo">Skill <span>Forge</span></div>
+      <div class="sf-heading">Welcome back</div>
+      <p class="sf-subheading">Sign in to continue your learning journey.</p>
+
+      <div class="sf-field">
+        <label for="sf-email">Email address</label>
+        <input type="email" id="sf-email" placeholder="you@example.com" autocomplete="email" />
+      </div>
+
+      <div class="sf-field">
+        <label for="sf-pass">Password</label>
+        <div class="sf-pw-wrap">
+          <input type="password" id="sf-pass" placeholder="••••••••" autocomplete="current-password" />
+          <button class="sf-eye" onclick="togglePw()" title="Toggle password visibility">
+            <svg id="sf-eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="sf-row">
+        <a class="sf-forgot" href="#">Forgot password?</a>
+      </div>
+
+      <button class="sf-btn" onclick="handleSignIn()">Sign In</button>
+
+      <div class="sf-divider">or continue with</div>
+
+      <div class="sf-social">
+        <button class="sf-social-btn">
+          <span class="sf-social-icon sf-g-icon">G</span> Google
+        </button>
+        <button class="sf-social-btn">
+          <span class="sf-social-icon sf-li-icon">in</span> LinkedIn
+        </button>
+      </div>
+
+      <div class="sf-bottom">
+        Don't have an account? <a href="#">Sign Up</a>
+      </div>
+    </div>
+
+    <!-- RIGHT: Promo Panel -->
+    <div class="sf-right">
+      <div class="sf-right-content">
+        <div class="sf-badge">AI-POWERED LEARNING</div>
+        <h2>Forge Your Future.<br>Master Your <span>Career.</span></h2>
+        <p>Join thousands of professionals accelerating their skills with AI-guided learning paths.</p>
+
+        <div class="sf-illustration">
+          <div class="sf-avatars">
+            <div class="sf-avatar sf-avatar-human">
+              <div class="sf-avatar-head sf-human-head"></div>
+              You
+            </div>
+            <div class="sf-handshake"></div>
+            <div class="sf-avatar sf-avatar-ai">
+              <div class="sf-avatar-head sf-ai-head">
+                <div class="sf-ai-dot"></div>
+              </div>
+              AI
+            </div>
+          </div>
+        </div>
+
+        <div class="sf-features">
+          <div class="sf-feature">
+            <div class="sf-feature-dot"></div>
+            Personalized AI learning paths
+          </div>
+          <div class="sf-feature">
+            <div class="sf-feature-dot"></div>
+            Industry-recognized certifications
+          </div>
+          <div class="sf-feature">
+            <div class="sf-feature-dot"></div>
+            Real-world projects &amp; mentorship
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="../js/LogInPage.js"/>
+
+</body>
+</html>
