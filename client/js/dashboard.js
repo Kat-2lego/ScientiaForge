@@ -1,50 +1,74 @@
-lucide.createIcons();
+document.addEventListener('DOMContentLoaded', () => {
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
+  const searchInput = document.getElementById('searchInput');
+  const emptyState = document.getElementById('emptyState');
+  const fileInput = document.getElementById('cvFileInput');
+  const navItems = Array.from(document.querySelectorAll('.nav-item'));
+  const sections = Array.from(document.querySelectorAll('main .searchable'));
 
-const navItems = document.querySelectorAll(".nav-item");
-const searchInput = document.getElementById("searchInput");
-const searchableItems = document.querySelectorAll("[data-search]");
-const emptyState = document.getElementById("emptyState");
-const sidebar = document.getElementById("sidebar");
-const menuBtn = document.getElementById("menuBtn");
-
-navItems.forEach((item) => {
-  item.addEventListener("click", () => {
-    navItems.forEach((nav) => nav.classList.remove("active"));
-    item.classList.add("active");
-
-    if (window.innerWidth <= 768) {
-      sidebar?.classList.remove("open");
-    }
-  });
-});
-
-menuBtn?.addEventListener("click", () => {
-  sidebar?.classList.toggle("open");
-});
-
-document.addEventListener("click", (e) => {
-  if (
-    window.innerWidth <= 768 &&
-    sidebar &&
-    menuBtn &&
-    !sidebar.contains(e.target) &&
-    !menuBtn.contains(e.target)
-  ) {
-    sidebar.classList.remove("open");
+  if (menuBtn && sidebar) {
+    menuBtn.addEventListener('click', () => sidebar.classList.toggle('open'));
   }
-});
 
-searchInput?.addEventListener("input", (e) => {
-  const value = e.target.value.toLowerCase().trim();
-  let visibleCount = 0;
+  navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      const label = item.dataset.label;
 
-  searchableItems.forEach((item) => {
-    const text = item.dataset.search.toLowerCase();
-    const match = text.includes(value);
+      if (item.tagName === 'A' && item.getAttribute('href') && item.getAttribute('href') !== '#') {
+        navItems.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        return;
+      }
 
-    item.style.display = match ? "" : "none";
-    if (match) visibleCount++;
+      e.preventDefault();
+
+      if (label === 'CV Analyzer') {
+        window.location.href = 'cvDashboard.html';
+        return;
+      }
+
+      navItems.forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    });
   });
 
-  emptyState?.classList.toggle("hidden", visibleCount !== 0 || value === "");
+  const uploadButtons = Array.from(document.querySelectorAll('.btn-primary, .action-row, .btn-secondary')).filter(btn => {
+    const text = (btn.textContent || '').toLowerCase();
+    return text.includes('upload cv') || text.includes('choose file') || text.includes('upload new cv');
+  });
+
+  uploadButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (fileInput) fileInput.click();
+    });
+  });
+
+  if (fileInput) {
+    fileInput.addEventListener('change', () => {
+      const fileName = fileInput.files?.[0]?.name;
+      if (fileName) {
+        const target = document.querySelector('.hero p');
+        if (target) target.textContent = `Selected file: ${fileName}`;
+      }
+    });
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      const term = searchInput.value.toLowerCase().trim();
+      let visible = 0;
+
+      sections.forEach(el => {
+        const text = (el.dataset.search || el.textContent || '').toLowerCase();
+        const match = !term || text.includes(term);
+        el.classList.toggle('hidden', !match);
+        if (match) visible += 1;
+      });
+
+      if (emptyState) emptyState.classList.toggle('hidden', visible !== 0);
+    });
+  }
+
+  if (window.lucide) lucide.createIcons();
 });
