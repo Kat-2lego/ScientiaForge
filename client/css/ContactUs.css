@@ -41,7 +41,9 @@ body {
 .logo-symbol { width: 30px; height: 30px; background: var(--royal); border-radius: 8px; }
 .nav-links a { color: var(--text-light); text-decoration: none; margin: 0 15px; font-weight: 600; font-size: 14px; }
 .nav-links a:hover { color: var(--royal); }
+.nav-link { text-decoration: none; color: var(--navy); font-weight: 700; font-size: 14px; }
 .nav-cta { background: var(--royal); color: white; padding: 10px 24px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 14px; }
+.nav-actions { display: flex; align-items: center; gap: 20px; }
 
 /* The Contact Wrapper section */
 .contact-wrapper { padding: 160px 0 100px; }

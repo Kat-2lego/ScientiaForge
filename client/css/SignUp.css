@@ -18,55 +18,77 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* THE NEW BODY */
+
 body {
-    background: white;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+
+    background: 
+        linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
+        url('../assets/modern-office.jpg'); /* YOU ADD PATH */
+
+    background-size: cover;
+    background-position: center;
+
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    font-family: 'Segoe UI', Roboto, sans-serif;
 }
 
 .master-viewport {
     width: 100%;
-    max-width: 1000px;
+    max-width: 90%;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px;
 }
 
-/* The hardware Chasis*/
-.chassis-outer-shell {
-    width: 100%;
-    padding: 12px;
-    background: var(--metal-gradient);
-    border-radius: 12px;
-    box-shadow: 0 40px 100px rgba(0,0,0,0.18);
-}
-
-.chassis-inner-recess {
-    background: #5a6673; 
-    padding: 4px;
-    clip-path: var(--chassis-clip);
-}
+/* THE NEW */
 
 .interface-deck {
     display: flex;
-    background: #fff;
-    min-height: 650px; /* Taller for more fields */
-    clip-path: var(--chassis-clip);
-    position: relative;
+    max-width: 1000px;
+    width: 100%;
+    border-radius: 20px;
     overflow: hidden;
+    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
 }
 
 /* The sectore*/
 .sector { flex: 1; position: relative; z-index: 2; }
-.sector-left { padding: 30px 50px; background: radial-gradient(circle at top left, white 0%, #f0f4f8 100%); }
-.sector-right { padding: 60px 45px; background: radial-gradient(circle at bottom right, white 0%, #e8edf3 100%); }
+ 
+/* THE NEW */
+.sector-left {
+    flex: 1;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(10px);
+}
+
+/* THE NEW */
+
+.sector-right {
+    flex: 1;
+    padding: 40px;
+    background-color: #28b5f6;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
 
 /*Styling for the branding and titles */
-.brand-name { font-size: 44px; font-weight: 900; color: var(--color-navy); text-align: center; margin-bottom: 10px; }
+.brand-name { font-size: 44px; 
+              font-weight: 900; 
+              color: var(--color-navy); 
+              text-align: center; 
+              margin-bottom: 10px; }
+              
 .brand-name span { color: var(--color-cyan); }
 
 .auth-titles { text-align: center; margin-bottom: 25px; }
@@ -84,29 +106,17 @@ body {
 .pass p { padding-top: 10px; }
 
 
-.input-module { width: 100%; height: 56px; position: relative; filter: drop-shadow(0 5px 8px rgba(0,0,0,0.05)); }
+.input-module { width: 100%; 
+                height: 56px; 
+                position: relative; 
+                filter: drop-shadow(0 5px 8px rgba(0,0,0,0.05)); }
 
-.module-bezel {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, gray 0%, white 25%, white 75%, #a8b3be 100%);
-    clip-path: var(--input-clip);
-    padding: 2px;
-}
 
 .module-inner {
     width: 100%; height: 100%;
     background: linear-gradient(180deg, #e0e0e0 0%, #f1f5f9 100%);
     clip-path: var(--input-clip);
     display: flex; align-items: center; padding: 0 20px;
-}
-
-.module-inner::before {
-    content: ''; 
-    position: absolute;
-     inset: 0;
-    box-shadow: inset 0 4px 6px rgba(1, 223, 252, 0.4);
-    pointer-events: none;
 }
 
 .module-inner input {
@@ -124,32 +134,30 @@ body {
     
 }
 
-/* The centered Sign Up buton*/
-.secure-submit {
-    margin-top: 10px;
-    position: relative;
-    width: 40%;
-    height: 58px;
-    margin-left: 100px;
-    border-top: 5px;
-    border-color: rgb(1, 172, 240);
-    border-radius: 100px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%);
-    background: linear-gradient(180deg, #dbdbdb 0%, grey 50%, #0e92cf 100%);
-    cursor: pointer;
-    box-shadow: 
-        0 10px 20px rgba(0,0,0,0.2),
-        inset 0 1px 2px rgba(255,255,255,0.6);
-    outline: 2px solid #8e9ba8;
-    outline-offset: 3px;
+
+
+/* THE NEW */
+.input {
+    width: 100%;
+    padding: 14px 16px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    background: #fff;
+    font-size: 14px;
+    transition: 0.2s;
 }
 
-
+.input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+    outline: none;
+}
 
 .btn-inner-text {
     font-size: 18px;
     font-weight: 900;
-    color: #0d1a29;
+    color: white;
     letter-spacing: 0.5px;
     position: relative;
     z-index: 2;
@@ -160,10 +168,25 @@ body {
     top: 0; left: 0; right: 0; height: 45%;
     background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
 }
+
+/* THE NEW */
+.secure-submit {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    /* background: linear-gradient(135deg, #3b82f6, #00a2ed); */
+    color: white;
+    background-color: #002b5c;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
 .secure-submit:hover {
-    filter: brightness(1.3);
-    transform: translateY(-1px);
-    transition: 0.2s ease;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(72, 141, 251, 0.3);
 }
 
 /*The OR divider*/
@@ -199,30 +222,10 @@ body {
 }
 
 .auth-switch .link-forgot {
-    color: #24c6d1;
+    color: #058c95;
     text-decoration: none;
     margin-left: 5px;
     font-weight: 800;
-}
-
-/* For the kinetic divider(centre) */
-.kinetic-divider {
-    width: 12px;
-    background: linear-gradient(180deg, #947a7a5d 0%, #fff 50%, #7a8694 100%);
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 5;
-}
-
-.divider-glow-core {
-    position: absolute;
-    width: 3px;
-    height: 320px;
-    background: #fff;
-    box-shadow: 0 0 20px 5px var(--color-cyan), 0 0 40px 10px #8ceff6;
-    border-radius: 50%;
 }
 
 /* Refinement for the right panel*/
@@ -263,7 +266,7 @@ body {
     margin-top: 25px; 
     font-weight: 800; 
     font-size: 13px; 
-    color: #222; 
+    color: #ffffff; 
     letter-spacing: 0.5px;
 }
 
