@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkillForge | CV Analyzer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/cvDashboard.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div>
+        <div class="logo">
+          <span class="logo-dark">Skill</span><span class="logo-blue">Forge</span>
+        </div>
+
+        <nav class="nav">
+          <a class="nav-item" href="dashboard.html" data-label="Dashboard">
+            <i data-lucide="layout-dashboard"></i><span>Dashboard</span>
+          </a>
+          <a class="nav-item" href="#" data-label="Career Discovery">
+            <i data-lucide="compass"></i><span>Career Discovery</span>
+          </a>
+          <a class="nav-item active" href="cvDashboard.html" data-label="CV Analyzer">
+            <i data-lucide="file-search"></i><span>CV Analyzer</span>
+          </a>
+          <a class="nav-item" href="#" data-label="Interview Simulator">
+            <i data-lucide="mic"></i><span>Interview Simulator</span>
+          </a>
+          <a class="nav-item" href="#" data-label="Skill Gap Analysis">
+            <i data-lucide="bar-chart-3"></i><span>Skill Gap Analysis</span>
+          </a>
+          <a class="nav-item" href="#" data-label="Progress Tracker">
+            <i data-lucide="activity"></i><span>Progress Tracker</span>
+          </a>
+          <a class="nav-item" href="#" data-label="Settings">
+            <i data-lucide="settings"></i><span>Settings</span>
+          </a>
+          <a class="nav-item" href="#" data-label="Help & Support">
+            <i data-lucide="life-buoy"></i><span>Help/Support <small>(01)</small></span>
+          </a>
+          <a class="nav-item" href="#" data-label="Log Out">
+            <i data-lucide="log-out"></i><span>Log Out</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="download-card">
+        <div class="download-icon">
+          <i data-lucide="smartphone"></i>
+        </div>
+        <h3>Download Our Mobile App</h3>
+        <p>Track your progress anywhere, anytime.</p>
+        <button class="download-btn">Download</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+            <i data-lucide="menu"></i>
+          </button>
+          <label class="searchbar">
+            <i data-lucide="search"></i>
+            <input type="text" id="searchInput" placeholder="Search CV insights..." autocomplete="off" />
+          </label>
+        </div>
+
+        <div class="topbar-right">
+          <button class="icon-btn"><i data-lucide="bell"></i></button>
+          <button class="icon-btn"><i data-lucide="mail"></i></button>
+          <div class="profile">
+            <div class="avatar"></div>
+            <div>
+              <div class="profile-name">Thabo M.</div>
+              <div class="profile-email">@thabo.m@skillforge.co.za</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="hero">
+        <div>
+          <h1>CV Analyzer</h1>
+          <p>Upload, score, improve, and download your CV</p>
+        </div>
+
+        <div class="hero-actions">
+          <button class="btn btn-primary">+ Upload CV</button>
+          <button class="btn btn-secondary">Download Improved CV</button>
+        </div>
+      </section>
+
+      <section class="stats-grid searchable top-summary-grid">
+        <article class="stat-card searchable" data-search="cv score ats 72 percent">
+          <div class="stat-head">
+            <div class="stat-icon orange"><i data-lucide="file-text"></i></div>
+            <h3>CV Score</h3>
+          </div>
+          <div class="stat-value-row">
+            <div class="stat-value">72%</div>
+            <div class="stat-unit">ATS Score</div>
+          </div>
+          <div class="stat-change positive">Good foundation</div>
+          <div class="mini-chart orange-line">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </article>
+
+        <article class="stat-card searchable" data-search="formatting score">
+          <div class="stat-head">
+            <div class="stat-icon green"><i data-lucide="align-left"></i></div>
+            <h3>Formatting</h3>
+          </div>
+          <div class="stat-value-row">
+            <div class="stat-value">84%</div>
+            <div class="stat-unit">Score</div>
+          </div>
+          <div class="stat-change positive">Clean layout</div>
+          <div class="mini-chart green-line">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </article>
+
+        <article class="stat-card job-match-card searchable" data-search="job match target role software developer 72 percent">
+          <h3>Job Match</h3>
+          <div class="job-match-inner">
+            <div>
+              <div class="job-target">Target role: Software Developer</div>
+              <div class="job-match-percent">Match 72%</div>
+            </div>
+            <div class="job-match-missing">6 key skills missing</div>
+          </div>
+        </article>
+      </section>
+
+      <section class="summary-stack">
+        <article class="panel cv-score-panel searchable" data-search="cv score ats compatibility content quality formatting skills match">
+          <div class="cv-score-header">
+            <div>
+              <h2>CV Score</h2>
+              <div class="cv-score-value">72%</div>
+            </div>
+            <div class="cv-score-circle">
+              <div class="cv-score-circle-inner">
+                <strong>72%</strong>
+                <span>ATS Score</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="cv-score-lines">
+            <div class="score-line-row">
+              <span>ATS Compatibility</span>
+              <div class="score-line"><i style="width:68%"></i></div>
+              <strong>68%</strong>
+            </div>
+            <div class="score-line-row">
+              <span>Content Quality</span>
+              <div class="score-line"><i style="width:63%"></i></div>
+              <strong>63%</strong>
+            </div>
+            <div class="score-line-row">
+              <span>Formatting</span>
+              <div class="score-line"><i style="width:70%"></i></div>
+              <strong>70%</strong>
+            </div>
+            <div class="score-line-row">
+              <span>Skills Match</span>
+              <div class="score-line"><i style="width:57%"></i></div>
+              <strong>57%</strong>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="content-grid searchable">
+        <article class="panel feedback-panel searchable" data-search="ai feedback measurable achievements action verbs skills section">
+          <h2>AI Feedback</h2>
+          <div class="list-card">
+            <div class="list-left"><i data-lucide="check-circle-2"></i><span>Strong education section</span></div>
+          </div>
+          <div class="list-card">
+            <div class="list-left"><i data-lucide="check-circle-2"></i><span>Good use of action verbs</span></div>
+          </div>
+          <div class="list-card">
+            <div class="list-left negative"><i data-lucide="x-circle"></i><span>No measurable achievements</span></div>
+          </div>
+          <div class="list-card">
+            <div class="list-left negative"><i data-lucide="x-circle"></i><span>Skills section too generic</span></div>
+          </div>
+          <div class="list-card">
+            <div class="list-left negative"><i data-lucide="x-circle"></i><span>Missing projects section</span></div>
+          </div>
+        </article>
+
+        <article class="panel quick-fixes searchable" data-search="quick fixes measurable achievements keywords shorten cv">
+          <h2>Quick Fixes</h2>
+          <div class="breakdown-list">
+            <div class="breakdown-item">
+              <span>✅ Add 3 measurable achievements</span>
+              <strong></strong>
+            </div>
+            <div class="breakdown-item">
+              <span>✅ Include key job keywords</span>
+              <strong></strong>
+            </div>
+            <div class="breakdown-item">
+              <span>✅ Shorten CV to 1–2 pages</span>
+              <strong></strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel progress-card searchable" data-search="progress tracker previous current">
+          <h2>Progress Tracker</h2>
+          <div class="progress-lines">
+            <div class="progress-line-row">
+              <span>Previous</span>
+              <div class="progress-track"><div class="progress-fill previous" style="width:60%"></div></div>
+              <strong>60%</strong>
+            </div>
+            <div class="progress-line-row">
+              <span>Current</span>
+              <div class="progress-track"><div class="progress-fill current" style="width:71%"></div></div>
+              <strong>71%</strong>
+            </div>
+            <div class="progress-line-row">
+              <span>Target</span>
+              <div class="progress-track"><div class="progress-fill" style="width:81%"></div></div>
+              <strong>81%</strong>
+            </div>
+          </div>
+
+          <div class="progress-graph">
+            <svg viewBox="0 0 420 180" preserveAspectRatio="none" aria-label="Progress line graph">
+              <line x1="40" y1="20" x2="40" y2="150" stroke="#dbe4f3" stroke-width="2" />
+              <line x1="40" y1="150" x2="390" y2="150" stroke="#dbe4f3" stroke-width="2" />
+              <polyline points="40,126 153,58 266,72 390,34" fill="none" stroke="#4d8dff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+              <circle cx="40" cy="126" r="4.5" fill="#4d8dff" />
+              <circle cx="153" cy="58" r="4.5" fill="#4d8dff" />
+              <circle cx="266" cy="72" r="4.5" fill="#4d8dff" />
+              <circle cx="390" cy="34" r="4.5" fill="#4d8dff" />
+              <text x="34" y="168" fill="#7b86a7" font-size="12">Prev</text>
+              <text x="143" y="168" fill="#7b86a7" font-size="12">Prev 2</text>
+              <text x="255" y="168" fill="#7b86a7" font-size="12">Prev 3</text>
+              <text x="375" y="168" fill="#7b86a7" font-size="12">Current</text>
+            </svg>
+          </div>
+        </article>
+
+        <article class="panel insights searchable" data-search="breakdown formatting keywords structure missing sections">
+          <h2>Breakdown</h2>
+          <div class="breakdown-list">
+            <div class="breakdown-item">
+              <span>✅ Formatting score</span>
+              <strong>84%</strong>
+            </div>
+            <div class="breakdown-item">
+              <span>✅ Keywords (ATS check)</span>
+              <strong>61%</strong>
+            </div>
+            <div class="breakdown-item">
+              <span>✅ Structure</span>
+              <strong>76%</strong>
+            </div>
+            <div class="breakdown-item">
+              <span>❌ Missing sections</span>
+              <strong>Projects, Certifications</strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel searchable" data-search="upload cv">
+          <h2>Upload CV</h2>
+          <div class="upload-box">
+            <i data-lucide="cloud-upload"></i>
+            <h3>Drop your CV here</h3>
+            <p>Upload PDF or DOC files to analyze your resume</p>
+            <button class="btn btn-primary">Choose File</button>
+          </div>
+        </article>
+
+        <article class="panel searchable" data-search="fix tools cv editor auto improve download improved cv">
+          <h2>Fix Tools</h2>
+          <button class="action-row">
+            <span><i data-lucide="edit-3"></i> CV Editor</span>
+            <i data-lucide="chevron-right"></i>
+          </button>
+          <button class="action-row featured">
+            <span><i data-lucide="sparkles"></i> Auto-improve Suggestions</span>
+            <i data-lucide="chevron-right"></i>
+          </button>
+          <button class="action-row">
+            <span><i data-lucide="download"></i> Download Improved CV</span>
+            <i data-lucide="chevron-right"></i>
+          </button>
+        </article>
+      </section>
+
+      <section class="panel bottom-actions searchable" data-search="upload new cv download report">
+        <div class="action-wrap">
+          <button class="btn btn-secondary">Upload New CV</button>
+          <button class="btn btn-primary">Download Report</button>
+        </div>
+      </section>
+
+      <input type="file" id="cvFileInput" accept=".pdf,.doc,.docx" hidden />
+
+      <div class="search-empty hidden" id="emptyState">
+        No matching sections found.
+      </div>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../js/dashboard.js"></script>
+</body>
+</html>
