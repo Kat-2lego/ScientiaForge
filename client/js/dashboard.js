@@ -13,18 +13,20 @@ navItems.forEach((item) => {
     item.classList.add("active");
 
     if (window.innerWidth <= 768) {
-      sidebar.classList.remove("open");
+      sidebar?.classList.remove("open");
     }
   });
 });
 
 menuBtn?.addEventListener("click", () => {
-  sidebar.classList.toggle("open");
+  sidebar?.classList.toggle("open");
 });
 
 document.addEventListener("click", (e) => {
   if (
     window.innerWidth <= 768 &&
+    sidebar &&
+    menuBtn &&
     !sidebar.contains(e.target) &&
     !menuBtn.contains(e.target)
   ) {
@@ -32,7 +34,7 @@ document.addEventListener("click", (e) => {
   }
 });
 
-searchInput.addEventListener("input", (e) => {
+searchInput?.addEventListener("input", (e) => {
   const value = e.target.value.toLowerCase().trim();
   let visibleCount = 0;
 
@@ -44,5 +46,5 @@ searchInput.addEventListener("input", (e) => {
     if (match) visibleCount++;
   });
 
-  emptyState.classList.toggle("hidden", visibleCount !== 0 || value === "");
+  emptyState?.classList.toggle("hidden", visibleCount !== 0 || value === "");
 });
