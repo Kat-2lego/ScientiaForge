@@ -9,103 +9,48 @@
 </head>
 <body>
 
-    <div class="master-viewport">
-        <div class="chassis-outer-shell">
-            <div class="chassis-inner-recess">
-                
-                <main class="interface-deck">
-                    
-                    <section class="sector sector-left">
-                        <div class="dot-matrix-wave wave-alpha"></div>
-                        <div class="dot-matrix-wave wave-beta"></div>
+<div class="container">
 
-                        <div class="auth-container">
-                            <div class="brand-header">
-                                <div class="logo-icon">
-                                   
-                                        <img src="../assets/handshake.png" alt="Collaborative Handshake" class="handshake-img">
-                    
-                                </div>
-                                <h1 class="brand-name">Skill <span>Forge</span></h1>
-                            </div>
+    <div class="login-card">
 
-                            <div class="auth-titles">
-                                <h2>SIGN IN</h2>
-                                <p>Welcome back! Enter your login details.</p>
-                            </div>
+        <!-- LEFT: FORM -->
+        <div class="form-section">
+            <h1 class="brand-name">Skill <span>Forge</span></h1>
 
+            <h2>Welcome back</h2>
+            <p class="subtitle">Sign in to continue your journey</p>
 
-                            <div class = "email">
-                            <p>Email: </p>
-                            </div>
+            <form>
+                <input type="email" placeholder="Email address" class="input" required>
 
+                <div class="password-field">
+                    <input type="password" placeholder="Password" class="input" required>
+                    <i class="fa-regular fa-eye toggle-password"></i>
+                </div>
 
+                <div class="form-links">
+                    <a href="#">Forgot Password?</a>
+                </div>
 
-                            <form class="cyber-form">
-                                <div class="input-module">
-                                    <div class="module-bezel">
-                                        <div class="module-inner">
-                                            <i class="fa-regular fa-address-card module-icon"></i>
-                                            <input type="text" placeholder="Enter Email" required>
-                                        </div>
-                                    </div>
-                                    <div class="neon-line"></div>
-                                </div>
+                <button class="btn-primary">Sign In</button>
+            </form>
 
-                            <div class = "pass">
-                            <p>Password: </p>
-                            </div>
+            <p class="switch-auth">
+                Don’t have an account? <a href="signup.html">Sign up</a>
+            </p>
+        </div>
 
-                                <div class="input-module">
-                                    <div class="module-bezel">
-                                        <div class="module-inner">
-                                            <i class="fa-solid fa-lock module-icon"></i>
-                                            <input type="password" placeholder="••••" required>
-                                            <i class="fa-regular fa-eye-slash module-action"></i>
-                                        </div>
-                                    </div>
-                                    <div class="neon-line"></div>
-                                </div>
-
-                                <div class="form-footer-links">
-                                    <a href="#" class="link-forgot">Forgot Password?</a>
-                                </div>
-
-                                <button type="submit" class="secure-submit">
-                                    <span class="btn-inner-text">Login</span>
-                                    <div class="btn-lighting-overlay"></div>
-                                </button>
-                            </form>
-                        </div>
-                    </section>
-
-                    <div class="kinetic-divider">
-                        <div class="divider-beam"></div>
-                        <div class="divider-glow-core"></div>
-                    </div>
-
-                    <section class="sector sector-right">
-                        <div class="dot-matrix-wave wave-gamma"></div>
-                        <div class="dot-matrix-wave wave-delta"></div>
-
-                        <div class="welcome-copy">
-                            <h3>Welcome back!<br>Please sign in to your<br><span class="navy">Skill</span><span class="cyan">Forge</span> account.</h3>
-                            <p class="tagline">Forge Your Future. Master Your Career.</p>
-                        </div>
-
-                        <div class="visual-stage">
-                            <img src="../assets/handshake1.png" alt="Collaborative Handshake" class="handshake-img">
-                        </div>
-                    </section>
-
-                </main>
+        <!-- RIGHT: VISUAL -->
+        <div class="image-section">
+            <div class="overlay-text">
+                <h3>Your AI Career Coach</h3>
+                <p>Build your future with SkillForge AI</p>
             </div>
         </div>
 
-        <footer class="global-footer">
-            © 2026 SkillForge AI - ScriptSquad SECURE LOGIN ACCESS
-        </footer>
     </div>
 
+</div>
+
 </body>
-</html>>
+</html>
