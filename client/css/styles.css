@@ -1,0 +1,356 @@
+/* ==========================================================================
+   SKILLFORGE AI LANDING PAGE - 100% FIDELITY
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    --primary-blue: #1e50ff;
+    --dark-navy: #0a192f;
+    --light-blue: #00a2ed;
+    --text-main: #334155;
+    --text-muted: #64748b;
+    --bg-white: #ffffff;
+    
+    /* Card gradients */
+    --grad-discovery: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    --grad-cv: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+    --grad-interview: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%);
+    --grad-skills: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: var(--bg-white);
+    color: var(--text-main);
+    overflow-x: hidden;
+}
+
+/* For the navigation part*/
+.main-nav {
+    width: 100%;
+    padding: 20px 0;
+    background: transparent;
+    position: absolute;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-svg {
+    width: 35px;
+    height: 35px;
+}
+
+.brand-text {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--dark-navy);
+}
+
+.brand-text strong {
+    color: var(--primary-blue);
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 35px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-main);
+    font-weight: 500;
+    font-size: 15px;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: var(--primary-blue);
+}
+
+.btn-primary {
+    background: var(--primary-blue);
+    color: white;
+    text-decoration: none;
+    padding: 12px 28px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(30, 80, 255, 0.3);
+}
+
+.btn-primary:hover {
+    background: #113bcc;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(30, 80, 255, 0.4);
+}
+
+/*The HERO section*/
+.hero-section {
+    position: relative;
+    width: 100%;
+    min-height: 800px;
+    padding-top: 120px; /* Space for absolute nav */
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.wave-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.wave-bg svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.hero-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    gap: 40px;
+}
+
+/* Left content */
+.hero-content {
+    flex: 1.2;
+    max-width: 650px;
+    z-index: 2;
+}
+
+.hero-title {
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--dark-navy);
+    margin-bottom: 20px;
+}
+
+.highlight-blue {
+    color: var(--primary-blue);
+}
+
+.hero-subtitle {
+    font-size: 18px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 40px;
+    max-width: 90%;
+}
+
+/* The 4 Feature cards grid */
+.hero-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 40px;
+}
+
+.feature-card {
+    border-radius: 16px;
+    padding: 20px 15px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    min-height: 180px;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.card-discovery { background: var(--grad-discovery); }
+.card-cv { background: var(--grad-cv); }
+.card-interview { background: var(--grad-interview); }
+.card-skills { background: var(--grad-skills); }
+
+.card-icon {
+    background: rgba(255,255,255,0.2);
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.feature-card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    line-height: 1.3;
+}
+
+.feature-card p {
+    font-size: 12px;
+    opacity: 0.9;
+    line-height: 1.5;
+}
+
+.hero-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 32px;
+    font-size: 16px;
+}
+
+/* Right image */
+.hero-image-wrapper {
+    height: 50%;
+    width: 50%;
+    flex: 1;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.hero-img {
+    width: 100%; 
+    max-width: 450px;
+    
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    object-fit: cover;
+
+    mask-image: radial-gradient(circle at center, black 80%, transparent 100%);
+    -webkit-mask-image: radial-gradient(circle at center, black 80%, transparent 100%);
+}
+
+/* For the "WHY US" section*/
+.why-us-section {
+    background: white;
+    padding: 60px 0 80px 0;
+    border-top: 1px solid #f1f5f9;
+}
+
+.why-us-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 40px;
+    text-align: center;
+}
+
+.section-heading {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--dark-navy);
+    margin-bottom: 50px;
+    position: relative;
+    display: inline-block;
+}
+
+.section-heading::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -120px;
+    width: 100px;
+    height: 1px;
+    background: #cbd5e1;
+}
+
+.section-heading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -120px;
+    width: 100px;
+    height: 1px;
+    background: #cbd5e1;
+}
+
+.benefits-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    text-align: left;
+}
+
+.benefit-item {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    position: relative;
+}
+
+/* The small arrows between items */
+.benefit-item:not(:last-child)::after {
+    content: '\f0da'; /* FontAwesome right arrow */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: -15px;
+    top: 15px;
+    color: #cbd5e1;
+    font-size: 14px;
+}
+
+.benefit-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.icon-blue { background: #eff6ff; color: #3b82f6; }
+.icon-orange { background: #fff7ed; color: #f97316; }
+.icon-purple { background: #f5f3ff; color: #8b5cf6; }
+.icon-teal { background: #f0fdfa; color: #14b8a6; }
+
+.benefit-text h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dark-navy);
+    margin-bottom: 5px;
+}
+
+.benefit-text p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+}

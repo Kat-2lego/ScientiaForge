@@ -1,0 +1,281 @@
+
+:root {
+    --color-navy: #002b5c;
+    --color-cyan: #00a2ed;
+    --metal-gradient: linear-gradient(135deg, #a8b3be 0%, #ffffff 35%, #d1d9e1 65%, #8a96a3 100%);
+    
+    --input-clip: polygon(
+        18px 0, 24% 0, 26% 6px, 74% 6px, 76% 0, calc(100% - 18px) 0,
+        100% 18px, 100% calc(100% - 18px),
+        calc(100% - 18px) 100%, 76% 100%, 74% calc(100% - 6px), 26% calc(100% - 6px), 24% 100%, 18px 100%,
+        0 calc(100% - 18px), 0 18px
+    );
+    
+    --chassis-clip: polygon(
+        35px 0, calc(100% - 35px) 0, 100% 35px, 100% calc(100% - 35px),
+        calc(100% - 35px) 100%, 35px 100%, 0 calc(100% - 25px), 0 25px
+    );
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+}
+
+.master-viewport {
+    width: 100%;
+    max-width: 1000px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+/* The hardware Chasis*/
+.chassis-outer-shell {
+    width: 100%;
+    padding: 12px;
+    background: var(--metal-gradient);
+    border-radius: 12px;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.18);
+}
+
+.chassis-inner-recess {
+    background: #5a6673; 
+    padding: 4px;
+    clip-path: var(--chassis-clip);
+}
+
+.interface-deck {
+    display: flex;
+    background: #fff;
+    min-height: 650px; /* Taller for more fields */
+    clip-path: var(--chassis-clip);
+    position: relative;
+    overflow: hidden;
+}
+
+/* The sectore*/
+.sector { flex: 1; position: relative; z-index: 2; }
+.sector-left { padding: 30px 50px; background: radial-gradient(circle at top left, white 0%, #f0f4f8 100%); }
+.sector-right { padding: 60px 45px; background: radial-gradient(circle at bottom right, white 0%, #e8edf3 100%); }
+
+/*Styling for the branding and titles */
+.brand-name { font-size: 44px; font-weight: 900; color: var(--color-navy); text-align: center; margin-bottom: 10px; }
+.brand-name span { color: var(--color-cyan); }
+
+.auth-titles { text-align: center; margin-bottom: 25px; }
+.auth-titles h2 { font-size: 36px; color: rgb(55, 78, 88); font-weight: bolder; }
+.auth-titles p { font-size: 15px; color: #6c818a; }
+
+/*Inputs per your edits*/
+.email p, .pass p {
+    color: rgb(59, 59, 59);
+    padding-left: 10px;
+    padding-bottom: 5px;
+    font-weight: bold;
+    font-size: 14px;
+}
+.pass p { padding-top: 10px; }
+
+
+.input-module { width: 100%; height: 56px; position: relative; filter: drop-shadow(0 5px 8px rgba(0,0,0,0.05)); }
+
+.module-bezel {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, gray 0%, white 25%, white 75%, #a8b3be 100%);
+    clip-path: var(--input-clip);
+    padding: 2px;
+}
+
+.module-inner {
+    width: 100%; height: 100%;
+    background: linear-gradient(180deg, #e0e0e0 0%, #f1f5f9 100%);
+    clip-path: var(--input-clip);
+    display: flex; align-items: center; padding: 0 20px;
+}
+
+.module-inner::before {
+    content: ''; 
+    position: absolute;
+     inset: 0;
+    box-shadow: inset 0 4px 6px rgba(1, 223, 252, 0.4);
+    pointer-events: none;
+}
+
+.module-inner input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    color: black;
+    font-weight: 500;
+
+    position: relative; 
+    z-index: 10; 
+
+    
+}
+
+/* The centered Sign Up buton*/
+.secure-submit {
+    margin-top: 10px;
+    position: relative;
+    width: 40%;
+    height: 58px;
+    margin-left: 100px;
+    border-top: 5px;
+    border-color: rgb(1, 172, 240);
+    border-radius: 100px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%);
+    background: linear-gradient(180deg, #dbdbdb 0%, grey 50%, #0e92cf 100%);
+    cursor: pointer;
+    box-shadow: 
+        0 10px 20px rgba(0,0,0,0.2),
+        inset 0 1px 2px rgba(255,255,255,0.6);
+    outline: 2px solid #8e9ba8;
+    outline-offset: 3px;
+}
+
+
+
+.btn-inner-text {
+    font-size: 18px;
+    font-weight: 900;
+    color: #0d1a29;
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 2;
+}
+
+.btn-lighting-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 45%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
+}
+.secure-submit:hover {
+    filter: brightness(1.3);
+    transform: translateY(-1px);
+    transition: 0.2s ease;
+}
+
+/*The OR divider*/
+.auth-switch {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.divider-line {
+    position: relative;
+    width: 100%;
+    height: 1px;
+    background: #e0e0e0;
+    margin: 20px 0;
+}
+
+.divider-line span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fdfdfd; /* Match the panel bg */
+    padding: 0 15px;
+    color: #888;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.auth-switch p {
+    font-size: 14px;
+    color: #6c818a;
+    font-weight: 600;
+}
+
+.auth-switch .link-forgot {
+    color: #24c6d1;
+    text-decoration: none;
+    margin-left: 5px;
+    font-weight: 800;
+}
+
+/* For the kinetic divider(centre) */
+.kinetic-divider {
+    width: 12px;
+    background: linear-gradient(180deg, #947a7a5d 0%, #fff 50%, #7a8694 100%);
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+}
+
+.divider-glow-core {
+    position: absolute;
+    width: 3px;
+    height: 320px;
+    background: #fff;
+    box-shadow: 0 0 20px 5px var(--color-cyan), 0 0 40px 10px #8ceff6;
+    border-radius: 50%;
+}
+
+/* Refinement for the right panel*/
+.welcome-copy h3 { 
+    font-size: 32px; 
+    color: #333; 
+    font-weight: 400; 
+    line-height: 1.2; 
+    margin-bottom: 15px; 
+    text-align: center;
+}
+
+.welcome-copy p {
+    text-align: center;
+    color: #5b6d80;
+    font-weight: 600;
+}
+
+.visual-stage {
+    position: absolute;
+    bottom: -20px;
+    right: -20px;
+    width: 105%;
+    height: 75%;
+}
+
+.handshake-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: bottom right;
+    mix-blend-mode: multiply;
+    opacity: 0.95;
+}
+
+/*The Footer */
+.global-footer { 
+    margin-top: 25px; 
+    font-weight: 800; 
+    font-size: 13px; 
+    color: #222; 
+    letter-spacing: 0.5px;
+}
+
+/* Responsive adjustments for the taller Sign Up form */
+@media (max-height: 800px) {
+    .interface-deck {
+        min-height: 600px;
+    }
+    .auth-titles {
+        margin-bottom: 15px;
+    }
+    .cyber-form {
+        gap: 15px;
+    }
+}
