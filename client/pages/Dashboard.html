@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkillForge Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="../css/dashboard.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div>
+        <div class="logo">
+          <span class="logo-dark">Skill</span><span class="logo-blue">Forge</span>
+        </div>
+
+        <nav class="nav">
+          <button class="nav-item active" data-label="Dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </button>
+
+          <button class="nav-item" data-label="Career Discovery">
+            <i data-lucide="compass"></i>
+            <span>Career Discovery</span>
+          </button>
+
+          <button class="nav-item" data-label="CV Analyzer">
+            <i data-lucide="file-search"></i>
+            <span>CV Analyzer</span>
+          </button>
+
+          <button class="nav-item" data-label="Interview Simulator">
+            <i data-lucide="mic"></i>
+            <span>Interview Simulator</span>
+          </button>
+
+          <button class="nav-item" data-label="Skill Gap Analysis">
+            <i data-lucide="bar-chart-3"></i>
+            <span>Skill Gap Analysis</span>
+          </button>
+
+          <button class="nav-item" data-label="Progress Tracker">
+            <i data-lucide="activity"></i>
+            <span>Progress Tracker</span>
+          </button>
+
+          <button class="nav-item" data-label="Settings">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+          </button>
+
+          <button class="nav-item" data-label="Help & Support">
+            <i data-lucide="life-buoy"></i>
+            <span>Help/Support <small>(01)</small></span>
+          </button>
+
+          <button class="nav-item" data-label="Log Out">
+            <i data-lucide="log-out"></i>
+            <span>Log Out</span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="download-card">
+        <div class="download-icon">
+          <i data-lucide="smartphone"></i>
+        </div>
+        <h3>Download Our Mobile App</h3>
+        <p>Track your progress anywhere, anytime.</p>
+        <button class="download-btn">Download</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+            <i data-lucide="menu"></i>
+          </button>
+
+          <label class="searchbar">
+            <i data-lucide="search"></i>
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search SkillForge..."
+              autocomplete="off"
+            />
+          </label>
+        </div>
+
+        <div class="topbar-right">
+          <button class="icon-btn"><i data-lucide="bell"></i></button>
+          <button class="icon-btn"><i data-lucide="mail"></i></button>
+
+          <div class="profile">
+            <div class="avatar"></div>
+            <div>
+              <div class="profile-name">Thabo M.</div>
+              <div class="profile-email">@thabo.m@skillforge.co.za</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="hero">
+        <div>
+          <h1>Welcome back, Thabo!</h1>
+          <p>Let's boost your career readiness</p>
+        </div>
+
+        <div class="hero-actions">
+          <button class="btn btn-primary">+ Add Goal</button>
+          <button class="btn btn-secondary">Import Data</button>
+        </div>
+      </section>
+
+      <section class="stats-grid searchable">
+        <article class="stat-card blue-card" data-search="cv score ats cv analyzer">
+          <div class="stat-head">
+            <div class="stat-icon blue"><i data-lucide="file-text"></i></div>
+            <h3>CV Score</h3>
+          </div>
+          <div class="stat-value-row">
+            <div class="stat-value">82</div>
+            <div class="stat-unit">ATS Score</div>
+          </div>
+          <div class="stat-change positive">Improved +5</div>
+          <div class="mini-chart blue-line">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </article>
+
+        <article class="stat-card searchable" data-search="interview score readiness practice interview">
+          <div class="stat-head">
+            <div class="stat-icon orange"><i data-lucide="mic"></i></div>
+            <h3>Interview Score</h3>
+          </div>
+          <div class="stat-value-row">
+            <div class="stat-value">76</div>
+            <div class="stat-unit">Readiness</div>
+          </div>
+          <div class="stat-change positive">+10% this month</div>
+          <div class="mini-chart orange-line">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </article>
+
+        <article class="stat-card searchable" data-search="skill readiness progress skills">
+          <div class="stat-head">
+            <div class="stat-icon green"><i data-lucide="target"></i></div>
+            <h3>Skill Readiness</h3>
+          </div>
+          <div class="stat-value-row">
+            <div class="stat-value">60%</div>
+            <div class="stat-unit">Ready</div>
+          </div>
+          <div class="stat-change positive">+15% this month</div>
+          <div class="mini-chart green-line">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </article>
+
+        <article class="stat-card searchable" data-search="sent applications jobs submitted">
+          <div class="stat-head">
+            <div class="stat-icon soft-green"><i data-lucide="send"></i></div>
+            <h3>Sent</h3>
+          </div>
+          <div class="stat-value-row">
+            <div class="stat-value">6</div>
+          </div>
+          <div class="stat-change">+3 this month</div>
+          <div class="mini-chart blue-line">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel insights searchable" data-search="insights marketing manager optimize cv gain employer skills apply jobs">
+          <h2>Insights</h2>
+          <div class="muted-line">Job Match <span class="accent">699 ○</span></div>
+
+          <div class="job-box">
+            <div class="job-left">
+              <div class="job-icon"><i data-lucide="briefcase"></i></div>
+              <div>
+                <div class="job-title">Marketing Manager</div>
+                <div class="job-sub">Aligns with your skillset</div>
+              </div>
+            </div>
+            <i data-lucide="chevron-right"></i>
+          </div>
+
+          <h3 class="subheading">Recommended Next Steps</h3>
+
+          <div class="list-card">
+            <div class="list-left"><i data-lucide="pencil-line"></i> Optimize Your CV</div>
+            <i data-lucide="chevron-right"></i>
+          </div>
+
+          <div class="list-card">
+            <div class="list-left"><i data-lucide="badge-check"></i> Gain Employer Skills</div>
+            <i data-lucide="chevron-right"></i>
+          </div>
+
+          <div class="list-card">
+            <div class="list-left"><i data-lucide="briefcase-business"></i> Apply for Entry-Level Jobs</div>
+            <i data-lucide="chevron-right"></i>
+          </div>
+        </article>
+
+        <article class="panel searchable" data-search="upcoming mock interview alan smith start practice">
+          <h2>Upcoming</h2>
+          <div class="upcoming-box">
+            <div class="upcoming-top">
+              <div class="avatar small"></div>
+              <div>
+                <div class="job-title">Mock Interview</div>
+                <div class="job-sub">April 28, 2026, 3:30 PM</div>
+                <div class="job-sub">with Alan Smith</div>
+              </div>
+            </div>
+            <button class="btn btn-primary full">Start Practice</button>
+          </div>
+        </article>
+
+        <article class="panel searchable" data-search="continue development upload cv start interview explore careers">
+          <h2>Continue Your Development</h2>
+
+          <button class="action-row">
+            <span><i data-lucide="file-up"></i> Upload CV</span>
+            <i data-lucide="chevron-right"></i>
+          </button>
+
+          <button class="action-row featured">
+            <span><i data-lucide="mic"></i> Start Interview</span>
+            <i data-lucide="chevron-right"></i>
+          </button>
+
+          <button class="action-row">
+            <span><i data-lucide="compass"></i> Explore Careers</span>
+            <i data-lucide="chevron-right"></i>
+          </button>
+        </article>
+
+        <article class="panel searchable" data-search="goal completion progress completed 45">
+          <div class="progress-wrap">
+            <div>
+              <div class="progress-big">34%</div>
+              <div class="job-sub">Goal Completion</div>
+              <div class="progress-bold">2 of Career Goals</div>
+            </div>
+
+            <div class="gauge">
+              <div class="gauge-ring"></div>
+              <div class="gauge-center">
+                <div class="gauge-value">45%</div>
+                <div class="job-sub center">Progress Completed</div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel searchable" data-search="jobs interviews jobs sent applications">
+          <div class="metrics-row">
+            <div class="metric">
+              <div class="metric-icon"><i data-lucide="clock-3"></i></div>
+              <div>
+                <div class="metric-value">2</div>
+                <div class="job-sub">Jobs Interviews</div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="metric">
+              <div class="metric-icon"><i data-lucide="send"></i></div>
+              <div>
+                <div class="metric-value">8</div>
+                <div class="job-sub">Jobs Sent</div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <div class="search-empty hidden" id="emptyState">
+        No matching sections found.
+      </div>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../js/dashboard.js"></script>
+</body>
+</html>
