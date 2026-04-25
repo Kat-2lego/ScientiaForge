@@ -1,0 +1,55 @@
+
+
+/*************************** Progress Tracker Styles ******************************/
+
+.chart {
+  height: 140px;
+  display: block;   /* better than flex here */
+  align-items: end;
+}
+
+.line-chart {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  height: 100%;   /* 🔥 ADD THIS */
+  align-items: flex-end;
+}
+
+.line-chart span {
+  flex: 1;
+  display: block;
+  height: 100%;
+  /* min-width: 10px;   */
+  background: linear-gradient(180deg, #d9e7ff, #4d8dff);
+  border-radius: 8px;
+}
+
+.line-chart.orange span {
+  background: linear-gradient(180deg, #fce0b4, #f2a43a);
+}
+
+/* SKILL BARS */
+.progress-bar {
+  margin-bottom: 14px;
+}
+
+.progress-bar label {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.bar {
+  width: 100%;
+  height: 10px;
+  background: #e6ecf7;
+  border-radius: 999px;
+  margin-top: 6px;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #4d8dff, #5f9cff);
+}
