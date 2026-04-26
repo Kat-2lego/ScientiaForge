@@ -1,16 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Career Discovery | SkillForge AI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/CareerDiscovery.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Career Discovery | SkillForge AI</title>
+
+  <!-- Fonts (both Inter & Plus Jakarta for flexibility) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- Lucide icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Shared Dashboard + Career discovery CSS -->
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/CareerDiscovery.css" />
 </head>
 <body>
 
   <div class="layout">
+    <!-- Sidebar (same as dashboard) -->
     <aside class="sidebar" id="sidebar">
       <div>
         <div class="logo">
@@ -18,50 +32,50 @@
         </div>
 
         <nav class="nav">
-          <button class="nav-item active" href="Dashboard.html" data-label="Dashboard">
+          <a class="nav-item active" href="../dashboard/dashboard.html" data-label="Dashboard">
             <i data-lucide="layout-dashboard"></i>
             <span>Dashboard</span>
-          </button>
+          </a>
 
-          <button class="nav-item" data-label="Career Discovery">
+          <a class="nav-item" href="CareerDiscovery.html" data-label="Career Discovery">
             <i data-lucide="compass"></i>
             <span>Career Discovery</span>
-          </button>
+          </a>
 
-          <button class="nav-item" data-label="CV Analyzer">
+          <a class="nav-item" href="../cvDashboard/cvDashboard.html" data-label="CV Analyzer">
             <i data-lucide="file-search"></i>
             <span>CV Analyzer</span>
-          </button>
+          </a>
 
-          <button class="nav-item" data-label="Interview Simulator">
+          <a class="nav-item" href="#" data-label="Interview Simulator">
             <i data-lucide="mic"></i>
             <span>Interview Simulator</span>
-          </button>
+          </a>
 
-          <button class="nav-item" data-label="Skill Gap Analysis">
+          <a class="nav-item" href="#" data-label="Skill Gap Analysis">
             <i data-lucide="bar-chart-3"></i>
             <span>Skill Gap Analysis</span>
-          </button>
+          </a>
 
-          <button class="nav-item" data-label="Progress Tracker">
+          <a class="nav-item" href="#" data-label="Progress Tracker">
             <i data-lucide="activity"></i>
             <span>Progress Tracker</span>
-          </button>
+          </a>
 
-          <button class="nav-item" data-label="Settings">
+          <a class="nav-item" href="#" data-label="Settings">
             <i data-lucide="settings"></i>
             <span>Settings</span>
-          </button>
+          </a>
 
-          <button class="nav-item" data-label="Help & Support">
+          <a class="nav-item" href="#" data-label="Help & Support">
             <i data-lucide="life-buoy"></i>
             <span>Help/Support <small>(01)</small></span>
-          </button>
+          </a>
 
-          <button class="nav-item" data-label="Log Out">
+          <a class="nav-item" href="#" data-label="Log Out">
             <i data-lucide="log-out"></i>
             <span>Log Out</span>
-          </button>
+          </a>
         </nav>
       </div>
 
@@ -75,265 +89,283 @@
       </div>
     </aside>
 
-    <main class="main-content">
-        
-        <header class="topbar">
-            <div class="search-container">
-                <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                <input type="text" placeholder="Search SkillForge...">
-            </div>
-            
-            <div class="topbar-actions">
-                <button class="icon-btn"><i class="fa-regular fa-circle-question"></i></button>
-                <button class="icon-btn"><i class="fa-regular fa-bell"></i></button>
-                <div class="user-profile">
-                    <img src="https://ui-avatars.com/api/?name=Thabo+M&background=f97316&color=fff" alt="User Avatar" class="avatar">
-                    <div class="user-info">
-                        <span class="user-name">Thabo M.</span>
-                        <span class="user-email">@thabo.m@skillforge.co.za</span>
-                    </div>
-                </div>
-            </div>
-        </header>
+    <!-- Main career discovery content -->
+    <main class="main main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+            <i data-lucide="menu"></i>
+          </button>
 
-        
-        <div class="dashboard-grid">
-            
-            <div class="content-left">
-                
-                <div class="page-header">
-                    <h1>Discover Your Ideal Career</h1>
-                    <p>AI-powered guidance tailored to your strengths</p>
-                </div>
-
-            <section class="questionnaire-card">
-  
-                <div class="q-header">
-                    <div class="q-title">
-                    <i class="fa-solid fa-circle-info"></i>
-                    <span>Questionnaire</span>
-                    </div>
-
-                    <div class="q-progress">
-                    <span class="dot active"></span>
-                    <span class="dot"></span>
-                    <span class="dot"></span>
-                    <span class="dot"></span>
-                    <span class="dot"></span>
-                    </div>
-
-                    <div class="q-arrows">
-                    <button class="arrow-btn"><i class="fa-solid fa-chevron-left"></i></button>
-                    <button class="arrow-btn"><i class="fa-solid fa-chevron-right"></i></button>
-                    </div>
-                </div>
-
-                <!-- Body -->
-                <div class="q-body" id="questionnaireWrapper">
-
-    <div id="qStep1" style="display: flex; flex-direction: column; gap: 20px;">
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
-            
-            <div class="input-group">
-                <label>Select Core Domains <span style="font-weight: 500; font-size: 12px; color: var(--text-muted);">(Select up to 3)</span></label>
-                <div class="chips-container" id="domainsContainer">
-                    <span class="chip" data-domain="technology">Technology & Computing</span>
-                    <span class="chip" data-domain="data">Data & Analytics</span>
-                    <span class="chip" data-domain="design">Design & UX</span>
-                    <span class="chip" data-domain="business">Business Strategy</span>
-                    <span class="chip" data-domain="creative">Creative Media</span>
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label>Academic/Professional Background</label>
-                <select class="dropdown" id="backgroundSelect" multiple style="height: 135px;">
-                    <option value="cs">Computer Science / IT</option>
-                    <option value="math">Mathematics / Statistics</option>
-                    <option value="art">Arts & Design</option>
-                    <option value="business">Business / Economics</option>
-                </select>
-                <small style="color: var(--text-muted); font-size: 11px; margin-top: 5px; display: block;">Hold CTRL/CMD to select multiple.</small>
-            </div>
+          <label class="searchbar">
+            <i data-lucide="search"></i>
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search SkillForge..."
+              autocomplete="off"
+            />
+          </label>
         </div>
 
-        <div class="q-footer">
-            <div class="personality-toggle">
-                <div>
-                    <span class="toggle-title">Deep Personality Scan</span>
-                    <span class="toggle-sub">Include behavioral questions.</span>
+        <div class="topbar-right">
+          <button class="icon-btn"><i data-lucide="bell"></i></button>
+          <button class="icon-btn"><i data-lucide="mail"></i></button>
+
+          <div class="profile">
+            <div class="avatar"></div>
+            <div>
+              <div class="profile-name">Thabo M.</div>
+              <div class="profile-email">@thabo.m@skillforge.co.za</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="dashboard-grid">
+        <!-- Left content -->
+        <div class="content-left">
+
+          <div class="page-header">
+            <h1>Discover Your Ideal Career</h1>
+            <p>AI‑powered guidance tailored to your strengths</p>
+          </div>
+
+          <section class="questionnaire-card">
+            <div class="q-header">
+              <div class="q-title">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>Questionnaire</span>
+              </div>
+
+              <div class="q-progress">
+                <span class="dot active"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+              </div>
+
+              <div class="q-arrows">
+                <button class="arrow-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                <button class="arrow-btn"><i class="fa-solid fa-chevron-right"></i></button>
+              </div>
+            </div>
+
+            <!-- Questionnaire body -->
+            <div class="q-body" id="questionnaireWrapper">
+              <div id="qStep1" style="display: flex; flex-direction: column; gap: 20px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
+                  <div class="input-group">
+                    <label>Select Core Domains <span style="font-weight: 500; font-size: 12px; color: var(--text-muted);">(Select up to 3)</span></label>
+                    <div class="chips-container" id="domainsContainer">
+                      <span class="chip" data-domain="technology">Technology & Computing</span>
+                      <span class="chip" data-domain="data">Data & Analytics</span>
+                      <span class="chip" data-domain="design">Design & UX</span>
+                      <span class="chip" data-domain="business">Business Strategy</span>
+                      <span class="chip" data-domain="creative">Creative Media</span>
+                    </div>
+                  </div>
+
+                  <div class="input-group">
+                    <label>Academic/Professional Background</label>
+                    <select class="dropdown" id="backgroundSelect" multiple style="height: 135px;">
+                      <option value="cs">Computer Science / IT</option>
+                      <option value="math">Mathematics / Statistics</option>
+                      <option value="art">Arts & Design</option>
+                      <option value="business">Business / Economics</option>
+                    </select>
+                    <small style="color: var(--text-muted); font-size: 11px; margin-top: 5px; display: block;">
+                      Hold CTRL/CMD to select multiple.
+                    </small>
+                  </div>
                 </div>
 
-                <label class="switch">
-                    <input type="checkbox" id="personalityToggle">
-                    <span class="slider round"></span>
-                </label>
-            </div>
-
-<button class="btn-next" id="generateBtn">
-    Generate Smart Questionnaire <i class="fa-solid fa-chevron-right"></i>
-</button>
-        </div>
-    </div>
-
-    <div id="qStep2" style="display: none; text-align: center; padding: 40px 20px;">
-        <div style="font-size: 48px; color: var(--primary); margin-bottom: 16px;">
-            <i class="fa-solid fa-circle-check"></i>
-        </div>
-        <h3 style="font-size: 24px; color: var(--text-dark); margin-bottom: 8px;">Analysis Complete</h3>
-        <p style="font-size: 16px; color: var(--text-main);">
-            Your dominant trait is: <strong id="resultTrait" style="color: var(--primary); text-transform: capitalize; font-size: 18px;">...</strong>
-        </p>
-        <button class="btn-secondary" id="resetBtn" style="margin: 24px auto 0; width: max-content; padding: 10px 24px;">
-            Start Over <i class="fa-solid fa-rotate-right" style="margin-left: 8px;"></i>
-        </button>
-    </div>
-
-</div>
-            </section>
-
-                <section class="suggested-section">
-                    <div class="section-title-row">
-                        <h3>AI-Suggested Careers</h3>
-                        <div class="dots-more"><span></span><span></span><span></span></div>
+                <div class="q-footer">
+                  <div class="personality-toggle">
+                    <div>
+                      <span class="toggle-title">Deep Personality Scan</span>
+                      <span class="toggle-sub">Include behavioral questions.</span>
                     </div>
-                    
-                    <div class="cards-grid">
-                        <div class="career-card active">
-                            <h4>Software Developer</h4>
-                            <div class="salary">R25,000 – R70,000<span>/Mo</span></div>
-                            <div class="skills-tags">
-                                <span><i class="fa-brands fa-python"></i> Python</span>
-                                <span>JavaScript, React</span>
-                            </div>
-                            <div class="card-image img-software"></div>
-                        </div>
-                        <div class="career-card">
-                            <h4>Data Analyst</h4>
-                            <div class="salary">R20,000 – R50,000<span>/Mo</span></div>
-                            <div class="skills-tags">
-                                <span><i class="fa-solid fa-database"></i> SQL</span>
-                                <span>Excel</span>
-                                <span>Tableau</span>
-                            </div>
-                            <div class="card-image img-data"></div>
-                        </div>
-                        <div class="career-card">
-                            <h4>UX Designer</h4>
-                            <div class="salary">R22,000 – R60,000<span>/Mo</span></div>
-                            <div class="skills-tags">
-                                <span><i class="fa-solid fa-pen-nib"></i> UI Design</span>
-                                <span>Figma</span>
-                            </div>
-                            <div class="card-image img-ux"></div>
-                        </div>
-                    </div>
-                </section>
 
-                <section class="related-section">
-                    <h3>Related Careers</h3>
-                    <div class="related-grid">
-                        <div class="related-card">
-                            <div class="r-icon blue-bg"><i class="fa-solid fa-code"></i></div>
-                            <div class="r-info">
-                                <h4>Web Developer</h4>
-                                <p>Career and pro...</p>
-                            </div>
-                            <i class="fa-solid fa-chevron-right arrow"></i>
-                        </div>
-                        <div class="related-card">
-                            <div class="r-icon cyan-bg"><i class="fa-solid fa-mobile-screen"></i></div>
-                            <div class="r-info">
-                                <h4>Mobile Developer</h4>
-                                <p>Apps and games</p>
-                            </div>
-                        </div>
-                        <div class="related-card">
-                            <div class="r-icon grey-bg"><i class="fa-solid fa-server"></i></div>
-                            <div class="r-info">
-                                <h4>Data Engineer</h4>
-                                <p>Report any career</p>
-                            </div>
-                            <i class="fa-solid fa-chevron-right arrow"></i>
-                        </div>
-                    </div>
-                </section>
+                    <label class="switch">
+                      <input type="checkbox" id="personalityToggle" />
+                      <span class="slider round"></span>
+                    </label>
+                  </div>
 
-            </div>
-
-            <div class="content-right">
-                <div class="details-panel">
-                    <div class="panel-hero img-software-hero">
-                        <div class="hero-overlay"></div>
-                    </div>
-                    
-                    <div class="panel-body">
-                        <div class="panel-header-row">
-                            <h2>Software Developer</h2>
-                            <button class="more-options"><i class="fa-solid fa-ellipsis"></i></button>
-                        </div>
-                        <p class="description">Create and maintain software applications to solve real world problems.</p>
-                        
-                        <div class="salary-large">R25,000 – R70,000<span>/Mo</span></div>
-                        
-                        <div class="skills-tags mb-20">
-                            <span><i class="fa-brands fa-python text-blue"></i> Python</span>
-                            <span><i class="fa-brands fa-js text-blue"></i> JavaScript</span>
-                            <span><i class="fa-brands fa-react text-blue"></i> React</span>
-                        </div>
-
-                        <div class="demand-badge">
-                            <i class="fa-solid fa-fire"></i> High Demand
-                            <div class="demand-dots"><span></span><span></span><span></span><span class="empty"></span></div>
-                        </div>
-
-                        <div class="roadmap">
-                            <h4>Career Roadmap</h4>
-                            <div class="timeline">
-                                <div class="t-step">
-                                    <div class="t-icon bg-cyan"><i class="fa-solid fa-book-open"></i></div>
-                                    <div class="t-label">Study</div>
-                                    <div class="t-time">3-6 months</div>
-                                </div>
-                                <div class="t-line"></div>
-                                <div class="t-step">
-                                    <div class="t-icon bg-orange"><i class="fa-solid fa-certificate"></i></div>
-                                    <div class="t-label">Certifications</div>
-                                    <div class="t-time">3-10 months</div>
-                                </div>
-                                <div class="t-line dotted"></div>
-                                <div class="t-step">
-                                    <div class="t-icon bg-blue"><i class="fa-solid fa-briefcase"></i></div>
-                                    <div class="t-label">Projects</div>
-                                    <div class="t-time">1-4 months</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="panel-actions">
-                            <button class="btn-secondary">
-                                Save Career Path
-                                <div class="action-icons">
-                                    <span>1.1</span>
-                                    <i class="fa-regular fa-bookmark"></i>
-                                </div>
-                            </button>
-                            <button class="btn-primary full">
-                                <i class="fa-solid fa-rocket"></i> Start Learning
-                                <div class="action-icons">
-                                    <span>5</span>
-                                    <i class="fa-solid fa-arrow-trend-up"></i>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
+                  <button class="btn-next" id="generateBtn">
+                    Generate Smart Questionnaire <i class="fa-solid fa-chevron-right"></i>
+                  </button>
                 </div>
+              </div>
+
+              <div id="qStep2" style="display: none; text-align: center; padding: 40px 20px;">
+                <div style="font-size: 48px; color: var(--primary); margin-bottom: 16px;">
+                  <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h3 style="font-size: 24px; color: var(--text-dark); margin-bottom: 8px;">Analysis Complete</h3>
+                <p style="font-size: 16px; color: var(--text-main);">
+                  Your dominant trait is: <strong id="resultTrait" style="color: var(--primary); text-transform: capitalize; font-size: 18px;">...</strong>
+                </p>
+                <button class="btn-secondary" id="resetBtn" style="margin: 24px auto 0; width: max-content; padding: 10px 24px;">
+                  Start Over <i class="fa-solid fa-rotate-right" style="margin-left: 8px;"></i>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section class="suggested-section">
+            <div class="section-title-row">
+              <h3>AI‑Suggested Careers</h3>
+              <div class="dots-more"><span></span><span></span><span></span></div>
             </div>
 
+            <div class="cards-grid">
+              <div class="career-card active">
+                <h4>Software Developer</h4>
+                <div class="salary">R25,000 – R70,000<span>/Mo</span></div>
+                <div class="skills-tags">
+                  <span><i class="fa-brands fa-python"></i> Python</span>
+                  <span>JavaScript, React</span>
+                </div>
+                <div class="card-image img-software"></div>
+              </div>
+
+              <div class="career-card">
+                <h4>Data Analyst</h4>
+                <div class="salary">R20,000 – R50,000<span>/Mo</span></div>
+                <div class="skills-tags">
+                  <span><i class="fa-solid fa-database"></i> SQL</span>
+                  <span>Excel</span>
+                  <span>Tableau</span>
+                </div>
+                <div class="card-image img-data"></div>
+              </div>
+
+              <div class="career-card">
+                <h4>UX Designer</h4>
+                <div class="salary">R22,000 – R60,000<span>/Mo</span></div>
+                <div class="skills-tags">
+                  <span><i class="fa-solid fa-pen-nib"></i> UI Design</span>
+                  <span>Figma</span>
+                </div>
+                <div class="card-image img-ux"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="related-section">
+            <h3>Related Careers</h3>
+            <div class="related-grid">
+              <div class="related-card">
+                <div class="r-icon blue-bg"><i class="fa-solid fa-code"></i></div>
+                <div class="r-info">
+                  <h4>Web Developer</h4>
+                  <p>Career and pro...</p>
+                </div>
+                <i class="fa-solid fa-chevron-right arrow"></i>
+              </div>
+
+              <div class="related-card">
+                <div class="r-icon cyan-bg"><i class="fa-solid fa-mobile-screen"></i></div>
+                <div class="r-info">
+                  <h4>Mobile Developer</h4>
+                  <p>Apps and games</p>
+                </div>
+              </div>
+
+              <div class="related-card">
+                <div class="r-icon grey-bg"><i class="fa-solid fa-server"></i></div>
+                <div class="r-info">
+                  <h4>Data Engineer</h4>
+                  <p>Report any career</p>
+                </div>
+                <i class="fa-solid fa-chevron-right arrow"></i>
+              </div>
+            </div>
+          </section>
         </div>
+
+        <!-- Right details panel -->
+        <div class="content-right">
+          <div class="details-panel">
+            <div class="panel-hero img-software-hero">
+              <div class="hero-overlay"></div>
+            </div>
+
+            <div class="panel-body">
+              <div class="panel-header-row">
+                <h2>Software Developer</h2>
+                <button class="more-options"><i class="fa-solid fa-ellipsis"></i></button>
+              </div>
+
+              <p class="description">Create and maintain software applications to solve real world problems.</p>
+
+              <div class="salary-large">R25,000 – R70,000<span>/Mo</span></div>
+
+              <div class="skills-tags mb-20">
+                <span><i class="fa-brands fa-python text-blue"></i> Python</span>
+                <span><i class="fa-brands fa-js text-blue"></i> JavaScript</span>
+                <span><i class="fa-brands fa-react text-blue"></i> React</span>
+              </div>
+
+              <div class="demand-badge">
+                <i class="fa-solid fa-fire"></i> High Demand
+                <div class="demand-dots"><span></span><span></span><span></span><span class="empty"></span></div>
+              </div>
+
+              <div class="roadmap">
+                <h4>Career Roadmap</h4>
+                <div class="timeline">
+                  <div class="t-step">
+                    <div class="t-icon bg-cyan"><i class="fa-solid fa-book-open"></i></div>
+                    <div class="t-label">Study</div>
+                    <div class="t-time">3‑6 months</div>
+                  </div>
+                  <div class="t-line"></div>
+                  <div class="t-step">
+                    <div class="t-icon bg-orange"><i class="fa-solid fa-certificate"></i></div>
+                    <div class="t-label">Certifications</div>
+                    <div class="t-time">3‑10 months</div>
+                  </div>
+                  <div class="t-line dotted"></div>
+                  <div class="t-step">
+                    <div class="t-icon bg-blue"><i class="fa-solid fa-briefcase"></i></div>
+                    <div class="t-label">Projects</div>
+                    <div class="t-time">1‑4 months</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel-actions">
+                <button class="btn-secondary">
+                  Save Career Path
+                  <div class="action-icons">
+                    <span>1.1</span>
+                    <i class="fa-regular fa-bookmark"></i>
+                  </div>
+                </button>
+                <button class="btn-primary full">
+                  <i class="fa-solid fa-rocket"></i> Start Learning
+                  <div class="action-icons">
+                    <span>5</span>
+                    <i class="fa-solid fa-arrow-trend-up"></i>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
-    <script src="../js/CareerDiscovery.js"></script>
+  </div>
+
+  <script src="../js/CareerDiscovery.js"></script>
+
+  <script>
+    lucide.createIcons();
+  </script>
 
 </body>
 </html>

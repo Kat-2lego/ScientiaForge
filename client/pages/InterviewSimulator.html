@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interview Simulator | SkillForge AI</title>
+
+  <!-- Lucide + Fonts (same as dashboard) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Shared layout + styling -->
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/CareerDiscovery.css" />
+  <link rel="stylesheet" href="../css/InterviewSimulator.css" />
+</head>
+<body>
+
+  <div class="layout">
+    <!-- Sidebar (same as other pages) -->
+    <aside class="sidebar" id="sidebar">
+      <div>
+        <div class="logo">
+          <span class="logo-dark">Skill</span><span class="logo-blue">Forge</span>
+        </div>
+
+        <nav class="nav">
+          <a class="nav-item" href="Dashboard.html" data-label="Dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+
+          <a class="nav-item" href="CareerDiscovery.html" data-label="Career Discovery">
+            <i data-lucide="compass"></i>
+            <span>Career Discovery</span>
+          </a>
+
+          <a class="nav-item" href="../cv-analyzer/CVAnalyzer.html" data-label="CV Analyzer">
+            <i data-lucide="file-search"></i>
+            <span>CV Analyzer</span>
+          </a>
+
+          <a class="nav-item active" href="InterviewSimulator.html" data-label="Interview Simulator">
+            <i data-lucide="mic"></i>
+            <span>Interview Simulator</span>
+          </a>
+
+          <a class="nav-item" href="SkillGap.html" data-label="Skill Gap Analysis">
+            <i data-lucide="bar-chart-3"></i>
+            <span>Skill Gap Analysis</span>
+          </a>
+
+          <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
+            <i data-lucide="activity"></i>
+            <span>Progress Tracker</span>
+          </a>
+
+          <a class="nav-item" href="Settings.html" data-label="Settings">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="download-card">
+        <div class="download-icon">
+          <i data-lucide="smartphone"></i>
+        </div>
+        <h3>Download Our Mobile App</h3>
+        <p>Track your progress anywhere, anytime.</p>
+        <button class="download-btn">Download</button>
+      </div>
+    </aside>
+
+    <!-- Main interview simulator content -->
+    <main class="main main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+            <i data-lucide="menu"></i>
+          </button>
+
+          <label class="searchbar">
+            <i data-lucide="search"></i>
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search SkillForge..."
+              autocomplete="off"
+            />
+          </label>
+        </div>
+
+        <div class="topbar-right">
+          <button class="icon-btn"><i data-lucide="bell"></i></button>
+          <button class="icon-btn"><i data-lucide="mail"></i></button>
+
+          <div class="profile">
+            <div class="avatar"></div>
+            <div>
+              <div class="profile-name">Thabo M.</div>
+              <div class="profile-email">@thabo.m@skillforge.co.za</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Interview Simulator main -->
+      <div class="interview-dashboard">
+        <!-- Page header -->
+        <div class="page-header">
+          <h1>Interview Simulator</h1>
+          <p>Practice real interview questions and get instant feedback.</p>
+        </div>
+
+        <!-- Interview type selection -->
+        <section class="interview-type-section">
+          <h3>Select Interview Type</h3>
+
+          <div class="interview-types">
+            <button class="interview-type" data-type="hr" data-icon="fa-regular fa-user">
+              <i class="fa-regular fa-user"></i>
+              <span>HR / Behavioral</span>
+            </button>
+
+            <button class="interview-type" data-type="technical" data-icon="fa-solid fa-code">
+              <i class="fa-solid fa-code"></i>
+              <span>Technical</span>
+            </button>
+
+            <button class="interview-type" data-type="consulting" data-icon="fa-solid fa-briefcase">
+              <i class="fa-solid fa-briefcase"></i>
+              <span>Consulting & Case</span>
+            </button>
+          </donnees>
+        </section>
+
+        <!-- Target job / role -->
+        <section class="target-role-section">
+          <label for="targetRole">Target Role (Optional)</label>
+          <div class="chips-container roles-container">
+            <span class="chip" data-role="software-engineer">Software Engineer</span>
+            <span class="chip" data-role="data-analyst">Data Analyst</span>
+            <span class="chip" data-role="ux-designer">UX Designer</span>
+            <span class="chip" data-role="product-manager">Product Manager</span>
+          </div>
+        </section>
+
+        <!-- Start interview preview -->
+        <section class="preview-section">
+          <div class="preview-card">
+            <h4>Interview Preview</h4>
+            <p><span id="preview-type">Type:</span> <strong id="previewTypeText">Behavioral</strong></p>
+            <p><span id="preview-role">Role:</span> <strong id="previewRoleText">Any</strong></p>
+            <p><span id="preview-duration">Duration:</span> <strong>10–15 minutes</strong></p>
+
+            <div class="preview-actions">
+              <button class="btn-secondary" id="resetBtn">
+                <i class="fa-regular fa-rotate-right"></i>
+                Reset Options
+              </button>
+              <button class="btn-primary full" id="startBtn">
+                <i class="fa-solid fa-play"></i>
+                Start Interview
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Interview UI (initially hidden) -->
+        <section class="interview-ui hidden" id="interviewUI">
+          <div class="interview-header">
+            <h3>Interview in Progress</h3>
+            <div class="timer">
+              <i class="fa-regular fa-clock"></i>
+              <span id="timer">02:34</span>
+            </div>
+          </div>
+
+          <div class="interview-box">
+            <div class="question-panel">
+              <div class="ai-avatar">
+                <i data-lucide="brain-cog"></i>
+              </div>
+              <div class="question-text">
+                <p>
+                  <strong class="label">AI Interviewer</strong>
+                </p>
+                <p id="currentQuestion">
+                  Tell me about yourself and why you’re interested in this role.
+                </p>
+              </div>
+            </div>
+
+            <div class="response-panel">
+              <div class="response-input">
+                <label>Record or type your answer</label>
+                <div class="mic-input">
+                  <button class="record-btn" id="recordBtn">
+                    <i class="fa-solid fa-microphone"></i>
+                    <span>Record</span>
+                  </button>
+                  <button class="stop-btn" id="stopBtn">
+                    <i class="fa-solid fa-stop"></i>
+                    <span>Stop</span>
+                  </button>
+                </div>
+
+                <div class="transcript-box">
+                  <textarea
+                    id="transcript"
+                    placeholder="Your spoken or typed answer will appear here..."
+                    rows="6"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="interview-controls">
+            <button class="btn-secondary" id="skipBtn">
+              <i class="fa-solid fa-forward"></i>
+              Skip Question
+            </button>
+            <button class="btn-primary full" id="submitBtn">
+              <i class="fa-solid fa-check-double"></i>
+              Submit Answer
+            </button>
+          </div>
+
+          <!-- Progress indicator -->
+          <div class="interview-progress">
+            <h5>Progress</h5>
+            <div class="progress-bar">
+              <div class="bar-fill" style="width: 40%;"></div>
+            </div>
+            <span class="progress-label">2 of 5 questions</span>
+          </div>
+        </section>
+
+        <!-- Feedback UI (after interview) -->
+        <section class="feedback-ui hidden" id="feedbackUI">
+          <div class="feedback-card">
+            <div class="feedback-header">
+              <h3>Interview Feedback</h3>
+              <div class="overall-score">
+                <span class="label">Overall:</span>
+                <strong class="score">85</strong>
+              </div>
+            </div>
+
+            <div class="feedback-grid">
+              <div class="score-item">
+                <h5>Confidence</h5>
+                <div class="score-badge">
+                  <span class="score">88</span>
+                  <span class="label">high</span>
+                </div>
+              </div>
+
+              <div class="score-item">
+                <h5>Clarity</h5>
+                <div class="score-badge">
+                  <span class="score">76</span>
+                  <span class="label">good</span>
+                </div>
+              </div>
+
+              <div class="score-item">
+                <h5>Structure</h5>
+                <div class="score-badge">
+                  <span class="score">82</span>
+                  <span class="label">good</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="feedback-tips">
+              <h4>Key Tips</h4>
+              <ul>
+                <li><strong>Use the STAR method</strong> (Situation, Task, Action, Result) for behavioral questions.</li>
+                <li>Avoid <strong>very short answers</strong>; expand with examples.</li>
+                <li>Make sure to mention <strong>results and metrics</strong> when talking about your experience.</li>
+              </ul>
+            </div>
+
+            <div class="feedback-actions">
+              <button class="btn-secondary">
+                <i class="fa-solid fa-redo"></i>
+                Practice Again
+              </button>
+              <button class="btn-primary">
+                <i class="fa-solid fa-external-link"></i>
+                See Detailed Report
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Local JS -->
+  <script src="../js/InterviewSimulator.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
