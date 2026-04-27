@@ -19,6 +19,9 @@
   },
   "homepage": "https://github.com/Kat-2lego/SkillForge#readme",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@supabase/supabase-js": "^2.104.1",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "postgres": "^3.4.9"

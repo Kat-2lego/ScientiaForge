@@ -6,6 +6,7 @@
     <title>SkillForge sign up</title>
     <link rel="stylesheet" href="../css/SignUp.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../auth/signupUser.js"></script>
 </head>
 <body>
 
@@ -30,51 +31,56 @@
                             </div>
 
                             <form class="cyber-form">
-                                <div class="field-wrapper email">
-                                    <p>Full Names:</p>
-                                    <!-- <div class="input-module"> -->
-                                        <!-- <div class="module-bezel"> -->
-                                            <!-- <div class="module-inner"> -->
-                                                <!-- <i class="fa-regular fa-address-card module-icon"></i> -->
-                                                <input type="text" placeholder="Enter full names" class="input" required>
-                                            <!-- </div> -->
-                                        <!-- </div> -->
-                                    <!-- </div> -->
-                                </div>
+  <div class="field-wrapper email">
+    <p>Full Names:</p>
+    <input
+      type="text"
+      id="sf-names"
+      placeholder="Enter full names"
+      class="input"
+      required
+    />
+  </div>
 
-                                <div class="field-wrapper email">
-                                    <p>Email:</p>
-                                    <!-- <div class="input-module"> -->
-                                        <!-- <div class="module-bezel"> -->
-                                            <!-- <div class="module-inner"> -->
-                                                <input type="email" placeholder="Email address" class="input" required>
-                                            <!-- </div> -->
-                                        <!-- </div> -->
-                                    <!-- </div> -->
-                                </div>
+  <div class="field-wrapper email">
+    <p>Email:</p>
+    <input
+      type="email"
+      id="sf-email"
+      placeholder="Email address"
+      class="input"
+      required
+    />
+  </div>
 
-                                <div class="field-wrapper pass">
-                                    <p>Password:</p>
-                                    <!-- <div class="input-module"> -->
-                                        <!-- <div class="module-bezel"> -->
-                                            <!-- <div class="module-inner"> -->
-                                                <input type="password" placeholder="••••" class="input" required>
-                                                <!-- <i class="fa-regular fa-eye module-icon" style="margin-left: 10px; cursor: pointer;"></i> -->
-                                            <!-- </div> -->
-                                        <!-- </div> -->
-                                    <!-- </div> -->
-                                </div>
+  <div class="field-wrapper pass">
+    <p>Password:</p>
+    <input
+      type="password"
+      id="sf-pass"
+      placeholder="••••"
+      class="input"
+      required
+    />
+  </div>
 
-                                <button type="submit" class="secure-submit">
-                                    <span class="btn-inner-text">Sign Up</span>
-                                    <div class="btn-lighting-overlay"></div>
-                                </button>
+  <button
+    type="button"
+    class="secure-submit"
+    onclick="handleSignUp()"
+  >
+    <span class="btn-inner-text">Sign Up</span>
+    <div class="btn-lighting-overlay"></div>
+  </button>
 
-                                <div class="auth-switch">
-                                    <div class="divider-line"><span>OR</span></div>
-                                    <p>Already have an account? <a href="Login.html" class="link-forgot">Login</a></p>
-                                </div>
-                            </form>
+  <div class="auth-switch">
+    <div class="divider-line"><span>OR</span></div>
+    <p>
+      Already have an account?
+      <a href="Login.html" class="link-forgot">Login</a>
+    </p>
+  </div>
+</form>
                         </div>
                     </section>
 

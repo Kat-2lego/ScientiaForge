@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Interview Simulator | SkillForge AI</title>
 
-  <!-- Lucide + Fonts (same as dashboard) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -15,59 +14,48 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Shared layout + styling -->
   <link rel="stylesheet" href="../css/dashboard.css" />
   <link rel="stylesheet" href="../css/CareerDiscovery.css" />
   <link rel="stylesheet" href="../css/InterviewSimulator.css" />
 </head>
 <body>
-
   <div class="layout">
-    <!-- Sidebar (same as other pages) -->
     <aside class="sidebar" id="sidebar">
       <div>
         <div class="logo">
           <span class="logo-dark">Skill</span><span class="logo-blue">Forge</span>
         </div>
-
         <nav class="nav">
           <a class="nav-item" href="Dashboard.html" data-label="Dashboard">
             <i data-lucide="layout-dashboard"></i>
             <span>Dashboard</span>
           </a>
-
           <a class="nav-item" href="CareerDiscovery.html" data-label="Career Discovery">
             <i data-lucide="compass"></i>
             <span>Career Discovery</span>
           </a>
-
           <a class="nav-item" href="../cv-analyzer/CVAnalyzer.html" data-label="CV Analyzer">
             <i data-lucide="file-search"></i>
             <span>CV Analyzer</span>
           </a>
-
           <a class="nav-item active" href="InterviewSimulator.html" data-label="Interview Simulator">
             <i data-lucide="mic"></i>
             <span>Interview Simulator</span>
           </a>
-
           <a class="nav-item" href="SkillGap.html" data-label="Skill Gap Analysis">
             <i data-lucide="bar-chart-3"></i>
             <span>Skill Gap Analysis</span>
           </a>
-
           <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
             <i data-lucide="activity"></i>
             <span>Progress Tracker</span>
           </a>
-
           <a class="nav-item" href="Settings.html" data-label="Settings">
             <i data-lucide="settings"></i>
             <span>Settings</span>
           </a>
         </nav>
       </div>
-
       <div class="download-card">
         <div class="download-icon">
           <i data-lucide="smartphone"></i>
@@ -78,29 +66,20 @@
       </div>
     </aside>
 
-    <!-- Main interview simulator content -->
     <main class="main main-content">
       <header class="topbar">
         <div class="topbar-left">
           <button class="menu-btn" id="menuBtn" aria-label="Open menu">
             <i data-lucide="menu"></i>
           </button>
-
           <label class="searchbar">
             <i data-lucide="search"></i>
-            <input
-              type="text"
-              id="searchInput"
-              placeholder="Search SkillForge..."
-              autocomplete="off"
-            />
+            <input type="text" id="searchInput" placeholder="Search SkillForge..." autocomplete="off" />
           </label>
         </div>
-
         <div class="topbar-right">
           <button class="icon-btn"><i data-lucide="bell"></i></button>
           <button class="icon-btn"><i data-lucide="mail"></i></button>
-
           <div class="profile">
             <div class="avatar"></div>
             <div>
@@ -111,37 +90,30 @@
         </div>
       </header>
 
-      <!-- Interview Simulator main -->
       <div class="interview-dashboard">
-        <!-- Page header -->
         <div class="page-header">
           <h1>Interview Simulator</h1>
           <p>Practice real interview questions and get instant feedback.</p>
         </div>
 
-        <!-- Interview type selection -->
         <section class="interview-type-section">
           <h3>Select Interview Type</h3>
-
           <div class="interview-types">
-            <button class="interview-type" data-type="hr" data-icon="fa-regular fa-user">
+            <button class="interview-type active" data-type="hr" data-icon="fa-regular fa-user">
               <i class="fa-regular fa-user"></i>
               <span>HR / Behavioral</span>
             </button>
-
             <button class="interview-type" data-type="technical" data-icon="fa-solid fa-code">
               <i class="fa-solid fa-code"></i>
               <span>Technical</span>
             </button>
-
             <button class="interview-type" data-type="consulting" data-icon="fa-solid fa-briefcase">
               <i class="fa-solid fa-briefcase"></i>
               <span>Consulting & Case</span>
             </button>
-          </donnees>
+          </div>
         </section>
 
-        <!-- Target job / role -->
         <section class="target-role-section">
           <label for="targetRole">Target Role (Optional)</label>
           <div class="chips-container roles-container">
@@ -152,14 +124,12 @@
           </div>
         </section>
 
-        <!-- Start interview preview -->
         <section class="preview-section">
           <div class="preview-card">
             <h4>Interview Preview</h4>
             <p><span id="preview-type">Type:</span> <strong id="previewTypeText">Behavioral</strong></p>
             <p><span id="preview-role">Role:</span> <strong id="previewRoleText">Any</strong></p>
             <p><span id="preview-duration">Duration:</span> <strong>10–15 minutes</strong></p>
-
             <div class="preview-actions">
               <button class="btn-secondary" id="resetBtn">
                 <i class="fa-regular fa-rotate-right"></i>
@@ -173,13 +143,12 @@
           </div>
         </section>
 
-        <!-- Interview UI (initially hidden) -->
         <section class="interview-ui hidden" id="interviewUI">
           <div class="interview-header">
             <h3>Interview in Progress</h3>
             <div class="timer">
               <i class="fa-regular fa-clock"></i>
-              <span id="timer">02:34</span>
+              <span id="timer">00:00</span>
             </div>
           </div>
 
@@ -189,12 +158,8 @@
                 <i data-lucide="brain-cog"></i>
               </div>
               <div class="question-text">
-                <p>
-                  <strong class="label">AI Interviewer</strong>
-                </p>
-                <p id="currentQuestion">
-                  Tell me about yourself and why you’re interested in this role.
-                </p>
+                <p><strong class="label">AI Interviewer</strong></p>
+                <p id="currentQuestion"></p>
               </div>
             </div>
 
@@ -206,18 +171,13 @@
                     <i class="fa-solid fa-microphone"></i>
                     <span>Record</span>
                   </button>
-                  <button class="stop-btn" id="stopBtn">
+                  <button class="stop-btn hidden" id="stopBtn">
                     <i class="fa-solid fa-stop"></i>
                     <span>Stop</span>
                   </button>
                 </div>
-
                 <div class="transcript-box">
-                  <textarea
-                    id="transcript"
-                    placeholder="Your spoken or typed answer will appear here..."
-                    rows="6"
-                  ></textarea>
+                  <textarea id="transcript" placeholder="Your spoken or typed answer will appear here..." rows="6"></textarea>
                 </div>
               </div>
             </div>
@@ -234,62 +194,51 @@
             </button>
           </div>
 
-          <!-- Progress indicator -->
           <div class="interview-progress">
             <h5>Progress</h5>
             <div class="progress-bar">
-              <div class="bar-fill" style="width: 40%;"></div>
+              <div class="bar-fill" style="width: 0%;"></div>
             </div>
-            <span class="progress-label">2 of 5 questions</span>
+            <span class="progress-label">0 of 0 questions</span>
           </div>
         </section>
 
-        <!-- Feedback UI (after interview) -->
         <section class="feedback-ui hidden" id="feedbackUI">
           <div class="feedback-card">
             <div class="feedback-header">
               <h3>Interview Feedback</h3>
               <div class="overall-score">
                 <span class="label">Overall:</span>
-                <strong class="score">85</strong>
+                <strong class="score">0</strong>
               </div>
             </div>
-
             <div class="feedback-grid">
               <div class="score-item">
                 <h5>Confidence</h5>
                 <div class="score-badge">
-                  <span class="score">88</span>
-                  <span class="label">high</span>
+                  <span class="score">0</span>
+                  <span class="label">n/a</span>
                 </div>
               </div>
-
               <div class="score-item">
                 <h5>Clarity</h5>
                 <div class="score-badge">
-                  <span class="score">76</span>
-                  <span class="label">good</span>
+                  <span class="score">0</span>
+                  <span class="label">n/a</span>
                 </div>
               </div>
-
               <div class="score-item">
                 <h5>Structure</h5>
                 <div class="score-badge">
-                  <span class="score">82</span>
-                  <span class="label">good</span>
+                  <span class="score">0</span>
+                  <span class="label">n/a</span>
                 </div>
               </div>
             </div>
-
             <div class="feedback-tips">
               <h4>Key Tips</h4>
-              <ul>
-                <li><strong>Use the STAR method</strong> (Situation, Task, Action, Result) for behavioral questions.</li>
-                <li>Avoid <strong>very short answers</strong>; expand with examples.</li>
-                <li>Make sure to mention <strong>results and metrics</strong> when talking about your experience.</li>
-              </ul>
+              <ul id="tipsList"></ul>
             </div>
-
             <div class="feedback-actions">
               <button class="btn-secondary">
                 <i class="fa-solid fa-redo"></i>
@@ -306,7 +255,6 @@
     </main>
   </div>
 
-  <!-- Local JS -->
   <script src="../js/InterviewSimulator.js"></script>
   <script>
     lucide.createIcons();

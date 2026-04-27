@@ -1,55 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkillForge Login</title>
-    <link rel="stylesheet" href="../css/LogIn.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkillForge Login</title>
+  <link rel="stylesheet" href="../css/LogIn.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="../auth/loginUser.js"></script>
 </head>
 <body>
 
 <div class="container">
+  <div class="login-card">
 
-    <div class="login-card">
+    <!-- LEFT: FORM -->
+    <div class="form-section">
+      <h1 class="brand-name">Skill <span>Forge</span></h1>
+      <h2>Welcome Back!</h2>
+      <p class="subtitle">Sign in to continue your journey</p>
 
-        <!-- LEFT: FORM -->
-        <div class="form-section">
-            <h1 class="brand-name">Skill <span>Forge</span></h1>
+      <form>
+        <input
+          type="email"
+          id="sf-email"
+          placeholder="Email address"
+          class="input"
+          required
+        />
 
-            <h2>Welcome Back!</h2>
-            <p class="subtitle">Sign in to continue your journey</p>
-
-            <form>
-                <input type="email" placeholder="Email address" class="input" required>
-
-                <div class="password-field">
-                    <input type="password" placeholder="Password" class="input" required>
-                </div>
-
-                <div class="form-links">
-                    <a href="#">Forgot Password?</a>
-                </div>
-
-                <button class="btn-primary" href="Dashboard.html">Sign In</button>
-            </form>
-
-            <p class="switch-auth">
-                Don’t have an account? <a href="signup.html">Sign up</a>
-            </p>
+        <div class="password-field">
+          <input
+            type="password"
+            id="sf-pass"
+            placeholder="Password"
+            class="input"
+            required
+          />
+          <button type="button" id="sf-eye-icon-btn" onclick="togglePw()">
+            <i class="fa-solid fa-eye"></i>
+          </button>
         </div>
 
-        <!-- RIGHT: VISUAL -->
-        <div class="image-section">
-            <div class="overlay-text">
-                <h3>Your AI Career Coach</h3>
-                <p>Build your future with SkillForge AI</p>
-            </div>
+        <div class="form-links">
+          <a href="#">Forgot Password?</a>
         </div>
 
+        <button
+          type="button"
+          class="btn-primary"
+          onclick="handleSignIn()"
+        >
+          Sign In
+        </button>
+      </form>
+
+      <p class="switch-auth">
+        Don’t have an account? <a href="signup.html">Sign up</a>
+      </p>
     </div>
 
+    <!-- RIGHT: VISUAL -->
+    <div class="image-section">
+      <div class="overlay-text">
+        <h3>Your AI Career Coach</h3>
+        <p>Build your future with SkillForge AI</p>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- ⚠️ Remove this extra script, it's redundant -->
+<!-- <script src="../js/loginUser.js"></script> -->
+
+<!-- Password toggle -->
+<script>
+  function togglePw() {
+    const inp = document.getElementById("sf-pass");
+    const btn = document.getElementById("sf-eye-icon-btn");
+    const icon = btn.querySelector("i");
+
+    if (inp.type === "password") {
+      inp.type = "text";
+      icon.classList.add("fa-eye-slash");
+      icon.classList.remove("fa-eye");
+    } else {
+      inp.type = "password";
+      icon.classList.add("fa-eye");
+      icon.classList.remove("fa-eye-slash");
+    }
+  }
+</script>
 
 </body>
 </html>
