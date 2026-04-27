@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillForge Settings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/Settings.css">
+</head>
+<body>
+
+    <div class="app-layout">
+        
+        
+    <aside class="sidebar" id="sidebar">
+      <div>
+        <div class="logo">
+          <span class="logo-dark">Skill</span><span class="logo-blue">Forge</span>
+        </div>
+
+        <nav class="nav">
+          <a class="nav-item" href="dashboard.html" data-label="Dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+
+          <a class="nav-item" href="CareerDiscovery.html" data-label="Career Discovery">
+            <i data-lucide="compass"></i>
+            <span>Career Discovery</span>
+          </a>
+
+          <a class="nav-item" href="cvDashboard.html" data-label="CV Analyzer">
+            <i data-lucide="file-search"></i>
+            <span>CV Analyzer</span>
+          </a>
+
+          <a class="nav-item" href="InterviewSimulator.html" data-label="Interview Simulator">
+            <i data-lucide="mic"></i>
+            <span>Interview Simulator</span>
+          </a>
+
+          <a class="nav-item" href="#" data-label="Skill Gap Analysis">
+            <i data-lucide="bar-chart-3"></i>
+            <span>Skill Gap Analysis</span>
+          </a>
+
+          <a class="nav-item " href="ProgressTracker.html" data-label="Progress Tracker">
+            <i data-lucide="activity"></i>
+            <span>Progress Tracker</span>
+          </a>
+
+          <a class="nav-item active" href="../pages/Settings.html" data-label="Settings">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+          </a>
+
+          <a class="nav-item" href="#" data-label="Help & Support">
+            <i data-lucide="life-buoy"></i>
+            <span>Help/Support <small>(01)</small></span>
+          </a>
+
+          <a class="nav-item" href="#" data-label="Log Out">
+            <i data-lucide="log-out"></i>
+            <span>Log Out</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="download-card">
+        <div class="download-icon">
+          <i data-lucide="smartphone"></i>
+        </div>
+        <h3>Download Our Mobile App</h3>
+        <p>Track your progress anywhere, anytime.</p>
+        <button class="download-btn">Download</button>
+      </div>
+    </aside>
+
+
+        <main class="main-content">
+            
+            <header class="top-header">
+                <button class="hamburger-btn" id="toggle-sidebar">
+                    <i data-lucide="menu"></i>
+                </button>
+                <h1 class="page-title">Settings</h1>
+            </header>
+
+            <div class="scroll-container custom-scrollbar">
+                <div class="settings-wrapper">
+
+                    <div class="section-container">
+                        <h2 class="section-title">User Profile</h2>
+                        <p class="section-subtitle">Manage your digital identity and core platform preferences.</p>
+                        
+                        <div class="profile-card-large">
+                            <div class="profile-bg-pattern"></div>
+                            <div class="profile-content">
+                                <div class="profile-identity">
+                                    <div class="avatar-container" title="Click to update avatar">
+                                        <div class="avatar-circle">TM</div>
+                                        <div class="avatar-hover">
+                                            <i data-lucide="camera"></i>
+                                        </div>
+                                    </div>
+                                    <div class="profile-text">
+                                        <h3 class="user-name">Thabo M.</h3>
+                                        <p class="user-email">thabo.m@skillforge.co.za</p>
+                                        <div class="badge-group">
+                                            <span class="badge premium">Premium User</span>
+                                            <span class="badge active-status">Online</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="profile-controls">
+                                    <div class="theme-toggle-box">
+                                        <div class="toggle-text">
+                                            <i data-lucide="moon"></i>
+                                            <span>Dark Mode</span>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-container">
+                        <h2 class="section-title">Notifications</h2>
+                        <div class="settings-card">
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Email Updates</h4>
+                                    <p>Weekly career insights and platform announcements.</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Push Alerts</h4>
+                                    <p>Instant alerts for new CV recommendations.</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-container">
+                        <h2 class="section-title">Security & Authentication</h2>
+                        <div class="settings-card">
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Password Management</h4>
+                                    <p>Ensure your account is protected with a strong password.</p>
+                                </div>
+                                <button class="btn-secondary">Update Password</button>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Two-Factor Authentication (2FA)</h4>
+                                    <p>Require a secondary code when logging in.</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-container">
+                        <h2 class="section-title">Account Management</h2>
+                        <div class="settings-card click-card">
+                            <a href="#" class="setting-row link-row">
+                                <div class="setting-icon"><i data-lucide="credit-card"></i></div>
+                                <div class="setting-info">
+                                    <h4>Manage Billing & Subscription</h4>
+                                    <p>View payment history and update your plan.</p>
+                                </div>
+                                <i data-lucide="chevron-right" class="arrow-icon"></i>
+                            </a>
+                        </div>
+                        <div class="settings-card click-card mt-3">
+                            <a href="#" class="setting-row link-row">
+                                <div class="setting-icon"><i data-lucide="shield"></i></div>
+                                <div class="setting-info">
+                                    <h4>Privacy & Data Control</h4>
+                                    <p>Export data and review terms & conditions.</p>
+                                </div>
+                                <i data-lucide="chevron-right" class="arrow-icon"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="section-container">
+                        <h2 class="section-title">Help & Support</h2>
+                        <p class="section-subtitle">Get assistance and learn how to use the platform.</p>
+                        <div class="support-grid">
+                            <div class="support-card">
+                                <div class="support-icon"><i data-lucide="book"></i></div>
+                                <h4>Documentation</h4>
+                                <p>Read detailed guides.</p>
+                            </div>
+                            <div class="support-card">
+                                <div class="support-icon"><i data-lucide="mail"></i></div>
+                                <h4>Contact Us</h4>
+                                <p>Submit a support ticket.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-container pb-large">
+                        <div class="settings-card border-danger">
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4 class="text-danger">Sign Out</h4>
+                                    <p>Securely log out of this device.</p>
+                                </div>
+                                <button class="btn-danger">
+                                    <i data-lucide="log-out"></i> Sign Out
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+    <script src="../js/settings.js"></script>
+</body>
+</html>
