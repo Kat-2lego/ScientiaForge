@@ -460,3 +460,242 @@
 .hidden {
   display: none !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   InterviewSimulator.css  –  additions for persona & QA breakdown
+   Append this to your existing InterviewSimulator.css
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Persona section ──────────────────────────────────────────── */
+.persona-section {
+  margin-top: 4px;
+}
+
+.persona-section h3 {
+  font-size: 1.15rem;
+  color: var(--text-main);
+  margin: 0 0 14px;
+  font-weight: 600;
+}
+
+.persona-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 900px) {
+  .persona-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .persona-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.persona-card {
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 12px;
+  background: var(--bg-card);
+  cursor: pointer;
+  text-align: center;
+  transition: 0.2s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.persona-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 8px 20px rgba(37,99,235,0.12);
+  transform: translateY(-2px);
+}
+
+.persona-card.active {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, #eff6ff, #fff);
+  box-shadow: 0 10px 28px rgba(37,99,235,0.2);
+}
+
+.persona-avatar {
+  font-size: 2rem;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #f1f5f9;
+}
+.persona-avatar.eng { background: #eff6ff; }
+.persona-avatar.hr  { background: #fdf4ff; }
+.persona-avatar.pm  { background: #f0fdf4; }
+.persona-avatar.con { background: #fff7ed; }
+
+.persona-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.persona-info strong {
+  font-size: 0.9rem;
+  color: var(--text-dark);
+}
+
+.persona-info span {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.persona-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #e0ecff;
+  color: var(--primary);
+}
+
+/* ── Persona preview strip ────────────────────────────────────── */
+.persona-preview {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: #f8faff;
+  border: 1px solid #dbeafe;
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-top: 4px;
+}
+
+.persona-preview-avatar {
+  font-size: 2rem;
+  min-width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  background: #eff6ff;
+  border-radius: 50%;
+}
+
+.persona-preview-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.persona-preview-text strong {
+  font-size: 0.95rem;
+  color: var(--text-dark);
+}
+
+.persona-preview-text span {
+  font-size: 0.8rem;
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.persona-preview-text p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 4px 0 0;
+  line-height: 1.5;
+}
+
+/* ── Interviewer badge in interview UI ────────────────────────── */
+.interviewer-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.interviewer-emoji {
+  font-size: 1.6rem;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  background: #eff6ff;
+  border-radius: 50%;
+}
+
+.interviewer-badge strong {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--text-dark);
+}
+
+.interviewer-badge small {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* ── ai-avatar overide for emoji ──────────────────────────────── */
+.ai-avatar {
+  font-size: 1.4rem;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  color: inherit;
+}
+
+/* ── Q&A breakdown in feedback ────────────────────────────────── */
+.qa-breakdown {
+  margin-bottom: 20px;
+}
+
+.qa-breakdown h4 {
+  font-size: 1.05rem;
+  color: var(--text-dark);
+  margin: 0 0 12px;
+}
+
+.qa-item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  background: #fafafa;
+}
+
+.qa-q {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.qa-num {
+  background: var(--primary);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+  margin-top: 1px;
+}
+
+.qa-a {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.qa-fb {
+  font-size: 0.85rem;
+  color: #1d4ed8;
+  background: #eff6ff;
+  border-radius: 8px;
+  padding: 8px 10px;
+  line-height: 1.5;
+}
+
+/* ── Hidden utility (ensure it's here) ───────────────────────── */
+.hidden { display: none !important; }

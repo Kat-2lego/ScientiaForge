@@ -4,16 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Interview Simulator | SkillForge AI</title>
-
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script src="https://unpkg.com/lucide@latest"></script>
-
   <link rel="stylesheet" href="../css/dashboard.css" />
   <link rel="stylesheet" href="../css/CareerDiscovery.css" />
   <link rel="stylesheet" href="../css/InterviewSimulator.css" />
@@ -34,7 +29,7 @@
             <i data-lucide="compass"></i>
             <span>Career Discovery</span>
           </a>
-          <a class="nav-item" href="../cv-analyzer/CVAnalyzer.html" data-label="CV Analyzer">
+          <a class="nav-item" href="CvDashboard.html" data-label="CV Analyzer">
             <i data-lucide="file-search"></i>
             <span>CV Analyzer</span>
           </a>
@@ -42,7 +37,7 @@
             <i data-lucide="mic"></i>
             <span>Interview Simulator</span>
           </a>
-          <a class="nav-item" href="SkillGap.html" data-label="Skill Gap Analysis">
+          <a class="nav-item" href="SkillGapAnalysis.html" data-label="Skill Gap Analysis">
             <i data-lucide="bar-chart-3"></i>
             <span>Skill Gap Analysis</span>
           </a>
@@ -57,9 +52,7 @@
         </nav>
       </div>
       <div class="download-card">
-        <div class="download-icon">
-          <i data-lucide="smartphone"></i>
-        </div>
+        <div class="download-icon"><i data-lucide="smartphone"></i></div>
         <h3>Download Our Mobile App</h3>
         <p>Track your progress anywhere, anytime.</p>
         <button class="download-btn">Download</button>
@@ -69,12 +62,10 @@
     <main class="main main-content">
       <header class="topbar">
         <div class="topbar-left">
-          <button class="menu-btn" id="menuBtn" aria-label="Open menu">
-            <i data-lucide="menu"></i>
-          </button>
+          <button class="menu-btn" id="menuBtn"><i data-lucide="menu"></i></button>
           <label class="searchbar">
             <i data-lucide="search"></i>
-            <input type="text" id="searchInput" placeholder="Search SkillForge..." autocomplete="off" />
+            <input type="text" placeholder="Search SkillForge..." autocomplete="off" />
           </label>
         </div>
         <div class="topbar-right">
@@ -93,73 +84,154 @@
       <div class="interview-dashboard">
         <div class="page-header">
           <h1>Interview Simulator</h1>
-          <p>Practice real interview questions and get instant feedback.</p>
+          <p>Practice with an AI interviewer that adapts to your target role.</p>
         </div>
 
-        <section class="interview-type-section">
-          <h3>Select Interview Type</h3>
-          <div class="interview-types">
-            <button class="interview-type active" data-type="hr" data-icon="fa-regular fa-user">
-              <i class="fa-regular fa-user"></i>
-              <span>HR / Behavioral</span>
-            </button>
-            <button class="interview-type" data-type="technical" data-icon="fa-solid fa-code">
-              <i class="fa-solid fa-code"></i>
-              <span>Technical</span>
-            </button>
-            <button class="interview-type" data-type="consulting" data-icon="fa-solid fa-briefcase">
-              <i class="fa-solid fa-briefcase"></i>
-              <span>Consulting & Case</span>
-            </button>
-          </div>
-        </section>
+        <!-- SETUP PANEL -->
+        <div id="setupPanel">
 
-        <section class="target-role-section">
-          <label for="targetRole">Target Role (Optional)</label>
-          <div class="chips-container roles-container">
-            <span class="chip" data-role="software-engineer">Software Engineer</span>
-            <span class="chip" data-role="data-analyst">Data Analyst</span>
-            <span class="chip" data-role="ux-designer">UX Designer</span>
-            <span class="chip" data-role="product-manager">Product Manager</span>
-          </div>
-        </section>
-
-        <section class="preview-section">
-          <div class="preview-card">
-            <h4>Interview Preview</h4>
-            <p><span id="preview-type">Type:</span> <strong id="previewTypeText">Behavioral</strong></p>
-            <p><span id="preview-role">Role:</span> <strong id="previewRoleText">Any</strong></p>
-            <p><span id="preview-duration">Duration:</span> <strong>10–15 minutes</strong></p>
-            <div class="preview-actions">
-              <button class="btn-secondary" id="resetBtn">
-                <i class="fa-regular fa-rotate-right"></i>
-                Reset Options
+          <!-- Interview Type -->
+          <section class="interview-type-section">
+            <h3>Select Interview Type</h3>
+            <div class="interview-types">
+              <button class="interview-type active" data-type="hr">
+                <i class="fa-regular fa-user"></i><span>HR / Behavioral</span>
               </button>
-              <button class="btn-primary full" id="startBtn">
-                <i class="fa-solid fa-play"></i>
-                Start Interview
+              <button class="interview-type" data-type="technical">
+                <i class="fa-solid fa-code"></i><span>Technical</span>
+              </button>
+              <button class="interview-type" data-type="consulting">
+                <i class="fa-solid fa-briefcase"></i><span>Consulting & Case</span>
               </button>
             </div>
-          </div>
-        </section>
+          </section>
 
+          <!-- Target Role -->
+          <section class="target-role-section">
+            <label>Target Role (Optional)</label>
+            <div class="chips-container roles-container">
+              <span class="chip" data-role="software-engineer">Software Engineer</span>
+              <span class="chip" data-role="data-analyst">Data Analyst</span>
+              <span class="chip" data-role="ux-designer">UX Designer</span>
+              <span class="chip" data-role="product-manager">Product Manager</span>
+            </div>
+          </section>
+
+          <!-- AI Persona Selector -->
+          <section class="persona-section">
+            <h3>Choose Your Interviewer</h3>
+            <div class="persona-grid">
+
+              <button class="persona-card active" data-persona="senior-engineer"
+                data-name="Alex Chen"
+                data-title="Senior Engineer @ FAANG"
+                data-style="Direct, technical, expects precision. Will probe deep on system design and code quality."
+                data-emoji="👨‍💻">
+                <div class="persona-avatar eng">👨‍💻</div>
+                <div class="persona-info">
+                  <strong>Alex Chen</strong>
+                  <span>Senior Engineer</span>
+                </div>
+                <div class="persona-tag">Technical</div>
+              </button>
+
+              <button class="persona-card" data-persona="hr-manager"
+                data-name="Sarah Okafor"
+                data-title="HR Manager, 10 yrs exp"
+                data-style="Warm but probing. Loves STAR-method answers. Cares about culture fit and soft skills."
+                data-emoji="👩‍💼">
+                <div class="persona-avatar hr">👩‍💼</div>
+                <div class="persona-info">
+                  <strong>Sarah Okafor</strong>
+                  <span>HR Manager</span>
+                </div>
+                <div class="persona-tag">Behavioral</div>
+              </button>
+
+              <button class="persona-card" data-persona="product-manager"
+                data-name="Jordan Lee"
+                data-title="Product Lead, ex-Google"
+                data-style="Strategic thinker. Asks about trade-offs, metrics, and product thinking. Pushes for structure."
+                data-emoji="🧠">
+                <div class="persona-avatar pm">🧠</div>
+                <div class="persona-info">
+                  <strong>Jordan Lee</strong>
+                  <span>Product Lead</span>
+                </div>
+                <div class="persona-tag">Product</div>
+              </button>
+
+              <button class="persona-card" data-persona="consultant"
+                data-name="Priya Naidoo"
+                data-title="Consulting Partner, MBB"
+                data-style="Sharp and fast-paced. Uses case frameworks. Expects structured thinking under pressure."
+                data-emoji="📊">
+                <div class="persona-avatar con">📊</div>
+                <div class="persona-info">
+                  <strong>Priya Naidoo</strong>
+                  <span>MBB Consultant</span>
+                </div>
+                <div class="persona-tag">Consulting</div>
+              </button>
+
+            </div>
+
+            <!-- Selected persona preview -->
+            <div class="persona-preview" id="personaPreview">
+              <div class="persona-preview-avatar">👨‍💻</div>
+              <div class="persona-preview-text">
+                <strong id="personaPreviewName">Alex Chen</strong>
+                <span id="personaPreviewTitle">Senior Engineer @ FAANG</span>
+                <p id="personaPreviewStyle">Direct, technical, expects precision. Will probe deep on system design and code quality.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Preview Card -->
+          <section class="preview-section">
+            <div class="preview-card">
+              <h4>Interview Preview</h4>
+              <p>Type: <strong id="previewTypeText">Behavioral</strong></p>
+              <p>Role: <strong id="previewRoleText">Any</strong></p>
+              <p>Interviewer: <strong id="previewPersonaText">Alex Chen</strong></p>
+              <p>Duration: <strong>10–15 minutes</strong></p>
+              <div class="preview-actions">
+                <button class="btn-secondary" id="resetBtn">
+                  <i class="fa-regular fa-rotate-right"></i> Reset Options
+                </button>
+                <button class="btn-primary full" id="startBtn">
+                  <i class="fa-solid fa-play"></i> Start Interview
+                </button>
+              </div>
+            </div>
+          </section>
+
+        </div><!-- end #setupPanel -->
+
+        <!-- INTERVIEW UI -->
         <section class="interview-ui hidden" id="interviewUI">
           <div class="interview-header">
-            <h3>Interview in Progress</h3>
+            <div class="interviewer-badge" id="interviewerBadge">
+              <span class="interviewer-emoji" id="interviewerEmoji">👨‍💻</span>
+              <div>
+                <strong id="interviewerName">Alex Chen</strong>
+                <small id="interviewerTitle">Senior Engineer</small>
+              </div>
+            </div>
             <div class="timer">
               <i class="fa-regular fa-clock"></i>
-              <span id="timer">00:00</span>
+              <span id="timer">10:00</span>
             </div>
           </div>
 
           <div class="interview-box">
             <div class="question-panel">
-              <div class="ai-avatar">
-                <i data-lucide="brain-cog"></i>
+              <div class="ai-avatar" id="aiAvatarIcon">
+                <span id="aiAvatarEmoji">👨‍💻</span>
               </div>
               <div class="question-text">
-                <p><strong class="label">AI Interviewer</strong></p>
-                <p id="currentQuestion"></p>
+                <p><strong class="label" id="aiLabel">Alex Chen</strong></p>
+                <p id="currentQuestion"><em>Loading question...</em></p>
               </div>
             </div>
 
@@ -168,12 +240,10 @@
                 <label>Record or type your answer</label>
                 <div class="mic-input">
                   <button class="record-btn" id="recordBtn">
-                    <i class="fa-solid fa-microphone"></i>
-                    <span>Record</span>
+                    <i class="fa-solid fa-microphone"></i><span>Record</span>
                   </button>
                   <button class="stop-btn hidden" id="stopBtn">
-                    <i class="fa-solid fa-stop"></i>
-                    <span>Stop</span>
+                    <i class="fa-solid fa-stop"></i><span>Stop</span>
                   </button>
                 </div>
                 <div class="transcript-box">
@@ -185,12 +255,10 @@
 
           <div class="interview-controls">
             <button class="btn-secondary" id="skipBtn">
-              <i class="fa-solid fa-forward"></i>
-              Skip Question
+              <i class="fa-solid fa-forward"></i> Skip Question
             </button>
             <button class="btn-primary full" id="submitBtn">
-              <i class="fa-solid fa-check-double"></i>
-              Submit Answer
+              <i class="fa-solid fa-check-double"></i> Submit Answer
             </button>
           </div>
 
@@ -203,61 +271,62 @@
           </div>
         </section>
 
+        <!-- FEEDBACK UI -->
         <section class="feedback-ui hidden" id="feedbackUI">
           <div class="feedback-card">
             <div class="feedback-header">
               <h3>Interview Feedback</h3>
               <div class="overall-score">
                 <span class="label">Overall:</span>
-                <strong class="score">0</strong>
+                <strong class="score" id="overallScore">–</strong>
+                <span class="label">/ 10</span>
               </div>
             </div>
+
             <div class="feedback-grid">
               <div class="score-item">
                 <h5>Confidence</h5>
-                <div class="score-badge">
-                  <span class="score">0</span>
-                  <span class="label">n/a</span>
+                <div class="score-badge" id="confidenceBadge">
+                  <span class="score">–</span><span class="label">–</span>
                 </div>
               </div>
               <div class="score-item">
                 <h5>Clarity</h5>
-                <div class="score-badge">
-                  <span class="score">0</span>
-                  <span class="label">n/a</span>
+                <div class="score-badge" id="clarityBadge">
+                  <span class="score">–</span><span class="label">–</span>
                 </div>
               </div>
               <div class="score-item">
                 <h5>Structure</h5>
-                <div class="score-badge">
-                  <span class="score">0</span>
-                  <span class="label">n/a</span>
+                <div class="score-badge" id="structureBadge">
+                  <span class="score">–</span><span class="label">–</span>
                 </div>
               </div>
             </div>
+
+            <!-- Per-question breakdown -->
+            <div class="qa-breakdown" id="qaBreakdown"></div>
+
             <div class="feedback-tips">
-              <h4>Key Tips</h4>
+              <h4>Key Tips from Your Interviewer</h4>
               <ul id="tipsList"></ul>
             </div>
             <div class="feedback-actions">
-              <button class="btn-secondary">
-                <i class="fa-solid fa-redo"></i>
-                Practice Again
+              <button class="btn-secondary" id="practiceAgainBtn">
+                <i class="fa-solid fa-redo"></i> Practice Again
               </button>
-              <button class="btn-primary">
-                <i class="fa-solid fa-external-link"></i>
-                See Detailed Report
+              <button class="btn-primary" id="detailedReportBtn">
+                <i class="fa-solid fa-external-link"></i> See Detailed Report
               </button>
             </div>
           </div>
         </section>
-      </div>
+
+      </div><!-- end .interview-dashboard -->
     </main>
   </div>
 
   <script src="../js/InterviewSimulator.js"></script>
-  <script>
-    lucide.createIcons();
-  </script>
+  <script>lucide.createIcons();</script>
 </body>
 </html>
