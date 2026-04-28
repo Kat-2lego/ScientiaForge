@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SkillForge | Skill Gap Analysis</title>
+
+  <link rel="stylesheet" href="../css/skillGapAnalysis.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="layout">
+
+  <!-- ================= SIDEBAR (UPDATED TO MATCH DASHBOARD EXACTLY) ================= -->
+  <aside class="sidebar" id="sidebar">
+    <div>
+      <div class="logo">
+        <span class="logo-dark">Skill</span><span class="logo-blue">Forge</span>
+      </div>
+
+      <nav class="nav">
+        <a class="nav-item" href="dashboard.html" data-label="Dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a class="nav-item" href="#" data-label="Career Discovery">
+          <i data-lucide="compass"></i>
+          <span>Career Discovery</span>
+        </a>
+
+        <a class="nav-item" href="cvDashboard.html" data-label="CV Analyzer">
+          <i data-lucide="file-search"></i>
+          <span>CV Analyzer</span>
+        </a>
+
+        <a class="nav-item" href="#" data-label="Interview Simulator">
+          <i data-lucide="mic"></i>
+          <span>Interview Simulator</span>
+        </a>
+
+        <!-- ACTIVE PAGE -->
+        <a class="nav-item active" href="skillGapAnalysis.html" data-label="Skill Gap Analysis">
+          <i data-lucide="bar-chart-3"></i>
+          <span>Skill Gap Analysis</span>
+        </a>
+
+        <a class="nav-item" href="#" data-label="Progress Tracker">
+          <i data-lucide="activity"></i>
+          <span>Progress Tracker</span>
+        </a>
+
+        <a class="nav-item" href="#" data-label="Settings">
+          <i data-lucide="settings"></i>
+          <span>Settings</span>
+        </a>
+
+        <a class="nav-item" href="#" data-label="Help & Support">
+          <i data-lucide="life-buoy"></i>
+          <span>Help/Support <small>(01)</small></span>
+        </a>
+
+        <a class="nav-item" href="#" data-label="Log Out">
+          <i data-lucide="log-out"></i>
+          <span>Log Out</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="download-card">
+      <div class="download-icon">
+        <i data-lucide="smartphone"></i>
+      </div>
+      <h3>Download Our Mobile App</h3>
+      <p>Track your progress anywhere, anytime.</p>
+      <button class="download-btn">Download</button>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <main class="main">
+
+    <section class="skill-dashboard">
+
+      <div class="skill-dashboard-header">
+        <div>
+          <h1>📉 Skill Gap Analysis</h1>
+          <p>Compare your current skills with job requirements</p>
+        </div>
+
+        <select class="job-select">
+          <option>Software Engineer</option>
+          <option>Frontend Developer</option>
+          <option>Full Stack Developer</option>
+          <option>Data Analyst</option>
+        </select>
+      </div>
+
+      <!-- METRICS -->
+      <div class="skill-metrics">
+
+        <div class="metric-card">
+          <h3>🎯 Match Score</h3>
+          <div class="big-number">62%</div>
+          <span>Overall compatibility</span>
+        </div>
+
+        <div class="metric-card">
+          <h3>✅ Skills You Have</h3>
+          <div class="big-number good">8</div>
+          <span>Matched skills</span>
+        </div>
+
+        <div class="metric-card">
+          <h3>❌ Missing Skills</h3>
+          <div class="big-number warn">5</div>
+          <span>Skills to learn</span>
+        </div>
+
+      </div>
+
+      <!-- SKILLS -->
+      <div class="skill-grid">
+
+        <div class="skill-box">
+          <h2>✅ Your Skills</h2>
+          <div class="skill-tags">
+            <span>HTML</span>
+            <span>CSS</span>
+            <span>JavaScript</span>
+            <span>Python</span>
+            <span>C#</span>
+          </div>
+        </div>
+
+        <div class="skill-box">
+          <h2>❌ Missing Skills</h2>
+          <div class="skill-tags missing-tags">
+            <span>React</span>
+            <span>Node.js</span>
+            <span>Git</span>
+            <span>APIs</span>
+            <span>Databases</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ROADMAP -->
+      <div class="roadmap">
+
+        <h2>🛠️ Learning Roadmap</h2>
+
+        <div class="roadmap-items">
+
+          <div class="road-step">
+            <div class="step-num">1</div>
+            <div>
+              <h4>Learn Git & GitHub</h4>
+              <p>Version control basics</p>
+            </div>
+          </div>
+
+          <div class="road-step">
+            <div class="step-num">2</div>
+            <div>
+              <h4>Master React</h4>
+              <p>Build modern UI applications</p>
+            </div>
+          </div>
+
+          <div class="road-step">
+            <div class="step-num">3</div>
+            <div>
+              <h4>Build API Projects</h4>
+              <p>Connect frontend + backend</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+
+</body>
+</html>
