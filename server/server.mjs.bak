@@ -1,0 +1,654 @@
+seimport express from "express";
+import cors from "cors";
+import { createClient } from "@supabase/supabase-js";
+import Groq from "groq-sdk";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+import WebSocket from "ws";
+
+// ─────────────────────────────────────────────────────────────────
+// CUSTOM TTS — bypasses @andresaya/edge-tts entirely.
+// The library's synthesize() resolves on WebSocket 'close', but Node's
+// event loop can process the 'close' callback before the final 'message'
+// callbacks, so audio_stream is empty when toBuffer() is called.
+// This implementation resolves only after "Path:turn.end" is received
+// inside a message — guaranteeing all audio chunks have already arrived.
+// ─────────────────────────────────────────────────────────────────
+
+const TRUSTED_CLIENT_TOKEN = "6A5AA1D4EAFF4E9FB37E23D68491D6F4";
+const WSS_URL = "wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1";
+const VERSION_MS_GEC = "1-143.0.3650";
+
+function generateUUID() {
+  return "xxxxxxxx-xxxx-xxxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+  });
+}
+
+async function generateSecMsGec() {
+  const now = new Date();
+  const ticks = Math.floor(now.getTime() / 1000) + 11644473600;
+  const rounded = ticks - (ticks % 300);
+  const windowsTicks = rounded * 10_000_000;
+  const encoder = new TextEncoder();
+  const data = encoder.encode(`${windowsTicks}${TRUSTED_CLIENT_TOKEN}`);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .toUpperCase();
+}
+
+function escapeXML(text) {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+function buildSSML(text, voice) {
+  return `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
+    <voice name="${voice}">
+      <prosody pitch="+0Hz" rate="+0%" volume="+0%">
+        ${escapeXML(text)}
+      </prosody>
+    </voice>
+  </speak>`;
+}
+
+/**
+ * Synthesise text to MP3 audio using the Edge TTS WebSocket API.
+ * Resolves with a Buffer when "Path:turn.end" is received in a message —
+ * this guarantees every audio chunk has already been pushed before we resolve.
+ */
+function synthesizeTTS(text, voice) {
+  return new Promise(async (resolve, reject) => {
+    const chunks = [];
+    const reqId  = generateUUID();
+    const secMsGEC = await generateSecMsGec().catch(reject);
+    if (!secMsGEC) return;
+
+    const url = `${WSS_URL}?TrustedClientToken=${TRUSTED_CLIENT_TOKEN}` +
+                `&Sec-MS-GEC=${secMsGEC}&Sec-MS-GEC-Version=${VERSION_MS_GEC}` +
+                `&ConnectionId=${reqId}`;
+
+    const ws = new WebSocket(url, {
+      headers: {
+        "User-Agent":     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Origin":         "chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold",
+      },
+      rejectUnauthorized: false,
+    });
+
+    const timeout = setTimeout(() => {
+      ws.terminate();
+      reject(new Error("Edge TTS WebSocket timed out after 30s"));
+    }, 30_000);
+
+    ws.on("open", () => {
+      // 1. Send speech config
+      const ts = new Date().toUTCString();
+      ws.send(
+        `X-Timestamp:${ts}\r\nContent-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n` +
+        `{"context":{"synthesis":{"audio":{"metadataoptions":{"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":false},"outputFormat":"audio-24khz-48kbitrate-mono-mp3"}}}}`
+      );
+      // 2. Send SSML
+      ws.send(
+        `X-RequestId:${reqId}\r\nContent-Type:application/ssml+xml\r\nX-Timestamp:${ts}\r\nPath:ssml\r\n\r\n` +
+        buildSSML(text, voice)
+      );
+    });
+
+    ws.on("message", (data) => {
+      // data is a Buffer for binary frames, string for text frames
+      const buf = Buffer.isBuffer(data) ? data : Buffer.from(data);
+      const str = buf.toString("utf8");
+
+      // Audio chunk — binary frame with "Path:audio\r\n" header
+      const AUDIO_NEEDLE = Buffer.from("Path:audio\r\n");
+      const audioIdx = buf.indexOf(AUDIO_NEEDLE);
+      if (audioIdx !== -1) {
+        chunks.push(buf.subarray(audioIdx + AUDIO_NEEDLE.length));
+        return;
+      }
+
+      // turn.end — all audio has been delivered; resolve now
+      if (str.includes("Path:turn.end")) {
+        clearTimeout(timeout);
+        ws.close();
+        if (chunks.length === 0) {
+          reject(new Error("Edge TTS: turn.end received but no audio chunks collected"));
+        } else {
+          resolve(Buffer.concat(chunks));
+        }
+      }
+    });
+
+    ws.on("error", (err) => {
+      clearTimeout(timeout);
+      reject(err);
+    });
+
+    // 'close' fires after 'message', so this is only a safety net for
+    // cases where turn.end was somehow missed.
+    ws.on("close", () => {
+      clearTimeout(timeout);
+      if (chunks.length > 0) {
+        resolve(Buffer.concat(chunks));
+      }
+      // If already resolved/rejected via message handler, these are no-ops.
+    });
+  });
+}
+
+// Resolve .env relative to this file (server/server.mjs → ../.env = project root)
+// This works regardless of which directory you run `node` from.
+dotenv.config({ path: new URL("../.env", import.meta.url).pathname });
+
+console.log("SUPABASE_URL:", process.env.SUPABASE_URL);
+console.log("SUPABASE_ANON_KEY:", process.env.SUPABASE_ANON_KEY);
+console.log("PORT:", process.env.PORT);
+
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+  console.error("❌ Missing SUPABASE_URL or SUPABASE_ANON_KEY in .env");
+  process.exit(1);
+}
+
+const app = express();
+const PORT = process.env.PORT || 5001;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const CLIENT_PATH = path.join(__dirname, "..", "client");
+
+console.log("Serving static files from:", CLIENT_PATH);
+
+// --- Supabase ---
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
+
+// --- Groq ---
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+// ─────────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────────
+
+async function callGroq(prompt, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const response = await groq.chat.completions.create({
+        model: "llama-3.1-8b-instant",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+        max_tokens: 1024,
+      });
+      return response.choices[0].message.content.trim();
+    } catch (err) {
+      if (i === retries - 1) throw err;
+      console.warn(`Groq attempt ${i + 1} failed, retrying...`);
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+  }
+}
+
+/**
+ * BUG 1 FIX: Robustly extract the first JSON array from a raw Groq string.
+ * Old approach used regex requiring a closing `]` which fails on truncated responses.
+ * New approach: find `[`, try to parse, then repair by slicing to last `}` and appending `]`.
+ */
+function extractJsonArray(raw) {
+  if (typeof raw !== "string") return null;
+
+  const stripped = raw.replace(/```(?:json)?/gi, "").trim();
+
+  // Find the opening bracket
+  const startIdx = stripped.indexOf("[");
+  if (startIdx === -1) return null;
+
+  let candidate = stripped.slice(startIdx);
+
+  // If already valid, parse immediately
+  try {
+    return JSON.parse(candidate);
+  } catch (_) {
+    /* fall through to repair */
+  }
+
+  // Find the last complete object — ends with }
+  const lastBrace = candidate.lastIndexOf("}");
+  if (lastBrace === -1) return null;
+
+  // Trim everything after the last } and close the array
+  candidate = candidate.slice(0, lastBrace + 1) + "\n]";
+
+  try {
+    return JSON.parse(candidate);
+  } catch (e) {
+    console.warn("Failed to parse repaired JSON array:", candidate.slice(0, 300));
+    return null;
+  }
+}
+
+/**
+ * Robustly extract the first JSON object from a raw Groq string.
+ */
+function extractJsonObject(raw) {
+  const stripped = raw.replace(/```(?:json)?/gi, "").trim();
+  const match = stripped.match(/\{[\s\S]*\}/);
+  if (!match) return null;
+
+  let candidate = match[0];
+  if (!candidate.endsWith("}")) {
+    candidate = candidate + " }";
+  }
+
+  try {
+    return JSON.parse(candidate);
+  } catch {
+    return null;
+  }
+}
+
+// --- Middleware ---
+app.use(cors());
+app.use(express.json());
+app.use(express.static(CLIENT_PATH));
+
+app.get("/", (req, res) => {
+  res.redirect("/pages/LogIn.html");
+});
+
+// ─────────────────────────────────────────────────────────────────
+// AUTH
+// ─────────────────────────────────────────────────────────────────
+
+app.post("/api/auth/login", async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password)
+    return res.status(400).json({ error: "Email and password are required." });
+
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return res.status(401).json({ error: error.message });
+    res.json({ success: true, user: { id: data.user.id, email: data.user.email } });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.post("/api/auth/signup", async (req, res) => {
+  const { email, password, firstNames } = req.body;
+  if (!email || !password || !firstNames)
+    return res.status(400).json({ error: "All fields required." });
+
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name: firstNames.split(" ")[0],
+          last_name: firstNames.split(" ").slice(1).join(" ") || " ",
+        },
+      },
+    });
+    if (error) throw error;
+    res.json({ success: true, user: { id: data.user?.id } });
+  } catch (err) {
+    console.error("❌ Signup Error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────
+// EDGE TTS PROXY
+// ─────────────────────────────────────────────────────────────────
+
+const PERSONA_VOICES = {
+  "senior-engineer": "en-US-DavisNeural",
+  "hr-manager":      "en-US-JennyNeural",
+  "product-manager": "en-US-GuyNeural",
+  "consultant":      "en-US-AriaNeural",
+};
+
+const DEFAULT_VOICE = "en-US-JennyNeural";
+
+app.post("/api/tts", async (req, res) => {
+  const { text, personaId } = req.body;
+
+  if (!text) {
+    return res.status(400).json({ error: "Text is required" });
+  }
+
+  const voiceName = PERSONA_VOICES[personaId] || DEFAULT_VOICE;
+
+  try {
+    console.log(`🎤 Generating speech | persona: ${personaId || "default"} | voice: ${voiceName}`);
+    console.log(`📝 Text length: ${text.length} characters`);
+
+    const audioBuffer = await synthesizeTTS(text, voiceName);
+
+    res.setHeader("Content-Type", "audio/mpeg");
+    res.setHeader("Content-Length", audioBuffer.length);
+    res.send(audioBuffer);
+
+    console.log(`✅ Speech generated successfully (${audioBuffer.length} bytes)`);
+  } catch (err) {
+    console.error("❌ Edge-TTS Error:", err.message);
+    console.error("Stack trace:", err.stack);
+    res.status(500).json({ error: "Failed to generate speech: " + err.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────
+// CAREER DISCOVERY
+// ─────────────────────────────────────────────────────────────────
+
+const questionBank = {
+  tech: [
+    {
+      question: "How do you approach solving technical problems?",
+      options: [
+        { text: "Break it into logical steps",          traits: { tech: 3 } },
+        { text: "Experiment until it works",            traits: { tech: 2, design: 1 } },
+        { text: "Look for existing solutions online",   traits: { tech: 1, data: 1 } },
+      ],
+    },
+  ],
+  data:   [],
+  design: [],
+};
+
+const careers = [
+  {
+    type: "tech",
+    title: "Software Developer",
+    salary: "R30,000 – R75,000",
+    desc: "Build applications and scalable systems.",
+    skills: ["JavaScript", "React", "Node.js"],
+    demand: "High Demand",
+    matchScore: 0,
+  },
+  {
+    type: "data",
+    title: "Data Analyst",
+    salary: "R25,000 – R60,000",
+    desc: "Analyze data to drive business decisions.",
+    skills: ["SQL", "Excel", "Power BI"],
+    demand: "Very High Demand",
+    matchScore: 0,
+  },
+  {
+    type: "design",
+    title: "UX Designer",
+    salary: "R25,000 – R65,000",
+    desc: "Design user‑friendly digital experiences.",
+    skills: ["Figma", "User Research", "Prototyping"],
+    demand: "High Demand",
+    matchScore: 0,
+  },
+];
+
+app.get("/api/career-discovery/questions", (req, res) => {
+  res.json({ questions: questionBank, careers });
+});
+
+app.post("/api/career-discovery/scores", async (req, res) => {
+  const { user_id } = req.body;
+  if (!user_id) return res.status(400).json({ error: "user_id required" });
+  res.json({ success: true });
+});
+
+// ─────────────────────────────────────────────────────────────────
+// INTERVIEW SIMULATOR
+// ─────────────────────────────────────────────────────────────────
+
+const sessions = new Map();
+
+function buildPersonaPrompt(persona, role, type) {
+  const roleLabel = role && role !== "any" ? role.replace(/-/g, " ") : "a general professional role";
+  const typeLabel =
+    { hr: "HR/Behavioral", technical: "Technical", consulting: "Consulting & Case" }[type] || type;
+  return `You are ${persona.name}, ${persona.title}.
+Your interview style: ${persona.style}
+You are conducting a ${typeLabel} interview for the role of ${roleLabel}.
+
+Rules:
+- Stay fully in character as ${persona.name} at all times.
+- Ask realistic, role‑relevant interview questions.
+- When evaluating answers be honest, constructive, and specific.
+- Keep questions concise (1–3 sentences).
+- Do NOT break character or mention that you are an AI.`;
+}
+
+// POST /api/interview/start
+app.post("/api/interview/start", async (req, res) => {
+  const { user_id, job_role_id, question_type, persona } = req.body;
+
+  if (!persona?.name)
+    return res.status(400).json({ error: "persona is required" });
+
+  try {
+    const prompt = `${buildPersonaPrompt(persona, job_role_id, question_type)}
+
+Generate exactly 5 interview questions as a JSON array with the following schema:
+[
+  { "id": "q1", "text": "..." },
+  { "id": "q2", "text": "..." },
+  { "id": "q3", "text": "..." },
+  { "id": "q4", "text": "..." },
+  { "id": "q5", "text": "..." }
+]
+
+RULES:
+- Return ONLY the JSON array.
+- Do NOT include markdown, code fences, or any extra text.
+- Do NOT truncate the JSON.
+- If you must stop early, include only the questions you have and keep the array structure valid.`;
+
+    let questions = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const raw = await callGroq(prompt);
+      console.log(`[start] Attempt ${attempt + 1} raw response:\n`, raw);
+
+      questions = extractJsonArray(raw);
+      if (questions && questions.length > 0) break;
+
+      console.warn(`[start] JSON array parse failed on attempt ${attempt + 1}, retrying...`);
+    }
+
+    if (!questions || questions.length === 0)
+      throw new Error("Failed to generate questions after 3 attempts");
+
+    const session_id = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+
+    sessions.set(session_id, {
+      session_id,
+      user_id,
+      job_role_id,
+      question_type,
+      persona,
+      questions,
+      answers: [],
+      started_at: new Date().toISOString(),
+    });
+
+    try {
+      await supabase.from("interview_sessions").insert({
+        id:            session_id,
+        user_id:       user_id || "guest",
+        job_role_id:   job_role_id || null,
+        question_type,
+        persona_id:    persona.id,
+        started_at:    new Date().toISOString(),
+      });
+    } catch (e) {
+      console.warn("Supabase insert skipped:", e.message);
+    }
+
+    res.json({ session_id, questions });
+  } catch (err) {
+    console.error("❌ Start interview error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/interview/answer
+app.post("/api/interview/answer", async (req, res) => {
+  const { session_id, question_id, user_answer, persona } = req.body;
+
+  const session = sessions.get(session_id);
+  if (!session) return res.status(404).json({ error: "Session not found" });
+
+  const question = session.questions.find((q) => q.id === question_id);
+  if (!question) return res.status(404).json({ error: "Question not found" });
+
+  try {
+    const p = session.persona || persona;
+    const prompt = `${buildPersonaPrompt(p, session.job_role_id, session.question_type)}
+
+Interview question asked: "${question.text}"
+Candidate's answer: "${user_answer}"
+
+Evaluate this answer and respond ONLY with a raw JSON object (no markdown, no code fences):
+{
+  "score": <number 1-10>,
+  "breakdown": {
+    "confidence": <number 1-10>,
+    "clarity":    <number 1-10>,
+    "structure":  <number 1-10>
+  },
+  "feedback": "<2-3 sentences of specific honest feedback in your persona voice>",
+  "tip": "<one actionable improvement tip>"
+}`;
+
+    let evaluation = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const raw = await callGroq(prompt);
+      console.log(`[answer] Attempt ${attempt + 1} raw response:\n`, raw.slice(0, 300));
+      evaluation = extractJsonObject(raw);
+      if (evaluation) break;
+      console.warn(`[answer] JSON object parse failed on attempt ${attempt + 1}, retrying...`);
+    }
+
+    if (!evaluation) throw new Error("Failed to evaluate answer after 3 attempts");
+
+    session.answers.push({ question_id, question_text: question.text, user_answer, evaluation });
+
+    res.json({
+      overallScore: evaluation.score,
+      breakdown:    evaluation.breakdown,
+      feedback:     evaluation.feedback,
+      tips:         [evaluation.tip],
+    });
+  } catch (err) {
+    console.error("❌ Answer evaluation error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/interview/end
+app.post("/api/interview/end", async (req, res) => {
+  const { session_id } = req.body;
+
+  const session = sessions.get(session_id);
+  if (!session) return res.status(404).json({ error: "Session not found" });
+
+  const answered = session.answers.filter((a) => a.evaluation);
+
+  const avg = (key) => {
+    const vals = answered.map((a) => a.evaluation?.breakdown?.[key] ?? 0);
+    return vals.length ? Math.round(vals.reduce((s, v) => s + v, 0) / vals.length) : 0;
+  };
+
+  const overallScore = answered.length
+    ? Math.round(answered.reduce((s, a) => s + (a.evaluation?.score ?? 0), 0) / answered.length)
+    : 0;
+
+  let tips = [];
+  try {
+    const qaText = answered
+      .map(
+        (a) =>
+          `Q: ${a.question_text}\nA: ${a.user_answer}\nFeedback: ${a.evaluation?.feedback || ""}`
+      )
+      .join("\n\n");
+
+    const prompt = `${buildPersonaPrompt(session.persona, session.job_role_id, session.question_type)}
+
+Full interview transcript:
+${qaText}
+
+Give 3–5 overall improvement tips as a raw JSON array of strings.
+Return ONLY the raw JSON array. No markdown, no code fences, no explanation.`;
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const raw = await callGroq(prompt);
+      console.log(`[end] Tips attempt ${attempt + 1} raw:\n`, raw.slice(0, 200));
+      const parsed = extractJsonArray(raw);
+      if (parsed && parsed.length > 0) {
+        tips = parsed;
+        break;
+      }
+      console.warn(`[end] Tips JSON parse failed on attempt ${attempt + 1}, retrying...`);
+    }
+  } catch (e) {
+    console.warn("Tips generation failed:", e.message);
+  }
+
+  if (!tips.length) {
+    tips = [
+      "Use specific, quantified examples in your answers.",
+      "Follow the STAR method for behavioural questions.",
+      "Speak at a measured pace and avoid filler words.",
+    ];
+  }
+
+  const perQuestion = session.answers.map((a) => ({
+    question: a.question_text,
+    answer:   a.user_answer || null,
+    feedback: a.evaluation?.feedback || null,
+  }));
+
+  try {
+    await supabase
+      .from("interview_sessions")
+      .update({
+        ended_at:      new Date().toISOString(),
+        overall_score: overallScore,
+      })
+      .eq("id", session_id);
+  } catch (e) {
+    console.warn("Supabase update skipped:", e.message);
+  }
+
+  sessions.delete(session_id);
+
+  res.json({
+    overallScore,
+    breakdown: {
+      confidence: avg("confidence"),
+      clarity:    avg("clarity"),
+      structure:  avg("structure"),
+    },
+    tips,
+    perQuestion,
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────
+// START SERVER
+// ─────────────────────────────────────────────────────────────────
+
+app.listen(PORT, () => {
+  console.log(`✅ Server running on http://localhost:${PORT}`);
+});
