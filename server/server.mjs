@@ -75,7 +75,12 @@ app.post("/api/auth/login", async (req, res) => {
   try {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return res.status(401).json({ error: error.message });
-    res.json({ success: true, user: { id: data.user.id, email: data.user.email } });
+
+    res.json({
+      success: true,
+      user: { id: data.user.id, email: data.user.email },
+      access_token: data.session.access_token  // ← add this
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
@@ -103,6 +108,26 @@ app.post("/api/auth/signup", async (req, res) => {
   } catch (err) {
     console.error("❌ Signup Error:", err.message);
     res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/auth/me
+app.get("/api/auth/me", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ error: "No token provided" });
+
+  const token = authHeader.replace("Bearer ", "");
+
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (error || !user) return res.status(401).json({ error: "Invalid session" });
+
+    const firstName = user.user_metadata?.first_name || user.email.split("@")[0];
+
+    res.json({ firstName, email: user.email });
+  } catch (err) {
+    console.error("❌ /api/auth/me error:", err.message);
+    res.status(500).json({ error: "Server error" });
   }
 });
 

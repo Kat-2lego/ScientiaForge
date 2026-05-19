@@ -32,6 +32,8 @@ function handleSignIn() {
       return resp.json();
     })
     .then((data) => {
+      localStorage.setItem("sb-access-token", data.access_token);
+       window.location.href = "../pages/Dashboard.html";
       // Optional: store user ID (later you can use tokens / Supabase helpers)
       // localStorage.setItem("user_id", data.user.id);
 
