@@ -40,7 +40,6 @@
   <!-- ================= MAIN ================= -->
   <main class="main">
 
-    <!-- TOPBAR -->
     <header class="topbar">
       <div class="topbar-left">
         <button class="menu-btn" id="menuBtn">☰</button>
@@ -62,7 +61,7 @@
       </div>
     </header>
 
-    <!-- HERO (FIXED - ONLY CLEAN TEXT, NO DUPLICATE SIDEBAR/NAV) -->
+    <!-- HERO -->
     <section class="hero">
       <div>
         <h1>CV Analyzer</h1>
@@ -81,7 +80,6 @@
     <!-- ================= TOP SUMMARY ================= -->
     <section class="stats-grid top-summary-grid searchable">
 
-      <!-- CV SCORE -->
       <article class="stat-card cv-score-panel">
         <div class="cv-score-header">
           <div>
@@ -98,7 +96,6 @@
         </div>
       </article>
 
-      <!-- JOB MATCH -->
       <article class="stat-card job-match-card">
         <h3>Job Match</h3>
         <div class="job-target">Target Role: Software Developer</div>
@@ -113,94 +110,27 @@
 
     </section>
 
-    <!-- ================= CONTENT ================= -->
+    <!-- CONTENT -->
     <section class="content-grid searchable">
 
-      <!-- CV BREAKDOWN -->
       <article class="panel cv-score-panel">
         <h2>CV Breakdown</h2>
-
-        <div class="cv-score-lines">
-
-          <div class="score-line-row">
-            <div>ATS Compatibility <span class="ats-score">0%</span></div>
-            <div class="score-line"><i class="ats-bar" style="width:0%"></i></div>
-            <div class="ats-score-text">0%</div>
-          </div>
-
-          <div class="score-line-row">
-            <div>Content Quality <span class="content-score">0%</span></div>
-            <div class="score-line"><i class="content-bar" style="width:0%"></i></div>
-            <div class="content-score-text">0%</div>
-          </div>
-
-          <div class="score-line-row">
-            <div>Formatting <span class="format-score">0%</span></div>
-            <div class="score-line"><i class="format-bar" style="width:0%"></i></div>
-            <div class="format-score-text">0%</div>
-          </div>
-
-          <div class="score-line-row">
-            <div>Skills Match <span class="skills-score">0%</span></div>
-            <div class="score-line"><i class="skills-bar" style="width:0%"></i></div>
-            <div class="skills-score-text">0%</div>
-          </div>
-
-        </div>
       </article>
 
-      <!-- AI FEEDBACK -->
       <article class="panel">
         <h2>AI Feedback</h2>
-
-        <div class="list-card"><div class="list-left"><span>✅</span><span>Strong education section</span></div></div>
-        <div class="list-card"><div class="list-left"><span>✅</span><span>Good use of action verbs</span></div></div>
-        <div class="list-card"><div class="list-left"><span>⚠️</span><span>No measurable achievements</span></div></div>
-        <div class="list-card"><div class="list-left"><span>⚠️</span><span>Skills section too generic</span></div></div>
-        <div class="list-card"><div class="list-left"><span>💡</span><span>Include technical keywords</span></div></div>
-
       </article>
 
-      <!-- QUICK FIXES -->
       <article class="panel">
         <h2>Quick Fixes</h2>
-
-        <div class="list-card"><div class="list-left"><span>✅</span><span>Add measurable achievements</span></div></div>
-        <div class="list-card"><div class="list-left"><span>✅</span><span>Include job keywords</span></div></div>
-        <div class="list-card"><div class="list-left"><span>✅</span><span>Shorten CV to 1–2 pages</span></div></div>
-
       </article>
 
-      <!-- ================= PROGRESS TRACKER ================= -->
       <article class="panel progress-card searchable">
         <h2>Progress Tracker</h2>
-
-        <div class="progress-lines">
-
-          <div class="progress-line-row">
-            <div>Previous <span class="prev-score">0%</span></div>
-            <div class="progress-track">
-              <div class="progress-fill previous" style="width:0%"></div>
-            </div>
-            <div class="prev-score-text">0%</div>
-          </div>
-
-          <div class="progress-line-row">
-            <div>Current <span class="curr-score">0%</span></div>
-            <div class="progress-track">
-              <div class="progress-fill current" style="width:0%"></div>
-            </div>
-            <div class="curr-score-text">0%</div>
-          </div>
-
-        </div>
-
-        <div class="progress-graph" id="progressChart"></div>
       </article>
 
     </section>
 
-    <!-- ACTIONS -->
     <section class="panel bottom-actions searchable">
       <div class="action-wrap">
         <button class="btn btn-primary" id="analyzeBtn2">Upload New CV</button>
@@ -208,19 +138,62 @@
       </div>
     </section>
 
-    <div id="emptyState" class="hidden search-empty">
-      No matching sections found.
-    </div>
-
   </main>
 </div>
 
+<!-- ================= SCRIPTS ================= -->
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script src="../js/dashboard.js"></script>
 
 <script>
   lucide.createIcons();
+
+  const API_URL = "http://localhost:5000/api/cv/upload";
+
+  const input = document.getElementById("cvFileInput");
+
+  function openFilePicker() {
+    input.value = "";
+    input.click();
+  }
+
+  document.getElementById("analyzeBtn").addEventListener("click", openFilePicker);
+  document.getElementById("analyzeBtn2").addEventListener("click", openFilePicker);
+
+  document.getElementById("cvFileInput").addEventListener("change", async (e) => {
+
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+
+      const score = data.score ?? 0;
+
+      document.querySelector(".cv-score-value").innerText = score + "%";
+      document.querySelector(".cv-score-inner").innerText = score + "%";
+
+      console.log("FEEDBACK:", data.feedback);
+      console.log("SKILLS:", data.skills);
+
+      alert(data.message || "Upload complete");
+
+    } catch (error) {
+      console.log("❌ ERROR:", error);
+      alert("Upload failed ❌");
+    }
+
+  });
+
 </script>
 
 </body>
