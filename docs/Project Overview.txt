@@ -1,0 +1,106 @@
+SKILLFORGE AI 
+1. Project Overview (What is SkillForge AI?) 
+SkillForge AI is a smart career guidance platform that helps people make better career 
+decisions, improve job applications, and prepare for interviews using AI-powered tools. 
+It is designed to support users from: 
+• Choosing a career 
+• Building strong CVs 
+• Practicing interviews 
+• Identifying missing skills 
+• Preparing for better job opportunities 
+
+Simple idea of the app: 
+It is a career coach in your pocket. 
+
+2. Why This Project Matters (Problem We Are Solving) 
+In South Africa, many young people struggle to find jobs even after studying. 
+The main problems are: 
+• Many students are unsure about career choices 
+• CVs are often poorly written or not ATS-friendly 
+• Job interviews are intimidating and unfamiliar 
+• People do not know what skills employers want 
+• Career guidance is limited or not personalised 
+
+The result: 
+Qualified people remain unemployed or underprepared for work. 
+SkillForge AI solution: 
+We bring all career tools into one simple platform that guides users step-by-step. 
+
+3. Target Audience (Who We Are Talking To) 
+
+    1. Students (16–25) 
+    • High school and university students 
+    • First-time job seekers 
+
+        Needs: 
+        o Career direction 
+        o CV writing help 
+        o Interview practice 
+
+    2. Young Professionals (22–35) 
+        • Already working but want growth 
+        • Needs: 
+        • Promotion opportunities 
+        • Skill improvement 
+        • Career planning 
+
+    3. Job Seekers 
+        • Unemployed individuals actively looking for work 
+        • Needs: 
+        • Confidence building 
+        • Better applications 
+        • Interview preparation 
+
+    4. Key Insights (Research Findings) 
+        From market research and general career trends: 
+        • Most graduates are not fully job-ready 
+        • Employers care about: 
+        • Communication skills 
+        • Practical skills 
+        • Good CV presentation 
+        • Career guidance is often: 
+        • Not personalised 
+        • Not easily accessible 
+        • Students use multiple apps for different needs: 
+        • One for CVs 
+        • One for jobs 
+        • One for learning 
+
+Main gap: There is no single platform that combines all career preparation tools in one place. 
+
+    5. What the App Does (Core Features) 
+
+        SkillForge AI is built around 4 main tools: 
+
+        1. Career Discovery Tool 
+            • Suggests possible careers based on interests and subjects 
+            • Helps users understand “what can I become?” 
+        2. CV Improvement Tool 
+            • Reviews CVs 
+            • Gives a simple score 
+            • Suggests improvements (layout, wording, keywords) 
+        3. Interview Practice Tool 
+            • Simulates real interview questions 
+            • Gives feedback on: 
+            • Confidence 
+            • Clarity 
+            • Structure of answers 
+        4. Skill Gap Tool 
+            • Compares current skills with job requirements 
+            • Shows what skills are missing 
+            • Suggests what to learn next 
+6. User Journey (How People Use the App) 
+
+    1. Sign up and create profile 
+        •  Education, interests, goals 
+    2. Get career suggestions 
+        • Recommended career paths 
+    Improve CV 
+        • Upload CV and receive feedback 
+    Check skill gaps 
+        • See what is missing for dream job 
+    Practice interviews 
+        • AI interview simulation 
+    
+    Track progress 
+        • Improve CV score and readiness over time 

@@ -1,19 +1,6 @@
 :root {
   --color-navy: #002b5c;
   --color-cyan: #00a2ed;
-  --metal-gradient: linear-gradient(135deg, #a8b3be 0%, #ffffff 35%, #d1d9e1 65%, #8a96a3 100%);
-
-  --input-clip: polygon(
-    18px 0, 24% 0, 26% 6px, 74% 6px, 76% 0, calc(100% - 18px) 0,
-    100% 18px, 100% calc(100% - 18px),
-    calc(100% - 18px) 100%, 76% 100%, 74% calc(100% - 6px), 26% calc(100% - 6px), 24% 100%, 18px 100%,
-    0 calc(100% - 18px), 0 18px
-  );
-
-  --chassis-clip: polygon(
-    35px 0, calc(100% - 35px) 0, 100% 35px, 100% calc(100% - 35px),
-    calc(100% - 35px) 100%, 35px 100%, 0 calc(100% - 25px), 0 25px
-  );
 }
 
 * {
@@ -22,18 +9,11 @@
   box-sizing: border-box;
 }
 
-/* THE NEW BODY */
 body {
   min-height: 100vh;
   font-family: 'Segoe UI', Roboto, sans-serif;
-
-  background:
-    linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
-    url('../assets/modern-office.jpg');
-
-  background-size: cover;
-  background-position: center;
-
+  /* CLEAN REFRESH: Replaced dark blurred office asset image with minimalist slate grey canvas */
+  background: #f1f5f9; 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -48,36 +28,31 @@ body {
   padding: 20px;
 }
 
-/* THE NEW */
 .interface-deck {
   display: flex;
-  max-width: 1000px;
+  max-width: 1100px; /* Expanded slightly to comfortably support side-by-side selection blocks */
   width: 100%;
   border-radius: 20px;
   overflow: hidden;
-  backdrop-filter: blur(12px);
-  background: rgba(255, 255, 255, 0.6);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  background: #ffffff;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
 }
 
-/* The sectore */
 .sector {
   flex: 1;
   position: relative;
   z-index: 2;
 }
 
-/* THE NEW */
 .sector-left {
-  flex: 1;
   padding: 40px;
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(10px);
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Clips the child slides array sliding left/right */
 }
 
-/* THE NEW */
 .sector-right {
-  flex: 1;
   padding: 40px;
   background-color: #28b5f6;
   color: white;
@@ -86,135 +61,285 @@ body {
   justify-content: center;
 }
 
-/* Branding and titles */
+/* BRANDING HEADER SYSTEM */
 .brand-name {
-  font-size: 44px;
+  font-size: 38px;
   font-weight: 900;
   color: var(--color-navy);
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
 .brand-name span {
   color: var(--color-cyan);
 }
 
-.auth-titles {
-  text-align: center;
+/* DYNAMIC MULTI-STEP PAGINATION DOTINDICATORS */
+.step-indicator-container {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
   margin-bottom: 25px;
 }
 
-.auth-titles h2 {
-  font-size: 36px;
-  color: rgb(55, 78, 88);
-  font-weight: bolder;
+.step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.auth-titles p {
-  font-size: 15px;
-  color: #6c818a;
+.step-dot.active {
+  background: var(--color-cyan);
+  transform: scale(1.25);
+  box-shadow: 0 0 8px rgba(0, 162, 237, 0.5);
 }
 
-/* Inputs per your edits */
-.email p,
-.pass p {
-  color: rgb(59, 59, 59);
-  padding-left: 10px;
-  padding-bottom: 5px;
-  font-weight: bold;
+/* HORIZONTAL VIEWPORT SLIDER TRACK MECHANICS */
+.form-viewport {
+  width: 100%;
+  overflow: hidden;
+}
+
+.cyber-form-strip {
+  display: flex;
+  width: 300%; /* Represents 3 sequential individual panel pages (300%) */
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  align-items: flex-start;
+}
+
+.form-step-panel {
+  width: 33.333%; /* Each structural section step claims exactly 1 full view segment */
+  padding: 0 5px;
+  flex-shrink: 0;
+}
+
+/* BASE FIELD WRAPPER CONTROLS */
+.field-wrapper {
+  margin-bottom: 18px;
+  width: 100%;
+}
+
+.field-wrapper p {
+  color: #334155;
+  padding-left: 4px;
+  padding-bottom: 6px;
+  font-weight: 700;
   font-size: 14px;
 }
 
-.pass p {
-  padding-top: 10px;
-}
-
-.input-module {
-  width: 100%;
-  height: 56px;
-  position: relative;
-  filter: drop-shadow(0 5px 8px rgba(0,0,0,0.05));
-}
-
-.module-inner {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(180deg, #e0e0e0 0%, #f1f5f9 100%);
-  clip-path: var(--input-clip);
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-}
-
-.module-inner input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  font-size: 15px;
-  color: black;
-  font-weight: 500;
-  position: relative;
-  z-index: 10;
-}
-
-/* THE NEW */
 .input {
   width: 100%;
-  padding: 14px 16px;
-  margin-bottom: 15px;
+  padding: 12px 16px;
   border-radius: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid #cbd5e1;
   background: #fff;
   font-size: 14px;
-  transition: 0.2s;
+  color: #1e293b;
+  transition: all 0.2s;
 }
 
 .input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+  border-color: var(--color-cyan);
+  box-shadow: 0 0 0 3px rgba(0, 162, 237, 0.15);
   outline: none;
 }
 
-.btn-inner-text {
-  font-size: 18px;
-  font-weight: 900;
+.select-input {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+/* DYNAMIC ROLES ITEM WRAPPER CHECKBOX GRID LAYOUTS */
+.roles-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  background: #f8fafc;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.checkbox-lbl-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #334155;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.checkbox-lbl-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-cyan);
+  cursor: pointer;
+}
+
+.form-placeholder-text {
+  grid-column: 1 / -1;
+  font-style: italic;
+  color: #94a3b8 !important;
+  font-weight: 400 !important;
+  font-size: 13px;
+  text-align: center;
+  padding: 10px 0;
+}
+
+/* HYBRID SKILL INTEREST CHIPS UI PATTERNS */
+.chips-flex-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.skill-chip-btn {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.skill-chip-btn:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.skill-chip-btn.selected-pill-active {
+  background: var(--color-cyan);
+  border-color: var(--color-cyan);
+  color: #ffffff;
+}
+
+.tags-input-master-container {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 10px;
+  min-height: 90px;
+}
+
+.dynamic-selections {
+  margin-bottom: 8px;
+}
+
+.live-tag-pill {
+  background: var(--color-navy);
   color: white;
-  letter-spacing: 0.5px;
-  position: relative;
-  z-index: 2;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.btn-lighting-overlay {
-  position: absolute;
-  top: 0; left: 0; right: 0; height: 45%;
-  background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
+.live-tag-pill i {
+  cursor: pointer;
+  color: #93c5fd;
+  transition: color 0.2s;
 }
 
-/* THE NEW */
+.live-tag-pill i:hover {
+  color: #ffffff;
+}
+
+.chip-input-field {
+  border: none !important;
+  padding: 6px 8px !important;
+  box-shadow: none !important;
+}
+
+/* COMPONENT STEPPED ACTION BUTTON BAR HOOKS */
+.step-navigation-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.back-step-btn {
+  padding: 12px 24px;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.back-step-btn:hover {
+  background: #f8fafc;
+  color: #1e293b;
+  border-color: #94a3b8;
+}
+
 .secure-submit {
-  width: 100%;
+  flex-grow: 1;
   padding: 14px;
   border-radius: 12px;
   border: none;
-  background-color: #002b5c;
+  background-color: var(--color-navy);
   color: white;
-  font-weight: 600;
-  font-size: 16px;
+  font-weight: 700;
+  font-size: 15px;
   cursor: pointer;
-  transition: 0.2s;
-  position: relative;
-  overflow: hidden;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
 }
 
 .secure-submit:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(72, 141, 251, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 43, 92, 0.25);
 }
 
-/* The OR divider */
+/* HIDDEN CONDITIONAL TOGGLE VISIBILITY RULE */
+.hidden-element {
+  display: none !important;
+}
+
+/* RIGHT PANEL BRANDING STYLES */
+.auth-titles {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.auth-titles h2 {
+  font-size: 28px;
+  color: #1e293b;
+  font-weight: 800;
+}
+
+.auth-titles p {
+  font-size: 14px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
 .auth-switch {
-  margin-top: 20px;
+  margin-top: 15px;
   text-align: center;
 }
 
@@ -222,57 +347,42 @@ body {
   position: relative;
   width: 100%;
   height: 1px;
-  background: #e0e0e0;
-  margin: 20px 0;
+  background: #e2e8f0;
+  margin: 15px 0;
 }
 
 .divider-line span {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  background: #fdfdfd;
-  padding: 0 15px;
-  color: #888;
-  font-size: 13px;
-  font-weight: bold;
+  background: #ffffff;
+  padding: 0 12px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 700;
 }
 
-.auth-switch p {
-  font-size: 14px;
-  color: #6c818a;
-  font-weight: 600;
-}
-
-.auth-switch .link-forgot {
-  color: #058c95;
-  text-decoration: none;
-  margin-left: 5px;
-  font-weight: 800;
-}
-
-/* Refinement for the right panel */
 .welcome-copy h3 {
-  font-size: 32px;
-  color: #333;
-  font-weight: 400;
-  line-height: 1.2;
-  margin-bottom: 15px;
+  font-size: 30px;
+  color: #ffffff;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 10px;
   text-align: center;
 }
 
-.welcome-copy p {
+.welcome-copy p.tagline {
   text-align: center;
-  color: #5b6d80;
+  color: #e0f2fe;
   font-weight: 600;
+  font-size: 14px;
 }
 
 .visual-stage {
   position: absolute;
-  bottom: -20px;
-  right: -20px;
-  width: 105%;
-  height: 75%;
+  bottom: 0; right: 0;
+  width: 100%;
+  height: 60%;
 }
 
 .handshake-img {
@@ -280,30 +390,12 @@ body {
   height: 100%;
   object-fit: contain;
   object-position: bottom right;
-  mix-blend-mode: multiply;
-  opacity: 0.95;
 }
 
-/* The Footer */
 .global-footer {
   margin-top: 25px;
-  font-weight: 800;
-  font-size: 13px;
-  color: #ffffff;
+  font-weight: 700;
+  font-size: 12px;
+  color: #64748b;
   letter-spacing: 0.5px;
-}
-
-/* Responsive adjustments for the taller Sign Up form */
-@media (max-height: 800px) {
-  .interface-deck {
-    min-height: 600px;
-  }
-
-  .auth-titles {
-    margin-bottom: 15px;
-  }
-
-  .cyber-form {
-    gap: 15px;
-  }
 }
