@@ -1,95 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SkillForge Login</title>
-  <link rel="stylesheet" href="../css/LogIn.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <script src="../auth/loginUser.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillForge Login</title>
+    <link rel="stylesheet" href="../css/SignUp.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../auth/loginUser.js" defer></script>
 </head>
 <body>
 
-<div class="container">
-  <div class="login-card">
+    <div class="master-viewport">
+        <div class="chassis-outer-shell">
+            <div class="chassis-inner-recess">
+                
+                <main class="interface-deck">
+                    
+                    <section class="sector sector-left">
+                        <div class="brand-header">
+                            <h1 class="brand-name">Skill <span>Forge</span></h1>
+                        </div>
 
-    <!-- LEFT: FORM -->
-    <div class="form-section">
-      <h1 class="brand-name">Skill <span>Forge</span></h1>
-      <h2>Welcome Back!</h2>
-      <p class="subtitle">Sign in to continue your journey</p>
+                        <div class="auth-titles" style="margin-top: 15px; margin-bottom: 30px;">
+                            <h2>Welcome back</h2>
+                            <p>Continue To "Forge Your Future. Master Your Career."</p>
+                        </div>
 
-      <form>
-        <input
-          type="email"
-          id="sf-email"
-          placeholder="Email address"
-          class="input"
-          required
-        />
+                        <form class="cyber-form" id="loginForm" onsubmit="event.preventDefault(); handleSignIn();">
+                            
+                            <div class="field-wrapper email" style="width: 100%;">
+                                <p>Email Address:</p>
+                                <input 
+                                    type="email" 
+                                    id="sf-email" 
+                                    placeholder="name@company.com" 
+                                    class="input" 
+                                    required 
+                                />
+                            </div>
 
-        <div class="password-field">
-          <input
-            type="password"
-            id="sf-pass"
-            placeholder="Password"
-            class="input"
-            required
-          />
-          <button type="button" id="sf-eye-icon-btn" onclick="togglePw()">
-            <i class="fa-solid fa-eye"></i>
-          </button>
+                            <div class="field-wrapper pass" style="position: relative; margin-bottom: 12px;">
+                                <p>Password:</p>
+                                <input 
+                                    type="password" 
+                                    id="sf-pass" 
+                                    placeholder="••••••••" 
+                                    class="input" 
+                                    required 
+                                />
+                                <button 
+                                    type="button" 
+                                    id="sf-eye-icon-btn" 
+                                    onclick="togglePw()" 
+                                    style="position: absolute; right: 16px; bottom: 12px; background: none; border: none; cursor: pointer; color: #64748b;"
+                                >
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 25px; padding: 0 4px;">
+                                <label class="checkbox-lbl-item" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="sf-remember" style="cursor: pointer;">
+                                    <span style="font-size: 13px; color: #475569; font-weight: 600;">Remember me</span>
+                                </label>
+                                <a href="ForgotPassword.html" class="link-forgot" style="font-size: 13px; color: #058c95; text-decoration: none; font-weight: 700;">Forgot Password?</a>
+                            </div>
+
+                            <div class="field-wrapper" style="width: 100%; margin-top: 10px;">
+                                <button type="submit" class="secure-submit btn-primary final-login-btn">
+                                    <span class="btn-inner-text">Sign In</span>
+                                </button>
+                            </div>
+
+                            <div class="auth-switch">
+                                <div class="divider-line"><span>OR</span></div>
+                                <p>Don't have an account yet? <a href="SignUp.html" class="link-forgot">Sign Up</a></p>
+                            </div>
+                        </form>
+                    </section>
+
+                    <div class="kinetic-divider">
+                        <div class="divider-glow-core"></div>
+                    </div>
+
+                    <section class="sector sector-right">
+                        <div class="welcome-copy">
+                            <h3><p style="color: #000; font-weight: bold; margin-bottom: 5px;">Welcome Back To SkillForge!</p>Please log in to your<br><span class="navy">Skill</span><span class="cyan">Forge</span> account.</h3>
+                            <p></p>
+                        </div>
+
+                        <div class="visual-stage">
+                            <img src="../assets/handshake1.png" alt="Handshake" class="handshake-img">
+                        </div>
+                    </section>
+
+                </main>
+            </div>
         </div>
 
-        <div class="form-links">
-          <a href="#">Forgot Password?</a>
-        </div>
-
-        <button
-          type="button"
-          class="btn-primary"
-          onclick="handleSignIn()"
-        >
-          Sign In
-        </button>
-      </form>
-
-      <p class="switch-auth">
-        Don’t have an account? <a href="signup.html">Sign up</a>
-      </p>
+        <footer class="global-footer">
+            © 2026 SkillForge AI - ScriptSquad SECURE SIGN IN ACCESS
+        </footer>
     </div>
-
-    <!-- RIGHT: VISUAL -->
-    <div class="image-section">
-      <div class="overlay-text">
-        <h3>Your AI Career Coach</h3>
-        <p>Build your future with SkillForge AI</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ⚠️ Remove this extra script, it's redundant -->
-<!-- <script src="../js/loginUser.js"></script> -->
-
-<!-- Password toggle -->
-<script>
-  function togglePw() {
-    const inp = document.getElementById("sf-pass");
-    const btn = document.getElementById("sf-eye-icon-btn");
-    const icon = btn.querySelector("i");
-
-    if (inp.type === "password") {
-      inp.type = "text";
-      icon.classList.add("fa-eye-slash");
-      icon.classList.remove("fa-eye");
-    } else {
-      inp.type = "password";
-      icon.classList.add("fa-eye");
-      icon.classList.remove("fa-eye-slash");
-    }
-  }
-</script>
-
 </body>
 </html>

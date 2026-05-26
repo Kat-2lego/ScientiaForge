@@ -399,3 +399,44 @@ body {
   color: #64748b;
   letter-spacing: 0.5px;
 }
+/* 1. Ensure the parent form expands fully to cover the container area */
+.cyber-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; /* Forces all children and wrappers to stretch to full width */
+}
+
+/* 2. Ensure field wrappers explicitly enforce 100% width allocation */
+.field-wrapper {
+    width: 100% !important;
+    display: block;
+    clear: both;
+}
+
+/* 3. Button property optimization to mirror input fields exactly */
+.btn-primary {
+    width: 100% !important;   /* Occupies full block area of its container wrapper */
+    display: block !important;
+    padding: 14px;             /* Exact vertical and horizontal matching cushion */
+    border-radius: 10px;       /* Identical curvature geometry to matching input cells */
+    border: none;
+    color: white;
+    background-color: #002b5c;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: center;
+    box-sizing: border-box;    /* Prevents padding from breaking layout width borders */
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 43, 92, 0.25);
+}
+
+/* 4. Keeps components stable on rendering */
+.final-login-btn {
+    width: 100% !important;
+}
