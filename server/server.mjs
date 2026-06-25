@@ -30,7 +30,7 @@ console.log("Serving static files from:", CLIENT_PATH);
 // --- Supabase ---
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 // --- Groq ---
@@ -431,6 +431,64 @@ Return ONLY the JSON array, no markdown.`;
     tips,
     perQuestion,
   });
+});
+
+//Forgot password
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required.' });
+  }
+
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'http://localhost:5001/pages/ResetPassword.html', // change this to your reset page URL
+    });
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.status(200).json({ message: 'A reset link has been sent to that email.' });
+
+  } catch (err) {
+    return res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
+//Reset Password
+app.patch("/api/auth/reset-password", async(req, res) => {
+  const { access_token, new_password} = req.body;
+
+  if(!access_token || !new_password){
+    return res.status(400).json({error: "access_token and new_password are required"});
+  }
+
+  if(new_password.length < 8){
+    return res.status(400).json({error: "Password must be at least 8 characters long"});
+  }
+
+  try{
+    const { data: { user }, error: userError } = await supabase.auth.getUser(access_token);
+
+    if(userError || !user){
+      return res.status(401).json({ error: "Invalid or expired reset link."});
+    }
+
+    const { error: updateError } = await supabase.auth.admin.updateUserById(user.id, {
+      password: new_password,
+    });
+
+    if(updateError){
+      return res.status(500).json({error: updateError.message});
+    }
+
+    return res.status(200).json({ message: "Password reset successful. You can now log in"});
+
+  }catch(err){
+    return res.status(500).json({error: "Internal server error"});
+  }
 });
 
 // ─────────────────────────────────────────────────────────────────
