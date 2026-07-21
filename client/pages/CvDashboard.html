@@ -7,20 +7,107 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="../css/dashboard.css" />
   <link rel="stylesheet" href="../css/cvDashboard.css" />
+
+  <style>
+
+    .progress-bar{
+      width:100%;
+      height:10px;
+      background:#e5e7eb;
+      border-radius:20px;
+      overflow:hidden;
+      margin-top:8px;
+    }
+
+    .progress-fill{
+      height:100%;
+      width:0%;
+      border-radius:20px;
+      transition:0.6s ease;
+    }
+
+    .breakdown-item{
+      margin-top:20px;
+    }
+
+    .breakdown-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-size:14px;
+      margin-bottom:6px;
+    }
+
+    .feedback-list,
+    .quick-fixes-list{
+      margin-top:18px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      padding-left:18px;
+    }
+
+    .feedback-list li,
+    .quick-fixes-list li{
+      line-height:1.5;
+    }
+
+    .progress-track{
+      margin-top:18px;
+    }
+
+    .cv-score-circle{
+      width:140px;
+      height:140px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:
+      conic-gradient(
+        #2563eb 0deg,
+        #e5e7eb 0deg
+      );
+      transition:0.6s ease;
+    }
+
+    .cv-score-circle-inner{
+      width:110px;
+      height:110px;
+      border-radius:50%;
+      background:white;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+    }
+
+    .cv-score-inner{
+      font-size:28px;
+      font-weight:800;
+    }
+
+  </style>
+
 </head>
 
 <body>
+
 <div class="layout">
 
-  <!-- ================= SIDEBAR ================= -->
+  <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
+
     <div>
+
       <div class="logo">
-        <span class="logo-dark">Skill</span><span class="logo-blue">Forge</span>
+        <span class="logo-dark">Skill</span>
+        <span class="logo-blue">Forge</span>
       </div>
 
       <nav class="nav">
@@ -34,78 +121,135 @@
         <a class="nav-item" href="../pages/Support.html"><i data-lucide="help-circle"></i><span>Help/support</span></a>
         <a class="nav-item" href="../pages/logout.html"><i data-lucide="log-out"></i><span>Logout</span></a>
       </nav>
+
     </div>
+
   </aside>
 
-  <!-- ================= MAIN ================= -->
+  <!-- MAIN -->
   <main class="main">
 
     <header class="topbar">
+
       <div class="topbar-left">
+
         <button class="menu-btn" id="menuBtn">☰</button>
 
         <div class="searchbar">
           <i data-lucide="search"></i>
           <input type="text" id="searchInput" placeholder="Search CV insights..." />
         </div>
+
       </div>
 
       <div class="topbar-right">
+
         <div class="profile">
+
           <div class="avatar"></div>
+
           <div>
             <div class="profile-name"></div>
             <div class="profile-email"></div>
           </div>
+
         </div>
+
       </div>
+
     </header>
 
     <!-- HERO -->
     <section class="hero">
+
       <div>
         <h1>CV Analyzer</h1>
-        <p>Review your CV score, job match, and improvement areas at a glance.</p>
+        <p>
+          Review your CV score, job match,
+          and improvement areas at a glance.
+        </p>
       </div>
 
       <div class="hero-actions">
-        <button class="btn btn-primary" id="analyzeBtn">Upload New CV</button>
-        <button class="btn btn-secondary" id="downloadBtn">Download Report</button>
+        <button class="btn btn-primary" id="analyzeBtn">
+          Upload New CV
+        </button>
+
+        <button class="btn btn-secondary" id="downloadBtn">
+          Download Report
+        </button>
       </div>
+
     </section>
 
-    <input type="file" id="cvFileInput" accept=".pdf,.doc,.docx" hidden />
-    <textarea id="jobDesc" hidden></textarea>
+    <input
+      type="file"
+      id="cvFileInput"
+      accept=".pdf,.doc,.docx,.txt"
+      hidden
+    />
 
-    <!-- ================= TOP SUMMARY ================= -->
+    <!-- TOP SUMMARY -->
     <section class="stats-grid top-summary-grid searchable">
 
+      <!-- SCORE -->
       <article class="stat-card cv-score-panel">
+
         <div class="cv-score-header">
+
           <div>
-            <div class="muted-line">Overall CV Score</div>
-            <div class="cv-score-value">0%</div>
+            <div class="muted-line">
+              Overall CV Score
+            </div>
+
+            <div class="cv-score-value">
+              0%
+            </div>
           </div>
 
           <div class="cv-score-circle">
+
             <div class="cv-score-circle-inner">
-              <strong class="cv-score-inner">0%</strong>
-              <span>Score</span>
+
+              <strong class="cv-score-inner">
+                0%
+              </strong>
+
+              <span>out of 100</span>
+
             </div>
+
           </div>
+
         </div>
+
       </article>
 
+      <!-- JOB MATCH -->
       <article class="stat-card job-match-card">
+
         <h3>Job Match</h3>
-        <div class="job-target">Target Role: Software Developer</div>
+
+        <div class="job-target">
+          Target Role: Software Developer
+        </div>
 
         <div class="job-match-inner">
+
           <div>
-            <div class="job-match-percent">Match 0%</div>
-            <div class="job-match-missing">0 Key skills missing</div>
+
+            <div class="job-match-percent">
+              Match 0%
+            </div>
+
+            <div class="job-match-missing">
+              0 Key skills missing
+            </div>
+
           </div>
+
         </div>
+
       </article>
 
     </section>
@@ -113,86 +257,399 @@
     <!-- CONTENT -->
     <section class="content-grid searchable">
 
+      <!-- CV BREAKDOWN -->
       <article class="panel cv-score-panel">
+
         <h2>CV Breakdown</h2>
+
+        <!-- ATS -->
+        <div class="breakdown-item">
+
+          <div class="breakdown-top">
+            <span>ATS Compatibility</span>
+            <span class="ats-score">0%</span>
+          </div>
+
+          <div class="progress-bar">
+            <div class="progress-fill ats-bar"></div>
+          </div>
+
+        </div>
+
+        <!-- CONTENT -->
+        <div class="breakdown-item">
+
+          <div class="breakdown-top">
+            <span>Content Quality</span>
+            <span class="content-score">0%</span>
+          </div>
+
+          <div class="progress-bar">
+            <div class="progress-fill content-bar"></div>
+          </div>
+
+        </div>
+
+        <!-- FORMATTING -->
+        <div class="breakdown-item">
+
+          <div class="breakdown-top">
+            <span>Formatting</span>
+            <span class="format-score">0%</span>
+          </div>
+
+          <div class="progress-bar">
+            <div class="progress-fill format-bar"></div>
+          </div>
+
+        </div>
+
       </article>
 
+      <!-- AI FEEDBACK -->
       <article class="panel">
+
         <h2>AI Feedback</h2>
+
+        <ul class="feedback-list"></ul>
+
       </article>
 
+      <!-- QUICK FIXES -->
       <article class="panel">
+
         <h2>Quick Fixes</h2>
+
+        <ul class="quick-fixes-list"></ul>
+
       </article>
 
+      <!-- PROGRESS TRACKER -->
       <article class="panel progress-card searchable">
+
         <h2>Progress Tracker</h2>
+
+        <div class="progress-track">
+
+          <p>Previous CV</p>
+
+          <div class="progress-bar">
+            <div class="progress-fill previous"></div>
+          </div>
+
+        </div>
+
+        <div class="progress-track">
+
+          <p>Current CV</p>
+
+          <div class="progress-bar">
+            <div class="progress-fill current"></div>
+          </div>
+
+        </div>
+
       </article>
 
     </section>
 
+    <!-- BOTTOM ACTIONS -->
     <section class="panel bottom-actions searchable">
+
       <div class="action-wrap">
-        <button class="btn btn-primary" id="analyzeBtn2">Upload New CV</button>
-        <button class="btn btn-secondary" id="downloadBtn2">Download Report</button>
+
+        <button class="btn btn-primary" id="analyzeBtn2">
+          Upload New CV
+        </button>
+
+        <button class="btn btn-secondary" id="downloadBtn2">
+          Download Report
+        </button>
+
       </div>
+
     </section>
 
   </main>
+
 </div>
 
-<!-- ================= SCRIPTS ================= -->
+<!-- SCRIPTS -->
 <script src="https://unpkg.com/lucide@latest"></script>
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script src="../js/dashboard.js"></script>
 
 <script>
+
   lucide.createIcons();
 
-  const API_URL = "http://localhost:5000/api/cv/upload";
+const API_URL = "http://localhost:5001/api/cv/upload";
 
-  const input = document.getElementById("cvFileInput");
+  const input =
+    document.getElementById("cvFileInput");
 
   function openFilePicker() {
+
     input.value = "";
     input.click();
+
   }
 
-  document.getElementById("analyzeBtn").addEventListener("click", openFilePicker);
-  document.getElementById("analyzeBtn2").addEventListener("click", openFilePicker);
+  document
+    .getElementById("analyzeBtn")
+    .addEventListener("click", openFilePicker);
 
-  document.getElementById("cvFileInput").addEventListener("change", async (e) => {
+  document
+    .getElementById("analyzeBtn2")
+    .addEventListener("click", openFilePicker);
 
-    const file = e.target.files[0];
-    if (!file) return;
+  /* ========================= */
+  /* CV UPLOAD */
+  /* ========================= */
 
-    const formData = new FormData();
-    formData.append("file", file);
+  document
+    .getElementById("cvFileInput")
+    .addEventListener("change", async (e) => {
 
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        body: formData
-      });
+      const file = e.target.files[0];
 
-      const data = await res.json();
+      if (!file) return;
 
-      const score = data.score ?? 0;
+      const formData = new FormData();
 
-      document.querySelector(".cv-score-value").innerText = score + "%";
-      document.querySelector(".cv-score-inner").innerText = score + "%";
+      formData.append("file", file);
 
-      console.log("FEEDBACK:", data.feedback);
-      console.log("SKILLS:", data.skills);
+      try {
 
-      alert(data.message || "Upload complete");
+        /* LOADING STATE */
 
-    } catch (error) {
-      console.log("❌ ERROR:", error);
-      alert("Upload failed ❌");
-    }
+        document.querySelector(".cv-score-value").innerText =
+          "Analyzing...";
 
-  });
+        document.querySelector(".cv-score-inner").innerText =
+          "...";
+
+        /* ========================= */
+
+        const res = await fetch(API_URL, {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+
+        console.log("AI RESPONSE:", data);
+
+        /* ========================= */
+        /* SCORE */
+        /* ========================= */
+
+        const score =
+          Number(data.score) || 0;
+
+        document.querySelector(
+          ".cv-score-value"
+        ).innerText = score + "%";
+
+        document.querySelector(
+          ".cv-score-inner"
+        ).innerText = score + "%";
+
+        /* ========================= */
+        /* CIRCLE */
+        /* ========================= */
+
+        document.querySelector(
+          ".cv-score-circle"
+        ).style.background =
+        `conic-gradient(
+          #2563eb ${score * 3.6}deg,
+          #e5e7eb 0deg
+        )`;
+
+        /* ========================= */
+        /* JOB MATCH */
+        /* ========================= */
+
+        const match =
+          Number(data.match) || score;
+
+        document.querySelector(
+          ".job-match-percent"
+        ).innerText =
+        `Match ${match}%`;
+
+        const skills =
+          data.skills || [];
+
+        const missing =
+          Math.max(0, 10 - skills.length);
+
+        document.querySelector(
+          ".job-match-missing"
+        ).innerText =
+        `${missing} Key skills missing`;
+
+        /* ========================= */
+        /* BREAKDOWN */
+        /* ========================= */
+
+        const ats =
+          Number(data.ats) || 0;
+
+        const content =
+          Number(data.content) || 0;
+
+        const formatting =
+          Number(data.formatting) || 0;
+
+        /* TEXT */
+
+        document.querySelector(
+          ".ats-score"
+        ).innerText = ats + "%";
+
+        document.querySelector(
+          ".content-score"
+        ).innerText = content + "%";
+
+        document.querySelector(
+          ".format-score"
+        ).innerText = formatting + "%";
+
+        /* BARS */
+
+        const atsBar =
+          document.querySelector(".ats-bar");
+
+        atsBar.style.width = ats + "%";
+        atsBar.style.background = "#2563eb";
+
+        const contentBar =
+          document.querySelector(".content-bar");
+
+        contentBar.style.width = content + "%";
+        contentBar.style.background = "#10b981";
+
+        const formatBar =
+          document.querySelector(".format-bar");
+
+        formatBar.style.width = formatting + "%";
+        formatBar.style.background = "#f59e0b";
+
+        /* ========================= */
+        /* AI FEEDBACK */
+        /* ========================= */
+
+        const feedbackList =
+          document.querySelector(".feedback-list");
+
+        feedbackList.innerHTML = "";
+
+        const good =
+          data.feedback?.good || [];
+
+        const bad =
+          data.feedback?.bad || [];
+
+        if (
+          good.length === 0 &&
+          bad.length === 0
+        ) {
+
+          const li =
+            document.createElement("li");
+
+          li.innerText =
+            "⚠️ AI returned no feedback";
+
+          feedbackList.appendChild(li);
+
+        }
+
+        /* GOOD */
+
+        good.forEach(item => {
+
+          const li =
+            document.createElement("li");
+
+          li.innerText =
+            "✅ " + item;
+
+          li.style.color =
+            "green";
+
+          feedbackList.appendChild(li);
+
+        });
+
+        /* BAD */
+
+        bad.forEach(item => {
+
+          const li =
+            document.createElement("li");
+
+          li.innerText =
+            "❌ " + item;
+
+          li.style.color =
+            "red";
+
+          feedbackList.appendChild(li);
+
+        });
+
+        /* ========================= */
+        /* QUICK FIXES */
+        /* ========================= */
+
+        const quickFixList =
+          document.querySelector(".quick-fixes-list");
+
+        quickFixList.innerHTML = "";
+
+        const fixes =
+          data.feedback?.quickFixes || [];
+
+        if (fixes.length === 0) {
+
+          const li =
+            document.createElement("li");
+
+          li.innerText =
+            "⚠️ No quick fixes generated";
+
+          quickFixList.appendChild(li);
+
+        }
+
+        fixes.forEach(item => {
+
+          const li =
+            document.createElement("li");
+
+          li.innerText =
+            "💡 " + item;
+
+          quickFixList.appendChild(li);
+
+        });
+
+        /* ========================= */
+        /* SUCCESS */
+        /* ========================= */
+
+        alert("✅ AI CV analyzed successfully");
+
+      } catch (error) {
+
+        console.log(error);
+
+        alert("❌ Upload failed");
+
+      }
+
+    });
 
 </script>
 

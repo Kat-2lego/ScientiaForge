@@ -5,6 +5,7 @@ import Groq from "groq-sdk";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
+import ws from "ws";
 
 dotenv.config();
 
@@ -20,16 +21,28 @@ if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
 const app  = express();
 const PORT = process.env.PORT || 5001;
 
-// --- Resolve path to client folder (ESM-safe)
+/* ========================= */
+/* PATH SETUP */
+/* ========================= */
+
 const __filename = fileURLToPath(import.meta.url);
+<<<<<<< Updated upstream
 const __dirname  = path.dirname(__filename);
+=======
+const __dirname = path.dirname(__filename);
+
+>>>>>>> Stashed changes
 const CLIENT_PATH = path.join(__dirname, "..", "client");
 
 console.log("Serving static files from:", CLIENT_PATH);
 
-// --- Supabase ---
+/* ========================= */
+/* SUPABASE */
+/* ========================= */
+
 const supabase = createClient(
   process.env.SUPABASE_URL,
+<<<<<<< Updated upstream
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
@@ -53,42 +66,121 @@ async function callGroq(prompt, retries = 3) {
     }
   }
 }
+=======
+  process.env.SUPABASE_ANON_KEY,
+  {
+    realtime: {
+      transport: ws,
+    },
+  }
+);
 
-// --- Middleware ---
+/* ========================= */
+/* GEMINI AI */
+/* ========================= */
+
+const genAI = new GoogleGenerativeAI(
+  process.env.GEMINI_API_KEY
+);
+
+/* ========================= */
+/* MIDDLEWARE */
+/* ========================= */
+>>>>>>> Stashed changes
+
 app.use(cors());
+
 app.use(express.json());
+<<<<<<< Updated upstream
 app.use(express.static(CLIENT_PATH));
 
+=======
+
+app.use(express.urlencoded({ extended: true }));
+
+app.use(express.static(CLIENT_PATH));
+
+/* ========================= */
+/* HOME */
+/* ========================= */
+
+>>>>>>> Stashed changes
 app.get("/", (req, res) => {
   res.redirect("/pages/LogIn.html");
 });
 
+<<<<<<< Updated upstream
 // ─────────────────────────────────────────────────────────────────
 // AUTH
 // ─────────────────────────────────────────────────────────────────
+=======
+/* ========================= */
+/* LOGIN */
+/* ========================= */
+>>>>>>> Stashed changes
 
 app.post("/api/auth/login", async (req, res) => {
+
   const { email, password } = req.body;
+<<<<<<< Updated upstream
   if (!email || !password)
     return res.status(400).json({ error: "Email and password are required." });
 
   try {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return res.status(401).json({ error: error.message });
+=======
+
+  if (!email || !password) {
+    return res.status(400).json({
+      error: "Email and password are required.",
+    });
+  }
+
+  try {
+
+    const { data, error } =
+      await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+    if (error) {
+      return res.status(401).json({
+        error: error.message,
+      });
+    }
+>>>>>>> Stashed changes
 
     res.json({
       success: true,
       user: { id: data.user.id, email: data.user.email },
       access_token: data.session.access_token  // ← add this
     });
+
   } catch (err) {
+
     console.error(err);
-    res.status(500).json({ error: "Server error" });
+
+    res.status(500).json({
+      error: "Server error",
+    });
+
   }
+
 });
 
+<<<<<<< Updated upstream
+=======
+/* ========================= */
+/* SIGNUP */
+/* ========================= */
+
+>>>>>>> Stashed changes
 app.post("/api/auth/signup", async (req, res) => {
+
   const { email, password, firstNames } = req.body;
+<<<<<<< Updated upstream
   if (!email || !password || !firstNames)
     return res.status(400).json({ error: "All fields required." });
 
@@ -100,17 +192,62 @@ app.post("/api/auth/signup", async (req, res) => {
         data: {
           first_name: firstNames.split(" ")[0],
           last_name:  firstNames.split(" ").slice(1).join(" ") || " ",
+=======
+
+  if (!email || !password || !firstNames) {
+    return res.status(400).json({
+      error: "All fields required.",
+    });
+  }
+
+  try {
+
+    const { data, error } =
+      await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: firstNames.split(" ")[0],
+            last_name:
+              firstNames
+                .split(" ")
+                .slice(1)
+                .join(" ") || "",
+          },
+>>>>>>> Stashed changes
         },
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    res.json({
+      success: true,
+      user: {
+        id: data.user?.id,
       },
     });
+<<<<<<< Updated upstream
     if (error) throw error;
     res.json({ success: true, user: { id: data.user?.id } });
+=======
+
+>>>>>>> Stashed changes
   } catch (err) {
+
     console.error("❌ Signup Error:", err.message);
-    res.status(500).json({ error: err.message });
+
+    res.status(500).json({
+      error: err.message,
+    });
+
   }
+
 });
 
+<<<<<<< Updated upstream
 // GET /api/auth/me
 app.get("/api/auth/me", async (req, res) => {
   const authHeader = req.headers.authorization;
@@ -134,25 +271,51 @@ app.get("/api/auth/me", async (req, res) => {
 // ─────────────────────────────────────────────────────────────────
 // CAREER DISCOVERY
 // ─────────────────────────────────────────────────────────────────
+=======
+/* ========================= */
+/* CAREER DISCOVERY */
+/* ========================= */
+>>>>>>> Stashed changes
 
 const questionBank = {
   tech: [
     {
       question: "How do you approach solving technical problems?",
       options: [
+<<<<<<< Updated upstream
         { text: "Break it into logical steps",        traits: { tech: 3 } },
         { text: "Experiment until it works",          traits: { tech: 2, design: 1 } },
         { text: "Look for existing solutions online", traits: { tech: 1, data: 1 } },
+=======
+        {
+          text: "Break it into logical steps",
+          traits: { tech: 3 },
+        },
+        {
+          text: "Experiment until it works",
+          traits: { tech: 2, design: 1 },
+        },
+        {
+          text: "Look for existing solutions online",
+          traits: { tech: 1, data: 1 },
+        },
+>>>>>>> Stashed changes
       ],
     },
-    // ... your full tech questions
   ],
+<<<<<<< Updated upstream
   data: [
     // ... your data questions
   ],
   design: [
     // ... your design questions
   ],
+=======
+
+  data: [],
+
+  design: [],
+>>>>>>> Stashed changes
 };
 
 const careers = [
@@ -165,6 +328,7 @@ const careers = [
     demand: "High Demand",
     matchScore: 0,
   },
+
   {
     type: "data",
     title: "Data Analyst",
@@ -174,6 +338,7 @@ const careers = [
     demand: "Very High Demand",
     matchScore: 0,
   },
+
   {
     type: "design",
     title: "UX Designer",
@@ -186,11 +351,28 @@ const careers = [
 ];
 
 app.get("/api/career-discovery/questions", (req, res) => {
+<<<<<<< Updated upstream
   res.json({ questions: questionBank, careers });
 });
 
+=======
+
+  res.json({
+    questions: questionBank,
+    careers,
+  });
+
+});
+
+/* ========================= */
+/* STORE USER SCORES */
+/* ========================= */
+
+>>>>>>> Stashed changes
 app.post("/api/career-discovery/scores", async (req, res) => {
+
   const { user_id, scores } = req.body;
+<<<<<<< Updated upstream
   if (!user_id) return res.status(400).json({ error: "user_id required" });
   res.json({ success: true });
 });
@@ -498,3 +680,27 @@ app.patch("/api/auth/reset-password", async(req, res) => {
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
 });
+=======
+
+  if (!user_id) {
+    return res.status(400).json({
+      error: "user_id required",
+    });
+  }
+
+  res.json({
+    success: true,
+  });
+
+});
+
+/* ========================= */
+/* START SERVER */
+/* ========================= */
+
+app.listen(PORT, () => {
+
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+
+});
+>>>>>>> Stashed changes

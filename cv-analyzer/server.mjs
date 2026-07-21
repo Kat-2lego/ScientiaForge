@@ -1,5 +1,8 @@
+
+
 import express from "express";
 import cors from "cors";
+
 import cvRoutes from "./routes/cvRoutes.js";
 
 const app = express();
@@ -8,15 +11,17 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ PUT THIS HERE (VERY IMPORTANT)
+// routes
 app.use("/api/cv", cvRoutes);
 
+// health check
 app.get("/", (req, res) => {
-  res.send("Server is working ✅");
+  res.send("🚀 SkillForge AI Server Running");
 });
 
-const PORT = 5000;
+// PORT (fallback included)
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
