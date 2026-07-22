@@ -44,6 +44,9 @@ body {
   justify-content: space-between;
   min-width: 0;
 }
+.nav-item {
+    text-decoration: none;
+}
 
 .logo {
   font-size: clamp(1.5rem, 2vw, 2rem);
