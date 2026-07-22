@@ -1,3 +1,9 @@
+# Dependencies
 node_modules/
 
-.env/
+# Environment files
+.env
+**/.env
+
+# Test files
+cv-analyzer/test-cv.txt
