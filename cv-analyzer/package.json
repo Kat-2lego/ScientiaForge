@@ -5,18 +5,25 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node --env-file=.env server.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google/genai": "^2.13.0",
     "@supabase/supabase-js": "^2.105.0",
     "axios": "^1.15.2",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "groq-sdk": "^1.2.0",
+    "mammoth": "^1.12.0",
     "multer": "^2.1.1",
-    "pdf-parse": "^1.0.9"
+    "openai": "^6.38.0",
+    "pdf-parse": "^1.1.4",
+    "pdf2json": "^4.0.3",
+    "pdfjs-dist": "^3.11.174"
   }
 }
