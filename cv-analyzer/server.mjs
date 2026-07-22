@@ -1,37 +1,70 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import path from "path";
-import { fileURLToPath } from "url";
 
 import cvRoutes from "./routes/cvRoutes.js";
 
 const app = express();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const PORT =
+  Number(process.env.PORT) || 5001;
 
-// Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5000",
+      "http://127.0.0.1:5000",
+      "http://localhost:5500",
+      "http://127.0.0.1:5500",
+      "http://localhost:5501",
+      "http://127.0.0.1:5501"
+    ]
+  })
+);
+
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Serve files from SkillForge/client
-const clientPath = path.join(__dirname, "..", "client");
-app.use(express.static(clientPath));
+app.use(
+  express.urlencoded({
+    extended: true
+  })
+);
 
-// API routes
 app.use("/api/cv", cvRoutes);
 
-// Open the login page by default
 app.get("/", (req, res) => {
-  res.sendFile(path.join(clientPath, "pages", "LogIn.html"));
+  res.status(200).json({
+    success: true,
+    message:
+      "SkillForge CV Analyzer API is running."
+  });
 });
 
-// PORT
-const PORT = process.env.PORT || 5000;
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    service: "SkillForge CV Analyzer",
+    uploadEndpoint: "/api/cv/upload",
+    improveEndpoint: "/api/cv/improve"
+  });
+});
+
+app.use((req, res) => {
+  res.status(404).json({
+    error: "CV Analyzer endpoint not found."
+  });
+});
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`🔐 Login page: http://localhost:${PORT}/pages/LogIn.html`);
+  console.log(
+    `🚀 CV Analyzer API running on http://localhost:${PORT}`
+  );
+
+  console.log(
+    `📄 Upload endpoint: http://localhost:${PORT}/api/cv/upload`
+  );
+
+  console.log(
+    `✨ Improve endpoint: http://localhost:${PORT}/api/cv/improve`
+  );
 });
