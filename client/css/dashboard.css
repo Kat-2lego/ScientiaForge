@@ -9,6 +9,7 @@
   --cyan-light: #ecfeff;
   --orange: #f97316;
   --orange-light: #fff7ed;
+  --blue-dark: #2563eb;
 
   --text: #1f2a4b;
   --text-dark: #0f172a;
@@ -124,11 +125,15 @@ input {
 
 .nav-item:hover {
   background: #edf3ff;
+  color: var(--blue-dark);
+  transform: translateX(2px);
 }
 
 .nav-item.active {
   background: #e8f0ff;
+  color: #29477a;
 }
+
 
 .nav-item.active::before {
   content: "";
@@ -201,6 +206,7 @@ input {
   gap: 16px;
   min-width: 0;
   box-shadow: var(--shadow-sm);
+  
 }
 
 /* topbar */
