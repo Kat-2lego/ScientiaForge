@@ -4,7 +4,7 @@
   Authentication is handled by the main SkillForge server.
 */
 const LOGIN_API_URL =
-  "http://localhost:5000/api/auth/login";
+  "http://localhost:5001/api/auth/login";
 
 /* =========================================================
    PAGE ELEMENTS
@@ -219,7 +219,7 @@ async function readLoginResponse(response) {
     );
 
     throw new Error(
-      "The login request reached the wrong server. Open SkillForge on http://localhost:5000."
+      "The login request reached the wrong server. Open SkillForge on http://localhost:5001."
     );
   }
 
