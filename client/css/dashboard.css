@@ -41,10 +41,12 @@ body {
   font-family: "Plus Jakarta Sans", "Inter", sans-serif;
   background: var(--bg-main);
   color: var(--text-main);
+  min-height: 100%;
 }
 
 body {
   min-height: 100vh;
+  overflow-y: auto;
 }
 
 button,
@@ -61,6 +63,7 @@ input {
   padding: 14px;
   max-width: 1600px;
   margin: 0 auto;
+  align-items: start;
 }
 
 /* sidebar */
@@ -74,6 +77,18 @@ input {
   justify-content: space-between;
   min-width: 0;
   box-shadow: var(--shadow-sm);
+
+  position: sticky;
+  top: 14px;
+  height: calc(100vh - 28px);
+  overflow-y: auto;
+}
+.sidebar::-webkit-scrollbar {
+  width: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.22);
 }
 .nav-item {
     text-decoration: none;

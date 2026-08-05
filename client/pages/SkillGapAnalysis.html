@@ -83,7 +83,36 @@
 
   <!-- ================= MAIN ================= -->
   <main class="main">
+    <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+            <i data-lucide="menu"></i>
+          </button>
 
+          <label class="searchbar">
+            <i data-lucide="search"></i>
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search SkillForge..."
+              autocomplete="off"
+            />
+          </label>
+        </div>
+
+        <div class="topbar-right">
+          <button class="icon-btn"><i data-lucide="bell"></i></button>
+          <button class="icon-btn"><i data-lucide="mail"></i></button>
+
+          <div class="profile">
+            <div class="avatar"></div>
+            <div>
+              <div class="profile-name"></div>
+              <div class="profile-email"></div>
+            </div>
+          </div>
+        </div>
+      </header>
     <section class="skill-dashboard">
 
       <div class="skill-dashboard-header">
