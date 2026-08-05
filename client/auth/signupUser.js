@@ -297,14 +297,13 @@ async function handleSignUp() {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                email,
-                password,
-                firstNames,
-                // New onboarding enhancements added context properties
-                industry,
-                experienceLevel,
-                rolesTargeted,
-                skillsInterests
+            email,
+            password,
+            firstNames,
+            industry,
+            experienceLevel,
+            rolesTargeted,
+            skillsInterests
             }),
         });
 
