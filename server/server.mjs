@@ -581,7 +581,45 @@ app.post("/api/auth/signup", async (req, res) => {
     });
   }
 });
+/* =========================================================
+   AUTH: LOGOUT
+========================================================= */
 
+app.post("/api/auth/logout", async (req, res) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(400).json({ error: "No access token provided." });
+  }
+
+  const accessToken = authHeader.replace("Bearer ", "").trim();
+
+  if (!accessToken) {
+    return res.status(400).json({ error: "No access token provided." });
+  }
+
+  try {
+    if (!supabaseAdmin) {
+      // No service-role key configured — client-side token clearing is all we can do.
+      return res.status(200).json({
+        success: true,
+        message: "Logged out locally. Server-side session revocation unavailable.",
+      });
+    }
+
+    const { error } = await supabaseAdmin.auth.admin.signOut(accessToken);
+
+    if (error) {
+      console.warn("⚠️ Supabase signOut warning:", error.message);
+      // Still tell the client to proceed with local logout even if this fails.
+    }
+
+    return res.status(200).json({ success: true, message: "Logged out." });
+  } catch (error) {
+    console.error("❌ Logout error:", error.message);
+    return res.status(500).json({ error: "An internal server error occurred." });
+  }
+});
 /* =========================================================
    AUTH: CURRENT USER
 ========================================================= */

@@ -61,9 +61,9 @@
             <span>Help/Support</span>
           </a>
 
-          <a class="nav-item" href="LogIn.html" data-label="Log Out">
+          <a class="nav-item" href="" data-label="Log Out">
             <i data-lucide="log-out"></i>
-            <span>Log Out</span>
+            <span>Logout</span>
           </a>
         </nav>
       </div>
@@ -227,9 +227,9 @@
                             <div class="setting-row">
                                 <div class="setting-info">
                                     <h4 class="text-danger">Sign Out</h4>
-                                    <p>Securely log out of this device.</p>
+                                    <p>Securely logout of this device.</p>
                                 </div>
-                                <button class="btn-danger">
+                                <button class="btn-danger" onclick="handleLogout()">
                                     <i data-lucide="log-out"></i> Sign Out
                                 </button>
                             </div>
@@ -243,5 +243,6 @@
     </div>
 
     <script src="../js/settings.js"></script>
+    <script src="../js/auth.js"></script>
 </body>
 </html>
