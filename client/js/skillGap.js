@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderGapResult(result);
   }
 
-  // ================= MODAL =================
+// ================= MODAL =================
   const overlay = document.getElementById("skillsModalOverlay");
   const modalList = document.getElementById("modalSkillsList");
   const newSkillInput = document.getElementById("newSkillInput");
@@ -129,12 +129,40 @@ document.addEventListener('DOMContentLoaded', () => {
     newSkillInput.value = "";
   }
 
-  document.getElementById("editSkillsBtn").addEventListener("click", openModal);
-  document.getElementById("closeSkillsModal").addEventListener("click", closeModal);
-  document.getElementById("doneSkillsBtn").addEventListener("click", closeModal);
+  // Commits whatever's typed in the input, if anything. Returns true if it added something.
+  async function commitPendingSkill() {
+    const name = newSkillInput.value.trim();
+    if (!name) return false;
 
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) closeModal();
+    try {
+      await addSkill(name);
+      currentSkills = await fetchUserSkills();
+      newSkillInput.value = "";
+      renderModalSkills();
+      renderHaveSkills();
+      await refreshGapForCurrentJob();
+      return true;
+    } catch (err) {
+      alert(err.message);
+      return false;
+    }
+  }
+
+  document.getElementById("editSkillsBtn").addEventListener("click", openModal);
+
+  document.getElementById("closeSkillsModal").addEventListener("click", async () => {
+    await commitPendingSkill();
+    closeModal();
+  });
+
+  document.getElementById("doneSkillsBtn").addEventListener("click", async () => {
+    await commitPendingSkill();
+    closeModal();
+  });
+
+  overlay.addEventListener("click", async (e) => {
+    if (e.target !== overlay) return;
+    closeModal();
   });
 
   modalList.addEventListener("click", async (e) => {
@@ -155,20 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
   newSkillInput.addEventListener("keydown", async (e) => {
     if (e.key !== "Enter") return;
     e.preventDefault();
-
-    const name = newSkillInput.value.trim();
-    if (!name) return;
-
-    try {
-      await addSkill(name);
-      currentSkills = await fetchUserSkills();
-      newSkillInput.value = "";
-      renderModalSkills();
-      renderHaveSkills();
-      await refreshGapForCurrentJob();
-    } catch (err) {
-      alert(err.message);
-    }
+    await commitPendingSkill();
   });
 
   // ================= INITIALIZE PAGE =================
