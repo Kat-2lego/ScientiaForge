@@ -832,6 +832,227 @@ app.patch(
 );
 
 /* =========================================================
+   AUTH HELPER — resolve user from Bearer token
+========================================================= */
+
+async function getUserFromToken(req) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return null;
+  }
+
+  const accessToken = authHeader.replace("Bearer ", "").trim();
+  if (!accessToken) return null;
+
+  const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+
+  if (error || !user) return null;
+  return user;
+}
+
+async function requireAuth(req, res, next) {
+  const user = await getUserFromToken(req);
+
+  if (!user) {
+    return res.status(401).json({ error: "Not authenticated." });
+  }
+
+  req.userId = user.id;
+  next();
+}
+
+/* =========================================================
+   SKILL CATEGORY HELPER (shared with signup logic)
+========================================================= */
+
+const SOFT_SKILLS = [
+  "communication",
+  "stakeholder management",
+  "leadership",
+  "teamwork",
+  "problem solving",
+  "negotiation",
+  "conflict resolution",
+  "resource planning",
+];
+
+function categorizeSkill(normalizedName) {
+  return SOFT_SKILLS.includes(normalizedName) ? "Soft Skill" : "Technical";
+}
+
+/* =========================================================
+   SKILLS: GET MY SKILLS
+========================================================= */
+
+app.get("/api/skills/me", requireAuth, async (req, res) => {
+  try {
+    const { data, error } = await databaseClient
+      .from("user_skills")
+      .select("user_skill_id, level, years_exp, skills(skill_id, name, category)")
+      .eq("user_id", req.userId);
+
+    if (error) {
+      console.error("❌ Error fetching user_skills:", error);
+      return res.status(500).json({ error: "Failed to load your skills." });
+    }
+
+    const skills = data.map((row) => ({
+      user_skill_id: row.user_skill_id,
+      skill_id: row.skills?.skill_id,
+      name: row.skills?.name,
+      category: row.skills?.category,
+      level: row.level,
+      years_exp: row.years_exp,
+    }));
+
+    return res.status(200).json({ skills });
+  } catch (error) {
+    console.error("❌ /api/skills/me GET error:", error.message);
+    return res.status(500).json({ error: "An internal server error occurred." });
+  }
+});
+
+/* =========================================================
+   SKILLS: ADD A SKILL
+========================================================= */
+
+app.post("/api/skills/me", requireAuth, async (req, res) => {
+  const name = typeof req.body.name === "string" ? req.body.name.trim() : "";
+  const level = typeof req.body.level === "string" ? req.body.level : "beginner";
+
+  if (!name) {
+    return res.status(400).json({ error: "A skill name is required." });
+  }
+
+  const normalized = name.toLowerCase();
+  const category = categorizeSkill(normalized);
+
+  try {
+    const { data: skillRows, error: skillUpsertError } = await databaseClient
+      .from("skills")
+      .upsert(
+        { name, normalized_name: normalized, category },
+        { onConflict: "normalized_name" }
+      )
+      .select();
+
+    if (skillUpsertError) {
+      console.error("❌ Error upserting skill:", skillUpsertError);
+      return res.status(500).json({ error: "Failed to save the skill." });
+    }
+
+    const skill = skillRows?.[0];
+    if (!skill) {
+      return res.status(500).json({ error: "Skill could not be created." });
+    }
+
+    const { error: userSkillError } = await databaseClient
+      .from("user_skills")
+      .upsert(
+        { user_id: req.userId, skill_id: skill.skill_id, level },
+        { onConflict: "user_id,skill_id" }
+      );
+
+    if (userSkillError) {
+      console.error("❌ Error linking user_skills:", userSkillError);
+      return res.status(500).json({ error: "Failed to add the skill to your profile." });
+    }
+
+    return res.status(201).json({
+      success: true,
+      skill: { skill_id: skill.skill_id, name: skill.name, category: skill.category, level },
+    });
+  } catch (error) {
+    console.error("❌ /api/skills/me POST error:", error.message);
+    return res.status(500).json({ error: "An internal server error occurred." });
+  }
+});
+
+/* =========================================================
+   SKILLS: REMOVE A SKILL
+========================================================= */
+
+app.delete("/api/skills/me/:skillId", requireAuth, async (req, res) => {
+  const { skillId } = req.params;
+
+  if (!skillId) {
+    return res.status(400).json({ error: "skillId is required." });
+  }
+
+  try {
+    const { error } = await databaseClient
+      .from("user_skills")
+      .delete()
+      .eq("user_id", req.userId)
+      .eq("skill_id", skillId);
+
+    if (error) {
+      console.error("❌ Error deleting user_skill:", error);
+      return res.status(500).json({ error: "Failed to remove the skill." });
+    }
+
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("❌ /api/skills/me DELETE error:", error.message);
+    return res.status(500).json({ error: "An internal server error occurred." });
+  }
+});
+
+/* =========================================================
+   JOBS (placeholder — swap for a real job_roles table later)
+========================================================= */
+
+const jobRoles = [
+  { id: 1, title: "Software Engineer", requiredSkills: ["HTML", "CSS", "JavaScript", "React", "Node.js", "Git", "APIs", "Databases", "Python", "SQL"] },
+  { id: 2, title: "Frontend Developer", requiredSkills: ["HTML", "CSS", "JavaScript", "React", "Figma", "Git", "APIs"] },
+  { id: 3, title: "Full Stack Developer", requiredSkills: ["HTML", "CSS", "JavaScript", "React", "Node.js", "SQL", "Git", "APIs", "Databases"] },
+  { id: 4, title: "Data Analyst", requiredSkills: ["SQL", "Excel", "Python", "PowerBI", "Tableau", "Data Pipelines"] },
+];
+
+app.get("/api/jobs", (req, res) => {
+  return res.status(200).json({
+    jobs: jobRoles.map((job) => ({ id: job.id, title: job.title })),
+  });
+});
+
+/* =========================================================
+   SKILL GAP (placeholder matching — swap once real data exists)
+========================================================= */
+
+app.post("/api/skillgap", requireAuth, async (req, res) => {
+  const { jobId } = req.body;
+
+  const userSkillNames = Array.isArray(req.body.userSkillNames)
+    ? req.body.userSkillNames
+    : [];
+
+  const job = jobRoles.find((j) => j.id === Number(jobId));
+
+  if (!job) {
+    return res.status(404).json({ error: "Job not found." });
+  }
+
+  const userSkillsNormalized = new Set(
+    userSkillNames.map((s) => s.trim().toLowerCase())
+  );
+
+  const have = job.requiredSkills.filter((skill) =>
+    userSkillsNormalized.has(skill.toLowerCase())
+  );
+
+  const missing = job.requiredSkills.filter(
+    (skill) => !userSkillsNormalized.has(skill.toLowerCase())
+  );
+
+  const matchScore = job.requiredSkills.length
+    ? Math.round((have.length / job.requiredSkills.length) * 100)
+    : 0;
+
+  return res.status(200).json({ have, missing, matchScore });
+});
+
+/* =========================================================
    CAREER DISCOVERY
 ========================================================= */
 

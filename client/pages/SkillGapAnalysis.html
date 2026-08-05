@@ -93,11 +93,9 @@
         </div>
 
         <select class="job-select">
-          <option>Software Engineer</option>
-          <option>Frontend Developer</option>
-          <option>Full Stack Developer</option>
-          <option>Data Analyst</option>
+          <!-- options populated by JS -->
         </select>
+
       </div>
 
       <!-- METRICS -->
@@ -105,19 +103,19 @@
 
         <div class="metric-card">
           <h3>🎯 Match Score</h3>
-          <div class="big-number">62%</div>
+          <div class="big-number" id="matchScore">–</div>
           <span>Overall compatibility</span>
         </div>
 
         <div class="metric-card">
           <h3>✅ Skills You Have</h3>
-          <div class="big-number good">8</div>
+          <div class="big-number good" id="haveCount">–</div>
           <span>Matched skills</span>
         </div>
 
         <div class="metric-card">
           <h3>❌ Missing Skills</h3>
-          <div class="big-number warn">5</div>
+          <div class="big-number warn" id="missingCount">–</div>
           <span>Skills to learn</span>
         </div>
 
@@ -127,24 +125,21 @@
       <div class="skill-grid">
 
         <div class="skill-box">
-          <h2>✅ Your Skills</h2>
-          <div class="skill-tags">
-            <span>HTML</span>
-            <span>CSS</span>
-            <span>JavaScript</span>
-            <span>Python</span>
-            <span>C#</span>
+          <div class="skill-box-header">
+            <h2>✅ Your Skills</h2>
+            <button id="editSkillsBtn" class="edit-skills-btn" type="button">
+              <i data-lucide="pencil"></i> Edit
+            </button>
+          </div>
+          <div class="skill-tags" id="haveSkills">
+            <!-- populated by JS -->
           </div>
         </div>
 
         <div class="skill-box">
           <h2>❌ Missing Skills</h2>
-          <div class="skill-tags missing-tags">
-            <span>React</span>
-            <span>Node.js</span>
-            <span>Git</span>
-            <span>APIs</span>
-            <span>Databases</span>
+          <div class="skill-tags missing-tags" id="missingSkills">
+            <!-- populated by JS -->
           </div>
         </div>
 
@@ -191,10 +186,37 @@
 
 </div>
 
+<div class="modal-overlay" id="skillsModalOverlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Edit Your Skills</h3>
+      <button id="closeSkillsModal" class="modal-close-btn" type="button">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-current-skills" id="modalSkillsList">
+        <!-- populated by JS -->
+      </div>
+
+      <input
+        type="text"
+        id="newSkillInput"
+        placeholder="Type a skill and press Enter..."
+        class="modal-skill-input"
+      />
+      <p class="modal-hint">Press Enter to add. Click × on a pill to remove.</p>
+    </div>
+
+    <div class="modal-footer">
+      <button id="doneSkillsBtn" class="btn-primary-modal" type="button">Done</button>
+    </div>
+  </div>
+</div>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>
 lucide.createIcons();
 </script>
+<script src="../js/skillGap.js"></script>
 
 </body>
 </html>
