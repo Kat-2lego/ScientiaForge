@@ -21,6 +21,7 @@
   "homepage": "https://github.com/Kat-2lego/SkillForge#readme",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",
+    "@google/genai": "^2.16.0",
     "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.104.1",
     "cors": "^2.8.6",
