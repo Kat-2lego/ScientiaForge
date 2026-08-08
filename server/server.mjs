@@ -6,12 +6,19 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import WebSocket from "ws";
+import cvRoutes from "./cv-analyzer/routes/cvRoutes.js";
 
 /* =========================================================
    LOAD ENVIRONMENT VARIABLES
 ========================================================= */
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+
+const __dirname = path.dirname(__filename);
+
+dotenv.config({
+  path: path.join(__dirname, "../.env"),
+});
 
 const {
   SUPABASE_URL,
@@ -65,12 +72,6 @@ const APP_URL =
 /* =========================================================
    RESOLVE CLIENT FOLDER
 ========================================================= */
-
-const __filename =
-  fileURLToPath(import.meta.url);
-
-const __dirname =
-  path.dirname(__filename);
 
 const CLIENT_PATH =
   path.join(
@@ -244,6 +245,8 @@ app.use(
 app.use(
   express.static(CLIENT_PATH)
 );
+
+app.use("/api/cv", cvRoutes);
 
 /* =========================================================
    MAIN PAGE
