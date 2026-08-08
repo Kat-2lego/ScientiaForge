@@ -7,7 +7,6 @@
     --text-main: #334155;
     --text-light: #64748b;
     --bg-white: #ffffff;
-    --bg-main: #f3f6fa;
     --border: #e2e8f0;
     --glass-bg: rgba(255, 255, 255, 0.85);
 }
@@ -15,7 +14,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-    background-color: var(--bg-main);
+    background-color: var(--bg-white);
     color: var(--text-main);
     font-family: 'Plus Jakarta Sans', sans-serif;
     overflow-x: hidden;
