@@ -336,6 +336,36 @@ async function handleSignIn() {
       );
     }
 
+    // 4. Target DOM button styles state to "Signing Up..."
+    const btn = document.querySelector(".final-submit-btn");
+    const innerTextNode = btn.querySelector(".btn-inner-text");
+    const originalContentHtml = innerTextNode.innerHTML;
+    
+    innerTextNode.textContent = "Signing up…";
+    btn.disabled = true;
+
+    // 5. Send complete profile package to backend server
+    try {
+        const resp = await fetch("http://localhost:5001/api/auth/signup", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+            email,
+            password,
+            firstNames,
+            industry,
+            experienceLevel,
+            rolesTargeted,
+            skillsInterests
+            }),
+        });
+
+        if (!resp.ok) {
+            const err = await resp.json();
+            throw new Error(err.error || "Sign‑up failed.");
+        }
     saveLoginSession(data);
 
     showLoginMessage(

@@ -46,27 +46,7 @@ main.main-content {
   padding-bottom: 40px;
 }
 
-/* topbar */
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 40px;
-  background: transparent;
-}
 
-/* search bar (from dashboard.css, but refined for career discovery) */
-.searchbar {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  min-height: 48px;
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: min(100%, 560px);
-}
 
 .searchbar i {
   color: var(--muted);
@@ -111,7 +91,7 @@ main.main-content {
   display: grid;
   grid-template-columns: 1fr 380px;
   gap: 30px;
-  padding: 0 40px;
+  padding:10px;
   max-width: 1400px;
   margin-top: 16px;
 }
