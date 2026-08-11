@@ -75,10 +75,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById("haveSkills");
     container.innerHTML = "";
     currentSkills.forEach((skill) => {
-      const span = document.createElement("span");
-      span.textContent = skill.name;
-      container.appendChild(span);
+      const item = document.createElement("span");
+      item.className = "skill-item";
+      item.innerHTML = `<i data-lucide="check" class="skill-icon has"></i>${skill.name}`;
+      container.appendChild(item);
     });
+    lucide.createIcons();
   }
 
   function renderGapResult(result) {
@@ -91,10 +93,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const missingContainer = document.getElementById("missingSkills");
     missingContainer.innerHTML = "";
     missing.forEach((skill) => {
-      const span = document.createElement("span");
-      span.textContent = skill;
-      missingContainer.appendChild(span);
+      const item = document.createElement("span");
+      item.className = "skill-item";
+      item.innerHTML = `<i data-lucide="x" class="skill-icon missing"></i>${skill}`;
+      missingContainer.appendChild(item);
     });
+    lucide.createIcons();
   }
 
   async function refreshGapForCurrentJob() {
