@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SkillForge | Skill Gap Analysis</title>
 
+  <link rel="stylesheet" href="../css/dashboard.css">
+
   <link rel="stylesheet" href="../css/skillGapAnalysis.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -59,12 +61,12 @@
 
         <a class="nav-item" href="Support.html" data-label="Help & Support">
           <i data-lucide="life-buoy"></i>
-          <span>Help/Support <small>(01)</small></span>
+          <span>Help/Support</span>
         </a>
 
-        <a class="nav-item" href="LogIn.html" data-label="Log Out">
+        <a class="nav-item" href="" data-label="Log Out">
           <i data-lucide="log-out"></i>
-          <span>Log Out</span>
+          <span>Logout</span>
         </a>
       </nav>
     </div>
@@ -81,41 +83,77 @@
 
   <!-- ================= MAIN ================= -->
   <main class="main">
+    <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+            <i data-lucide="menu"></i>
+          </button>
 
+          <label class="searchbar">
+            <i data-lucide="search"></i>
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search SkillForge..."
+              autocomplete="off"
+            />
+          </label>
+        </div>
+
+        <div class="topbar-right">
+          <button class="icon-btn"><i data-lucide="bell"></i></button>
+          <button class="icon-btn"><i data-lucide="mail"></i></button>
+
+          <div class="profile">
+            <div class="avatar"></div>
+            <div>
+              <div class="profile-name"></div>
+              <div class="profile-email"></div>
+            </div>
+          </div>
+        </div>
+      </header>
     <section class="skill-dashboard">
 
       <div class="skill-dashboard-header">
         <div>
-          <h1>📉 Skill Gap Analysis</h1>
+          <h1><i data-lucide="bar-chart-3"></i> Skill Gap Analysis</h1>
           <p>Compare your current skills with job requirements</p>
         </div>
 
         <select class="job-select">
-          <option>Software Engineer</option>
-          <option>Frontend Developer</option>
-          <option>Full Stack Developer</option>
-          <option>Data Analyst</option>
+          <!-- options populated by JS -->
         </select>
+
       </div>
 
       <!-- METRICS -->
       <div class="skill-metrics">
 
         <div class="metric-card">
-          <h3>🎯 Match Score</h3>
-          <div class="big-number">62%</div>
+          <div class="metric-card-head">
+            <span class="metric-icon-circle blue"><i data-lucide="target"></i></span>
+            <h3>Match Score</h3>
+          </div>
+          <div class="big-number" id="matchScore">–</div>
           <span>Overall compatibility</span>
         </div>
 
         <div class="metric-card">
-          <h3>✅ Skills You Have</h3>
-          <div class="big-number good">8</div>
+          <div class="metric-card-head">
+            <span class="metric-icon-circle green"><i data-lucide="check-circle-2"></i></span>
+            <h3>Skills You Have</h3>
+          </div>
+          <div class="big-number good" id="haveCount">–</div>
           <span>Matched skills</span>
         </div>
 
         <div class="metric-card">
-          <h3>❌ Missing Skills</h3>
-          <div class="big-number warn">5</div>
+          <div class="metric-card-head">
+            <span class="metric-icon-circle orange"><i data-lucide="x-circle"></i></span>
+            <h3>Missing Skills</h3>
+          </div>
+          <div class="big-number warn" id="missingCount">–</div>
           <span>Skills to learn</span>
         </div>
 
@@ -125,25 +163,18 @@
       <div class="skill-grid">
 
         <div class="skill-box">
-          <h2>✅ Your Skills</h2>
-          <div class="skill-tags">
-            <span>HTML</span>
-            <span>CSS</span>
-            <span>JavaScript</span>
-            <span>Python</span>
-            <span>C#</span>
+          <div class="skill-box-header">
+            <h2 class="good"><i data-lucide="check-circle-2" style="color: #28a745;"></i> Your Skills</h2>
+            <button id="editSkillsBtn" class="edit-skills-btn" type="button" style="background-color: #90c4f9; color: rgb(0, 0, 0);  padding: 5px 5px; border-radius: 4px; cursor: pointer;">
+              <i data-lucide="plus" style="color: #003671; width: 16px; height: 16px;"></i> Edit 
+            </button>
           </div>
+          <div class="skill-list" id="haveSkills"><!-- populated by JS --></div>
         </div>
 
         <div class="skill-box">
-          <h2>❌ Missing Skills</h2>
-          <div class="skill-tags missing-tags">
-            <span>React</span>
-            <span>Node.js</span>
-            <span>Git</span>
-            <span>APIs</span>
-            <span>Databases</span>
-          </div>
+          <h2 class="missing"><i data-lucide="x-circle" style="color: #dc3545;"></i> Missing Skills</h2>
+          <div class="skill-list" id="missingSkills"><!-- populated by JS --></div>
         </div>
 
       </div>
@@ -151,7 +182,7 @@
       <!-- ROADMAP -->
       <div class="roadmap">
 
-        <h2>🛠️ Learning Roadmap</h2>
+        <h2><i data-lucide="wrench"></i> Learning Roadmap</h2>
 
         <div class="roadmap-items">
 
@@ -189,7 +220,38 @@
 
 </div>
 
+<div class="modal-overlay" id="skillsModalOverlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Edit Your Skills</h3>
+      <button id="closeSkillsModal" class="modal-close-btn" type="button">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-current-skills" id="modalSkillsList">
+        <!-- populated by JS -->
+      </div>
+
+      <input
+        type="text"
+        id="newSkillInput"
+        placeholder="Type a skill and press Enter..."
+        class="modal-skill-input"
+      />
+      <p class="modal-hint">Press Enter to add. Click × on a pill to remove.</p>
+    </div>
+
+    <div class="modal-footer">
+      <button id="doneSkillsBtn" class="btn-primary-modal" type="button">Done</button>
+    </div>
+  </div>
+</div>
 <script src="https://unpkg.com/lucide@latest"></script>
+<script>
+lucide.createIcons();
+</script>
+<script src="../js/skillGap.js"></script>
+<script src="../js/auth.js"></script>
 
 </body>
 </html>

@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
 
   /* ================= ELEMENTS ================= */
-
+  lucide.createIcons();
   const fileInput = document.getElementById("cvFileInput");
 
   const analyzeBtn = document.getElementById("analyzeBtn");

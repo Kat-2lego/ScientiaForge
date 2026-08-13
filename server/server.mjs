@@ -6,12 +6,19 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import WebSocket from "ws";
+import cvRoutes from "./cv-analyzer/routes/cvRoutes.js";
 
 /* =========================================================
    LOAD ENVIRONMENT VARIABLES
 ========================================================= */
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+
+const __dirname = path.dirname(__filename);
+
+dotenv.config({
+  path: path.join(__dirname, "../.env"),
+});
 
 const {
   SUPABASE_URL,
@@ -65,12 +72,6 @@ const APP_URL =
 /* =========================================================
    RESOLVE CLIENT FOLDER
 ========================================================= */
-
-const __filename =
-  fileURLToPath(import.meta.url);
-
-const __dirname =
-  path.dirname(__filename);
 
 const CLIENT_PATH =
   path.join(
@@ -245,6 +246,8 @@ app.use(
   express.static(CLIENT_PATH)
 );
 
+app.use("/api/cv", cvRoutes);
+
 /* =========================================================
    MAIN PAGE
 ========================================================= */
@@ -355,109 +358,271 @@ app.post(
    AUTH: SIGNUP
 ========================================================= */
 
-app.post(
-  "/api/auth/signup",
-  async (req, res) => {
-    const email =
-      typeof req.body.email === "string"
-        ? req.body.email.trim()
-        : "";
+app.post("/api/auth/signup", async (req, res) => {
+  const email =
+    typeof req.body.email === "string"
+      ? req.body.email.trim()
+      : "";
 
-    const password =
-      typeof req.body.password === "string"
-        ? req.body.password
-        : "";
+  const password =
+    typeof req.body.password === "string"
+      ? req.body.password
+      : "";
 
-    const firstNames =
-      typeof req.body.firstNames === "string"
-        ? req.body.firstNames.trim()
-        : "";
+  const firstNames =
+    typeof req.body.firstNames === "string"
+      ? req.body.firstNames.trim()
+      : "";
 
-    if (
-      !email ||
-      !password ||
-      !firstNames
-    ) {
+  if (!email || !password || !firstNames) {
+    return res.status(400).json({
+      error: "Email, password and name are required.",
+    });
+  }
+
+  if (password.length < 8) {
+    return res.status(400).json({
+      error: "Password must be at least 8 characters long.",
+    });
+  }
+
+  const nameParts = firstNames.split(/\s+/).filter(Boolean);
+  const firstName = nameParts[0] || "";
+  const lastName = nameParts.slice(1).join(" ");
+
+  const industry =
+    typeof req.body.industry === "string"
+      ? req.body.industry.trim()
+      : "";
+
+  const experienceLevel =
+    typeof req.body.experienceLevel === "string"
+      ? req.body.experienceLevel.trim()
+      : "";
+
+  const rolesTargeted =
+    Array.isArray(req.body.rolesTargeted)
+      ? req.body.rolesTargeted
+          .map((role) =>
+            typeof role === "string" ? role.trim() : ""
+          )
+          .filter(Boolean)
+      : [];
+
+  const skillsInterests =
+    Array.isArray(req.body.skillsInterests)
+      ? req.body.skillsInterests
+          .map((skill) =>
+            typeof skill === "string" ? skill.trim() : ""
+          )
+          .filter(Boolean)
+      : [];
+
+  if (
+    !industry ||
+    !experienceLevel ||
+    rolesTargeted.length === 0 ||
+    skillsInterests.length === 0
+  ) {
+    return res.status(400).json({
+      error:
+        "Industry, experience level, at least one role, and at least one skill are required.",
+    });
+  }
+
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+        },
+      },
+    });
+
+    if (error) {
       return res.status(400).json({
-        error:
-          "Email, password and name are required.",
+        error: error.message,
       });
     }
 
-    if (password.length < 8) {
+    if (!data.user) {
       return res.status(400).json({
-        error:
-          "Password must be at least 8 characters long.",
+        error: "Signup succeeded but no user object was returned.",
       });
     }
 
-    const nameParts =
-      firstNames
-        .split(/\s+/)
-        .filter(Boolean);
+    const userId = data.user.id;
 
-    const firstName =
-      nameParts[0] || "";
+    // Table users upsert
 
-    const lastName =
-      nameParts
-        .slice(1)
-        .join(" ");
-
-    try {
-      const {
-        data,
-        error,
-      } =
-        await supabase.auth.signUp({
+    const { error: usersInsertError } =
+      await databaseClient.from("users").upsert(
+        {
+          id: userId,
           email,
-          password,
-
-          options: {
-            data: {
-              first_name: firstName,
-              last_name: lastName,
-            },
-          },
-        });
-
-      if (error) {
-        return res.status(400).json({
-          error: error.message,
-        });
-      }
-
-      return res.status(201).json({
-        success: true,
-
-        message:
-          data.session
-            ? "Account created successfully."
-            : "Account created. Check your email to confirm your account.",
-
-        user: data.user
-          ? {
-              id: data.user.id,
-              email:
-                data.user.email,
-            }
-          : null,
-      });
-
-    } catch (error) {
-      console.error(
-        "❌ Signup error:",
-        error.message
+        },
+        { onConflict: "id" }
       );
 
+    if (usersInsertError) {
+      console.error(
+        "❌ Error inserting into public.users:",
+        usersInsertError
+      );
       return res.status(500).json({
-        error:
-          "An internal server error occurred.",
+        error: "Account created in auth, but failed to create user record.",
       });
     }
-  }
-);
 
+    let targetIndustry = industry;
+    if (industry === "Other") {
+      const customIndustry =
+        typeof req.body.sfCustomIndustry === "string"
+          ? req.body.sfCustomIndustry.trim()
+          : "";
+      if (customIndustry) {
+        targetIndustry = customIndustry;
+      }
+    }
+
+    const { error: profileInsertError } =
+      await databaseClient.from("user_profiles").upsert(
+        {
+          user_id: userId,
+          first_name: firstName || "User",
+          last_name: lastName || null,
+          target_industry: targetIndustry || null,
+          career_experience_level: experienceLevel || null,
+          target_roles: rolesTargeted,
+        },
+        { onConflict: "user_id" }
+      );
+
+    if (profileInsertError) {
+      console.error(
+        "❌ Error inserting into public.user_profiles:",
+        profileInsertError
+      );
+      return res.status(500).json({
+        error: "Account created, but failed to create profile.",
+      });
+    }
+
+    for (const skillName of skillsInterests) {
+      const cleaned = skillName.trim();
+      const normalized = cleaned.toLowerCase();
+
+      const category = [
+        "communication",
+        "stakeholder management",
+        "leadership",
+        "teamwork",
+        "problem solving",
+        "negotiation",
+        "conflict resolution",
+        "resource planning",
+      ].includes(normalized)
+        ? "Soft Skill"
+        : "Technical";
+
+      const { data: skillRows, error: skillUpsertError } =
+        await databaseClient
+          .from("skills")
+          .upsert(
+            {
+              name: cleaned,
+              normalized_name: normalized,
+              category,
+            },
+            { onConflict: "normalized_name" }
+          )
+          .select();
+
+      if (skillUpsertError) {
+        console.error(
+          "❌ Error upserting skill:",
+          skillName,
+          skillUpsertError
+        );
+        continue;
+      }
+
+      const skill = skillRows?.[0];
+      if (!skill) continue;
+
+      const { error: userSkillInsertError } =
+        await databaseClient.from("user_skills").insert({
+          user_id: userId,
+          skill_id: skill.skill_id,
+        });
+
+      if (userSkillInsertError) {
+        console.warn(
+          "⚠️ Error inserting into public.user_skills:",
+          userSkillInsertError.message
+        );
+      }
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: data.session
+        ? "Account created successfully."
+        : "Account created. Check your email to confirm your account.",
+      user: {
+        id: data.user.id,
+        email: data.user.email,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Signup error:", error.message);
+    return res.status(500).json({
+      error: "An internal server error occurred.",
+    });
+  }
+});
+/* =========================================================
+   AUTH: LOGOUT
+========================================================= */
+
+app.post("/api/auth/logout", async (req, res) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(400).json({ error: "No access token provided." });
+  }
+
+  const accessToken = authHeader.replace("Bearer ", "").trim();
+
+  if (!accessToken) {
+    return res.status(400).json({ error: "No access token provided." });
+  }
+
+  try {
+    if (!supabaseAdmin) {
+      // No service-role key configured — client-side token clearing is all we can do.
+      return res.status(200).json({
+        success: true,
+        message: "Logged out locally. Server-side session revocation unavailable.",
+      });
+    }
+
+    const { error } = await supabaseAdmin.auth.admin.signOut(accessToken);
+
+    if (error) {
+      console.warn("⚠️ Supabase signOut warning:", error.message);
+      // Still tell the client to proceed with local logout even if this fails.
+    }
+
+    return res.status(200).json({ success: true, message: "Logged out." });
+  } catch (error) {
+    console.error("❌ Logout error:", error.message);
+    return res.status(500).json({ error: "An internal server error occurred." });
+  }
+});
 /* =========================================================
    AUTH: CURRENT USER
 ========================================================= */
@@ -706,6 +871,227 @@ app.patch(
     }
   }
 );
+
+/* =========================================================
+   AUTH HELPER — resolve user from Bearer token
+========================================================= */
+
+async function getUserFromToken(req) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return null;
+  }
+
+  const accessToken = authHeader.replace("Bearer ", "").trim();
+  if (!accessToken) return null;
+
+  const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+
+  if (error || !user) return null;
+  return user;
+}
+
+async function requireAuth(req, res, next) {
+  const user = await getUserFromToken(req);
+
+  if (!user) {
+    return res.status(401).json({ error: "Not authenticated." });
+  }
+
+  req.userId = user.id;
+  next();
+}
+
+/* =========================================================
+   SKILL CATEGORY HELPER (shared with signup logic)
+========================================================= */
+
+const SOFT_SKILLS = [
+  "communication",
+  "stakeholder management",
+  "leadership",
+  "teamwork",
+  "problem solving",
+  "negotiation",
+  "conflict resolution",
+  "resource planning",
+];
+
+function categorizeSkill(normalizedName) {
+  return SOFT_SKILLS.includes(normalizedName) ? "Soft Skill" : "Technical";
+}
+
+/* =========================================================
+   SKILLS: GET MY SKILLS
+========================================================= */
+
+app.get("/api/skills/me", requireAuth, async (req, res) => {
+  try {
+    const { data, error } = await databaseClient
+      .from("user_skills")
+      .select("user_skill_id, level, years_exp, skills(skill_id, name, category)")
+      .eq("user_id", req.userId);
+
+    if (error) {
+      console.error("❌ Error fetching user_skills:", error);
+      return res.status(500).json({ error: "Failed to load your skills." });
+    }
+
+    const skills = data.map((row) => ({
+      user_skill_id: row.user_skill_id,
+      skill_id: row.skills?.skill_id,
+      name: row.skills?.name,
+      category: row.skills?.category,
+      level: row.level,
+      years_exp: row.years_exp,
+    }));
+
+    return res.status(200).json({ skills });
+  } catch (error) {
+    console.error("❌ /api/skills/me GET error:", error.message);
+    return res.status(500).json({ error: "An internal server error occurred." });
+  }
+});
+
+/* =========================================================
+   SKILLS: ADD A SKILL
+========================================================= */
+
+app.post("/api/skills/me", requireAuth, async (req, res) => {
+  const name = typeof req.body.name === "string" ? req.body.name.trim() : "";
+  const level = typeof req.body.level === "string" ? req.body.level : "beginner";
+
+  if (!name) {
+    return res.status(400).json({ error: "A skill name is required." });
+  }
+
+  const normalized = name.toLowerCase();
+  const category = categorizeSkill(normalized);
+
+  try {
+    const { data: skillRows, error: skillUpsertError } = await databaseClient
+      .from("skills")
+      .upsert(
+        { name, normalized_name: normalized, category },
+        { onConflict: "normalized_name" }
+      )
+      .select();
+
+    if (skillUpsertError) {
+      console.error("❌ Error upserting skill:", skillUpsertError);
+      return res.status(500).json({ error: "Failed to save the skill." });
+    }
+
+    const skill = skillRows?.[0];
+    if (!skill) {
+      return res.status(500).json({ error: "Skill could not be created." });
+    }
+
+    const { error: userSkillError } = await databaseClient
+      .from("user_skills")
+      .upsert(
+        { user_id: req.userId, skill_id: skill.skill_id, level },
+        { onConflict: "user_id,skill_id" }
+      );
+
+    if (userSkillError) {
+      console.error("❌ Error linking user_skills:", userSkillError);
+      return res.status(500).json({ error: "Failed to add the skill to your profile." });
+    }
+
+    return res.status(201).json({
+      success: true,
+      skill: { skill_id: skill.skill_id, name: skill.name, category: skill.category, level },
+    });
+  } catch (error) {
+    console.error("❌ /api/skills/me POST error:", error.message);
+    return res.status(500).json({ error: "An internal server error occurred." });
+  }
+});
+
+/* =========================================================
+   SKILLS: REMOVE A SKILL
+========================================================= */
+
+app.delete("/api/skills/me/:skillId", requireAuth, async (req, res) => {
+  const { skillId } = req.params;
+
+  if (!skillId) {
+    return res.status(400).json({ error: "skillId is required." });
+  }
+
+  try {
+    const { error } = await databaseClient
+      .from("user_skills")
+      .delete()
+      .eq("user_id", req.userId)
+      .eq("skill_id", skillId);
+
+    if (error) {
+      console.error("❌ Error deleting user_skill:", error);
+      return res.status(500).json({ error: "Failed to remove the skill." });
+    }
+
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("❌ /api/skills/me DELETE error:", error.message);
+    return res.status(500).json({ error: "An internal server error occurred." });
+  }
+});
+
+/* =========================================================
+   JOBS (placeholder — swap for a real job_roles table later)
+========================================================= */
+
+const jobRoles = [
+  { id: 1, title: "Software Engineer", requiredSkills: ["HTML", "CSS", "JavaScript", "React", "Node.js", "Git", "APIs", "Databases", "Python", "SQL"] },
+  { id: 2, title: "Frontend Developer", requiredSkills: ["HTML", "CSS", "JavaScript", "React", "Figma", "Git", "APIs"] },
+  { id: 3, title: "Full Stack Developer", requiredSkills: ["HTML", "CSS", "JavaScript", "React", "Node.js", "SQL", "Git", "APIs", "Databases"] },
+  { id: 4, title: "Data Analyst", requiredSkills: ["SQL", "Excel", "Python", "PowerBI", "Tableau", "Data Pipelines"] },
+];
+
+app.get("/api/jobs", (req, res) => {
+  return res.status(200).json({
+    jobs: jobRoles.map((job) => ({ id: job.id, title: job.title })),
+  });
+});
+
+/* =========================================================
+   SKILL GAP (placeholder matching — swap once real data exists)
+========================================================= */
+
+app.post("/api/skillgap", requireAuth, async (req, res) => {
+  const { jobId } = req.body;
+
+  const userSkillNames = Array.isArray(req.body.userSkillNames)
+    ? req.body.userSkillNames
+    : [];
+
+  const job = jobRoles.find((j) => j.id === Number(jobId));
+
+  if (!job) {
+    return res.status(404).json({ error: "Job not found." });
+  }
+
+  const userSkillsNormalized = new Set(
+    userSkillNames.map((s) => s.trim().toLowerCase())
+  );
+
+  const have = job.requiredSkills.filter((skill) =>
+    userSkillsNormalized.has(skill.toLowerCase())
+  );
+
+  const missing = job.requiredSkills.filter(
+    (skill) => !userSkillsNormalized.has(skill.toLowerCase())
+  );
+
+  const matchScore = job.requiredSkills.length
+    ? Math.round((have.length / job.requiredSkills.length) * 100)
+    : 0;
+
+  return res.status(200).json({ have, missing, matchScore });
+});
 
 /* =========================================================
    CAREER DISCOVERY

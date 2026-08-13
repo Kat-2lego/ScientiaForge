@@ -1,0 +1,1895 @@
+diff --git a/client/css/CareerDiscovery.css b/client/css/CareerDiscovery.css
+index e2f7400..3b2b044 100644
+--- a/client/css/CareerDiscovery.css
++++ b/client/css/CareerDiscovery.css
+@@ -46,27 +46,7 @@ main.main-content {
+   padding-bottom: 40px;
+ }
+ 
+-/* topbar */
+-.topbar {
+-  display: flex;
+-  justify-content: space-between;
+-  align-items: center;
+-  padding: 20px 40px;
+-  background: transparent;
+-}
+ 
+-/* search bar (from dashboard.css, but refined for career discovery) */
+-.searchbar {
+-  background: #fff;
+-  border: 1px solid var(--border);
+-  border-radius: 999px;
+-  min-height: 48px;
+-  padding: 0 16px;
+-  display: flex;
+-  align-items: center;
+-  gap: 10px;
+-  width: min(100%, 560px);
+-}
+ 
+ .searchbar i {
+   color: var(--muted);
+@@ -111,7 +91,7 @@ main.main-content {
+   display: grid;
+   grid-template-columns: 1fr 380px;
+   gap: 30px;
+-  padding: 0 40px;
++  padding:10px;
+   max-width: 1400px;
+   margin-top: 16px;
+ }
+diff --git a/client/css/Settings.css b/client/css/Settings.css
+index b849d74..7b2a6da 100644
+--- a/client/css/Settings.css
++++ b/client/css/Settings.css
+@@ -20,18 +20,18 @@
+     box-sizing: border-box;
+     font-family: 'Plus Jakarta Sans', sans-serif;
+ }
+-
+ body {
+-    background-color: var(--bg-body);
+-    color: var(--text-main);
+-    overflow: hidden;
++  background-color: var(--bg-body);
++  color: var(--text-main);
++  overflow-y: auto;
++  min-height: 100vh;
+ }
+-
+ .app-layout {
+-    display: flex;
+-    height: 100vh;
+-    padding: 16px; 
+-    gap: 20px;
++  display: flex;
++  min-height: 100vh;
++  padding: 16px;
++  gap: 20px;
++  align-items: flex-start;
+ }
+ 
+ 
+diff --git a/client/css/SkillGapAnalysis.css b/client/css/SkillGapAnalysis.css
+index 79e1ad0..7cacd1e 100644
+--- a/client/css/SkillGapAnalysis.css
++++ b/client/css/SkillGapAnalysis.css
+@@ -1,7 +1,7 @@
+ :root {
+-  --bg: #eef2f8;
+-  --panel: #f7f8fc;
+-  --card: #ffffff;
++  --bg: #f3f6fa;
++  --panel: #f3f6fa;
++  --card: #fafafa;
+   --text: #1f2a4b;
+   --muted: #7b86a7;
+   --line: #e8edf7;
+@@ -9,6 +9,7 @@
+   --blue-soft: #edf4ff;
+   --orange: #f2a43a;
+   --green: #9cc96b;
++  --border: #e2e8f0;
+   --shadow: 0 10px 24px rgba(31, 42, 75, 0.06);
+   --radius-lg: 18px;
+   --radius-xl: 24px;
+@@ -35,7 +36,7 @@ body {
+    SIDEBAR (UPDATED TO MATCH DASHBOARD)
+    ========================= */
+ .sidebar {
+-  background: linear-gradient(180deg, #f8fbff 0%, #f2f5fb 100%);
++  background: linear-gradient(135deg, #f0f4ff, #f8fbff);
+   border: 1px solid var(--line);
+   border-radius: var(--radius-xl);
+   padding: 20px 16px;
+@@ -119,6 +120,7 @@ body {
+    ========================= */
+ .main {
+   background: var(--panel);
++  border: 0.5px solid var(--border);
+   border-radius: var(--radius-xl);
+   padding: 20px;
+ }
+@@ -153,6 +155,7 @@ body {
+ .metric-card {
+   background: var(--card);
+   padding: 16px;
++  border: 1px solid rgb(232, 232, 232);
+   border-radius: var(--radius-lg);
+   box-shadow: var(--shadow);
+ }
+@@ -176,6 +179,7 @@ body {
+   background: var(--card);
+   padding: 16px;
+   border-radius: var(--radius-lg);
++  border: 1px solid rgb(232, 232, 232);
+   box-shadow: var(--shadow);
+ }
+ 
+@@ -218,7 +222,122 @@ body {
+   place-items: center;
+   border-radius: 50%;
+ }
++.skill-box-header {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++}
++
++.edit-skills-btn {
++  display: flex;
++  align-items: center;
++  gap: 4px;
++  font-size: 13px;
++  padding: 6px 12px;
++  border-radius: 8px;
++  border: 1px solid #dbe2ea;
++  background: #f5f7fa;
++  cursor: pointer;
++}
++
++.edit-skills-btn:hover {
++  background: #eef1f5;
++}
++
++.edit-skills-btn i {
++  width: 14px;
++  height: 14px;
++}
++
++.modal-overlay {
++  display: none;
++  position: fixed;
++  inset: 0;
++  background: rgba(15, 23, 42, 0.45);
++  align-items: center;
++  justify-content: center;
++  z-index: 1000;
++}
++
++.modal-overlay.open {
++  display: flex;
++}
++
++.modal-card {
++  background: #fff;
++  width: 420px;
++  max-width: 90vw;
++  max-height: 80vh;
++  border-radius: 14px;
++  padding: 20px;
++  display: flex;
++  flex-direction: column;
++  gap: 14px;
++  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
++}
++
++.modal-header {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++}
++
++.modal-close-btn {
++  background: none;
++  border: none;
++  font-size: 20px;
++  cursor: pointer;
++  line-height: 1;
++}
++
++.modal-current-skills {
++  display: flex;
++  flex-wrap: wrap;
++  gap: 8px;
++  max-height: 220px;
++  overflow-y: auto;
++}
++
++.modal-current-skills .modal-pill {
++  display: flex;
++  align-items: center;
++  gap: 6px;
++  background: #eef2ff;
++  color: #3730a3;
++  padding: 6px 10px;
++  border-radius: 999px;
++  font-size: 13px;
++}
++
++.modal-current-skills .modal-pill i,
++.modal-current-skills .modal-pill .remove-x {
++  cursor: pointer;
++  font-weight: bold;
++}
++
++.modal-skill-input {
++  width: 100%;
++  padding: 10px 12px;
++  border-radius: 8px;
++  border: 1px solid #dbe2ea;
++  font-size: 14px;
++}
++
++.modal-hint {
++  font-size: 12px;
++  color: #6b7280;
++  margin: 0;
++}
+ 
++.btn-primary-modal {
++  align-self: flex-end;
++  padding: 8px 18px;
++  border-radius: 8px;
++  border: none;
++  background: #3b82f6;
++  color: #fff;
++  cursor: pointer;
++}
+ /* RESPONSIVE */
+ @media (max-width: 900px) {
+   .skill-metrics,
+diff --git a/client/css/Suport.css b/client/css/Suport.css
+index 6c13cd7..8b2f8b7 100644
+--- a/client/css/Suport.css
++++ b/client/css/Suport.css
+@@ -7,6 +7,7 @@
+     --text-main: #334155;
+     --text-light: #64748b;
+     --bg-white: #ffffff;
++    --bg-main: #f3f6fa;
+     --border: #e2e8f0;
+     --glass-bg: rgba(255, 255, 255, 0.85);
+ }
+@@ -14,7 +15,7 @@
+ * { margin: 0; padding: 0; box-sizing: border-box; }
+ 
+ body {
+-    background-color: var(--bg-white);
++    background-color: var(--bg-main);
+     color: var(--text-main);
+     font-family: 'Plus Jakarta Sans', sans-serif;
+     overflow-x: hidden;
+diff --git a/client/css/cvDashboard.css b/client/css/cvDashboard.css
+index 58ea89d..ab4ac37 100644
+--- a/client/css/cvDashboard.css
++++ b/client/css/cvDashboard.css
+@@ -46,39 +46,15 @@ input {
+ 
+ /* ================= LAYOUT ================= */
+ 
+-.layout {
+-  width: 100%;
+-  max-width: 1600px;
+-  min-height: 100vh;
+-  margin: 0 auto;
+-  padding: 14px;
+-  display: grid;
+-  grid-template-columns: 290px minmax(0, 1fr);
+-  gap: 14px;
+-}
++
+ 
+ /* ================= SIDEBAR ================= */
+ 
+-.sidebar {
+-  min-height: calc(100vh - 28px);
+-  padding: 24px 18px;
+-  border: 1px solid var(--line);
+-  border-radius: var(--radius-xl);
+-  background:
+-    linear-gradient(
+-      180deg,
+-      #f8fbff 0%,
+-      #f2f5fb 100%
+-    );
+-  box-shadow: var(--shadow);
+-}
++
+ 
+ .logo {
+   margin-bottom: 24px;
+-  padding: 0 4px;
+-  font-size: 2rem;
+-  font-weight: 800;
+-  white-space: nowrap;
++
+ }
+ 
+ .logo-dark {
+@@ -91,119 +67,25 @@ input {
+ 
+ /* ================= NAVIGATION ================= */
+ 
+-.nav {
+-  display: flex;
+-  flex-direction: column;
+-  gap: 7px;
+-}
+ 
+-.nav-item {
+-  position: relative;
+-  min-height: 48px;
+-  padding: 0 13px;
+-  border: 0;
+-  border-radius: 13px;
+-  display: flex;
+-  align-items: center;
+-  gap: 12px;
+-  background: transparent;
+-  color: #425072;
+-  font-weight: 500;
+-  text-decoration: none;
+-  cursor: pointer;
+-  transition:
+-    background 0.2s ease,
+-    color 0.2s ease,
+-    transform 0.2s ease;
+-}
+ 
+-.nav-item svg {
+-  width: 22px;
+-  height: 22px;
+-  flex-shrink: 0;
+-}
+ 
+-.nav-item:hover {
+-  background: #edf3ff;
+-  color: var(--blue-dark);
+-  transform: translateX(2px);
+-}
+ 
+-.nav-item.active {
+-  background: #e8f0ff;
+-  color: #29477a;
+-}
+ 
+-.nav-item.active::before {
+-  content: "";
+-  position: absolute;
+-  top: 7px;
+-  bottom: 7px;
+-  left: -7px;
+-  width: 4px;
+-  border-radius: 999px;
+-  background: var(--blue);
+-}
+ 
+ /* ================= MAIN ================= */
+ 
+-.main {
+-  min-width: 0;
+-  padding: 20px;
+-  border: 1px solid var(--line);
+-  border-radius: var(--radius-xl);
+-  display: flex;
+-  flex-direction: column;
+-  gap: 18px;
+-  background:
+-    linear-gradient(
+-      180deg,
+-      #f9fbff 0%,
+-      #f5f7fb 100%
+-    );
+-  box-shadow: var(--shadow);
+-}
++
+ 
+ /* ================= TOP BAR ================= */
+ 
+-.topbar {
+-  min-height: 72px;
+-  display: flex;
+-  align-items: center;
+-  justify-content: space-between;
+-  gap: 18px;
+-}
+ 
+-.topbar-left,
+-.topbar-right {
+-  display: flex;
+-  align-items: center;
+-  gap: 14px;
+-}
+ 
+-.menu-btn {
+-  display: none;
+-  width: 44px;
+-  height: 44px;
+-  border: 1px solid var(--line);
+-  border-radius: 12px;
+-  background: var(--card);
+-  color: var(--text);
+-  cursor: pointer;
+-}
+ 
+-.searchbar {
+-  width: min(330px, 100%);
+-  height: 52px;
+-  padding: 0 17px;
+-  border: 1px solid var(--line);
+-  border-radius: 999px;
+-  display: flex;
+-  align-items: center;
+-  gap: 11px;
+-  background: var(--card);
+-  box-shadow: 0 5px 14px rgba(31, 42, 75, 0.04);
+-}
++
++
++
++
+ 
+ .searchbar svg {
+   width: 21px;
+@@ -224,22 +106,7 @@ input {
+   color: var(--muted);
+ }
+ 
+-.profile {
+-  display: flex;
+-  align-items: center;
+-  gap: 11px;
+-}
+ 
+-.avatar {
+-  width: 48px;
+-  height: 48px;
+-  border: 9px solid var(--card);
+-  border-radius: 50%;
+-  background: #efb477;
+-  box-shadow:
+-    0 0 0 1px var(--line),
+-    0 5px 14px rgba(31, 42, 75, 0.08);
+-}
+ 
+ /* ================= HERO ================= */
+ 
+diff --git a/client/css/dashboard.css b/client/css/dashboard.css
+index 31794ac..c9e0386 100644
+--- a/client/css/dashboard.css
++++ b/client/css/dashboard.css
+@@ -9,6 +9,7 @@
+   --cyan-light: #ecfeff;
+   --orange: #f97316;
+   --orange-light: #fff7ed;
++  --blue-dark: #2563eb;
+ 
+   --text: #1f2a4b;
+   --text-dark: #0f172a;
+@@ -40,10 +41,12 @@ body {
+   font-family: "Plus Jakarta Sans", "Inter", sans-serif;
+   background: var(--bg-main);
+   color: var(--text-main);
++  min-height: 100%;
+ }
+ 
+ body {
+   min-height: 100vh;
++  overflow-y: auto;
+ }
+ 
+ button,
+@@ -60,6 +63,7 @@ input {
+   padding: 14px;
+   max-width: 1600px;
+   margin: 0 auto;
++  align-items: start;
+ }
+ 
+ /* sidebar */
+@@ -73,6 +77,18 @@ input {
+   justify-content: space-between;
+   min-width: 0;
+   box-shadow: var(--shadow-sm);
++
++  position: sticky;
++  top: 14px;
++  height: calc(100vh - 28px);
++  overflow-y: auto;
++}
++.sidebar::-webkit-scrollbar {
++  width: 3px;
++}
++
++.sidebar::-webkit-scrollbar-thumb {
++  background: rgba(148, 163, 184, 0.22);
+ }
+ .nav-item {
+     text-decoration: none;
+@@ -124,12 +140,16 @@ input {
+ 
+ .nav-item:hover {
+   background: #edf3ff;
++  color: var(--blue-dark);
++  transform: translateX(2px);
+ }
+ 
+ .nav-item.active {
+   background: #e8f0ff;
++  color: #29477a;
+ }
+ 
++
+ .nav-item.active::before {
+   content: "";
+   position: absolute;
+@@ -201,6 +221,7 @@ input {
+   gap: 16px;
+   min-width: 0;
+   box-shadow: var(--shadow-sm);
++  
+ }
+ 
+ /* topbar */
+diff --git a/client/js/auth.js b/client/js/auth.js
+new file mode 100644
+index 0000000..90f6332
+--- /dev/null
++++ b/client/js/auth.js
+@@ -0,0 +1,31 @@
++// auth.js — shared across all pages with a sidebar/logout link
++
++const API_BASE = "http://localhost:5001/api";
++
++async function handleLogout(event) {
++  if (event) event.preventDefault();
++
++  const token = localStorage.getItem("sb-access-token");
++
++  try {
++    if (token) {
++      await fetch(`${API_BASE}/auth/logout`, {
++        method: "POST",
++        headers: {
++          Authorization: `Bearer ${token}`,
++        },
++      });
++    }
++  } catch (err) {
++    console.warn("Logout request failed, clearing session locally anyway:", err);
++  } finally {
++    localStorage.removeItem("sb-access-token");
++    window.location.href = "LogIn.html";
++  }
++}
++
++document.addEventListener("DOMContentLoaded", () => {
++  document.querySelectorAll('[data-label="Log Out"]').forEach((link) => {
++    link.addEventListener("click", handleLogout);
++  });
++});
+\ No newline at end of file
+diff --git a/client/js/skillGap.js b/client/js/skillGap.js
+index eed7321..fb702fa 100644
+--- a/client/js/skillGap.js
++++ b/client/js/skillGap.js
+@@ -1,89 +1,227 @@
+ document.addEventListener('DOMContentLoaded', () => {
+ 
+-// skillGap.js
++  const API_BASE = "http://localhost:5001/api";
+ 
+-    const API_BASE = "https://localhost:5001/api"; // adjust to your port
++  let currentSkills = [];   // [{skill_id, name, level, ...}]
++  let currentJobId = null;
+ 
+-    // ================= FETCH USER SKILLS =================
+-    async function fetchUserSkills() {
+-    const res = await fetch(`${API_BASE}/user/skills`);
+-    return await res.json();
++  // ================= AUTH HEADER HELPER =================
++  function getAuthHeaders(extra = {}) {
++    const token = localStorage.getItem("sb-access-token");
++
++    if (!token) {
++      window.location.href = "LogIn.html";
++      return extra;
+     }
+ 
+-    // ================= FETCH JOBS =================
+-    async function fetchJobs() {
++    return {
++      ...extra,
++      Authorization: `Bearer ${token}`,
++    };
++  }
++
++  // ================= FETCH USER SKILLS =================
++  async function fetchUserSkills() {
++    const res = await fetch(`${API_BASE}/skills/me`, {
++      headers: getAuthHeaders(),
++    });
++    if (!res.ok) throw new Error("Failed to load your skills.");
++    const data = await res.json();
++    return data.skills || [];
++  }
++
++  // ================= FETCH JOBS =================
++  async function fetchJobs() {
+     const res = await fetch(`${API_BASE}/jobs`);
+-    return await res.json();
+-    }
++    if (!res.ok) throw new Error("Failed to load jobs.");
++    const data = await res.json();
++    return data.jobs || [];
++  }
+ 
+-    // ================= CALL SKILL GAP API =================
+-    async function getSkillGap(userSkills, jobId) {
++  // ================= CALL SKILL GAP API =================
++  async function getSkillGap(skillNames, jobId) {
+     const res = await fetch(`${API_BASE}/skillgap`, {
+-        method: "POST",
+-        headers: {
+-        "Content-Type": "application/json"
+-        },
+-        body: JSON.stringify({
+-        userSkills: userSkills.map(s => s.name), // normalize
+-        jobId: jobId
+-        })
++      method: "POST",
++      headers: getAuthHeaders({ "Content-Type": "application/json" }),
++      body: JSON.stringify({ userSkillNames: skillNames, jobId }),
+     });
+-
++    if (!res.ok) throw new Error("Failed to compute skill gap.");
+     return await res.json();
++  }
++
++  // ================= ADD / REMOVE SKILL =================
++  async function addSkill(name) {
++    const res = await fetch(`${API_BASE}/skills/me`, {
++      method: "POST",
++      headers: getAuthHeaders({ "Content-Type": "application/json" }),
++      body: JSON.stringify({ name }),
++    });
++    if (!res.ok) {
++      const err = await res.json();
++      throw new Error(err.error || "Failed to add skill.");
+     }
++  }
+ 
+-    // ================= INITIALIZE PAGE =================
+-    async function initSkillGap() {
+-    const jobSelect = document.querySelector(".job-select");
+-
+-    const jobs = await fetchJobs();
+-    const userSkills = await fetchUserSkills();
+-
+-    // Populate dropdown
+-    jobs.forEach(job => {
+-        const option = document.createElement("option");
+-        option.value = job.id;
+-        option.textContent = job.title;
+-        jobSelect.appendChild(option);
++  async function removeSkill(skillId) {
++    const res = await fetch(`${API_BASE}/skills/me/${skillId}`, {
++      method: "DELETE",
++      headers: getAuthHeaders(),
+     });
+-
+-    // On job change
+-    jobSelect.addEventListener("change", async () => {
+-        const jobId = parseInt(jobSelect.value);
+-
+-        const result = await getSkillGap(userSkills, jobId);
+-
+-        updateUI(result);
++    if (!res.ok) throw new Error("Failed to remove skill.");
++  }
++
++  // ================= RENDER: MAIN PAGE =================
++  function renderHaveSkills() {
++    const container = document.getElementById("haveSkills");
++    container.innerHTML = "";
++    currentSkills.forEach((skill) => {
++      const span = document.createElement("span");
++      span.textContent = skill.name;
++      container.appendChild(span);
+     });
+-    }
++  }
+ 
+-    // ================= UPDATE UI =================
+-    function updateUI(data) {
+-    const { have, missing, matchScore } = data;
++  function renderGapResult(result) {
++    const { have, missing, matchScore } = result;
+ 
+     document.getElementById("matchScore").textContent = matchScore + "%";
+     document.getElementById("haveCount").textContent = have.length;
+     document.getElementById("missingCount").textContent = missing.length;
+ 
+-    const haveContainer = document.getElementById("haveSkills");
+     const missingContainer = document.getElementById("missingSkills");
+-
+-    haveContainer.innerHTML = "";
+     missingContainer.innerHTML = "";
+-
+-    have.forEach(skill => {
+-        const span = document.createElement("span");
+-        span.textContent = skill;
+-        haveContainer.appendChild(span);
++    missing.forEach((skill) => {
++      const span = document.createElement("span");
++      span.textContent = skill;
++      missingContainer.appendChild(span);
+     });
+-
+-    missing.forEach(skill => {
+-        const span = document.createElement("span");
+-        span.textContent = skill;
+-        missingContainer.appendChild(span);
++  }
++
++  async function refreshGapForCurrentJob() {
++    if (!currentJobId) return;
++    const skillNames = currentSkills.map((s) => s.name);
++    const result = await getSkillGap(skillNames, currentJobId);
++    renderGapResult(result);
++  }
++
++// ================= MODAL =================
++  const overlay = document.getElementById("skillsModalOverlay");
++  const modalList = document.getElementById("modalSkillsList");
++  const newSkillInput = document.getElementById("newSkillInput");
++
++  function renderModalSkills() {
++    modalList.innerHTML = "";
++    currentSkills.forEach((skill) => {
++      const pill = document.createElement("span");
++      pill.className = "modal-pill";
++      pill.innerHTML = `${skill.name} <span class="remove-x" data-id="${skill.skill_id}">&times;</span>`;
++      modalList.appendChild(pill);
+     });
++  }
++
++  function openModal() {
++    renderModalSkills();
++    overlay.classList.add("open");
++  }
++
++  function closeModal() {
++    overlay.classList.remove("open");
++    newSkillInput.value = "";
++  }
++
++  // Commits whatever's typed in the input, if anything. Returns true if it added something.
++  async function commitPendingSkill() {
++    const name = newSkillInput.value.trim();
++    if (!name) return false;
++
++    try {
++      await addSkill(name);
++      currentSkills = await fetchUserSkills();
++      newSkillInput.value = "";
++      renderModalSkills();
++      renderHaveSkills();
++      await refreshGapForCurrentJob();
++      return true;
++    } catch (err) {
++      alert(err.message);
++      return false;
++    }
++  }
++
++  document.getElementById("editSkillsBtn").addEventListener("click", openModal);
++
++  document.getElementById("closeSkillsModal").addEventListener("click", async () => {
++    await commitPendingSkill();
++    closeModal();
++  });
++
++  document.getElementById("doneSkillsBtn").addEventListener("click", async () => {
++    await commitPendingSkill();
++    closeModal();
++  });
++
++  overlay.addEventListener("click", async (e) => {
++    if (e.target !== overlay) return;
++    closeModal();
++  });
++
++  modalList.addEventListener("click", async (e) => {
++    if (!e.target.classList.contains("remove-x")) return;
++    const skillId = e.target.getAttribute("data-id");
++
++    try {
++      await removeSkill(skillId);
++      currentSkills = currentSkills.filter((s) => s.skill_id !== skillId);
++      renderModalSkills();
++      renderHaveSkills();
++      await refreshGapForCurrentJob();
++    } catch (err) {
++      alert(err.message);
++    }
++  });
++
++  newSkillInput.addEventListener("keydown", async (e) => {
++    if (e.key !== "Enter") return;
++    e.preventDefault();
++    await commitPendingSkill();
++  });
++
++  // ================= INITIALIZE PAGE =================
++  async function initSkillGap() {
++    const jobSelect = document.querySelector(".job-select");
++
++    try {
++      const [jobs, skills] = await Promise.all([
++        fetchJobs(),
++        fetchUserSkills(),
++      ]);
++
++      currentSkills = skills;
++      renderHaveSkills();
++
++      jobSelect.innerHTML = "";
++      jobs.forEach((job) => {
++        const option = document.createElement("option");
++        option.value = job.id;
++        option.textContent = job.title;
++        jobSelect.appendChild(option);
++      });
++
++      if (jobs.length > 0) {
++        currentJobId = jobs[0].id;
++        await refreshGapForCurrentJob();
++      }
++
++      jobSelect.addEventListener("change", async () => {
++        currentJobId = parseInt(jobSelect.value, 10);
++        await refreshGapForCurrentJob();
++      });
++
++    } catch (err) {
++      console.error("Skill Gap init error:", err);
++      alert(err.message || "Failed to load Skill Gap Analysis.");
+     }
++  }
+ 
+-    // ================= RUN =================
+-    initSkillGap();
++  initSkillGap();
+ });
+\ No newline at end of file
+diff --git a/client/pages/CareerDiscovery.html b/client/pages/CareerDiscovery.html
+index 4c79087..6f6c2cf 100644
+--- a/client/pages/CareerDiscovery.html
++++ b/client/pages/CareerDiscovery.html
+@@ -52,7 +52,7 @@
+             <span>Interview Simulator</span>
+           </a>
+ 
+-          <a class="nav-item" href="#" data-label="Skill Gap Analysis">
++          <a class="nav-item" href="SkillGapAnalysis.html" data-label="Skill Gap Analysis">
+             <i data-lucide="bar-chart-3"></i>
+             <span>Skill Gap Analysis</span>
+           </a>
+@@ -72,9 +72,9 @@
+             <span>Help/Support</span>
+           </a>
+ 
+-          <a class="nav-item" href="LogIn.html" data-label="Log Out">
++          <a class="nav-item" href="#" data-label="Log Out">            
+             <i data-lucide="log-out"></i>
+-            <span>Log Out</span>
++            <span>Logout</span>
+           </a>
+         </nav>
+       </div>
+@@ -366,6 +366,7 @@
+   <script>
+     lucide.createIcons();
+   </script>
++  <script src="../js/auth.js"></script>
+ 
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/client/pages/ContactUs.html b/client/pages/ContactUs.html
+index 5a548b0..3bfa61c 100644
+--- a/client/pages/ContactUs.html
++++ b/client/pages/ContactUs.html
+@@ -125,6 +125,6 @@
+             </div>
+         </div>
+     </section>
+-
++    <script src="../js/auth.js"></script>
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/client/pages/CvDashboard.html b/client/pages/CvDashboard.html
+index bc94198..53536f4 100644
+--- a/client/pages/CvDashboard.html
++++ b/client/pages/CvDashboard.html
+@@ -29,8 +29,7 @@
+     <aside class="sidebar" id="sidebar">
+       <div>
+         <div class="logo">
+-          <span class="logo-dark">Skill</span>
+-          <span class="logo-blue">Forge</span>
++          <span class="logo-dark">Skill</span><span class="logo-blue">Forge</span>
+         </div>
+ 
+         <nav class="nav">
+@@ -50,8 +49,8 @@
+           </a>
+ 
+           <a class="nav-item" href="../pages/InterviewSimulator.html">
+-            <i data-lucide="messages-square"></i>
+-            <span>Interview Practice</span>
++            <i data-lucide="mic"></i>
++            <span>Interview Simulator</span>
+           </a>
+ 
+           <a class="nav-item" href="../pages/skillGapAnalysis.html">
+@@ -74,7 +73,7 @@
+             <span>Help/support</span>
+           </a>
+ 
+-          <a class="nav-item" href="../pages/logout.html">
++          <a class="nav-item" href="#" data-label="Log Out">
+             <i data-lucide="log-out"></i>
+             <span>Logout</span>
+           </a>
+@@ -118,9 +117,11 @@
+         </div>
+ 
+         <div class="topbar-right">
++          <button class="icon-btn"><i data-lucide="bell"></i></button>
++          <button class="icon-btn"><i data-lucide="mail"></i></button>
++
+           <div class="profile">
+             <div class="avatar"></div>
+-
+             <div>
+               <div class="profile-name"></div>
+               <div class="profile-email"></div>
+@@ -1278,5 +1279,6 @@ Generated by SkillForge CV Analyzer
+ 
+     loadSavedProgress();
+   </script>
++  <script src="../js/auth.js"></script>
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/client/pages/Dashboard.html b/client/pages/Dashboard.html
+index 7c4feb4..e6ef0b6 100644
+--- a/client/pages/Dashboard.html
++++ b/client/pages/Dashboard.html
+@@ -61,9 +61,9 @@
+             <span>Help/Support</span>
+           </a>
+ 
+-          <a class="nav-item" href="LogIn.html" data-label="Log Out">
++          <a class="nav-item" href="" data-label="Log Out">
+             <i data-lucide="log-out"></i>
+-            <span>Log Out</span>
++            <span>Logout</span>
+           </a>
+         </nav>
+       </div>
+@@ -300,5 +300,6 @@
+ 
+   <script src="https://unpkg.com/lucide@latest"></script>
+   <script src="../js/dashboard.js"></script>
++  <script src="../js/auth.js"></script>
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/client/pages/InterviewSimulator.html b/client/pages/InterviewSimulator.html
+index e8ef18f..7176532 100644
+--- a/client/pages/InterviewSimulator.html
++++ b/client/pages/InterviewSimulator.html
+@@ -30,7 +30,7 @@
+         <a class="nav-item" href="ProgressTracker.html"><i data-lucide="activity"></i><span>Progress Tracker</span></a>
+         <a class="nav-item" href="Settings.html"><i data-lucide="settings"></i><span>Settings</span></a>
+         <a class="nav-item" href="Support.html"><i data-lucide="life-buoy"></i><span>Help/Support</span></a>
+-        <a class="nav-item" href="LogIn.html"><i data-lucide="log-out"></i><span>Log Out</span></a>
++        <a class="nav-item" href="" data-label="Log Out"><i data-lucide="log-out"></i><span>Logout</span></a>
+       </nav>
+     </div>
+     <div class="download-card">
+@@ -317,5 +317,6 @@
+     eng._draw(0);
+   });
+ </script>
++<script src="../js/auth.js"></script>
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/client/pages/ProgressTracker.html b/client/pages/ProgressTracker.html
+index a0b1e10..8bf4231 100644
+--- a/client/pages/ProgressTracker.html
++++ b/client/pages/ProgressTracker.html
+@@ -64,9 +64,9 @@
+             <span>Help/Support</span>
+           </a>
+ 
+-          <a class="nav-item" href="LogIn.html" data-label="Log Out">
++          <a class="nav-item" href="" data-label="Log Out">
+             <i data-lucide="log-out"></i>
+-            <span>Log Out</span>
++            <span>Logout</span>
+           </a>
+         </nav>
+       </div>
+@@ -218,6 +218,6 @@
+ 
+   <script src="https://unpkg.com/lucide@latest"></script>
+   <script src="../js/dashboard.js"></script>
+-
++  <script src="../js/auth.js"></script>
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/client/pages/Settings.html b/client/pages/Settings.html
+index e6480b2..0114622 100644
+--- a/client/pages/Settings.html
++++ b/client/pages/Settings.html
+@@ -61,9 +61,9 @@
+             <span>Help/Support</span>
+           </a>
+ 
+-          <a class="nav-item" href="LogIn.html" data-label="Log Out">
++          <a class="nav-item" href="" data-label="Log Out">
+             <i data-lucide="log-out"></i>
+-            <span>Log Out</span>
++            <span>Logout</span>
+           </a>
+         </nav>
+       </div>
+@@ -227,9 +227,9 @@
+                             <div class="setting-row">
+                                 <div class="setting-info">
+                                     <h4 class="text-danger">Sign Out</h4>
+-                                    <p>Securely log out of this device.</p>
++                                    <p>Securely logout of this device.</p>
+                                 </div>
+-                                <button class="btn-danger">
++                                <button class="btn-danger" onclick="handleLogout()">
+                                     <i data-lucide="log-out"></i> Sign Out
+                                 </button>
+                             </div>
+@@ -243,5 +243,6 @@
+     </div>
+ 
+     <script src="../js/settings.js"></script>
++    <script src="../js/auth.js"></script>
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/client/pages/SkillGapAnalysis.html b/client/pages/SkillGapAnalysis.html
+index 633b55b..b624068 100644
+--- a/client/pages/SkillGapAnalysis.html
++++ b/client/pages/SkillGapAnalysis.html
+@@ -5,6 +5,8 @@
+   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+   <title>SkillForge | Skill Gap Analysis</title>
+ 
++  <link rel="stylesheet" href="../css/dashboard.css">
++
+   <link rel="stylesheet" href="../css/skillGapAnalysis.css">
+   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+ </head>
+@@ -62,9 +64,9 @@
+           <span>Help/Support</span>
+         </a>
+ 
+-        <a class="nav-item" href="LogIn.html" data-label="Log Out">
++        <a class="nav-item" href="" data-label="Log Out">
+           <i data-lucide="log-out"></i>
+-          <span>Log Out</span>
++          <span>Logout</span>
+         </a>
+       </nav>
+     </div>
+@@ -81,7 +83,36 @@
+ 
+   <!-- ================= MAIN ================= -->
+   <main class="main">
++    <header class="topbar">
++        <div class="topbar-left">
++          <button class="menu-btn" id="menuBtn" aria-label="Open menu">
++            <i data-lucide="menu"></i>
++          </button>
++
++          <label class="searchbar">
++            <i data-lucide="search"></i>
++            <input
++              type="text"
++              id="searchInput"
++              placeholder="Search SkillForge..."
++              autocomplete="off"
++            />
++          </label>
++        </div>
++
++        <div class="topbar-right">
++          <button class="icon-btn"><i data-lucide="bell"></i></button>
++          <button class="icon-btn"><i data-lucide="mail"></i></button>
+ 
++          <div class="profile">
++            <div class="avatar"></div>
++            <div>
++              <div class="profile-name"></div>
++              <div class="profile-email"></div>
++            </div>
++          </div>
++        </div>
++      </header>
+     <section class="skill-dashboard">
+ 
+       <div class="skill-dashboard-header">
+@@ -91,11 +122,9 @@
+         </div>
+ 
+         <select class="job-select">
+-          <option>Software Engineer</option>
+-          <option>Frontend Developer</option>
+-          <option>Full Stack Developer</option>
+-          <option>Data Analyst</option>
++          <!-- options populated by JS -->
+         </select>
++
+       </div>
+ 
+       <!-- METRICS -->
+@@ -103,19 +132,19 @@
+ 
+         <div class="metric-card">
+           <h3>🎯 Match Score</h3>
+-          <div class="big-number">62%</div>
++          <div class="big-number" id="matchScore">–</div>
+           <span>Overall compatibility</span>
+         </div>
+ 
+         <div class="metric-card">
+           <h3>✅ Skills You Have</h3>
+-          <div class="big-number good">8</div>
++          <div class="big-number good" id="haveCount">–</div>
+           <span>Matched skills</span>
+         </div>
+ 
+         <div class="metric-card">
+           <h3>❌ Missing Skills</h3>
+-          <div class="big-number warn">5</div>
++          <div class="big-number warn" id="missingCount">–</div>
+           <span>Skills to learn</span>
+         </div>
+ 
+@@ -125,24 +154,21 @@
+       <div class="skill-grid">
+ 
+         <div class="skill-box">
+-          <h2>✅ Your Skills</h2>
+-          <div class="skill-tags">
+-            <span>HTML</span>
+-            <span>CSS</span>
+-            <span>JavaScript</span>
+-            <span>Python</span>
+-            <span>C#</span>
++          <div class="skill-box-header">
++            <h2>✅ Your Skills</h2>
++            <button id="editSkillsBtn" class="edit-skills-btn" type="button">
++              <i data-lucide="pencil"></i> Edit
++            </button>
++          </div>
++          <div class="skill-tags" id="haveSkills">
++            <!-- populated by JS -->
+           </div>
+         </div>
+ 
+         <div class="skill-box">
+           <h2>❌ Missing Skills</h2>
+-          <div class="skill-tags missing-tags">
+-            <span>React</span>
+-            <span>Node.js</span>
+-            <span>Git</span>
+-            <span>APIs</span>
+-            <span>Databases</span>
++          <div class="skill-tags missing-tags" id="missingSkills">
++            <!-- populated by JS -->
+           </div>
+         </div>
+ 
+@@ -189,10 +215,38 @@
+ 
+ </div>
+ 
++<div class="modal-overlay" id="skillsModalOverlay">
++  <div class="modal-card">
++    <div class="modal-header">
++      <h3>Edit Your Skills</h3>
++      <button id="closeSkillsModal" class="modal-close-btn" type="button">&times;</button>
++    </div>
++
++    <div class="modal-body">
++      <div class="modal-current-skills" id="modalSkillsList">
++        <!-- populated by JS -->
++      </div>
++
++      <input
++        type="text"
++        id="newSkillInput"
++        placeholder="Type a skill and press Enter..."
++        class="modal-skill-input"
++      />
++      <p class="modal-hint">Press Enter to add. Click × on a pill to remove.</p>
++    </div>
++
++    <div class="modal-footer">
++      <button id="doneSkillsBtn" class="btn-primary-modal" type="button">Done</button>
++    </div>
++  </div>
++</div>
+ <script src="https://unpkg.com/lucide@latest"></script>
+ <script>
+ lucide.createIcons();
+ </script>
++<script src="../js/skillGap.js"></script>
++<script src="../js/auth.js"></script>
+ 
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/client/pages/Support.html b/client/pages/Support.html
+index 94c9bc5..3d43a71 100644
+--- a/client/pages/Support.html
++++ b/client/pages/Support.html
+@@ -7,6 +7,8 @@
+ 
+     <link rel="stylesheet" href="../css/dashboard.css" />
+     <link rel="stylesheet" href="../css/Suport.css" />
++    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
++
+ 
+ 
+ </head>
+@@ -56,14 +58,14 @@
+                     <span>Settings</span>
+                 </a>
+ 
+-                <a class="nav-item active" href="#" data-label="Help & Support">
++                <a class="nav-item active" href="Support.html" data-label="Help & Support">
+                     <i data-lucide="life-buoy"></i>
+                     <span>Help/Support</span>
+                 </a>
+ 
+-                <a class="nav-item" href="LogIn.html" data-label="Log Out">
++                <a class="nav-item" href="" data-label="Log Out">
+                     <i data-lucide="log-out"></i>
+-                    <span>Log Out</span>
++                    <span>Logout</span>
+                 </a>
+                 </nav>
+             </div>
+@@ -103,7 +105,7 @@
+                 </div>
+             </header>
+ 
+-            <div class="container">
++            <div class="container" style="padding : 0.7%">
+                 <div class="contact-grid">
+                     
+                     <div class="contact-info">
+@@ -139,7 +141,6 @@
+                             <p>Follow our journey</p>
+                             <div class="social-icons">
+                                 <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+-                                <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+                                 <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                             </div>
+                         </div>
+@@ -187,4 +188,5 @@
+     <script src="https://unpkg.com/lucide@latest"></script>
+     <script src="../js/dashboard.js"></script>
+     <script src="../js//support.js"></script>
++    <script src="../js/auth.js"></script>
+ </html>
+\ No newline at end of file
+diff --git a/server/server.mjs b/server/server.mjs
+index 854d3af..c916de9 100644
+--- a/server/server.mjs
++++ b/server/server.mjs
+@@ -358,109 +358,271 @@ app.post(
+    AUTH: SIGNUP
+ ========================================================= */
+ 
+-app.post(
+-  "/api/auth/signup",
+-  async (req, res) => {
+-    const email =
+-      typeof req.body.email === "string"
+-        ? req.body.email.trim()
+-        : "";
++app.post("/api/auth/signup", async (req, res) => {
++  const email =
++    typeof req.body.email === "string"
++      ? req.body.email.trim()
++      : "";
++
++  const password =
++    typeof req.body.password === "string"
++      ? req.body.password
++      : "";
++
++  const firstNames =
++    typeof req.body.firstNames === "string"
++      ? req.body.firstNames.trim()
++      : "";
++
++  if (!email || !password || !firstNames) {
++    return res.status(400).json({
++      error: "Email, password and name are required.",
++    });
++  }
+ 
+-    const password =
+-      typeof req.body.password === "string"
+-        ? req.body.password
+-        : "";
++  if (password.length < 8) {
++    return res.status(400).json({
++      error: "Password must be at least 8 characters long.",
++    });
++  }
+ 
+-    const firstNames =
+-      typeof req.body.firstNames === "string"
+-        ? req.body.firstNames.trim()
+-        : "";
++  const nameParts = firstNames.split(/\s+/).filter(Boolean);
++  const firstName = nameParts[0] || "";
++  const lastName = nameParts.slice(1).join(" ");
++
++  const industry =
++    typeof req.body.industry === "string"
++      ? req.body.industry.trim()
++      : "";
++
++  const experienceLevel =
++    typeof req.body.experienceLevel === "string"
++      ? req.body.experienceLevel.trim()
++      : "";
++
++  const rolesTargeted =
++    Array.isArray(req.body.rolesTargeted)
++      ? req.body.rolesTargeted
++          .map((role) =>
++            typeof role === "string" ? role.trim() : ""
++          )
++          .filter(Boolean)
++      : [];
++
++  const skillsInterests =
++    Array.isArray(req.body.skillsInterests)
++      ? req.body.skillsInterests
++          .map((skill) =>
++            typeof skill === "string" ? skill.trim() : ""
++          )
++          .filter(Boolean)
++      : [];
++
++  if (
++    !industry ||
++    !experienceLevel ||
++    rolesTargeted.length === 0 ||
++    skillsInterests.length === 0
++  ) {
++    return res.status(400).json({
++      error:
++        "Industry, experience level, at least one role, and at least one skill are required.",
++    });
++  }
+ 
+-    if (
+-      !email ||
+-      !password ||
+-      !firstNames
+-    ) {
++  try {
++    const { data, error } = await supabase.auth.signUp({
++      email,
++      password,
++      options: {
++        data: {
++          first_name: firstName,
++          last_name: lastName,
++        },
++      },
++    });
++
++    if (error) {
+       return res.status(400).json({
+-        error:
+-          "Email, password and name are required.",
++        error: error.message,
+       });
+     }
+ 
+-    if (password.length < 8) {
++    if (!data.user) {
+       return res.status(400).json({
+-        error:
+-          "Password must be at least 8 characters long.",
++        error: "Signup succeeded but no user object was returned.",
+       });
+     }
+ 
+-    const nameParts =
+-      firstNames
+-        .split(/\s+/)
+-        .filter(Boolean);
+-
+-    const firstName =
+-      nameParts[0] || "";
++    const userId = data.user.id;
+ 
+-    const lastName =
+-      nameParts
+-        .slice(1)
+-        .join(" ");
++    // Table users upsert
+ 
+-    try {
+-      const {
+-        data,
+-        error,
+-      } =
+-        await supabase.auth.signUp({
++    const { error: usersInsertError } =
++      await databaseClient.from("users").upsert(
++        {
++          id: userId,
+           email,
+-          password,
++        },
++        { onConflict: "id" }
++      );
+ 
+-          options: {
+-            data: {
+-              first_name: firstName,
+-              last_name: lastName,
+-            },
+-          },
+-        });
++    if (usersInsertError) {
++      console.error(
++        "❌ Error inserting into public.users:",
++        usersInsertError
++      );
++      return res.status(500).json({
++        error: "Account created in auth, but failed to create user record.",
++      });
++    }
+ 
+-      if (error) {
+-        return res.status(400).json({
+-          error: error.message,
+-        });
++    let targetIndustry = industry;
++    if (industry === "Other") {
++      const customIndustry =
++        typeof req.body.sfCustomIndustry === "string"
++          ? req.body.sfCustomIndustry.trim()
++          : "";
++      if (customIndustry) {
++        targetIndustry = customIndustry;
+       }
++    }
+ 
+-      return res.status(201).json({
+-        success: true,
+-
+-        message:
+-          data.session
+-            ? "Account created successfully."
+-            : "Account created. Check your email to confirm your account.",
+-
+-        user: data.user
+-          ? {
+-              id: data.user.id,
+-              email:
+-                data.user.email,
+-            }
+-          : null,
+-      });
++    const { error: profileInsertError } =
++      await databaseClient.from("user_profiles").upsert(
++        {
++          user_id: userId,
++          first_name: firstName || "User",
++          last_name: lastName || null,
++          target_industry: targetIndustry || null,
++          career_experience_level: experienceLevel || null,
++          target_roles: rolesTargeted,
++        },
++        { onConflict: "user_id" }
++      );
+ 
+-    } catch (error) {
++    if (profileInsertError) {
+       console.error(
+-        "❌ Signup error:",
+-        error.message
++        "❌ Error inserting into public.user_profiles:",
++        profileInsertError
+       );
+-
+       return res.status(500).json({
+-        error:
+-          "An internal server error occurred.",
++        error: "Account created, but failed to create profile.",
+       });
+     }
++
++    for (const skillName of skillsInterests) {
++      const cleaned = skillName.trim();
++      const normalized = cleaned.toLowerCase();
++
++      const category = [
++        "communication",
++        "stakeholder management",
++        "leadership",
++        "teamwork",
++        "problem solving",
++        "negotiation",
++        "conflict resolution",
++        "resource planning",
++      ].includes(normalized)
++        ? "Soft Skill"
++        : "Technical";
++
++      const { data: skillRows, error: skillUpsertError } =
++        await databaseClient
++          .from("skills")
++          .upsert(
++            {
++              name: cleaned,
++              normalized_name: normalized,
++              category,
++            },
++            { onConflict: "normalized_name" }
++          )
++          .select();
++
++      if (skillUpsertError) {
++        console.error(
++          "❌ Error upserting skill:",
++          skillName,
++          skillUpsertError
++        );
++        continue;
++      }
++
++      const skill = skillRows?.[0];
++      if (!skill) continue;
++
++      const { error: userSkillInsertError } =
++        await databaseClient.from("user_skills").insert({
++          user_id: userId,
++          skill_id: skill.skill_id,
++        });
++
++      if (userSkillInsertError) {
++        console.warn(
++          "⚠️ Error inserting into public.user_skills:",
++          userSkillInsertError.message
++        );
++      }
++    }
++
++    return res.status(201).json({
++      success: true,
++      message: data.session
++        ? "Account created successfully."
++        : "Account created. Check your email to confirm your account.",
++      user: {
++        id: data.user.id,
++        email: data.user.email,
++      },
++    });
++  } catch (error) {
++    console.error("❌ Signup error:", error.message);
++    return res.status(500).json({
++      error: "An internal server error occurred.",
++    });
+   }
+-);
++});
++/* =========================================================
++   AUTH: LOGOUT
++========================================================= */
++
++app.post("/api/auth/logout", async (req, res) => {
++  const authHeader = req.headers.authorization;
+ 
++  if (!authHeader || !authHeader.startsWith("Bearer ")) {
++    return res.status(400).json({ error: "No access token provided." });
++  }
++
++  const accessToken = authHeader.replace("Bearer ", "").trim();
++
++  if (!accessToken) {
++    return res.status(400).json({ error: "No access token provided." });
++  }
++
++  try {
++    if (!supabaseAdmin) {
++      // No service-role key configured — client-side token clearing is all we can do.
++      return res.status(200).json({
++        success: true,
++        message: "Logged out locally. Server-side session revocation unavailable.",
++      });
++    }
++
++    const { error } = await supabaseAdmin.auth.admin.signOut(accessToken);
++
++    if (error) {
++      console.warn("⚠️ Supabase signOut warning:", error.message);
++      // Still tell the client to proceed with local logout even if this fails.
++    }
++
++    return res.status(200).json({ success: true, message: "Logged out." });
++  } catch (error) {
++    console.error("❌ Logout error:", error.message);
++    return res.status(500).json({ error: "An internal server error occurred." });
++  }
++});
+ /* =========================================================
+    AUTH: CURRENT USER
+ ========================================================= */
+@@ -710,6 +872,227 @@ app.patch(
+   }
+ );
+ 
++/* =========================================================
++   AUTH HELPER — resolve user from Bearer token
++========================================================= */
++
++async function getUserFromToken(req) {
++  const authHeader = req.headers.authorization;
++
++  if (!authHeader || !authHeader.startsWith("Bearer ")) {
++    return null;
++  }
++
++  const accessToken = authHeader.replace("Bearer ", "").trim();
++  if (!accessToken) return null;
++
++  const { data: { user }, error } = await supabase.auth.getUser(accessToken);
++
++  if (error || !user) return null;
++  return user;
++}
++
++async function requireAuth(req, res, next) {
++  const user = await getUserFromToken(req);
++
++  if (!user) {
++    return res.status(401).json({ error: "Not authenticated." });
++  }
++
++  req.userId = user.id;
++  next();
++}
++
++/* =========================================================
++   SKILL CATEGORY HELPER (shared with signup logic)
++========================================================= */
++
++const SOFT_SKILLS = [
++  "communication",
++  "stakeholder management",
++  "leadership",
++  "teamwork",
++  "problem solving",
++  "negotiation",
++  "conflict resolution",
++  "resource planning",
++];
++
++function categorizeSkill(normalizedName) {
++  return SOFT_SKILLS.includes(normalizedName) ? "Soft Skill" : "Technical";
++}
++
++/* =========================================================
++   SKILLS: GET MY SKILLS
++========================================================= */
++
++app.get("/api/skills/me", requireAuth, async (req, res) => {
++  try {
++    const { data, error } = await databaseClient
++      .from("user_skills")
++      .select("user_skill_id, level, years_exp, skills(skill_id, name, category)")
++      .eq("user_id", req.userId);
++
++    if (error) {
++      console.error("❌ Error fetching user_skills:", error);
++      return res.status(500).json({ error: "Failed to load your skills." });
++    }
++
++    const skills = data.map((row) => ({
++      user_skill_id: row.user_skill_id,
++      skill_id: row.skills?.skill_id,
++      name: row.skills?.name,
++      category: row.skills?.category,
++      level: row.level,
++      years_exp: row.years_exp,
++    }));
++
++    return res.status(200).json({ skills });
++  } catch (error) {
++    console.error("❌ /api/skills/me GET error:", error.message);
++    return res.status(500).json({ error: "An internal server error occurred." });
++  }
++});
++
++/* =========================================================
++   SKILLS: ADD A SKILL
++========================================================= */
++
++app.post("/api/skills/me", requireAuth, async (req, res) => {
++  const name = typeof req.body.name === "string" ? req.body.name.trim() : "";
++  const level = typeof req.body.level === "string" ? req.body.level : "beginner";
++
++  if (!name) {
++    return res.status(400).json({ error: "A skill name is required." });
++  }
++
++  const normalized = name.toLowerCase();
++  const category = categorizeSkill(normalized);
++
++  try {
++    const { data: skillRows, error: skillUpsertError } = await databaseClient
++      .from("skills")
++      .upsert(
++        { name, normalized_name: normalized, category },
++        { onConflict: "normalized_name" }
++      )
++      .select();
++
++    if (skillUpsertError) {
++      console.error("❌ Error upserting skill:", skillUpsertError);
++      return res.status(500).json({ error: "Failed to save the skill." });
++    }
++
++    const skill = skillRows?.[0];
++    if (!skill) {
++      return res.status(500).json({ error: "Skill could not be created." });
++    }
++
++    const { error: userSkillError } = await databaseClient
++      .from("user_skills")
++      .upsert(
++        { user_id: req.userId, skill_id: skill.skill_id, level },
++        { onConflict: "user_id,skill_id" }
++      );
++
++    if (userSkillError) {
++      console.error("❌ Error linking user_skills:", userSkillError);
++      return res.status(500).json({ error: "Failed to add the skill to your profile." });
++    }
++
++    return res.status(201).json({
++      success: true,
++      skill: { skill_id: skill.skill_id, name: skill.name, category: skill.category, level },
++    });
++  } catch (error) {
++    console.error("❌ /api/skills/me POST error:", error.message);
++    return res.status(500).json({ error: "An internal server error occurred." });
++  }
++});
++
++/* =========================================================
++   SKILLS: REMOVE A SKILL
++========================================================= */
++
++app.delete("/api/skills/me/:skillId", requireAuth, async (req, res) => {
++  const { skillId } = req.params;
++
++  if (!skillId) {
++    return res.status(400).json({ error: "skillId is required." });
++  }
++
++  try {
++    const { error } = await databaseClient
++      .from("user_skills")
++      .delete()
++      .eq("user_id", req.userId)
++      .eq("skill_id", skillId);
++
++    if (error) {
++      console.error("❌ Error deleting user_skill:", error);
++      return res.status(500).json({ error: "Failed to remove the skill." });
++    }
++
++    return res.status(200).json({ success: true });
++  } catch (error) {
++    console.error("❌ /api/skills/me DELETE error:", error.message);
++    return res.status(500).json({ error: "An internal server error occurred." });
++  }
++});
++
++/* =========================================================
++   JOBS (placeholder — swap for a real job_roles table later)
++========================================================= */
++
++const jobRoles = [
++  { id: 1, title: "Software Engineer", requiredSkills: ["HTML", "CSS", "JavaScript", "React", "Node.js", "Git", "APIs", "Databases", "Python", "SQL"] },
++  { id: 2, title: "Frontend Developer", requiredSkills: ["HTML", "CSS", "JavaScript", "React", "Figma", "Git", "APIs"] },
++  { id: 3, title: "Full Stack Developer", requiredSkills: ["HTML", "CSS", "JavaScript", "React", "Node.js", "SQL", "Git", "APIs", "Databases"] },
++  { id: 4, title: "Data Analyst", requiredSkills: ["SQL", "Excel", "Python", "PowerBI", "Tableau", "Data Pipelines"] },
++];
++
++app.get("/api/jobs", (req, res) => {
++  return res.status(200).json({
++    jobs: jobRoles.map((job) => ({ id: job.id, title: job.title })),
++  });
++});
++
++/* =========================================================
++   SKILL GAP (placeholder matching — swap once real data exists)
++========================================================= */
++
++app.post("/api/skillgap", requireAuth, async (req, res) => {
++  const { jobId } = req.body;
++
++  const userSkillNames = Array.isArray(req.body.userSkillNames)
++    ? req.body.userSkillNames
++    : [];
++
++  const job = jobRoles.find((j) => j.id === Number(jobId));
++
++  if (!job) {
++    return res.status(404).json({ error: "Job not found." });
++  }
++
++  const userSkillsNormalized = new Set(
++    userSkillNames.map((s) => s.trim().toLowerCase())
++  );
++
++  const have = job.requiredSkills.filter((skill) =>
++    userSkillsNormalized.has(skill.toLowerCase())
++  );
++
++  const missing = job.requiredSkills.filter(
++    (skill) => !userSkillsNormalized.has(skill.toLowerCase())
++  );
++
++  const matchScore = job.requiredSkills.length
++    ? Math.round((have.length / job.requiredSkills.length) * 100)
++    : 0;
++
++  return res.status(200).json({ have, missing, matchScore });
++});
++
+ /* =========================================================
+    CAREER DISCOVERY
+ ========================================================= */
