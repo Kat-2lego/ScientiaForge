@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import WebSocket from "ws";
+import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 import cvRoutes from "./cv-analyzer/routes/cvRoutes.js";
 
 /* =========================================================
@@ -273,6 +274,71 @@ app.get(
     });
   }
 );
+
+/* =========================================================
+   TEXT-TO-SPEECH (Edge TTS — free, human neural voices)
+========================================================= */
+
+const PERSONA_VOICES = {
+  "senior-engineer": { voice: "en-US-GuyNeural", rate: 1.0, pitch: "+0Hz" },
+  "hr-manager": { voice: "en-ZA-LeahNeural", rate: 0.97, pitch: "+10Hz" },
+  "product-manager": { voice: "en-GB-RyanNeural", rate: 1.0, pitch: "-5Hz" },
+  "consultant": { voice: "en-IN-NeerjaNeural", rate: 1.08, pitch: "+5Hz" },
+};
+
+const DEFAULT_VOICE = { voice: "en-US-AriaNeural", rate: 1.0, pitch: "+0Hz" };
+
+// Any custom/unknown persona still gets a consistent, distinct voice for
+// the whole session instead of always falling back to the same default.
+const FALLBACK_VOICE_POOL = [
+  "en-US-AriaNeural",
+  "en-US-DavisNeural",
+  "en-GB-SoniaNeural",
+  "en-AU-NatashaNeural",
+  "en-ZA-LukeNeural",
+  "en-IE-ConnorNeural",
+];
+
+function pickFallbackVoice(id) {
+  let h = 0;
+  for (const ch of String(id)) h = (h * 31 + ch.charCodeAt(0)) | 0;
+  const voice = FALLBACK_VOICE_POOL[Math.abs(h) % FALLBACK_VOICE_POOL.length];
+  return { voice, rate: 1.0, pitch: "+0Hz" };
+}
+
+app.post("/api/tts", async (req, res) => {
+  const text = typeof req.body.text === "string" ? req.body.text.trim() : "";
+  const personaId = typeof req.body.personaId === "string" ? req.body.personaId : "";
+
+  if (!text) {
+    return res.status(400).json({ error: "text is required." });
+  }
+
+  const voiceConfig =
+    PERSONA_VOICES[personaId] || (personaId ? pickFallbackVoice(personaId) : DEFAULT_VOICE);
+
+  try {
+    const tts = new MsEdgeTTS();
+    await tts.setMetadata(voiceConfig.voice, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+
+    const { audioStream } = await tts.toStream(text, {
+      rate: voiceConfig.rate,
+      pitch: voiceConfig.pitch,
+    });
+
+    res.setHeader("Content-Type", "audio/mpeg");
+
+    audioStream.on("error", (err) => {
+      console.error("❌ TTS stream error:", err.message);
+      if (!res.headersSent) res.status(500).end();
+    });
+
+    audioStream.pipe(res);
+  } catch (error) {
+    console.error("❌ TTS generation error:", error.message);
+    return res.status(500).json({ error: "TTS generation failed." });
+  }
+});
 
 /* =========================================================
    AUTH: LOGIN
@@ -1058,6 +1124,110 @@ app.get("/api/jobs", (req, res) => {
 });
 
 /* =========================================================
+   JOB TITLE SEARCH (for Interview Simulator target-role field)
+========================================================= */
+
+const JOB_CATEGORIES = {
+  "Technology": [
+    "Software Engineer", "Frontend Developer", "Backend Developer", "Full Stack Developer",
+    "Mobile Developer (iOS)", "Mobile Developer (Android)", "DevOps Engineer",
+    "Site Reliability Engineer", "Cloud Engineer", "Data Engineer", "Data Analyst",
+    "Data Scientist", "Machine Learning Engineer", "AI Engineer", "QA Engineer",
+    "Test Automation Engineer", "Database Administrator", "Systems Administrator",
+    "Network Engineer", "Cybersecurity Analyst", "Security Engineer", "IT Support Specialist",
+    "Technical Support Engineer", "Solutions Architect", "Software Architect",
+    "Engineering Manager", "Technical Lead", "Product Manager", "Product Owner",
+    "Scrum Master", "Systems Analyst", "UX Designer", "UI Designer", "Product Designer",
+    "UX Researcher", "Game Developer", "Embedded Systems Engineer", "Blockchain Developer",
+    "Data Warehouse Engineer", "BI Analyst", "ERP Consultant", "IT Auditor", "Technical Writer",
+    "Release Engineer", "Platform Engineer", "Integration Engineer",
+  ],
+
+  "Business & Finance": [
+    "Accountant", "Bookkeeper", "Financial Analyst", "Financial Advisor", "Auditor",
+    "Tax Consultant", "Investment Banker", "Actuary", "Credit Analyst", "Risk Analyst",
+    "Compliance Officer", "Treasury Analyst", "Payroll Administrator", "Business Analyst",
+    "Management Consultant", "Operations Manager", "Procurement Specialist",
+    "Supply Chain Analyst", "Logistics Coordinator", "Insurance Underwriter",
+  ],
+
+  "Sales & Marketing": [
+    "Sales Representative", "Sales Executive", "Account Manager", "Business Development Manager",
+    "Marketing Coordinator", "Digital Marketing Specialist", "SEO Specialist",
+    "Social Media Manager", "Content Marketer", "Brand Manager", "Market Research Analyst",
+    "Public Relations Specialist", "Copywriter", "Retail Sales Associate", "Sales Engineer",
+    "Customer Success Manager", "E-commerce Manager", "Event Coordinator",
+  ],
+
+  "Healthcare": [
+    "Registered Nurse", "Doctor / General Practitioner", "Pharmacist", "Physiotherapist",
+    "Occupational Therapist", "Dentist", "Dental Hygienist", "Radiographer",
+    "Medical Laboratory Technician", "Paramedic", "Clinical Psychologist", "Dietitian",
+    "Optometrist", "Veterinarian", "Healthcare Administrator", "Medical Sales Representative",
+    "Caregiver / Home Health Aide", "Speech Therapist",
+  ],
+
+  "Education": [
+    "Primary School Teacher", "High School Teacher", "Early Childhood Educator",
+    "University Lecturer", "Teaching Assistant", "School Principal", "Curriculum Developer",
+    "Special Education Teacher", "Tutor", "Education Consultant", "Librarian",
+    "Training and Development Specialist",
+  ],
+
+  "Legal": [
+    "Lawyer / Attorney", "Paralegal", "Legal Secretary", "Legal Advisor",
+    "Compliance Manager", "Contract Manager", "Notary", "Court Clerk",
+  ],
+
+  "Creative & Media": [
+    "Graphic Designer", "Video Editor", "Photographer", "Journalist", "Copywriter",
+    "Content Creator", "Illustrator", "Animator", "Sound Engineer", "Film Director",
+    "Fashion Designer", "Interior Designer", "Art Director",
+  ],
+
+  "Engineering & Skilled Trades": [
+    "Civil Engineer", "Mechanical Engineer", "Electrical Engineer", "Chemical Engineer",
+    "Industrial Engineer", "Structural Engineer", "Mining Engineer", "Environmental Engineer",
+    "Electrician", "Plumber", "Welder", "Carpenter", "HVAC Technician", "Mechanic",
+    "Construction Site Manager", "Quantity Surveyor", "Architect", "Draughtsman",
+  ],
+
+  "Hospitality, Retail & Service": [
+    "Chef", "Restaurant Manager", "Hotel Manager", "Waiter / Waitress", "Barista",
+    "Retail Store Manager", "Cashier", "Flight Attendant", "Travel Agent", "Tour Guide",
+    "Housekeeping Supervisor", "Event Planner",
+  ],
+
+  "Public Sector, Science & Other": [
+    "Police Officer", "Firefighter", "Social Worker", "Urban Planner",
+    "Environmental Scientist", "Biologist", "Chemist", "Physicist", "Research Scientist",
+    "Agricultural Specialist", "Human Resources Manager", "Recruiter", "Office Administrator",
+    "Executive Assistant", "Translator / Interpreter", "Pilot", "Truck Driver",
+  ],
+};
+
+const JOB_TITLES = [...new Set(Object.values(JOB_CATEGORIES).flat())];
+
+// A small, cross-industry sample shown before the user types anything —
+// picking one from most categories instead of always showing the same
+// handful of tech titles.
+const DEFAULT_JOB_SUGGESTIONS = [
+  "Software Engineer", "Registered Nurse", "Accountant", "High School Teacher",
+  "Marketing Coordinator", "Civil Engineer", "Lawyer / Attorney", "Graphic Designer",
+];
+
+app.get("/api/jobs/search", (req, res) => {
+  const q = typeof req.query.q === "string" ? req.query.q.trim().toLowerCase() : "";
+
+  if (!q) {
+    return res.status(200).json({ results: DEFAULT_JOB_SUGGESTIONS });
+  }
+
+  const results = JOB_TITLES.filter((title) => title.toLowerCase().includes(q)).slice(0, 8);
+  return res.status(200).json({ results });
+});
+
+/* =========================================================
    SKILL GAP (placeholder matching — swap once real data exists)
 ========================================================= */
 
@@ -1297,6 +1467,136 @@ Rules:
 }
 
 /* =========================================================
+   INTERVIEW DURATION HELPERS
+========================================================= */
+
+const MIN_INTERVIEW_MINUTES = 5;
+const MAX_INTERVIEW_MINUTES = 30;
+
+function clampInterviewMinutes(minutes) {
+  const n = Number(minutes);
+  if (!Number.isFinite(n)) return 15; // sensible default
+  return Math.min(MAX_INTERVIEW_MINUTES, Math.max(MIN_INTERVIEW_MINUTES, Math.round(n)));
+}
+
+// Question-count target: candidate can ask for a minimum of 5 questions
+// with no upper bound ("no limit" = null, meaning purely time-driven as
+// before). MAX_QUESTIONS_PER_SESSION below still applies as an internal
+// safety ceiling regardless of what the candidate requests.
+const MIN_TARGET_QUESTIONS = 5;
+
+function clampTargetQuestionCount(count) {
+  if (count === null || count === undefined || count === "") return null; // no limit
+  const n = Number(count);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return Math.max(MIN_TARGET_QUESTIONS, Math.round(n));
+}
+
+/* =========================================================
+   QUESTION GENERATION (shared by start + on-demand top-up)
+========================================================= */
+
+// Question objects now carry richer metadata so the frontend can:
+//  - show a suggested time budget (quant/engineering questions get longer)
+//  - render a plain-text diagram / given-data block for problems that need one
+//  - show a "final numeric answer" field when a specific number is expected
+function buildQuestionBatchPrompt(persona, job_role_id, question_type, { count, isOpening }) {
+  const base = buildPersonaPrompt(persona, job_role_id, question_type);
+
+  const structureInstructions = isOpening
+    ? `
+The FIRST question must be a warm opening question inviting the candidate to
+introduce themselves ("type": "intro", "answerFormat": "text", "diagram": null).
+
+The SECOND question must be a soft, human question about their interests or
+motivations, not technical ("type": "soft", "answerFormat": "text", "diagram": null).
+
+Any remaining questions in this batch of ${count} should be substantive
+${question_type === "technical" ? "technical" : "role-relevant"} questions,
+increasing gradually in depth.
+`
+    : `
+Continue the interview naturally from where it left off with ${count} more
+substantive ${question_type === "technical" ? "technical" : "role-relevant"}
+question(s), increasing gradually in depth. Do not repeat an icebreaker or
+soft/motivation question — the interview is already underway.
+`;
+
+  return `
+${base}
+
+Generate exactly ${count} interview question(s) as a JSON array.
+${structureInstructions}
+
+For technical, quantitative, or engineering-relevant roles, include
+questions that require the candidate to actually work through numbers,
+physics, or math to reach a concrete answer where appropriate — for example
+estimation problems, statistics/probability questions, system-design
+capacity math, or physics/statics/circuit problems for engineering roles.
+Base this on the target role and interview type — a behavioral/HR interview
+should stay mostly conversational, while a technical interview for an
+engineering, data, or quantitative role should include at least one such
+question when it fits naturally.
+
+For EACH question object, include:
+- "type": one of "intro", "soft", "conceptual", "quant", "engineering".
+- "suggestedTimeMinutes": a realistic whole number of minutes to budget —
+  1-2 for intro/soft questions, 2-3 for conceptual questions, 4-6 for
+  quant/engineering questions that require real calculation.
+- "answerFormat": "numeric" only when the expected answer is a specific
+  number the candidate should state explicitly; otherwise "text".
+- "diagram": when the question involves given data, measurements, forces,
+  a dataset, or a scenario that benefits from a simple visual, provide a
+  plain-text/ASCII diagram or a clearly labeled list of given values (e.g.
+  "Beam length: 4m\\nLoad: 500N at midpoint\\nSupports: pinned at both ends").
+  Otherwise set this to null. Never reference or describe an actual image
+  file — plain text only.
+
+Keep the tone natural and conversational, the way a real interviewer would.
+
+Return only a valid JSON array. Each item must use this exact structure:
+
+{
+  "id": "q1",
+  "text": "Question text",
+  "type": "conceptual",
+  "suggestedTimeMinutes": 3,
+  "answerFormat": "text",
+  "diagram": null
+}
+  `.trim();
+}
+
+async function generateQuestionBatch(persona, job_role_id, question_type, { count, isOpening }) {
+  const prompt = buildQuestionBatchPrompt(persona, job_role_id, question_type, { count, isOpening });
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const raw = await callGroq(prompt);
+    const match = raw.match(/\[[\s\S]*\]/);
+
+    if (!match) {
+      console.warn(`No interview-question JSON array on attempt ${attempt + 1}.`);
+      continue;
+    }
+
+    try {
+      const parsed = JSON.parse(match[0]);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    } catch (error) {
+      console.warn(`Question JSON parsing failed on attempt ${attempt + 1}.`);
+    }
+  }
+
+  return null;
+}
+
+// Internal safety cap — prevents runaway generation even for "no limit"
+// sessions if a client keeps requesting new questions indefinitely.
+const MAX_QUESTIONS_PER_SESSION = 200;
+
+/* =========================================================
    INTERVIEW: START SESSION
 ========================================================= */
 
@@ -1308,6 +1608,8 @@ app.post(
       job_role_id,
       question_type,
       persona,
+      duration_minutes,
+      question_count,
     } = req.body;
 
     if (
@@ -1320,75 +1622,31 @@ app.post(
       });
     }
 
+    const durationMinutes = clampInterviewMinutes(duration_minutes);
+    const targetQuestionCount = clampTargetQuestionCount(question_count);
+
     try {
-      const prompt = `
-${buildPersonaPrompt(
-  persona,
-  job_role_id,
-  question_type
-)}
+      const rawQuestions = await generateQuestionBatch(
+        persona,
+        job_role_id,
+        question_type,
+        { count: 3, isOpening: true }
+      );
 
-Generate exactly five interview questions.
-
-Return only a valid JSON array.
-
-Each item must use this structure:
-
-{
-  "id": "q1",
-  "text": "Question text"
-}
-      `.trim();
-
-      let questions = null;
-
-      for (
-        let attempt = 0;
-        attempt < 3;
-        attempt += 1
-      ) {
-        const raw =
-          await callGroq(prompt);
-
-        const match =
-          raw.match(/\[[\s\S]*\]/);
-
-        if (!match) {
-          console.warn(
-            `No interview-question JSON array on attempt ${
-              attempt + 1
-            }.`
-          );
-
-          continue;
-        }
-
-        try {
-          const parsed =
-            JSON.parse(match[0]);
-
-          if (
-            Array.isArray(parsed) &&
-            parsed.length > 0
-          ) {
-            questions = parsed;
-            break;
-          }
-
-        } catch (error) {
-          console.warn(
-            `Question JSON parsing failed on attempt ${
-              attempt + 1
-            }.`
-          );
-        }
-      }
-
-      if (!questions) {
+      if (!rawQuestions) {
         throw new Error(
           "Interview questions could not be generated."
         );
       }
+
+      const questions = rawQuestions.map((q, i) => ({
+        id: `q${i + 1}`,
+        text: q.text,
+        type: q.type || "conceptual",
+        suggestedTimeMinutes: Number(q.suggestedTimeMinutes) || 2,
+        answerFormat: q.answerFormat === "numeric" ? "numeric" : "text",
+        diagram: typeof q.diagram === "string" && q.diagram.trim() ? q.diagram : null,
+      }));
 
       const sessionId =
         `sess_${Date.now()}_${
@@ -1411,6 +1669,12 @@ Each item must use this structure:
 
           question_type:
             question_type || "hr",
+
+          duration_seconds:
+            durationMinutes * 60,
+
+          target_question_count:
+            targetQuestionCount,
 
           persona,
 
@@ -1478,6 +1742,12 @@ Each item must use this structure:
           sessionId,
 
         questions,
+
+        duration_seconds:
+          durationMinutes * 60,
+
+        target_question_count:
+          targetQuestionCount,
       });
 
     } catch (error) {
@@ -1495,6 +1765,75 @@ Each item must use this structure:
 );
 
 /* =========================================================
+   INTERVIEW: NEXT QUESTION (on-demand top-up — questions never run out)
+========================================================= */
+
+app.post(
+  "/api/interview/next-question",
+  async (req, res) => {
+    const { session_id } = req.body;
+
+    if (!session_id) {
+      return res.status(400).json({
+        error: "session_id is required.",
+      });
+    }
+
+    const session = sessions.get(session_id);
+
+    if (!session) {
+      return res.status(404).json({
+        error: "Interview session not found.",
+      });
+    }
+
+    if (session.questions.length >= MAX_QUESTIONS_PER_SESSION) {
+      // Extremely unlikely in practice at 10-30 min, but guards against a
+      // stuck client hammering this endpoint indefinitely.
+      return res.status(200).json({
+        question: session.questions[session.questions.length - 1],
+      });
+    }
+
+    try {
+      const rawQuestions = await generateQuestionBatch(
+        session.persona,
+        session.job_role_id,
+        session.question_type,
+        { count: 1, isOpening: false }
+      );
+
+      if (!rawQuestions) {
+        throw new Error("The next question could not be generated.");
+      }
+
+      const q = rawQuestions[0];
+      const question = {
+        id: `q${session.questions.length + 1}`,
+        text: q.text,
+        type: q.type || "conceptual",
+        suggestedTimeMinutes: Number(q.suggestedTimeMinutes) || 2,
+        answerFormat: q.answerFormat === "numeric" ? "numeric" : "text",
+        diagram: typeof q.diagram === "string" && q.diagram.trim() ? q.diagram : null,
+      };
+
+      session.questions.push(question);
+
+      return res.status(200).json({ question });
+    } catch (error) {
+      console.error(
+        "❌ Next-question error:",
+        error.message
+      );
+
+      return res.status(500).json({
+        error: error.message,
+      });
+    }
+  }
+);
+
+/* =========================================================
    INTERVIEW: ANSWER QUESTION
 ========================================================= */
 
@@ -1505,6 +1844,7 @@ app.post(
       session_id,
       question_id,
       user_answer,
+      final_answer,
       persona,
     } = req.body;
 
@@ -1560,6 +1900,11 @@ app.post(
         session.persona ||
         persona;
 
+      const finalAnswerText =
+        typeof final_answer === "string" && final_answer.trim()
+          ? final_answer.trim()
+          : null;
+
       const prompt = `
 ${buildPersonaPrompt(
   selectedPersona,
@@ -1569,11 +1914,16 @@ ${buildPersonaPrompt(
 
 Interview question:
 "${question.text}"
-
-Candidate answer:
+${question.diagram ? `\nGiven information / diagram:\n${question.diagram}\n` : ""}
+Candidate's working / answer:
 "${user_answer}"
+${finalAnswerText ? `\nCandidate's stated final numeric answer: ${finalAnswerText}` : ""}
 
-Evaluate the answer.
+Evaluate the answer${
+        question.answerFormat === "numeric"
+          ? ", including whether the final numeric answer is correct and whether the reasoning that led to it makes sense"
+          : ""
+      }.
 
 Return only a valid JSON object using this structure:
 
@@ -1643,6 +1993,9 @@ Every score must be a whole number from 1 to 10.
 
         user_answer:
           user_answer.trim(),
+
+        final_answer:
+          finalAnswerText,
 
         evaluation,
       });

@@ -40,28 +40,49 @@ document.addEventListener("DOMContentLoaded", () => {
   const webcamToggleBtn   = document.getElementById("webcamToggleBtn");
   const reportContainer   = document.getElementById("reportContainer");
 
+  // ── Duration + question-count + quant/diagram elements ────────────────────
+  const durationSlider       = document.getElementById("durationSlider");
+  const durationValue        = document.getElementById("durationValue");
+  const previewDurationText  = document.getElementById("previewDurationText");
+  const questionCountInput   = document.getElementById("questionCountInput");
+  const questionCountDecrement = document.getElementById("questionCountDecrement");
+  const questionCountIncrement = document.getElementById("questionCountIncrement");
+  const questionCountValue   = document.getElementById("questionCountValue");
+  const previewQuestionCountText = document.getElementById("previewQuestionCountText");
+  const questionTimeBadge    = document.getElementById("questionTimeBadge");
+  const diagramBox           = document.getElementById("diagramBox");
+  const diagramCopyBtn       = document.getElementById("diagramCopyBtn");
+  const webcamWrap           = document.getElementById("webcamWrap");
+  const diagramContent       = document.getElementById("diagramContent");
+  const finalAnswerWrap      = document.getElementById("finalAnswerWrap");
+  const finalAnswerInput     = document.getElementById("finalAnswerInput");
+
   // ── State ──────────────────────────────────────────────────────────────────
-  let currentType     = "hr";
-  let currentRole     = "any";
-  let session_id      = null;
-  let questions       = [];
-  let answers         = [];
-  let currentQIndex   = 0;
-  let timeLeft        = 600;
-  let timerInterval   = null;
-  let recognition     = null;
-  let isRecording     = false;
-  let finalTranscript = "";
-  let currentAudio    = null;
-  let isSpeaking      = false;
-  let webcamActive    = false;
+  let currentType      = "hr";
+  let currentRole      = "any";
+  let session_id       = null;
+  let questions        = [];
+  let answers          = [];
+  let currentQIndex    = 0;
+  let interviewMinutes     = 15;
+  let totalDurationSeconds = interviewMinutes * 60;
+  let timeLeft              = totalDurationSeconds;
+  let targetQuestionCount  = null; // null = no limit (time-based only)
+  let timerInterval    = null;
+  let recognition      = null;
+  let isRecording      = false;
+  let finalTranscript  = "";
+  let currentAudio     = null;
+  let isSpeaking       = false;
+  let webcamActive     = false;
+  let fetchingNextQuestion = false; // guards against duplicate top-up calls
 
   let currentPersona = {
     id:    "senior-engineer",
     name:  "Alex Chen",
     title: "Senior Engineer @ FAANG",
     style: "Direct, technical, expects precision.",
-    emoji: "👨‍💻",
+    icon:  "fa-solid fa-laptop-code",
   };
 
   // ── Engine instances ───────────────────────────────────────────────────────
@@ -154,15 +175,157 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // ── Role chips ─────────────────────────────────────────────────────────────
-  document.querySelectorAll(".roles-container .chip").forEach(chip => {
-    chip.addEventListener("click", () => {
-      document.querySelectorAll(".roles-container .chip").forEach(c => c.classList.remove("selected"));
-      chip.classList.add("selected");
-      currentRole = chip.dataset.role;
-      previewRoleText.textContent = chip.textContent;
-    });
+  // ── Duration slider (5-30 min) ─────────────────────────────────────────
+  function updateDurationDisplay() {
+    durationValue.textContent = `${interviewMinutes} min`;
+    if (previewDurationText) previewDurationText.textContent = `${interviewMinutes} minutes`;
+  }
+
+  durationSlider?.addEventListener("input", () => {
+    interviewMinutes = Number(durationSlider.value);
+    updateDurationDisplay();
   });
+
+  updateDurationDisplay();
+
+  // ── Number of questions (min 5, no upper limit) ──────────────────────────
+  const MIN_TARGET_QUESTIONS = 5;
+
+  function updateQuestionCountDisplay() {
+    const label = targetQuestionCount ? `${targetQuestionCount} questions` : "No limit";
+    if (questionCountValue) questionCountValue.textContent = label;
+    if (previewQuestionCountText) previewQuestionCountText.textContent = label;
+  }
+
+  questionCountInput?.addEventListener("input", () => {
+    const raw = questionCountInput.value.trim();
+    targetQuestionCount = raw === "" ? null : Math.max(MIN_TARGET_QUESTIONS, Math.round(Number(raw)) || MIN_TARGET_QUESTIONS);
+    updateQuestionCountDisplay();
+  });
+
+  // Snap back up to the minimum if the candidate types something below it
+  // and clicks away, without fighting them while they're still typing.
+  questionCountInput?.addEventListener("blur", () => {
+    if (questionCountInput.value.trim() === "") return;
+    const n = Number(questionCountInput.value);
+    if (Number.isFinite(n) && n < MIN_TARGET_QUESTIONS) {
+      questionCountInput.value = MIN_TARGET_QUESTIONS;
+      targetQuestionCount = MIN_TARGET_QUESTIONS;
+      updateQuestionCountDisplay();
+    }
+  });
+
+  // +/- stepper buttons — just move the number input and let its own
+  // "input" handler above do the actual state update, so there's exactly
+  // one place that owns the parsing logic.
+  questionCountDecrement?.addEventListener("click", () => {
+    const current = Number(questionCountInput.value) || MIN_TARGET_QUESTIONS;
+    questionCountInput.value = Math.max(MIN_TARGET_QUESTIONS, current - 1);
+    questionCountInput.dispatchEvent(new Event("input"));
+  });
+
+  questionCountIncrement?.addEventListener("click", () => {
+    const current = Number(questionCountInput.value) || MIN_TARGET_QUESTIONS;
+    questionCountInput.value = Math.max(MIN_TARGET_QUESTIONS, current + 1);
+    questionCountInput.dispatchEvent(new Event("input"));
+  });
+
+  updateQuestionCountDisplay();
+
+  // Copy the given-information/diagram block to the clipboard.
+  diagramCopyBtn?.addEventListener("click", async () => {
+    const text = diagramContent?.textContent || "";
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      const original = diagramCopyBtn.innerHTML;
+      diagramCopyBtn.innerHTML = '<i class="fa-solid fa-check"></i>';
+      setTimeout(() => { diagramCopyBtn.innerHTML = original; }, 1200);
+    } catch (err) {
+      console.warn("Could not copy diagram text:", err.message);
+    }
+  });
+
+  // ── Role search + custom entry ───────────────────────────────────────────
+  const roleSearchInput  = document.getElementById("roleSearchInput");
+  const roleSuggestions  = document.getElementById("roleSuggestions");
+  const roleSelectedChip = document.getElementById("roleSelectedChip");
+  const roleSelectedText = document.getElementById("roleSelectedText");
+  const roleClearBtn     = document.getElementById("roleClearBtn");
+
+  let roleSearchDebounce = null;
+
+  function selectRole(title) {
+    currentRole = title;
+    previewRoleText.textContent = title;
+    if (roleSelectedText) roleSelectedText.textContent = title;
+    roleSelectedChip?.classList.remove("hidden");
+    if (roleSearchInput) roleSearchInput.value = "";
+    hideSuggestions();
+  }
+
+  function clearRole() {
+    currentRole = "any";
+    previewRoleText.textContent = "Any";
+    roleSelectedChip?.classList.add("hidden");
+  }
+
+  function hideSuggestions() {
+    roleSuggestions?.classList.add("hidden");
+    if (roleSuggestions) roleSuggestions.innerHTML = "";
+  }
+
+  function renderSuggestions(results, query) {
+    if (!roleSuggestions) return;
+    roleSuggestions.innerHTML = "";
+
+    results.forEach((title) => {
+      const item = document.createElement("div");
+      item.className = "role-suggestion-item";
+      item.textContent = title;
+      item.addEventListener("click", () => selectRole(title));
+      roleSuggestions.appendChild(item);
+    });
+
+    if (query) {
+      const custom = document.createElement("div");
+      custom.className = "role-suggestion-item role-suggestion-custom";
+      custom.textContent = `Use "${query}" as my role`;
+      custom.addEventListener("click", () => selectRole(query));
+      roleSuggestions.appendChild(custom);
+    }
+
+    roleSuggestions.classList.toggle("hidden", roleSuggestions.children.length === 0);
+  }
+
+  roleSearchInput?.addEventListener("input", () => {
+    const query = roleSearchInput.value.trim();
+    clearTimeout(roleSearchDebounce);
+
+    roleSearchDebounce = setTimeout(async () => {
+      try {
+        const res  = await fetch(`/api/jobs/search?q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        renderSuggestions(data.results || [], query);
+      } catch (err) {
+        console.warn("Role search failed:", err.message);
+        renderSuggestions([], query);
+      }
+    }, 200);
+  });
+
+  roleSearchInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && roleSearchInput.value.trim()) {
+      e.preventDefault();
+      selectRole(roleSearchInput.value.trim());
+    }
+  });
+
+  roleSearchInput?.addEventListener("blur", () => {
+    setTimeout(hideSuggestions, 150); // allow click on a suggestion to register first
+  });
+
+  roleClearBtn?.addEventListener("click", clearRole);
 
   // ── Persona cards ──────────────────────────────────────────────────────────
   document.querySelectorAll(".persona-card").forEach(card => {
@@ -174,12 +337,13 @@ document.addEventListener("DOMContentLoaded", () => {
         name:  card.dataset.name,
         title: card.dataset.title,
         style: card.dataset.style,
-        emoji: card.dataset.emoji,
+        icon:  card.dataset.icon,
       };
-      document.getElementById("personaPreviewName").textContent     = currentPersona.name;
-      document.getElementById("personaPreviewTitle").textContent    = currentPersona.title;
-      document.getElementById("personaPreviewStyle").textContent    = currentPersona.style;
-      document.querySelector(".persona-preview-avatar").textContent = currentPersona.emoji;
+      document.getElementById("personaPreviewName").textContent  = currentPersona.name;
+      document.getElementById("personaPreviewTitle").textContent = currentPersona.title;
+      document.getElementById("personaPreviewStyle").textContent = currentPersona.style;
+      const previewIconEl = document.getElementById("personaPreviewIcon");
+      if (previewIconEl) previewIconEl.className = currentPersona.icon;
       previewPersona.textContent = currentPersona.name;
 
       // Switch avatar persona
@@ -190,9 +354,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // ── Reset ──────────────────────────────────────────────────────────────────
   resetBtn?.addEventListener("click", () => {
     document.querySelectorAll(".interview-type")[0].click();
-    document.querySelectorAll(".roles-container .chip").forEach(c => c.classList.remove("selected"));
-    currentRole = "any";
-    previewRoleText.textContent = "Any";
+    clearRole();
+    interviewMinutes = 15;
+    if (durationSlider) durationSlider.value = 15;
+    updateDurationDisplay();
+    targetQuestionCount = null;
+    if (questionCountInput) questionCountInput.value = "";
+    updateQuestionCountDisplay();
   });
 
   // ── Webcam toggle ──────────────────────────────────────────────────────────
@@ -202,8 +370,9 @@ document.addEventListener("DOMContentLoaded", () => {
       behaviorAnalyzer = null;
       webcamActive     = false;
       webcamVideo.srcObject = null;
-      webcamToggleBtn.textContent = "📷 Enable Webcam Analysis";
+      webcamToggleBtn.innerHTML = '<i class="fa-solid fa-video"></i> Enable Webcam Analysis';
       webcamToggleBtn.classList.remove("active");
+      webcamWrap?.classList.remove("is-live");
     } else {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
@@ -211,8 +380,9 @@ document.addEventListener("DOMContentLoaded", () => {
         behaviorAnalyzer      = new BehaviorAnalyzer(webcamVideo, webcamCanvas);
         await behaviorAnalyzer.start();
         webcamActive          = true;
-        webcamToggleBtn.textContent = "📷 Webcam Active";
+        webcamToggleBtn.innerHTML = '<i class="fa-solid fa-video"></i> Webcam Active';
         webcamToggleBtn.classList.add("active");
+        webcamWrap?.classList.add("is-live");
       } catch (e) {
         alert("Could not access webcam: " + e.message);
       }
@@ -277,7 +447,8 @@ document.addEventListener("DOMContentLoaded", () => {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id, job_role_id: currentRole === "any" ? null : currentRole,
-          question_type: currentType, persona: currentPersona }),
+          question_type: currentType, persona: currentPersona, duration_minutes: interviewMinutes,
+          question_count: targetQuestionCount }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to start");
@@ -287,6 +458,15 @@ document.addEventListener("DOMContentLoaded", () => {
       answers       = [];
       sessionAnswers= [];
       currentQIndex = 0;
+
+      // Server clamps duration (5-30 min) and question count (min 5) —
+      // use its authoritative values.
+      if (data.duration_seconds) {
+        totalDurationSeconds = data.duration_seconds;
+        timeLeft = data.duration_seconds;
+      }
+      targetQuestionCount = data.target_question_count ?? targetQuestionCount;
+      updateQuestionCountDisplay();
 
       if (interviewerName)  interviewerName.textContent  = currentPersona.name;
       if (interviewerTitle) interviewerTitle.textContent = currentPersona.title;
@@ -307,18 +487,23 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ── Timer ──────────────────────────────────────────────────────────────────
+  // timeLeft is set by the start-interview handler from the server's
+  // (clamped 10-30 min) duration_seconds before this is called.
   function startTimer() {
-    timeLeft = 600;
     if (timerInterval) clearInterval(timerInterval);
+    renderTimer();
     timerInterval = setInterval(() => {
       timeLeft--;
       if (timeLeft <= 0) { clearInterval(timerInterval); endInterview(); return; }
-      const m = Math.floor(timeLeft / 60).toString().padStart(2, "0");
-      const s = (timeLeft % 60).toString().padStart(2, "0");
-      timerEl.textContent = `${m}:${s}`;
-      if (timeLeft <= 120) timerEl.style.color = "#ea580c";
-      if (timeLeft <= 60)  timerEl.style.color = "#dc2626";
+      renderTimer();
     }, 1000);
+  }
+
+  function renderTimer() {
+    const m = Math.floor(timeLeft / 60).toString().padStart(2, "0");
+    const s = (timeLeft % 60).toString().padStart(2, "0");
+    timerEl.textContent = `${m}:${s}`;
+    timerEl.style.color = timeLeft <= 60 ? "#dc2626" : timeLeft <= 120 ? "#ea580c" : "";
   }
 
   // ── Display & speak question ───────────────────────────────────────────────
@@ -329,12 +514,80 @@ document.addEventListener("DOMContentLoaded", () => {
     currentQuestionEl.textContent = q.text;
     speakText(q.text);
 
-    const pct = ((currentQIndex + 1) / questions.length) * 100;
+    // Suggested time budget — longer for quant/engineering questions that
+    // need real calculation, shorter for icebreaker/soft ones.
+    if (questionTimeBadge) {
+      const mins = q.suggestedTimeMinutes || 2;
+      questionTimeBadge.innerHTML = `<i class="fa-regular fa-clock"></i> Suggested time: ${mins} min`;
+    }
+
+    // Diagram / given data — only for questions that include one.
+    if (diagramBox && diagramContent) {
+      if (q.diagram) {
+        diagramContent.textContent = q.diagram;
+        diagramBox.classList.remove("hidden");
+      } else {
+        diagramContent.textContent = "";
+        diagramBox.classList.add("hidden");
+      }
+    }
+
+    // Final numeric answer field — only for quant-style questions.
+    if (finalAnswerWrap) {
+      finalAnswerWrap.classList.toggle("hidden", q.answerFormat !== "numeric");
+    }
+    if (finalAnswerInput) finalAnswerInput.value = "";
+
+    // Progress reflects the question-count target when the candidate set
+    // one; otherwise it falls back to time elapsed against the chosen
+    // duration, since with no count set the question supply is open-ended.
     const fill = document.querySelector(".bar-fill");
     const lbl  = document.querySelector(".progress-label");
-    if (fill) fill.style.width = `${pct}%`;
-    if (lbl)  lbl.textContent  = `${currentQIndex + 1} of ${questions.length} questions`;
+
+    if (targetQuestionCount) {
+      const pct = Math.min(100, Math.max(0, ((currentQIndex + 1) / targetQuestionCount) * 100));
+      if (fill) fill.style.width = `${pct}%`;
+      if (lbl)  lbl.textContent  = `Question ${currentQIndex + 1} of ${targetQuestionCount}`;
+    } else {
+      const elapsed = totalDurationSeconds - timeLeft;
+      const pct = totalDurationSeconds > 0
+        ? Math.min(100, Math.max(0, (elapsed / totalDurationSeconds) * 100))
+        : 0;
+      if (fill) fill.style.width = `${pct}%`;
+      if (lbl)  lbl.textContent  = `Question ${currentQIndex + 1} · ${Math.round(pct)}% of interview time used`;
+    }
+
     transcript.value = "";
+
+    // Keep 1-2 questions buffered ahead in the background so advancing
+    // never has to stall on a network round trip.
+    maybeTopUpQuestions();
+  }
+
+  // Silently fetch and append another question ahead of time so the
+  // candidate is never left waiting when they advance.
+  async function maybeTopUpQuestions() {
+    if (fetchingNextQuestion) return;
+    if (questions.length - currentQIndex > 1) return; // buffer already healthy
+    if (timeLeft < 30) return; // not enough time left for it to matter
+    if (targetQuestionCount && questions.length >= targetQuestionCount) return; // target already covered
+
+    fetchingNextQuestion = true;
+    try {
+      const res  = await fetch("/api/interview/next-question", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ session_id }),
+      });
+      const data = await res.json();
+      if (res.ok && data.question) {
+        questions.push(data.question);
+      }
+    } catch (err) {
+      console.warn("Background question top-up failed:", err.message);
+    } finally {
+      fetchingNextQuestion = false;
+    }
   }
 
   // ── Submit Answer ──────────────────────────────────────────────────────────
@@ -348,19 +601,23 @@ document.addEventListener("DOMContentLoaded", () => {
     stopAudio();
 
     const q = questions[currentQIndex];
+    const finalAnswer = finalAnswerInput && !finalAnswerWrap.classList.contains("hidden")
+      ? finalAnswerInput.value.trim()
+      : "";
 
     try {
-      const feedbackData = await submitAnswer(session_id, q.id, answer, currentPersona);
+      const feedbackData = await submitAnswer(session_id, q.id, answer, finalAnswer, currentPersona);
       // Store enriched answer including score
       sessionAnswers.push({
         question_id:   q.id,
         question_text: q.text,
         answer,
+        finalAnswer,
         score:         feedbackData.overallScore,
         feedback:      feedbackData.feedback,
       });
-      answers.push({ question_id: q.id, question_text: q.text, answer, feedback: feedbackData });
-      advanceOrEnd();
+      answers.push({ question_id: q.id, question_text: q.text, answer, finalAnswer, feedback: feedbackData });
+      await advanceOrEnd();
     } catch (err) {
       alert("Could not submit answer: " + err.message);
     } finally {
@@ -369,27 +626,66 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  skipBtn.addEventListener("click", () => {
+  skipBtn.addEventListener("click", async () => {
     if (isRecording) stopRecording();
     stopAudio();
     sessionAnswers.push({ question_id: questions[currentQIndex].id,
       question_text: questions[currentQIndex].text, answer: null, score: null, feedback: null });
     answers.push({ question_id: questions[currentQIndex].id,
       question_text: questions[currentQIndex].text, answer: null, feedback: null });
-    advanceOrEnd();
+    await advanceOrEnd();
   });
 
-  function advanceOrEnd() {
+  // Advances to the next buffered question, fetching one on demand if the
+  // buffer has run dry but time remains — the candidate should never hit a
+  // dead end just because the initial batch is used up. Stops once the
+  // candidate's requested question-count target is reached, even if time
+  // is still left on the clock.
+  async function advanceOrEnd() {
     currentQIndex++;
-    if (currentQIndex < questions.length) updateQuestion();
-    else endInterview();
+
+    if (targetQuestionCount && currentQIndex >= targetQuestionCount) {
+      endInterview();
+      return;
+    }
+
+    if (currentQIndex < questions.length) {
+      updateQuestion();
+      return;
+    }
+
+    if (timeLeft > 20) {
+      currentQuestionEl.innerHTML = "<em>Preparing the next question…</em>";
+      if (diagramBox) diagramBox.classList.add("hidden");
+      if (questionTimeBadge) {
+        questionTimeBadge.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading…';
+      }
+
+      try {
+        const res  = await fetch("/api/interview/next-question", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ session_id }),
+        });
+        const data = await res.json();
+        if (res.ok && data.question) {
+          questions.push(data.question);
+          updateQuestion();
+          return;
+        }
+      } catch (err) {
+        console.warn("Could not fetch the next question:", err.message);
+      }
+    }
+
+    endInterview();
   }
 
-  async function submitAnswer(sid, question_id, user_answer, persona) {
+  async function submitAnswer(sid, question_id, user_answer, final_answer, persona) {
     const res  = await fetch("/api/interview/answer", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ session_id: sid, question_id, user_answer, persona }),
+      body: JSON.stringify({ session_id: sid, question_id, user_answer, final_answer, persona }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Answer submission failed");
@@ -478,10 +774,12 @@ document.addEventListener("DOMContentLoaded", () => {
     feedbackUI.classList.add("hidden");
     setupPanel.classList.remove("hidden");
     setupPanel.scrollIntoView({ behavior: "smooth" });
-    if (timerEl) { timerEl.textContent = "10:00"; timerEl.style.color = ""; }
+    if (timerEl) { timerEl.textContent = `${interviewMinutes}:00`; timerEl.style.color = ""; }
     const fill = document.querySelector(".bar-fill");
     if (fill) fill.style.width = "0%";
     if (reportContainer) reportContainer.innerHTML = "";
+    if (diagramBox) diagramBox.classList.add("hidden");
+    if (finalAnswerWrap) finalAnswerWrap.classList.add("hidden");
   });
 
 });

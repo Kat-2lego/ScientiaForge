@@ -66,140 +66,230 @@
 
     <div class="interview-dashboard">
       <div class="page-header">
-        <h1>Interview Simulator</h1>
-        <p>Practice with an AI interviewer — now with a talking avatar and behaviour analysis.</p>
+        <div class="page-header-icon"><i class="fa-solid fa-user-tie"></i></div>
+        <div>
+          <h1>Interview Simulator</h1>
+          <p>Practice with an AI interviewer — talking avatar, live voice, and a full behaviour report.</p>
+        </div>
       </div>
 
       <!-- ═══════════════════════════════════════════════════════════════════
            SETUP PANEL
       ════════════════════════════════════════════════════════════════════ -->
       <div id="setupPanel">
+        <div class="setup-grid">
 
-        <section class="interview-type-section">
-          <h3>Select Interview Type</h3>
-          <div class="interview-types">
-            <button class="interview-type active" data-type="hr">
-              <i class="fa-regular fa-user"></i><span>HR / Behavioral</span>
-            </button>
-            <button class="interview-type" data-type="technical">
-              <i class="fa-solid fa-code"></i><span>Technical</span>
-            </button>
-            <button class="interview-type" data-type="consulting">
-              <i class="fa-solid fa-briefcase"></i><span>Consulting & Case</span>
-            </button>
-          </div>
-        </section>
+          <div class="setup-main">
 
-        <section class="target-role-section">
-          <label>Target Role (Optional)</label>
-          <div class="chips-container roles-container">
-            <span class="chip" data-role="software-engineer">Software Engineer</span>
-            <span class="chip" data-role="data-analyst">Data Analyst</span>
-            <span class="chip" data-role="ux-designer">UX Designer</span>
-            <span class="chip" data-role="product-manager">Product Manager</span>
-          </div>
-        </section>
-
-        <!-- AI Persona — now shows avatar canvas preview -->
-        <section class="persona-section">
-          <h3>Choose Your Interviewer</h3>
-          <div class="persona-grid">
-
-            <button class="persona-card active"
-              data-persona="senior-engineer"
-              data-name="Alex Chen"
-              data-title="Senior Engineer @ FAANG"
-              data-style="Direct, technical, expects precision. Probes deep on system design and code quality."
-              data-emoji="👨‍💻">
-              <div class="persona-avatar-wrap">
-                <canvas class="persona-canvas" width="80" height="80"
-                  data-persona-id="senior-engineer"></canvas>
+            <section class="interview-type-section setup-card">
+              <h3><span class="section-icon"><i class="fa-solid fa-sliders"></i></span>Select Interview Type</h3>
+              <div class="interview-types">
+                <button class="interview-type active" data-type="hr">
+                  <span class="interview-type-icon"><i class="fa-regular fa-user"></i></span>
+                  <span>HR / Behavioral</span>
+                </button>
+                <button class="interview-type" data-type="technical">
+                  <span class="interview-type-icon"><i class="fa-solid fa-code"></i></span>
+                  <span>Technical</span>
+                </button>
+                <button class="interview-type" data-type="consulting">
+                  <span class="interview-type-icon"><i class="fa-solid fa-briefcase"></i></span>
+                  <span>Consulting & Case</span>
+                </button>
               </div>
-              <div class="persona-info"><strong>Alex Chen</strong><span>Senior Engineer</span></div>
-              <div class="persona-tag">Technical</div>
-            </button>
+            </section>
 
-            <button class="persona-card"
-              data-persona="hr-manager"
-              data-name="Sarah Okafor"
-              data-title="HR Manager, 10 yrs exp"
-              data-style="Warm but probing. Loves STAR-method answers. Cares about culture fit and soft skills."
-              data-emoji="👩‍💼">
-              <div class="persona-avatar-wrap">
-                <canvas class="persona-canvas" width="80" height="80"
-                  data-persona-id="hr-manager"></canvas>
-              </div>
-              <div class="persona-info"><strong>Sarah Okafor</strong><span>HR Manager</span></div>
-              <div class="persona-tag">Behavioral</div>
-            </button>
+            <div class="setup-card-row">
+              <!-- Interview duration — 5 to 30 minutes -->
+              <section class="duration-section setup-card">
+                <label for="durationSlider"><span class="section-icon"><i class="fa-regular fa-clock"></i></span>Interview Duration</label>
+                <div class="duration-control">
+                  <input
+                    type="range"
+                    id="durationSlider"
+                    min="5"
+                    max="30"
+                    step="5"
+                    value="15"
+                  />
+                  <span class="duration-value" id="durationValue">15 min</span>
+                </div>
+                <div class="range-scale"><span>5 min</span><span>30 min</span></div>
+                <span class="field-hint">Questions are generated as you go — you'll never run out of time to fill.</span>
+              </section>
 
-            <button class="persona-card"
-              data-persona="product-manager"
-              data-name="Jordan Lee"
-              data-title="Product Lead, ex-Google"
-              data-style="Strategic thinker. Asks about trade-offs, metrics, and product thinking."
-              data-emoji="🧠">
-              <div class="persona-avatar-wrap">
-                <canvas class="persona-canvas" width="80" height="80"
-                  data-persona-id="product-manager"></canvas>
-              </div>
-              <div class="persona-info"><strong>Jordan Lee</strong><span>Product Lead</span></div>
-              <div class="persona-tag">Product</div>
-            </button>
-
-            <button class="persona-card"
-              data-persona="consultant"
-              data-name="Priya Naidoo"
-              data-title="Consulting Partner, MBB"
-              data-style="Sharp and fast-paced. Uses case frameworks. Expects structured thinking."
-              data-emoji="📊">
-              <div class="persona-avatar-wrap">
-                <canvas class="persona-canvas" width="80" height="80"
-                  data-persona-id="consultant"></canvas>
-              </div>
-              <div class="persona-info"><strong>Priya Naidoo</strong><span>MBB Consultant</span></div>
-              <div class="persona-tag">Consulting</div>
-            </button>
-
-          </div>
-
-          <div class="persona-preview" id="personaPreview">
-            <div class="persona-preview-avatar">👨‍💻</div>
-            <div class="persona-preview-text">
-              <strong id="personaPreviewName">Alex Chen</strong>
-              <span id="personaPreviewTitle">Senior Engineer @ FAANG</span>
-              <p id="personaPreviewStyle">Direct, technical, expects precision.</p>
-            </div>
-          </div>
-        </section>
-
-        <section class="preview-section">
-          <div class="preview-card">
-            <h4>Interview Preview</h4>
-            <p>Type: <strong id="previewTypeText">Behavioral</strong></p>
-            <p>Role: <strong id="previewRoleText">Any</strong></p>
-            <p>Interviewer: <strong id="previewPersonaText">Alex Chen</strong></p>
-            <p>Duration: <strong>10–15 minutes</strong></p>
-
-            <!-- Webcam toggle in setup -->
-            <div class="webcam-option">
-              <button class="webcam-toggle-btn" id="webcamToggleBtn">
-                📷 Enable Webcam Analysis
-              </button>
-              <span class="webcam-hint">Optional — tracks eye contact &amp; presence for your report</span>
+              <!-- Number of questions — minimum 5, no upper limit -->
+              <section class="question-count-section setup-card">
+                <label for="questionCountInput"><span class="section-icon"><i class="fa-solid fa-list-ol"></i></span>Number of Questions</label>
+                <div class="question-count-control">
+                  <button type="button" class="stepper-btn" id="questionCountDecrement" aria-label="Decrease number of questions">
+                    <i class="fa-solid fa-minus"></i>
+                  </button>
+                  <input
+                    type="number"
+                    id="questionCountInput"
+                    min="5"
+                    step="1"
+                    placeholder="No limit"
+                  />
+                  <button type="button" class="stepper-btn" id="questionCountIncrement" aria-label="Increase number of questions">
+                    <i class="fa-solid fa-plus"></i>
+                  </button>
+                  <span class="question-count-value" id="questionCountValue">No limit</span>
+                </div>
+                <span class="field-hint">Minimum 5. Leave blank for no limit — the interview runs for the full duration instead.</span>
+              </section>
             </div>
 
-            <div class="preview-actions">
-              <button class="btn-secondary" id="resetBtn">
-                <i class="fa-regular fa-rotate-right"></i> Reset Options
-              </button>
-              <button class="btn-primary full" id="startBtn">
-                <i class="fa-solid fa-play"></i> Start Interview
-              </button>
-            </div>
-          </div>
-        </section>
+            <!-- Target role — searchable, with free-text custom entry -->
+            <section class="target-role-section setup-card">
+              <label><span class="section-icon"><i class="fa-solid fa-magnifying-glass"></i></span>Target Role <em>(optional)</em></label>
+              <div class="role-search-wrap">
+                <i class="fa-solid fa-magnifying-glass role-search-icon"></i>
+                <input
+                  type="text"
+                  id="roleSearchInput"
+                  class="role-search-input"
+                  placeholder="Search any role — e.g. Backend Developer, Data Scientist..."
+                  autocomplete="off"
+                />
+                <div class="role-suggestions hidden" id="roleSuggestions"></div>
+              </div>
+              <div class="role-selected-chip hidden" id="roleSelectedChip">
+                <i class="fa-solid fa-briefcase"></i>
+                <span id="roleSelectedText"></span>
+                <button type="button" id="roleClearBtn" aria-label="Clear selected role">&times;</button>
+              </div>
+            </section>
 
+            <!-- AI Persona — now shows avatar canvas preview -->
+            <section class="persona-section setup-card">
+              <h3><span class="section-icon"><i class="fa-solid fa-comments"></i></span>Choose Your Interviewer</h3>
+              <div class="persona-grid">
+
+                <button class="persona-card active"
+                  data-persona="senior-engineer"
+                  data-name="Alex Chen"
+                  data-title="Senior Engineer @ FAANG"
+                  data-style="Direct, technical, expects precision. Probes deep on system design and code quality."
+                  data-icon="fa-solid fa-laptop-code">
+                  <div class="persona-tag">Technical</div>
+                  <div class="persona-avatar-wrap">
+                    <canvas class="persona-canvas" width="80" height="80"
+                      data-persona-id="senior-engineer"></canvas>
+                  </div>
+                  <div class="persona-info"><strong>Alex Chen</strong><span>Senior Engineer</span></div>
+                </button>
+
+                <button class="persona-card"
+                  data-persona="hr-manager"
+                  data-name="Sarah Okafor"
+                  data-title="HR Manager, 10 yrs exp"
+                  data-style="Warm but probing. Loves STAR-method answers. Cares about culture fit and soft skills."
+                  data-icon="fa-solid fa-user-tie">
+                  <div class="persona-tag">Behavioral</div>
+                  <div class="persona-avatar-wrap">
+                    <canvas class="persona-canvas" width="80" height="80"
+                      data-persona-id="hr-manager"></canvas>
+                  </div>
+                  <div class="persona-info"><strong>Sarah Okafor</strong><span>HR Manager</span></div>
+                </button>
+
+                <button class="persona-card"
+                  data-persona="product-manager"
+                  data-name="Jordan Lee"
+                  data-title="Product Lead, ex-Google"
+                  data-style="Strategic thinker. Asks about trade-offs, metrics, and product thinking."
+                  data-icon="fa-solid fa-chart-line">
+                  <div class="persona-tag">Product</div>
+                  <div class="persona-avatar-wrap">
+                    <canvas class="persona-canvas" width="80" height="80"
+                      data-persona-id="product-manager"></canvas>
+                  </div>
+                  <div class="persona-info"><strong>Jordan Lee</strong><span>Product Lead</span></div>
+                </button>
+
+                <button class="persona-card"
+                  data-persona="consultant"
+                  data-name="Priya Naidoo"
+                  data-title="Consulting Partner, MBB"
+                  data-style="Sharp and fast-paced. Uses case frameworks. Expects structured thinking."
+                  data-icon="fa-solid fa-chess-knight">
+                  <div class="persona-tag">Consulting</div>
+                  <div class="persona-avatar-wrap">
+                    <canvas class="persona-canvas" width="80" height="80"
+                      data-persona-id="consultant"></canvas>
+                  </div>
+                  <div class="persona-info"><strong>Priya Naidoo</strong><span>MBB Consultant</span></div>
+                </button>
+
+              </div>
+
+              <div class="persona-preview" id="personaPreview">
+                <div class="persona-preview-avatar"><i class="fa-solid fa-laptop-code" id="personaPreviewIcon"></i></div>
+                <div class="persona-preview-text">
+                  <strong id="personaPreviewName">Alex Chen</strong>
+                  <span id="personaPreviewTitle">Senior Engineer @ FAANG</span>
+                  <p id="personaPreviewStyle">Direct, technical, expects precision.</p>
+                </div>
+              </div>
+            </section>
+
+          </div><!-- end .setup-main -->
+
+          <!-- Sticky summary — mirrors every choice made in the form above -->
+          <aside class="setup-summary">
+            <div class="preview-card">
+              <h4><i class="fa-solid fa-clipboard-check"></i> Interview Summary</h4>
+
+              <div class="summary-row">
+                <i class="fa-solid fa-sliders"></i>
+                <span class="summary-label">Type</span>
+                <strong id="previewTypeText">Behavioral</strong>
+              </div>
+              <div class="summary-row">
+                <i class="fa-solid fa-briefcase"></i>
+                <span class="summary-label">Role</span>
+                <strong id="previewRoleText">Any</strong>
+              </div>
+              <div class="summary-row">
+                <i class="fa-solid fa-comments"></i>
+                <span class="summary-label">Interviewer</span>
+                <strong id="previewPersonaText">Alex Chen</strong>
+              </div>
+              <div class="summary-row">
+                <i class="fa-regular fa-clock"></i>
+                <span class="summary-label">Duration</span>
+                <strong id="previewDurationText">15 minutes</strong>
+              </div>
+              <div class="summary-row">
+                <i class="fa-solid fa-list-ol"></i>
+                <span class="summary-label">Questions</span>
+                <strong id="previewQuestionCountText">No limit</strong>
+              </div>
+
+              <div class="ticket-divider" aria-hidden="true"><i class="fa-solid fa-ticket"></i></div>
+
+              <!-- Webcam toggle in setup -->
+              <div class="webcam-option">
+                <button class="webcam-toggle-btn" id="webcamToggleBtn">
+                  <i class="fa-solid fa-video"></i> Enable Webcam Analysis
+                </button>
+                <span class="webcam-hint">Optional — tracks eye contact &amp; presence for your report</span>
+              </div>
+
+              <div class="preview-actions">
+                <button class="btn-secondary" id="resetBtn">
+                  <i class="fa-regular fa-rotate-right"></i> Reset Options
+                </button>
+                <button class="btn-primary full" id="startBtn">
+                  <i class="fa-solid fa-play"></i> Start Interview
+                </button>
+              </div>
+            </div>
+          </aside>
+
+        </div><!-- end .setup-grid -->
       </div><!-- end #setupPanel -->
 
       <!-- ═══════════════════════════════════════════════════════════════════
@@ -209,7 +299,7 @@
 
         <div class="interview-header">
           <div class="interviewer-badge" id="interviewerBadge">
-            <!-- No emoji — show canvas avatar name instead -->
+            <span class="interviewer-live-dot"></span>
             <div class="interviewer-name-block">
               <strong id="interviewerName">Alex Chen</strong>
               <small id="interviewerTitle">Senior Engineer</small>
@@ -234,19 +324,36 @@
               </div>
             </div>
             <div class="question-bubble">
+              <div class="question-meta" id="questionMeta">
+                <span class="question-time-badge" id="questionTimeBadge">
+                  <i class="fa-regular fa-clock"></i> Suggested time: 2 min
+                </span>
+              </div>
               <p id="currentQuestion"><em>Loading question…</em></p>
             </div>
           </div>
 
           <!-- Candidate webcam + response -->
           <div class="candidate-panel">
-            <div class="webcam-wrap">
+            <div class="webcam-wrap" id="webcamWrap">
               <video id="webcamVideo" autoplay muted playsinline></video>
               <canvas id="webcamOverlay"></canvas>
+              <span class="live-badge" id="webcamLiveBadge"><span class="live-dot"></span>LIVE</span>
               <div class="webcam-placeholder" id="webcamPlaceholder">
                 <i class="fa-solid fa-user-tie"></i>
                 <span>Enable webcam for<br>body language analysis</span>
               </div>
+            </div>
+
+            <!-- Diagram / given data — only shown for questions that include one -->
+            <div class="diagram-box hidden" id="diagramBox">
+              <div class="diagram-box-label">
+                <span><i class="fa-solid fa-diagram-project"></i> Given information</span>
+                <button type="button" class="diagram-copy-btn" id="diagramCopyBtn" aria-label="Copy given information">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </div>
+              <pre id="diagramContent"></pre>
             </div>
 
             <div class="response-panel">
@@ -260,7 +367,14 @@
                 </button>
               </div>
               <textarea id="transcript" rows="6"
-                placeholder="Your spoken or typed answer will appear here…"></textarea>
+                placeholder="Your spoken or typed answer, or show your working here…"></textarea>
+
+              <!-- Final numeric answer — only shown for quant/numeric questions -->
+              <div class="final-answer-wrap hidden" id="finalAnswerWrap">
+                <label for="finalAnswerInput"><i class="fa-solid fa-equals"></i> Final numeric answer</label>
+                <input type="text" id="finalAnswerInput" class="final-answer-input"
+                  placeholder="e.g. 42 or 3.14" inputmode="decimal" autocomplete="off" />
+              </div>
             </div>
           </div>
 
