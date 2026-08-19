@@ -780,3 +780,30 @@ input {
     padding: 17px;
   }
 }
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.modal-box {
+  background: #fff;
+  padding: 24px 28px;
+  border-radius: 12px;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+.modal-box button {
+  margin-top: 16px;
+  padding: 8px 24px;
+  border-radius: 20px;
+  border: 2px solid #1a3c8f;
+  color: #1a3c8f;
+  background: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
