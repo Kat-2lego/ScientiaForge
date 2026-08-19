@@ -279,11 +279,21 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!roleSuggestions) return;
     roleSuggestions.innerHTML = "";
 
+    // Use mousedown + preventDefault (not click) so the search input never
+    // actually loses focus when a suggestion is picked. Previously this
+    // used "click", but clicking a non-focusable element still blurs
+    // whatever input currently has focus on mousedown — which fired our
+    // hide-on-blur handler and deleted the suggestion from the DOM before
+    // its own click event could land, making it look like it "just
+    // disappeared" instead of being selectable.
     results.forEach((title) => {
       const item = document.createElement("div");
       item.className = "role-suggestion-item";
       item.textContent = title;
-      item.addEventListener("click", () => selectRole(title));
+      item.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        selectRole(title);
+      });
       roleSuggestions.appendChild(item);
     });
 
@@ -291,7 +301,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const custom = document.createElement("div");
       custom.className = "role-suggestion-item role-suggestion-custom";
       custom.textContent = `Use "${query}" as my role`;
-      custom.addEventListener("click", () => selectRole(query));
+      custom.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        selectRole(query);
+      });
       roleSuggestions.appendChild(custom);
     }
 
