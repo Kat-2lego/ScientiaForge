@@ -170,6 +170,16 @@
         hidden
       />
 
+      <!-- TARGET ROLE INPUT (NEW) -->
+      <div class="target-role-field">
+        <label for="targetRoleInput">Target Role (optional)</label>
+        <input
+          type="text"
+          id="targetRoleInput"
+          placeholder="e.g. Frontend Developer"
+        />
+      </div>
+
       <!-- TOP SUMMARY -->
       <section class="stats-grid top-summary-grid">
 
@@ -446,12 +456,8 @@
     lucide.createIcons();
 
     const API_URL = "http://localhost:5001/api/cv/upload";
-
-    const PREVIOUS_SCORE_KEY =
-      "skillforgePreviousCvScore";
-
-    const CURRENT_SCORE_KEY =
-      "skillforgeCurrentCvScore";
+    const HISTORY_URL = "http://localhost:5001/api/cv/history";
+    const QUOTA_URL = "http://localhost:5001/api/cv/quota";
 
     const appState = {
       analysis: null
@@ -462,6 +468,7 @@
       menuBtn: document.getElementById("menuBtn"),
       searchInput: document.getElementById("searchInput"),
       fileInput: document.getElementById("cvFileInput"),
+      targetRoleInput: document.getElementById("targetRoleInput"),
 
       analyzeBtn: document.getElementById("analyzeBtn"),
       analyzeBtn2: document.getElementById("analyzeBtn2"),
@@ -527,6 +534,10 @@
         document.getElementById("currentBar")
     };
 
+    function getAuthToken() {
+      return localStorage.getItem("sb-access-token");
+    }
+
     function clampScore(value) {
       const score = Number(value);
 
@@ -551,6 +562,14 @@
     }
 
     function openFilePicker() {
+      const token = getAuthToken();
+
+      if (!token) {
+        alert("Please log in to upload a CV.");
+        window.location.href = "LogIn.html";
+        return;
+      }
+
       elements.fileInput.value = "";
       elements.fileInput.click();
     }
@@ -831,48 +850,43 @@
         `${current}%`;
     }
 
-    function loadSavedProgress() {
-      const previous =
-        localStorage.getItem(
-          PREVIOUS_SCORE_KEY
+    async function loadHistory() {
+      const token = getAuthToken();
+
+      if (!token) {
+        return;
+      }
+
+      try {
+        const response = await fetch(HISTORY_URL, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data = await response.json();
+        const history = data.history || [];
+
+        if (history.length === 0) {
+          renderProgress(0, 0);
+          return;
+        }
+
+        const current = history[0]?.overall_score || 0;
+        const previous = history[1]?.overall_score || 0;
+
+        renderProgress(previous, current);
+
+      } catch (error) {
+        console.error(
+          "Failed to load CV history:",
+          error
         );
-
-      const current =
-        localStorage.getItem(
-          CURRENT_SCORE_KEY
-        );
-
-      renderProgress(
-        previous || 0,
-        current || 0
-      );
-    }
-
-    function saveProgress(newScore) {
-      const oldCurrentScore =
-        clampScore(
-          localStorage.getItem(
-            CURRENT_SCORE_KEY
-          )
-        );
-
-      const currentScore =
-        clampScore(newScore);
-
-      localStorage.setItem(
-        PREVIOUS_SCORE_KEY,
-        String(oldCurrentScore)
-      );
-
-      localStorage.setItem(
-        CURRENT_SCORE_KEY,
-        String(currentScore)
-      );
-
-      renderProgress(
-        oldCurrentScore,
-        currentScore
-      );
+      }
     }
 
     function validateFile(file) {
@@ -965,16 +979,30 @@
       renderBreakdown(analysis);
       renderFeedback(analysis);
       renderQuickFixes(analysis);
-      saveProgress(analysis.score);
     }
 
     async function analyzeSelectedFile(file) {
       validateFile(file);
 
+      const token = getAuthToken();
+
+      if (!token) {
+        alert("Your session has expired. Please log in again.");
+        window.location.href = "LogIn.html";
+        return;
+      }
+
       const formData =
         new FormData();
 
       formData.append("file", file);
+
+      const targetRole =
+        elements.targetRoleInput?.value?.trim() || "";
+
+      if (targetRole) {
+        formData.append("targetRole", targetRole);
+      }
 
       setLoading(true);
 
@@ -983,6 +1011,9 @@
           API_URL,
           {
             method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`
+            },
             body: formData
           }
         );
@@ -1003,6 +1034,10 @@
         );
 
         if (!response.ok) {
+          if (data.code === "UPLOAD_LIMIT_REACHED") {
+            throw new Error(data.error);
+          }
+
           throw new Error(
             data.error ||
             data.message ||
@@ -1021,9 +1056,15 @@
         };
 
         renderAnalysis(analysis);
+        await loadHistory();
+
+        const usageNote =
+          data.uploadsLimit === -1
+            ? ""
+            : ` (${data.uploadsUsed}/${data.uploadsLimit} analyses used on your ${data.plan} plan)`;
 
         alert(
-          "✅ CV analyzed successfully."
+          `✅ CV analyzed successfully.${usageNote}`
         );
 
       } catch (error) {
@@ -1277,7 +1318,7 @@ Generated by SkillForge CV Analyzer
       }
     );
 
-    loadSavedProgress();
+    loadHistory();
   </script>
   <script src="../js/auth.js"></script>
 </body>
