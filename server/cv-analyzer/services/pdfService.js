@@ -1,6 +1,6 @@
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-const pdfParse = require("pdf-parse");
+const { PDFParse } = require("pdf-parse");
 import mammoth from "mammoth";
 
 export const extractTextFromFile = async (buffer, mimetype) => {
@@ -19,10 +19,19 @@ export const extractTextFromFile = async (buffer, mimetype) => {
     }
 
     // PDF
-    const data = await pdfParse(buffer);
-    console.log("📄 PDF TEXT LENGTH:", data.text?.length);
-    console.log("📄 PDF TEXT PREVIEW:", data.text?.slice(0, 300));
-    return data.text || "";
+    const parser = new PDFParse({ data: buffer });
+
+    try {
+      const textResult = await parser.getText();
+      const text = textResult?.text || "";
+
+      console.log("📄 PDF TEXT LENGTH:", text.length);
+      console.log("📄 PDF TEXT PREVIEW:", text.slice(0, 300));
+
+      return text;
+    } finally {
+      await parser.destroy();
+    }
 
   } catch (err) {
     console.error("File parse error:", err.message);
