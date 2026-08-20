@@ -72,6 +72,7 @@ body {
 
 .brand-name span {
   color: var(--color-cyan);
+  font-weight: 900;
 }
 
 /* DYNAMIC MULTI-STEP PAGINATION DOTINDICATORS */
