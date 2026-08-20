@@ -457,7 +457,7 @@
                             </a>
                         </div>
                       
-                        <div class="settings-card click-card mt-3 delete-account-card">
+                        <div id = "deleteAccountBtn" class="settings-card click-card mt-3 delete-account-card" onclick="openModal()">
                             <a href="#" class="setting-row link-row">
                                 <div class="setting-icon delete-icon"><i data-lucide="trash-2"></i></div>
                                 <div class="setting-info delete-info">
@@ -466,14 +466,38 @@
                                 </div>
                                 <i data-lucide="chevron-right" class="arrow-icon"></i>
                             </a>
-                        </div>            
+                        </div>   
+
                     </div>
                 </div>
             </div>
         </main>
 
     </div>
+    <!-- Modal -->
+  <div id="deleteModal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h2 id="modalTitle">Delete your account?</h2>
+      <p>
+        This action is permanent. All your data will be deleted and you will be logged out.
+      </p>
+      <div class="modal-actions">
+        <button id="cancelDeleteBtn" class="secondary-btn">Cancel</button>
+        <button id="confirmDeleteBtn" class="danger-btn">Delete Account</button>
+      </div>
+      <p id="deleteError" class="error-text" hidden></p>
+    </div>
+  </div>
 
+    <!-- Supabase client first -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        window.supabase = window.supabase.createClient(
+            'https://https://imozjvllleijknuimsde.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imltb3pqdmxsbGVpamtudWltc2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNzA4MzQsImV4cCI6MjA5MTc0NjgzNH0.ypgtyUrczofLQxG9gP-Z1SlKa3v68jAtUgdhtwz2swY'
+        );
+    </script>
     <script src="../js/settings.js"></script>
     <script src="../js/auth.js"></script>
 </body>

@@ -8,7 +8,7 @@ import { fileURLToPath } from "url";
 import WebSocket from "ws";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 import cvRoutes from "./cv-analyzer/routes/cvRoutes.js";
-
+import { dirname, join } from 'path';
 /* =========================================================
    LOAD ENVIRONMENT VARIABLES
 ========================================================= */
@@ -2330,3 +2330,47 @@ app.listen(
     );
   }
 );
+/* =========================================================
+   AUTH: DELETE ACCOUNT
+========================================================= */
+
+app.post('/api/delete-account', async (req, res) => {
+
+  console.log('DELETE ACCOUNT HIT');
+  res.json({ ok: true, debug: 'route reached' });
+  
+  try {
+    if (!supabaseAdmin) {
+      return res
+        .status(500)
+        .json({ error: 'Server not configured for account deletion' });
+    }
+
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const token = authHeader.slice(7);
+
+    // Verify token and get user
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !user) {
+      return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+
+    const userId = user.id;
+
+    // Delete user via admin client
+    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    if (deleteError) {
+      console.error('Supabase delete error:', deleteError);
+      return res.status(500).json({ error: 'Failed to delete account' });
+    }
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
