@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/payments.css">
+<script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 
@@ -23,32 +24,19 @@
 
     <div class="spec-card">
       <div class="eyebrow">Order spec / 001</div>
-      <div class="plan-name">Practitioner plan</div>
-      <div class="plan-desc">Unlimited CV Uploads, Analysis, Unlimited Interview Sessions, Seggestions Taylored for You.</div>
-
-      <div class="cycle-toggle">
-        <button type="button" class="active" data-cycle="monthly" data-price="39">Monthly</button>
-        <button type="button" data-cycle="annual" data-price="29">Annual <span class="save-tag">save 26%</span></button>
-      </div>
+      <div class="plan-name">Premium plan</div>
+      <div class="plan-desc">Unlimited CV Uploads, Analysis, Unlimited Interview Sessions, Suggestions Tailored for You.</div>
 
       <div class="line-items">
         <div class="line-item">
-          <span>Practitioner, <span id="cycleText">billed monthly</span></span>
-          <span id="basePrice">$39.00</span>
-        </div>
-        <div class="line-item discount" id="discountRow" style="display:none;">
-          <span>Annual discount</span>
-          <span id="discountValue">−$120.00</span>
-        </div>
-        <div class="line-item">
-          <span>Estimated tax</span>
-          <span id="taxValue">$3.12</span>
+          <span>Premium, once-off</span>
+          <span id="basePrice">R149.00</span>
         </div>
       </div>
 
       <div class="total-row">
         <span class="total-label">Due today</span>
-        <span class="total-value"><sup>$</sup><span id="totalValue">42.12</span></span>
+        <span class="total-value"><sup>R</sup><span id="totalValue">149.00</span></span>
       </div>
     </div>
 
@@ -96,26 +84,15 @@
           <div class="error-msg">Enter the name on your card.</div>
         </div>
 
+        <!--
+          Stripe Elements mounts its own secure card iframe here.
+          Card number, expiry, and CVC are entered inside Stripe's iframe —
+          this page's JS never sees or touches the raw values.
+        -->
         <div class="field" id="field-card">
-          <label for="cardnumber">Card number</label>
-          <div class="card-field-wrap">
-            <input type="text" id="cardnumber" placeholder="4242 4242 4242 4242" inputmode="numeric" maxlength="19" autocomplete="cc-number">
-            <span class="card-brand" id="cardBrand">card</span>
-          </div>
-          <div class="error-msg">Enter a valid 16-digit card number.</div>
-        </div>
-
-        <div class="field-row">
-          <div class="field" id="field-expiry">
-            <label for="expiry">Expiry</label>
-            <input type="text" id="expiry" placeholder="MM / YY" inputmode="numeric" maxlength="7" autocomplete="cc-exp">
-            <div class="error-msg">Use MM / YY format.</div>
-          </div>
-          <div class="field" id="field-cvc">
-            <label for="cvc">CVC</label>
-            <input type="text" id="cvc" placeholder="123" inputmode="numeric" maxlength="4" autocomplete="cc-csc">
-            <div class="error-msg">3 or 4 digit security code.</div>
-          </div>
+          <label for="card-element">Card details</label>
+          <div id="card-element" class="card-field-wrap"></div>
+          <div id="card-errors" class="error-msg" role="alert"></div>
         </div>
       </fieldset>
 
@@ -128,7 +105,7 @@
       </div>
 
       <button type="submit" class="submit" id="submitBtn">
-        <span id="submitLabel">Forge my plan — $42.12</span>
+        <span id="submitLabel">Forge my plan — R149.00</span>
       </button>
 
       <div class="secure-note">
@@ -142,7 +119,7 @@
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2F5FFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
       </div>
       <div class="success-title">You're all set</div>
-      <div class="success-sub">Your Practitioner plan is active. A receipt is on its way to your inbox.</div>
+      <div class="success-sub">Your Premium plan is active. A receipt is on its way to your inbox.</div>
     </div>
 
   </div>

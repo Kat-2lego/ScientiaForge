@@ -9,6 +9,8 @@ import WebSocket from "ws";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 import cvRoutes from "./cv-analyzer/routes/cvRoutes.js";
 import { dirname, join } from 'path';
+import Stripe from 'stripe';
+
 /* =========================================================
    LOAD ENVIRONMENT VARIABLES
 ========================================================= */
@@ -225,6 +227,13 @@ async function callGroq(
 }
 
 /* =========================================================
+   STRIPE CONFIGURATION
+   (must exist before the /webhook route below uses it)
+========================================================= */
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+/* =========================================================
    MIDDLEWARE
 ========================================================= */
 
@@ -234,6 +243,97 @@ app.use(
     credentials: true,
   })
 );
+
+/*
+  Stripe webhook — MUST be registered before express.json() and
+  use express.raw(), because Stripe's signature check needs the
+  untouched raw request body, not a parsed JSON object.
+*/
+app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    console.error('Webhook signature verification failed:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  const intent = event.data.object;
+
+  switch (event.type) {
+    case 'payment_intent.succeeded': {
+      const userId = intent.metadata.userId;
+      const productId = intent.metadata.productId;
+
+      // 1. Look up the plan in subscription_plans so we know how long it lasts
+      const { data: plan, error: planError } = await databaseClient
+        .from('subscription_plans')
+        .select('subscription_id, duration_days')
+        .eq('name', productId)
+        .single();
+
+      if (planError || !plan) {
+        console.error('Could not find subscription plan for productId:', productId, planError);
+        break;
+      }
+
+      const endDate = plan.duration_days
+        ? new Date(Date.now() + plan.duration_days * 86400000).toISOString()
+        : null;
+
+      // 2. Create or reactivate the user's subscription
+      const { data: subscription, error: subError } = await databaseClient
+        .from('user_subscriptions')
+        .upsert({
+          user_id: userId,
+          subscription_id: plan.subscription_id,
+          status: 'active',
+          start_date: new Date().toISOString(),
+          end_date: endDate,
+        }, { onConflict: 'user_id' })
+        .select()
+        .single();
+
+      if (subError) {
+        console.error('Subscription upsert failed:', subError);
+      }
+
+      // 3. Log the payment, linked to that subscription
+      const { error: paymentError } = await databaseClient.from('payments').upsert({
+        provider_ref: intent.id,
+        user_id: userId,
+        user_subscription_id: subscription?.user_subscription_id ?? null,
+        amount_zar: intent.amount,
+        currency: intent.currency,
+        status: 'succeeded',
+        payment_method: intent.payment_method_types?.[0] ?? null,
+        provider: 'stripe',
+        paid_at: new Date().toISOString(),
+      }, { onConflict: 'provider_ref' });
+
+      if (paymentError) console.error('Supabase payment insert failed:', paymentError);
+      break;
+    }
+
+    case 'payment_intent.payment_failed': {
+      const { error } = await databaseClient.from('payments').upsert({
+        provider_ref: intent.id,
+        user_id: intent.metadata.userId,
+        amount_zar: intent.amount,
+        currency: intent.currency,
+        status: 'failed',
+        provider: 'stripe',
+      }, { onConflict: 'provider_ref' });
+
+      if (error) console.error('Supabase insert failed:', error);
+      break;
+    }
+  }
+
+  res.json({ received: true });
+});
 
 app.use(express.json());
 
@@ -968,6 +1068,87 @@ async function requireAuth(req, res, next) {
   req.userId = user.id;
   next();
 }
+
+/* =========================================================
+   PREMIUM ACCESS CHECK
+   Gate any premium-only route with: requireAuth, requirePremium
+========================================================= */
+
+async function requirePremium(req, res, next) {
+  const { data, error } = await databaseClient
+    .from('user_subscriptions')
+    .select('status, end_date')
+    .eq('user_id', req.userId)
+    .eq('status', 'active')
+    .maybeSingle();
+
+  if (error) {
+    console.error('Premium check failed:', error);
+    return res.status(500).json({ error: 'Could not verify subscription status.' });
+  }
+
+  if (!data) {
+    return res.status(403).json({ error: 'This feature requires a premium subscription.' });
+  }
+
+  if (data.end_date && new Date(data.end_date) < new Date()) {
+    return res.status(403).json({ error: 'Your subscription has expired.' });
+  }
+
+  next();
+}
+
+/* =========================================================
+   STRIPE PAYMENT
+========================================================= */
+
+const PRODUCTS = {
+  premium: {
+    amount: Number(process.env.PREMIUM_AMOUNT),
+    currency: 'zar',
+    label: 'Premium Plan',
+  },
+};
+
+app.post('/create-payment-intent', requireAuth, async (req, res) => {
+  try {
+    const { productId } = req.body;
+
+    if (!productId || typeof productId !== 'string') {
+      return res.status(400).json({ error: 'A valid productId is required' });
+    }
+
+    const product = PRODUCTS[productId];
+
+    if (!product) {
+      return res.status(400).json({ error: 'Unknown product' });
+    }
+
+    if (!product.amount || product.amount <= 0) {
+      console.error(`Invalid amount configured for product "${productId}"`);
+      return res.status(500).json({ error: 'Product is misconfigured, please contact support' });
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: product.amount,
+      currency: product.currency,
+      automatic_payment_methods: { enabled: true },
+      metadata: {
+        productId,
+        userId: req.userId, // set by requireAuth above
+      },
+    });
+
+    res.json({
+      clientSecret: paymentIntent.client_secret,
+      amount: product.amount,
+      currency: product.currency,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Something went wrong creating the payment' });
+  }
+});
 
 /* =========================================================
    SKILL CATEGORY HELPER (shared with signup logic)

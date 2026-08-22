@@ -1,153 +1,172 @@
-const state = { cycle: 'monthly', price: 39 };
+/* =========================================================
+   CONFIG — update these two values for your environment
+========================================================= */
 
-  const els = {
-    cycleButtons: document.querySelectorAll('.cycle-toggle button'),
-    cycleText: document.getElementById('cycleText'),
-    basePrice: document.getElementById('basePrice'),
-    discountRow: document.getElementById('discountRow'),
-    discountValue: document.getElementById('discountValue'),
-    taxValue: document.getElementById('taxValue'),
-    totalValue: document.getElementById('totalValue'),
-    submitLabel: document.getElementById('submitLabel'),
-    email: document.getElementById('email'),
-    cardname: document.getElementById('cardname'),
-    cardnumber: document.getElementById('cardnumber'),
-    cardBrand: document.getElementById('cardBrand'),
-    expiry: document.getElementById('expiry'),
-    cvc: document.getElementById('cvc'),
-    gaugeFill: document.getElementById('gaugeFill'),
-    gaugePercent: document.getElementById('gaugePercent'),
-    form: document.getElementById('payForm'),
-    submitBtn: document.getElementById('submitBtn'),
-    successState: document.getElementById('successState'),
-    formPanel: document.getElementById('formPanel'),
-  };
+// Your Stripe PUBLISHABLE key (starts with pk_test_...), NOT the secret key.
+// Safe to expose in frontend code — find it in Stripe Dashboard > API keys.
+const STRIPE_PUBLISHABLE_KEY = 'pk_test_51U678MHewt0yzVsxirPkZ0eHxu3WJIBVy9GOfJFg2uVDzTKbn8rw9H0fnV33Qix70s6QZxThvCHu72P5oF5sbxxc00ZhNHY6WG';
 
-  const TAX_RATE = 0.08;
+// Your backend's base URL
+const API_BASE_URL = 'http://localhost:5001';
 
-  function fmt(n){ return n.toFixed(2); }
+/* =========================================================
+   STRIPE ELEMENTS SETUP
+========================================================= */
 
-  function updateOrder(){
-    let base, discount = 0, cycleLabel;
-    if(state.cycle === 'monthly'){
-      base = 39;
-      cycleLabel = 'billed monthly';
-    } else {
-      base = 29 * 12;
-      discount = 39*12 - 29*12;
-      cycleLabel = 'billed annually';
-    }
-    const subtotal = state.cycle === 'monthly' ? base : (29*12);
-    const tax = subtotal * TAX_RATE;
-    const total = subtotal + tax;
+const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+const elements = stripe.elements();
 
-    els.cycleText.textContent = cycleLabel;
-    els.basePrice.textContent = '$' + fmt(state.cycle === 'monthly' ? 39 : 39*12);
-    if(discount > 0){
-      els.discountRow.style.display = 'flex';
-      els.discountValue.textContent = '−$' + fmt(discount);
-    } else {
-      els.discountRow.style.display = 'none';
-    }
-    els.taxValue.textContent = '$' + fmt(tax);
-    els.totalValue.textContent = fmt(total);
-    els.submitLabel.textContent = 'Forge my plan — $' + fmt(total);
+// Styled to blend with the existing input look. Adjust colors to match
+// your CSS variables if you have them defined (e.g. var(--text-color)).
+const cardElement = elements.create('card', {
+  style: {
+    base: {
+      fontFamily: "'Inter', sans-serif",
+      fontSize: '15px',
+      color: '#1a1a1a',
+      '::placeholder': { color: '#9a9a9a' },
+    },
+    invalid: {
+      color: '#e5484d',
+    },
+  },
+});
+
+cardElement.mount('#card-element');
+
+cardElement.on('change', (event) => {
+  const displayError = document.getElementById('card-errors');
+  displayError.textContent = event.error ? event.error.message : '';
+  updateGauge();
+});
+
+/* =========================================================
+   UI STATE / ELEMENT REFERENCES
+========================================================= */
+
+const els = {
+  submitLabel: document.getElementById('submitLabel'),
+  email: document.getElementById('email'),
+  cardname: document.getElementById('cardname'),
+  gaugeFill: document.getElementById('gaugeFill'),
+  gaugePercent: document.getElementById('gaugePercent'),
+  form: document.getElementById('payForm'),
+  submitBtn: document.getElementById('submitBtn'),
+  successState: document.getElementById('successState'),
+  formPanel: document.getElementById('formPanel'),
+  cardErrors: document.getElementById('card-errors'),
+};
+
+let cardComplete = false;
+
+function fieldFilled(el) {
+  return el.value.trim().length > 0;
+}
+
+function updateGauge() {
+  const textFields = [els.email, els.cardname];
+  const filledText = textFields.filter(fieldFilled).length;
+  const totalSteps = textFields.length + 1; // +1 for the card element
+  const filledSteps = filledText + (cardComplete ? 1 : 0);
+  const pct = Math.round((filledSteps / totalSteps) * 100);
+  els.gaugeFill.style.width = pct + '%';
+  els.gaugePercent.textContent = pct + '%';
+}
+
+cardElement.on('change', (event) => {
+  cardComplete = event.complete;
+});
+
+[els.email, els.cardname].forEach((inp) => inp.addEventListener('input', updateGauge));
+
+function setError(fieldId, hasError) {
+  const field = document.getElementById(fieldId);
+  field.classList.toggle('has-error', hasError);
+  const input = field.querySelector('input');
+  if (input) input.classList.toggle('invalid', hasError);
+}
+
+function validate() {
+  let ok = true;
+
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(els.email.value.trim());
+  setError('field-email', !emailOk);
+  if (!emailOk) ok = false;
+
+  const nameOk = els.cardname.value.trim().length > 1;
+  setError('field-name', !nameOk);
+  if (!nameOk) ok = false;
+
+  if (!cardComplete) {
+    document.getElementById('field-card').classList.add('has-error');
+    ok = false;
+  } else {
+    document.getElementById('field-card').classList.remove('has-error');
   }
 
-  els.cycleButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      els.cycleButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.cycle = btn.dataset.cycle;
-      updateOrder();
+  return ok;
+}
+
+/* =========================================================
+   CHECKOUT SUBMIT
+========================================================= */
+
+els.form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!validate()) return;
+
+  els.submitBtn.disabled = true;
+  els.submitLabel.textContent = 'Forging…';
+  els.cardErrors.textContent = '';
+
+  try {
+    const accessToken = localStorage.getItem('access_token');
+
+    if (!accessToken) {
+      throw new Error('You need to be logged in to complete this purchase.');
+    }
+
+    // 1. Ask our backend to create the PaymentIntent (server decides the price)
+    const intentRes = await fetch(`${API_BASE_URL}/create-payment-intent`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ productId: 'premium' }),
     });
-  });
 
-  updateOrder();
+    const intentData = await intentRes.json();
 
-  /* card number formatting + brand detect */
-  els.cardnumber.addEventListener('input', (e) => {
-    let digits = e.target.value.replace(/\D/g,'').slice(0,16);
-    let groups = digits.match(/.{1,4}/g) || [];
-    e.target.value = groups.join(' ');
-
-    let brand = 'card';
-    if(/^4/.test(digits)) brand = 'visa';
-    else if(/^5[1-5]/.test(digits)) brand = 'mastercard';
-    else if(/^3[47]/.test(digits)) brand = 'amex';
-    else if(/^6(?:011|5)/.test(digits)) brand = 'discover';
-    els.cardBrand.textContent = brand;
-    updateGauge();
-  });
-
-  /* expiry auto-slash */
-  els.expiry.addEventListener('input', (e) => {
-    let digits = e.target.value.replace(/\D/g,'').slice(0,4);
-    if(digits.length >= 3){
-      e.target.value = digits.slice(0,2) + ' / ' + digits.slice(2);
-    } else {
-      e.target.value = digits;
+    if (!intentRes.ok) {
+      throw new Error(intentData.error || 'Could not start checkout.');
     }
-    updateGauge();
-  });
 
-  els.cvc.addEventListener('input', (e) => {
-    e.target.value = e.target.value.replace(/\D/g,'').slice(0,4);
-    updateGauge();
-  });
+    // 2. Confirm the payment directly with Stripe using the card element.
+    //    The card number/expiry/CVC never leave Stripe's iframe.
+    const result = await stripe.confirmCardPayment(intentData.clientSecret, {
+      payment_method: {
+        card: cardElement,
+        billing_details: {
+          name: els.cardname.value.trim(),
+          email: els.email.value.trim(),
+        },
+      },
+    });
 
-  [els.email, els.cardname].forEach(inp => inp.addEventListener('input', updateGauge));
+    if (result.error) {
+      throw new Error(result.error.message || 'Payment failed.');
+    }
 
-  function fieldFilled(el){
-    return el.value.trim().length > 0;
-  }
-
-  function updateGauge(){
-    const fields = [els.email, els.cardname, els.cardnumber, els.expiry, els.cvc];
-    const filled = fields.filter(fieldFilled).length;
-    const pct = Math.round((filled / fields.length) * 100);
-    els.gaugeFill.style.width = pct + '%';
-    els.gaugePercent.textContent = pct + '%';
-  }
-
-  function setError(fieldId, hasError){
-    const field = document.getElementById(fieldId);
-    field.classList.toggle('has-error', hasError);
-    const input = field.querySelector('input');
-    input.classList.toggle('invalid', hasError);
-  }
-
-  function validate(){
-    let ok = true;
-
-    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(els.email.value.trim());
-    setError('field-email', !emailOk); if(!emailOk) ok = false;
-
-    const nameOk = els.cardname.value.trim().length > 1;
-    setError('field-name', !nameOk); if(!nameOk) ok = false;
-
-    const cardDigits = els.cardnumber.value.replace(/\D/g,'');
-    const cardOk = cardDigits.length === 16;
-    setError('field-card', !cardOk); if(!cardOk) ok = false;
-
-    const expiryOk = /^\d{2} \/ \d{2}$/.test(els.expiry.value.trim());
-    setError('field-expiry', !expiryOk); if(!expiryOk) ok = false;
-
-    const cvcOk = els.cvc.value.trim().length >= 3;
-    setError('field-cvc', !cvcOk); if(!cvcOk) ok = false;
-
-    return ok;
-  }
-
-  els.form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if(!validate()) return;
-
-    els.submitBtn.disabled = true;
-    els.submitLabel.textContent = 'Forging…';
-
-    setTimeout(() => {
+    if (result.paymentIntent.status === 'succeeded') {
       els.formPanel.classList.add('hidden-form');
       els.successState.classList.add('show');
-    }, 900);
-  });
+    } else {
+      throw new Error(`Payment status: ${result.paymentIntent.status}. Please try again.`);
+    }
+  } catch (err) {
+    els.cardErrors.textContent = err.message;
+    els.submitBtn.disabled = false;
+    els.submitLabel.textContent = 'Forge my plan — R149.00';
+  }
+});
