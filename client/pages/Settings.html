@@ -13,7 +13,6 @@
 
     <div class="app-layout">
         
-        
     <aside class="sidebar" id="sidebar">
       <div>
         <div class="logo">
@@ -46,7 +45,7 @@
             <span>Skill Gap Analysis</span>
           </a>
 
-          <a class="nav-item " href="ProgressTracker.html" data-label="Progress Tracker">
+          <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
             <i data-lucide="activity"></i>
             <span>Progress Tracker</span>
           </a>
@@ -78,7 +77,6 @@
       </div>
     </aside>
 
-
         <main class="main-content">
             
             <header class="top-header">
@@ -91,6 +89,7 @@
             <div class="scroll-container custom-scrollbar">
                 <div class="settings-wrapper">
 
+                    <!-- User Profile Section -->
                     <div class="section-container">
                         <h2 class="section-title">User Profile</h2>
                         <p class="section-subtitle">Manage your digital identity and core platform preferences.</p>
@@ -121,7 +120,7 @@
                                             <span>Dark Mode</span>
                                         </div>
                                         <label class="switch">
-                                            <input type="checkbox">
+                                            <input type="checkbox" id="darkModeToggle">
                                             <span class="slider round"></span>
                                         </label>
                                     </div>
@@ -130,8 +129,34 @@
                         </div>
                     </div>
 
+                    <!-- Appearance & Accessibility -->
+                    <div class="section-container">
+                        <h2 class="section-title">Appearance & Accessibility</h2>
+                        <p class="section-subtitle">Customize how SkillForge looks and feels.</p>
+                        
+                        <div class="settings-card">
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Language</h4>
+                                    <p>Choose your preferred interface language.</p>
+                                </div>
+                                <select class="setting-select" id="languageSelect">
+                                    <option value="en">English</option>
+                                    <option value="es">Español</option>
+                                    <option value="fr">Français</option>
+                                    <option value="de">Deutsch</option>
+                                    <option value="pt">Português</option>
+                                </select>
+                            </div>   
+                            <div class="divider"></div>
+                        </div>
+                    </div>
+
+                    <!-- Notifications -->
                     <div class="section-container">
                         <h2 class="section-title">Notifications</h2>
+                        <p class="section-subtitle">Control how and when you receive updates.</p>
+                        
                         <div class="settings-card">
                             <div class="setting-row">
                                 <div class="setting-info">
@@ -139,7 +164,7 @@
                                     <p>Weekly career insights and platform announcements.</p>
                                 </div>
                                 <label class="switch">
-                                    <input type="checkbox" checked>
+                                    <input type="checkbox" checked id="emailUpdates">
                                     <span class="slider round"></span>
                                 </label>
                             </div>
@@ -150,22 +175,47 @@
                                     <p>Instant alerts for new CV recommendations.</p>
                                 </div>
                                 <label class="switch">
-                                    <input type="checkbox">
+                                    <input type="checkbox" id="pushAlerts">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Skill Gap Alerts</h4>
+                                    <p>Notifications when new learning opportunities match your gaps.</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" checked id="skillGapAlerts">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Interview Reminders</h4>
+                                    <p>Reminders for scheduled practice interviews.</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" checked id="interviewReminders">
                                     <span class="slider round"></span>
                                 </label>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Security & Authentication -->
                     <div class="section-container">
                         <h2 class="section-title">Security & Authentication</h2>
+                        <p class="section-subtitle">Protect your account and manage access.</p>
+                        
                         <div class="settings-card">
                             <div class="setting-row">
                                 <div class="setting-info">
                                     <h4>Password Management</h4>
                                     <p>Ensure your account is protected with a strong password.</p>
                                 </div>
-                                <button class="btn-secondary">Update Password</button>
+                                <button class="btn-secondary" id="changePasswordBtn">Update Password</button>
                             </div>
                             <div class="divider"></div>
                             <div class="setting-row">
@@ -174,17 +224,138 @@
                                     <p>Require a secondary code when logging in.</p>
                                 </div>
                                 <label class="switch">
-                                    <input type="checkbox" checked>
+                                    <input type="checkbox" checked id="twoFactorAuth">
                                     <span class="slider round"></span>
                                 </label>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Login Alerts</h4>
+                                    <p>Get notified when someone logs into your account.</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" checked id="loginAlerts">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Active Sessions</h4>
+                                    <p>Manage devices where you're currently logged in.</p>
+                                </div>
+                                <button class="btn-secondary" id="manageSessionsBtn">View Sessions</button>
                             </div>
                         </div>
                     </div>
 
+                    
+                    <!-- Content Preferences -->
+                    <div class="section-container">
+                        <h2 class="section-title">Content Preferences</h2>
+                        <p class="section-subtitle">Tailor SkillForge to your career goals.</p>
+                        
+                        <div class="settings-card">
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Primary Career Field</h4>
+                                    <p>Your main area of professional interest.</p>
+                                </div>
+                                <select class="setting-select" id="careerFieldSelect">
+                                    <option value="tech">Technology & Software</option>
+                                    <option value="data">Data Science & Analytics</option>
+                                    <option value="design">Design & UX</option>
+                                    <option value="marketing">Marketing & Communications</option>
+                                    <option value="finance">Finance & Business</option>
+                                    <option value="healthcare">Healthcare</option>
+                                    <option value="education">Education</option>
+                                </select>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Experience Level</h4>
+                                    <p>Where you are in your career journey.</p>
+                                </div>
+                                <select class="setting-select" id="experienceLevelSelect">
+                                    <option value="student">Student</option>
+                                    <option value="entry">Entry Level (0-2 years)</option>
+                                    <option value="mid">Mid Level (3-5 years)</option>
+                                    <option value="senior">Senior Level (6-10 years)</option>
+                                    <option value="expert">Expert (10+ years)</option>
+                                </select>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Job Type Preference</h4>
+                                    <p>Your preferred work arrangement.</p>
+                                </div>
+                                <select class="setting-select" id="jobTypeSelect">
+                                    <option value="any">Any</option>
+                                    <option value="remote">Remote Only</option>
+                                    <option value="hybrid">Hybrid</option>
+                                    <option value="onsite">On-site Only</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Integrations -->
+                    <div class="section-container">
+                        <h2 class="section-title">Integrations</h2>
+                        <p class="section-subtitle">Connect your favorite tools and services.</p>
+                        
+                        <div class="settings-card">
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="integration-icon-wrapper">
+                                        <i data-lucide="linkedin" class="integration-icon"></i>
+                                    </div>
+                                    <div>
+                                        <h4>LinkedIn</h4>
+                                        <p>Import your professional network and experience.</p>
+                                    </div>
+                                </div>
+                                <button class="btn-secondary" id="connectLinkedIn">Connect</button>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="integration-icon-wrapper">
+                                        <i data-lucide="github" class="integration-icon"></i>
+                                    </div>
+                                    <div>
+                                        <h4>GitHub</h4>
+                                        <p>Sync your repositories and contributions.</p>
+                                    </div>
+                                </div>
+                                <button class="btn-secondary" id="connectGitHub">Connect</button>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="integration-icon-wrapper">
+                                        <i data-lucide="file-text" class="integration-icon"></i>
+                                    </div>
+                                    <div>
+                                        <h4>Google Drive</h4>
+                                        <p>Store and access your CVs from the cloud.</p>
+                                    </div>
+                                </div>
+                                <button class="btn-secondary" id="connectGoogleDrive">Connect</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Account Management -->
                     <div class="section-container">
                         <h2 class="section-title">Account Management</h2>
+                        <p class="section-subtitle">Billing, subscription, and legal information.</p>
+                        
                         <div class="settings-card click-card">
-                            <a href="#" class="setting-row link-row">
+                            <a href="billing_Subscription.html" class="setting-row link-row">
                                 <div class="setting-icon"><i data-lucide="credit-card"></i></div>
                                 <div class="setting-info">
                                     <h4>Manage Billing & Subscription</h4>
@@ -195,16 +366,27 @@
                         </div>
                         <div class="settings-card click-card mt-3">
                             <a href="#" class="setting-row link-row">
-                                <div class="setting-icon"><i data-lucide="shield"></i></div>
+                                <div class="setting-icon"><i data-lucide="file-text"></i></div>
                                 <div class="setting-info">
-                                    <h4>Privacy & Data Control</h4>
-                                    <p>Export data and review terms & conditions.</p>
+                                    <h4>Terms of Service</h4>
+                                    <p>Read our terms and conditions.</p>
+                                </div>
+                                <i data-lucide="chevron-right" class="arrow-icon"></i>
+                            </a>
+                        </div>
+                        <div class="settings-card click-card mt-3">
+                            <a href="#" class="setting-row link-row">
+                                <div class="setting-icon"><i data-lucide="shield-check"></i></div>
+                                <div class="setting-info">
+                                    <h4>Privacy Policy</h4>
+                                    <p>Learn how we protect your data.</p>
                                 </div>
                                 <i data-lucide="chevron-right" class="arrow-icon"></i>
                             </a>
                         </div>
                     </div>
 
+                    <!-- Help & Support -->
                     <div class="section-container">
                         <h2 class="section-title">Help & Support</h2>
                         <p class="section-subtitle">Get assistance and learn how to use the platform.</p>
@@ -219,29 +401,103 @@
                                 <h4>Contact Us</h4>
                                 <p>Submit a support ticket.</p>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="section-container pb-large">
-                        <div class="settings-card border-danger">
-                            <div class="setting-row">
-                                <div class="setting-info">
-                                    <h4 class="text-danger">Sign Out</h4>
-                                    <p>Securely logout of this device.</p>
-                                </div>
-                                <button class="btn-danger" onclick="handleLogout()">
-                                    <i data-lucide="log-out"></i> Sign Out
-                                </button>
+                            <div class="support-card">
+                                <div class="support-icon"><i data-lucide="message-circle"></i></div>
+                                <h4>Live Chat</h4>
+                                <p>Chat with our support team.</p>
+                            </div>
+                            <div class="support-card">
+                                <div class="support-icon"><i data-lucide="video"></i></div>
+                                <h4>Video Tutorials</h4>
+                                <p>Watch step-by-step guides.</p>
                             </div>
                         </div>
                     </div>
 
+                    <!-- About -->
+                    <div class="section-container">
+                        <h2 class="section-title">About</h2>
+                        <p class="section-subtitle">Application information and version.</p>
+                        
+                        <div class="settings-card">
+                            <div class="about-row">
+                                <div class="about-info">
+                                    <h4>SkillForge</h4>
+                                    <p>Version 2.4.1</p>
+                                    <p class="build-info">Build 2026.08.20</p>
+                                </div>
+                                <div class="about-logo">
+                                    <span class="logo-dark">Skill</span><span class="logo-blue">Forge</span>
+                                </div>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Check for Updates</h4>
+                                    <p>Ensure you're using the latest version.</p>
+                                </div>
+                                <button class="btn-secondary" id="checkUpdates">Check Now</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Privacy & Data Control -->
+                    <div class="section-container">
+                        <h2 class="section-title">Privacy & Data Control</h2>
+                        <p class="section-subtitle">Control your data and privacy settings.</p>
+                        
+                        <div class="settings-card click-card">
+                            <a href="#" class="setting-row link-row">
+                                <div class="setting-icon"><i data-lucide="shield"></i></div>
+                                <div class="setting-info">
+                                    <h4>Privacy Settings</h4>
+                                    <p>Control who can see your profile and activity.</p>
+                                </div>
+                                <i data-lucide="chevron-right" class="arrow-icon"></i>
+                            </a>
+                        </div>
+                      
+                        <div id = "deleteAccountBtn" class="settings-card click-card mt-3 delete-account-card" onclick="openModal()">
+                            <a href="#" class="setting-row link-row">
+                                <div class="setting-icon delete-icon"><i data-lucide="trash-2"></i></div>
+                                <div class="setting-info delete-info">
+                                    <h4>Delete Account</h4>
+                                    <p>Permanently remove your account and data.</p>
+                                </div>
+                                <i data-lucide="chevron-right" class="arrow-icon"></i>
+                            </a>
+                        </div>   
+
+                    </div>
                 </div>
             </div>
         </main>
 
     </div>
+    <!-- Modal -->
+  <div id="deleteModal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h2 id="modalTitle">Delete your account?</h2>
+      <p>
+        This action is permanent. All your data will be deleted and you will be logged out.
+      </p>
+      <div class="modal-actions">
+        <button id="cancelDeleteBtn" class="secondary-btn">Cancel</button>
+        <button id="confirmDeleteBtn" class="danger-btn">Delete Account</button>
+      </div>
+      <p id="deleteError" class="error-text" hidden></p>
+    </div>
+  </div>
 
+    <!-- Supabase client first -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        window.supabase = window.supabase.createClient(
+            'https://https://imozjvllleijknuimsde.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imltb3pqdmxsbGVpamtudWltc2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNzA4MzQsImV4cCI6MjA5MTc0NjgzNH0.ypgtyUrczofLQxG9gP-Z1SlKa3v68jAtUgdhtwz2swY'
+        );
+    </script>
     <script src="../js/settings.js"></script>
     <script src="../js/auth.js"></script>
 </body>
