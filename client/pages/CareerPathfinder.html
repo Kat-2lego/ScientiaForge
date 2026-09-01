@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Career Pathfinder | SkillForge AI</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/CareerPathfinder.css" />
+</head>
+<body>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div>
+        <div class="logo">
+          <span class="logo-dark">Skill</span><span class="logo-blue">Forge</span>
+        </div>
+
+        <nav class="nav">
+          <a class="nav-item" href="Dashboard.html" data-label="Dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+
+          <a class="nav-item" href="CareerDiscovery.html" data-label="Career Discovery">
+            <i data-lucide="compass"></i>
+            <span>Career Discovery</span>
+          </a>
+
+          <a class="nav-item" href="cvDashboard.html" data-label="CV Analyzer">
+            <i data-lucide="file-search"></i>
+            <span>CV Analyzer</span>
+          </a>
+
+          <a class="nav-item" href="InterviewSimulator.html" data-label="Interview Simulator">
+            <i data-lucide="mic"></i>
+            <span>Interview Simulator</span>
+          </a>
+
+          <a class="nav-item" href="SkillGapAnalysis.html" data-label="Skill Gap Analysis">
+            <i data-lucide="bar-chart-3"></i>
+            <span>Skill Gap Analysis</span>
+          </a>
+
+          <a class="nav-item active" href="CareerPathfinder.html" data-label="Career Pathfinder">
+            <i data-lucide="graduation-cap"></i>
+            <span>Career Pathfinder</span>
+          </a>
+
+          <a class="nav-item" href="StudyHub.html" data-label="Study Hub">
+            <i data-lucide="book-open"></i>
+            <span>Study Hub</span>
+          </a>
+
+          <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
+            <i data-lucide="activity"></i>
+            <span>Progress Tracker</span>
+          </a>
+
+          <a class="nav-item" href="Settings.html" data-label="Settings">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+          </a>
+
+          <a class="nav-item" href="Support.html" data-label="Help & Support">
+            <i data-lucide="life-buoy"></i>
+            <span>Help/Support</span>
+          </a>
+
+          <a class="nav-item" href="#" data-label="Log Out">
+            <i data-lucide="log-out"></i>
+            <span>Logout</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="download-card">
+        <div class="download-icon">
+          <i data-lucide="smartphone"></i>
+        </div>
+        <h3>Download Our Mobile App</h3>
+        <p>Track your progress anywhere, anytime.</p>
+        <button class="download-btn">Download</button>
+      </div>
+    </aside>
+
+    <main class="main main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+            <i data-lucide="menu"></i>
+          </button>
+          <label class="searchbar">
+            <i data-lucide="search"></i>
+            <input type="text" id="searchInput" placeholder="Search SkillForge..." autocomplete="off" />
+          </label>
+        </div>
+        <div class="topbar-right">
+          <button class="icon-btn"><i data-lucide="bell"></i></button>
+          <button class="icon-btn"><i data-lucide="mail"></i></button>
+          <div class="profile">
+            <div class="avatar"></div>
+            <div>
+              <div class="profile-name"></div>
+              <div class="profile-email"></div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="cp-wrap">
+        <div class="page-header">
+          <h1>Career Pathfinder</h1>
+          <p>Find the degrees and diplomas you qualify for at South African institutions, and the bursaries that could fund them.</p>
+        </div>
+
+        <!-- Mode toggle -->
+        <div class="cp-tabs">
+          <button class="cp-tab active" data-mode="subjects">I'll enter my subjects</button>
+          <button class="cp-tab" data-mode="career">I'll pick a career/degree first</button>
+        </div>
+
+        <!-- Subjects mode -->
+        <section class="cp-card" id="subjectsPanel">
+          <h2>Your NSC subjects</h2>
+          <p class="cp-subtext">Add each subject you're doing and the level you're achieving (or aiming for). We'll match you to degrees and diplomas you meet the requirements for.</p>
+
+          <div class="subject-row" id="subjectAddRow">
+            <select id="subjectSelect"><option value="">Select a subject…</option></select>
+            <select id="levelSelect">
+              <option value="">Level</option>
+              <option value="7">7 (80–100%)</option>
+              <option value="6">6 (70–79%)</option>
+              <option value="5">5 (60–69%)</option>
+              <option value="4">4 (50–59%)</option>
+              <option value="3">3 (40–49%)</option>
+              <option value="2">2 (30–39%)</option>
+              <option value="1">1 (0–29%)</option>
+            </select>
+            <button class="btn-primary" id="addSubjectBtn">Add subject</button>
+          </div>
+
+          <div class="chip-list" id="mySubjectsList"></div>
+        </section>
+
+        <!-- Career mode -->
+        <section class="cp-card" id="careerPanel" style="display:none;">
+          <h2>Browse by career</h2>
+          <select id="careerSelect"><option value="">Select a career…</option></select>
+        </section>
+
+        <!-- Filters -->
+        <section class="cp-card cp-filters">
+          <div class="filter-group">
+            <label>Institution type</label>
+            <select id="typeFilter">
+              <option value="">Any</option>
+              <option value="university">University</option>
+              <option value="university_of_technology">University of Technology</option>
+              <option value="tvet_college">TVET College</option>
+              <option value="private_college">Private College</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Province</label>
+            <select id="provinceFilter">
+              <option value="">Any</option>
+              <option>Eastern Cape</option>
+              <option>Free State</option>
+              <option>Gauteng</option>
+              <option>KwaZulu-Natal</option>
+              <option>Limpopo</option>
+              <option>Mpumalanga</option>
+              <option>Northern Cape</option>
+              <option>North West</option>
+              <option>Western Cape</option>
+            </select>
+          </div>
+          <button class="btn-primary" id="findMatchesBtn">Find matches</button>
+        </section>
+
+        <!-- Results -->
+        <section id="resultsSection">
+          <h2 class="results-heading" id="resultsHeading" style="display:none;">Results</h2>
+          <div id="resultsList" class="results-list"></div>
+        </section>
+
+        <!-- Bursaries -->
+        <section class="cp-card">
+          <div class="bursary-header">
+            <h2>Bursaries</h2>
+            <p class="cp-subtext">Expand a bursary to see its requirements and application window. Tap "Apply" to go to the official application page.</p>
+          </div>
+          <div id="bursaryList" class="bursary-list"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/CareerPathfinder.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Hub | SkillForge AI</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/CareerPathfinder.css" />
+  <link rel="stylesheet" href="../css/StudyHub.css" />
+</head>
+<body>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div>
+        <div class="logo">
+          <span class="logo-dark">Skill</span><span class="logo-blue">Forge</span>
+        </div>
+
+        <nav class="nav">
+          <a class="nav-item" href="Dashboard.html" data-label="Dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+
+          <a class="nav-item" href="CareerDiscovery.html" data-label="Career Discovery">
+            <i data-lucide="compass"></i>
+            <span>Career Discovery</span>
+          </a>
+
+          <a class="nav-item" href="cvDashboard.html" data-label="CV Analyzer">
+            <i data-lucide="file-search"></i>
+            <span>CV Analyzer</span>
+          </a>
+
+          <a class="nav-item" href="InterviewSimulator.html" data-label="Interview Simulator">
+            <i data-lucide="mic"></i>
+            <span>Interview Simulator</span>
+          </a>
+
+          <a class="nav-item" href="SkillGapAnalysis.html" data-label="Skill Gap Analysis">
+            <i data-lucide="bar-chart-3"></i>
+            <span>Skill Gap Analysis</span>
+          </a>
+
+          <a class="nav-item" href="CareerPathfinder.html" data-label="Career Pathfinder">
+            <i data-lucide="graduation-cap"></i>
+            <span>Career Pathfinder</span>
+          </a>
+
+          <a class="nav-item active" href="StudyHub.html" data-label="Study Hub">
+            <i data-lucide="book-open"></i>
+            <span>Study Hub</span>
+          </a>
+
+          <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
+            <i data-lucide="activity"></i>
+            <span>Progress Tracker</span>
+          </a>
+
+          <a class="nav-item" href="Settings.html" data-label="Settings">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+          </a>
+
+          <a class="nav-item" href="Support.html" data-label="Help & Support">
+            <i data-lucide="life-buoy"></i>
+            <span>Help/Support</span>
+          </a>
+
+          <a class="nav-item" href="#" data-label="Log Out">
+            <i data-lucide="log-out"></i>
+            <span>Logout</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="download-card">
+        <div class="download-icon">
+          <i data-lucide="smartphone"></i>
+        </div>
+        <h3>Download Our Mobile App</h3>
+        <p>Track your progress anywhere, anytime.</p>
+        <button class="download-btn">Download</button>
+      </div>
+    </aside>
+
+    <main class="main main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+            <i data-lucide="menu"></i>
+          </button>
+          <label class="searchbar">
+            <i data-lucide="search"></i>
+            <input type="text" id="searchInput" placeholder="Search SkillForge..." autocomplete="off" />
+          </label>
+        </div>
+        <div class="topbar-right">
+          <button class="icon-btn"><i data-lucide="bell"></i></button>
+          <button class="icon-btn"><i data-lucide="mail"></i></button>
+          <div class="profile">
+            <div class="avatar"></div>
+            <div>
+              <div class="profile-name"></div>
+              <div class="profile-email"></div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="cp-wrap">
+        <div class="page-header">
+          <h1>Study Hub</h1>
+          <p>Past papers for every subject and grade, study videos, and guidance on how to apply to a university or a bursary.</p>
+        </div>
+
+        <div class="sh-tabs">
+          <button class="cp-tab active" data-panel="papersPanel">Past papers</button>
+          <button class="cp-tab" data-panel="videosPanel">Study videos</button>
+          <button class="cp-tab" data-panel="applyPanel">How to apply</button>
+        </div>
+
+        <!-- Past papers -->
+        <section class="cp-card" id="papersPanel">
+          <h2>Find past papers</h2>
+          <p class="cp-subtext">Papers link out to the official Department of Basic Education (NSC) or IEB portals — pick your subject, grade and curriculum below.</p>
+          <div class="cp-filters">
+            <div class="filter-group">
+              <label>Subject</label>
+              <select id="paperSubject"><option value="">All subjects</option></select>
+            </div>
+            <div class="filter-group">
+              <label>Grade</label>
+              <select id="paperGrade">
+                <option value="">All grades</option>
+                <option value="12">Grade 12</option>
+                <option value="11">Grade 11</option>
+                <option value="10">Grade 10</option>
+                <option value="9">Grade 9</option>
+                <option value="8">Grade 8</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>Curriculum</label>
+              <select id="paperCurriculum">
+                <option value="">Both</option>
+                <option value="NSC">NSC (DBE)</option>
+                <option value="IEB">IEB</option>
+              </select>
+            </div>
+            <button class="btn-primary" id="searchPapersBtn">Search</button>
+          </div>
+          <div id="papersList" class="resource-list"></div>
+        </section>
+
+        <!-- Study videos -->
+        <section class="cp-card" id="videosPanel" style="display:none;">
+          <h2>Study videos</h2>
+          <p class="cp-subtext">YouTube videos to help you study each subject.</p>
+          <div class="cp-filters">
+            <div class="filter-group">
+              <label>Subject</label>
+              <select id="videoSubject"><option value="">All subjects</option></select>
+            </div>
+            <button class="btn-primary" id="searchVideosBtn">Search</button>
+          </div>
+          <div id="videosList" class="resource-list"></div>
+        </section>
+
+        <!-- How to apply -->
+        <section class="cp-card" id="applyPanel" style="display:none;">
+          <h2>How to apply to a university</h2>
+          <p class="cp-subtext">Application-guide videos, by institution.</p>
+          <div id="applyUniList" class="resource-list"></div>
+
+          <h2 style="margin-top:24px;">How to apply for a bursary</h2>
+          <div id="applyBursaryVideoList" class="resource-list"></div>
+
+          <h2 style="margin-top:24px;">Apply for a bursary</h2>
+          <p class="cp-subtext">Tap "Apply" to be taken straight to the official bursary application page.</p>
+          <div id="applyBursaryList" class="bursary-list"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/StudyHub.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
