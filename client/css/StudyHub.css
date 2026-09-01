@@ -1,0 +1,55 @@
+.sh-tabs {
+  display: flex;
+  gap: 10px;
+}
+
+.resource-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.resource-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  flex-wrap: wrap;
+}
+
+.resource-card:hover {
+  background: var(--bg-card-hover);
+}
+
+.resource-main h4 {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.resource-main span {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.resource-card a.resource-link {
+  padding: 9px 16px;
+  border-radius: var(--radius-md);
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.resource-card a.resource-link.youtube {
+  background: #fee2e2;
+  color: #dc2626;
+}
