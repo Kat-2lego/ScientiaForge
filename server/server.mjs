@@ -8,6 +8,8 @@ import { fileURLToPath } from "url";
 import WebSocket from "ws";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 import cvRoutes from "./cv-analyzer/routes/cvRoutes.js";
+import careerPathfinderRoutes from "./routes/careerPathfinder.js";
+import studyHubRoutes from "./routes/studyHub.js";
 
 /* =========================================================
    LOAD ENVIRONMENT VARIABLES
@@ -250,6 +252,8 @@ app.use(
 );
 
 app.use("/api/cv", cvRoutes);
+app.use("/api/career-pathfinder", careerPathfinderRoutes);
+app.use("/api/study-hub", studyHubRoutes);
 
 /* =========================================================
    MAIN PAGE
