@@ -176,7 +176,9 @@ async function callGroq(
     try {
       const response =
         await groq.chat.completions.create({
-          model: "llama-3.1-8b-instant",
+          // Groq deprecated llama-3.1-8b-instant (shut down ~Aug 2026).
+          // openai/gpt-oss-20b is Groq's own recommended replacement.
+          model: "openai/gpt-oss-20b",
 
           messages: [
             {
@@ -491,6 +493,8 @@ app.post(
         });
       }
 
+      logAudit(data.user.id, "sign_in", { desc: "User signed in", req });
+
       return res.status(200).json({
         success: true,
 
@@ -733,6 +737,8 @@ app.post("/api/auth/signup", async (req, res) => {
       }
     }
 
+    logAudit(userId, "sign_up", { desc: "User account created", req });
+
     return res.status(201).json({
       success: true,
       message: data.session
@@ -768,8 +774,20 @@ app.post("/api/auth/logout", async (req, res) => {
   }
 
   try {
+    // Resolve which user this token belongs to before invalidating it, so
+    // we can log the sign-out — once signOut() runs, the token is dead and
+    // this lookup would no longer work.
+    let loggingOutUserId = null;
+    try {
+      const { data: userData } = await supabase.auth.getUser(accessToken);
+      loggingOutUserId = userData?.user?.id || null;
+    } catch (_) {
+      // Non-fatal — logout still proceeds even if we can't identify the user.
+    }
+
     if (!supabaseAdmin) {
       // No service-role key configured — client-side token clearing is all we can do.
+      if (loggingOutUserId) logAudit(loggingOutUserId, "sign_out", { desc: "User signed out (local only)", req });
       return res.status(200).json({
         success: true,
         message: "Logged out locally. Server-side session revocation unavailable.",
@@ -783,12 +801,48 @@ app.post("/api/auth/logout", async (req, res) => {
       // Still tell the client to proceed with local logout even if this fails.
     }
 
+    if (loggingOutUserId) logAudit(loggingOutUserId, "sign_out", { desc: "User signed out", req });
+
     return res.status(200).json({ success: true, message: "Logged out." });
   } catch (error) {
     console.error("❌ Logout error:", error.message);
     return res.status(500).json({ error: "An internal server error occurred." });
   }
 });
+
+/* =========================================================
+   AUTH: DELETE ACCOUNT
+   Fixed: the previous version called res.json({ ok: true, ... }) BEFORE
+   the deletion actually ran, which meant it always reported success even
+   when nothing was deleted, and would crash with "headers already sent"
+   if the code below ever tried to send a second response. Now uses
+   requireAuth (consistent with every other authenticated route) and
+   sends exactly one response, only after the deletion actually completes
+   or definitively fails.
+========================================================= */
+
+app.post("/api/delete-account", requireAuth, async (req, res) => {
+  try {
+    if (!supabaseAdmin) {
+      return res
+        .status(500)
+        .json({ error: "Server not configured for account deletion." });
+    }
+
+    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(req.userId);
+
+    if (deleteError) {
+      console.error("❌ Supabase delete error:", deleteError.message);
+      return res.status(500).json({ error: "Failed to delete account." });
+    }
+
+    return res.status(200).json({ ok: true });
+  } catch (error) {
+    console.error("❌ Delete-account error:", error.message);
+    return res.status(500).json({ error: "An internal server error occurred." });
+  }
+});
+
 /* =========================================================
    AUTH: CURRENT USER
 ========================================================= */
@@ -1783,15 +1837,23 @@ const MAX_QUESTIONS_PER_SESSION = 200;
 
 app.post(
   "/api/interview/start",
+  requireAuth,
   async (req, res) => {
     const {
-      user_id,
       job_role_id,
       question_type,
       persona,
       duration_minutes,
       question_count,
     } = req.body;
+
+    // The authenticated user is the source of truth for user_id — not
+    // whatever the client sends. Previously this came from a
+    // localStorage key ("skillforge_user_id") that was never actually
+    // set anywhere in the frontend, so every session was silently being
+    // attributed to the literal string "guest_user", which isn't a
+    // valid UUID and would fail the FK constraint on insert.
+    const user_id = req.userId;
 
     if (
       !persona ||
@@ -1805,6 +1867,7 @@ app.post(
 
     const durationMinutes = clampInterviewMinutes(duration_minutes);
     const targetQuestionCount = clampTargetQuestionCount(question_count);
+    const resolvedJobRoleId = await getOrCreateJobRoleId(job_role_id);
 
     try {
       const rawQuestions = await generateQuestionBatch(
@@ -1829,12 +1892,11 @@ app.post(
         diagram: typeof q.diagram === "string" && q.diagram.trim() ? q.diagram : null,
       }));
 
-      const sessionId =
-        `sess_${Date.now()}_${
-          Math.random()
-            .toString(36)
-            .slice(2, 9)
-        }`;
+      // A real UUID now, not a human-readable "sess_..." string — the
+      // interview_sessions.id column is typed uuid, and the mismatch
+      // between the two was the exact cause of the
+      // "invalid input syntax for type uuid" errors.
+      const sessionId = crypto.randomUUID();
 
       sessions.set(
         sessionId,
@@ -1842,8 +1904,7 @@ app.post(
           session_id:
             sessionId,
 
-          user_id:
-            user_id || null,
+          user_id,
 
           job_role_id:
             job_role_id || null,
@@ -1884,20 +1945,19 @@ app.post(
             .insert({
               id: sessionId,
 
-              user_id:
-                user_id || null,
+              user_id,
 
-              job_role_id:
-                job_role_id ||
-                null,
+              job_role_id: resolvedJobRoleId,
 
-              question_type:
+              interview_type:
                 question_type ||
                 "hr",
 
               persona_id:
                 persona.id ||
                 persona.name,
+
+              total_questions: targetQuestionCount || 0,
 
               started_at:
                 new Date()
@@ -1917,6 +1977,13 @@ app.post(
           error.message
         );
       }
+
+      logAudit(user_id, "interview_started", {
+        entity: "interview_sessions",
+        entityId: sessionId,
+        desc: `Started a ${question_type || "hr"} interview`,
+        req,
+      });
 
       return res.status(200).json({
         session_id:
@@ -1969,7 +2036,7 @@ app.post(
     }
 
     if (session.questions.length >= MAX_QUESTIONS_PER_SESSION) {
-      // Extremely unlikely in practice at 10-30 min, but guards against a
+      // Extremely unlikely in practice at 5-30 min, but guards against a
       // stuck client hammering this endpoint indefinitely.
       return res.status(200).json({
         question: session.questions[session.questions.length - 1],
@@ -2180,6 +2247,33 @@ Every score must be a whole number from 1 to 10.
 
         evaluation,
       });
+
+      // Persist this Q&A to interview_responses — previously this data was
+      // generated, shown to the candidate once, and then thrown away
+      // entirely. Scores are stored on a 0-100 scale (score * 10) to match
+      // every other score column in the schema.
+      try {
+        const { error: responseInsertError } = await databaseClient
+          .from("interview_responses")
+          .insert({
+            session_id,
+            question_ref: question.id,
+            question_text: question.text,
+            user_answer: user_answer.trim(),
+            confidence_score: toHundredScale(evaluation.breakdown?.confidence),
+            clarity_score: toHundredScale(evaluation.breakdown?.clarity),
+            structure_score: toHundredScale(evaluation.breakdown?.structure),
+            overall_score: toHundredScale(evaluation.score),
+            ai_feedback: evaluation.feedback || null,
+            ai_tip: evaluation.tip || null,
+          });
+
+        if (responseInsertError) {
+          console.warn("Supabase interview-response insert skipped:", responseInsertError.message);
+        }
+      } catch (error) {
+        console.warn("Supabase interview-response insert skipped:", error.message);
+      }
 
       return res.status(200).json({
         overallScore:
@@ -2413,12 +2507,25 @@ Return only a valid JSON array of strings.
             "interview_sessions"
           )
           .update({
+            status: "completed",
+
+            total_questions: answered.length,
+
             ended_at:
               new Date()
                 .toISOString(),
 
-            overall_score:
-              overallScore,
+            completed_at:
+              new Date()
+                .toISOString(),
+
+            // Scaled to 0-100 — see toHundredScale. This UPDATE is what
+            // fires trg_snapshot_on_interview, which copies avg_score into
+            // progress_snapshots alongside cv_score/readiness_score, all
+            // on the same 0-100 scale.
+            avg_score: toHundredScale(overallScore),
+
+            overall_score: toHundredScale(overallScore),
           })
           .eq(
             "id",
@@ -2430,6 +2537,13 @@ Return only a valid JSON array of strings.
           "Supabase interview-session update skipped:",
           updateError.message
         );
+      } else {
+        logAudit(session.user_id, "interview_completed", {
+          entity: "interview_sessions",
+          entityId: session_id,
+          desc: `Completed interview, overall score ${overallScore}/10`,
+          req,
+        });
       }
 
     } catch (error) {
