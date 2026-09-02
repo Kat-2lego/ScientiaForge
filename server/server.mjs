@@ -625,13 +625,17 @@ app.post("/api/auth/signup", async (req, res) => {
     // Table users upsert
 
     const { error: usersInsertError } =
-      await databaseClient.from("users").upsert(
-        {
-          id: userId,
-          email,
-        },
-        { onConflict: "id" }
-      );
+    await databaseClient.from("users").upsert(
+      {
+        id: userId,
+        email,
+        role: "job_seeker",
+        auth_provider: "email",
+        plan_type: "standard",
+        is_active: true,
+      },
+      { onConflict: "id" }
+    );
 
     if (usersInsertError) {
       console.error(
@@ -1147,6 +1151,100 @@ app.post('/create-payment-intent', requireAuth, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Something went wrong creating the payment' });
+  }
+});
+
+/* =========================================================
+   BILLING: GET BILLING DATA
+========================================================= */
+
+// Maps the DB's account_plan enum values to the plan keys the billing
+// UI already renders (Billing.html's data-plan="free" / data-plan="premium").
+// Update this map — not the frontend — if the enum grows more tiers.
+const PLAN_TYPE_MAP = {
+  standard: 'free',
+  premium: 'premium',
+};
+
+app.get('/api/billing/data', requireAuth, async (req, res) => {
+  try {
+    // 1. Current plan — plan_type lives on public.users
+    const { data: userRow, error: userError } = await databaseClient
+      .from('users')
+      .select('plan_type')
+      .eq('id', req.userId)
+      .single();
+
+    if (userError || !userRow) {
+      console.error('❌ Error fetching user plan_type:', userError);
+      return res.status(500).json({ error: 'Failed to load billing data.' });
+    }
+
+    const planType = PLAN_TYPE_MAP[userRow.plan_type] || 'free';
+
+    // 2. Active subscription — used for the "next billing date" field
+    const { data: subscription, error: subError } = await databaseClient
+      .from('user_subscriptions')
+      .select('status, end_date')
+      .eq('user_id', req.userId)
+      .eq('status', 'active')
+      .maybeSingle();
+
+    if (subError) {
+      console.warn('⚠️ Could not load subscription:', subError.message);
+    }
+
+    // 3. Payment history
+    const { data: payments, error: paymentsError } = await databaseClient
+      .from('payments')
+      .select('provider_ref, amount_zar, currency, status, paid_at')
+      .eq('user_id', req.userId)
+      .order('paid_at', { ascending: false });
+
+    if (paymentsError) {
+      console.warn('⚠️ Could not load payment history:', paymentsError.message);
+    }
+
+    const paymentHistory = (payments || [])
+      .filter((payment) => payment.paid_at) // skip rows with no paid_at (e.g. failed attempts)
+      .map((payment) => ({
+        date: payment.paid_at,
+        description: planType === 'premium' ? 'Premium Plan - Monthly' : 'Plan payment',
+        // Stripe amounts are stored in the smallest currency unit (cents).
+        amount: (payment.amount_zar || 0) / 100,
+        status: payment.status === 'succeeded' ? 'paid' : payment.status,
+        invoiceId: payment.provider_ref,
+      }));
+
+    // 4. Billing details — there's no billing_details table yet, so this
+    // is populated from the authenticated Supabase user for now.
+    const rawToken = req.headers.authorization.replace('Bearer ', '').trim();
+    const { data: { user: authUser } } = await supabase.auth.getUser(rawToken);
+
+    return res.status(200).json({
+      currentPlan: {
+        type: planType,
+        nextBillingDate: subscription?.end_date || null,
+      },
+      paymentHistory,
+      billingDetails: {
+        email: authUser?.email || null,
+        name: authUser?.user_metadata?.first_name
+          ? `${authUser.user_metadata.first_name} ${authUser.user_metadata.last_name || ''}`.trim()
+          : null,
+        company: null,
+        country: null,
+        postalCode: null,
+        // No card details are stored yet (no payment_methods table, and
+        // the Stripe webhook doesn't persist a customer/payment-method
+        // ID). Wire this up once that data exists — until then the
+        // frontend correctly shows "Not added".
+        paymentMethods: [],
+      },
+    });
+  } catch (error) {
+    console.error('❌ /api/billing/data error:', error.message);
+    return res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
@@ -2515,43 +2613,70 @@ app.listen(
    AUTH: DELETE ACCOUNT
 ========================================================= */
 
-app.post('/api/delete-account', async (req, res) => {
+app.post("/api/delete-account", async (req, res) => {
+  console.log("DELETE ACCOUNT HIT");
 
-  console.log('DELETE ACCOUNT HIT');
-  res.json({ ok: true, debug: 'route reached' });
-  
   try {
     if (!supabaseAdmin) {
-      return res
-        .status(500)
-        .json({ error: 'Server not configured for account deletion' });
+      return res.status(500).json({
+        error: "Server not configured for account deletion",
+      });
     }
 
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Unauthorized' });
+
+    if (
+      typeof authHeader !== "string" ||
+      !authHeader.startsWith("Bearer ")
+    ) {
+      return res.status(401).json({
+        error: "Authorization token missing",
+      });
     }
 
-    const token = authHeader.slice(7);
+    const token = authHeader.slice("Bearer ".length).trim();
 
-    // Verify token and get user
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    if (!token) {
+      return res.status(401).json({
+        error: "Authorization token missing",
+      });
+    }
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabaseAdmin.auth.getUser(token);
+
     if (userError || !user) {
-      return res.status(401).json({ error: 'Invalid or expired token' });
+      console.error("Token verification failed:", userError);
+
+      return res.status(401).json({
+        error: "Invalid or expired token",
+      });
     }
 
     const userId = user.id;
+// Delete user via admin client
+    const { error: deleteError } =
+      await supabaseAdmin.auth.admin.deleteUser(userId);
 
-    // Delete user via admin client
-    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
     if (deleteError) {
-      console.error('Supabase delete error:', deleteError);
-      return res.status(500).json({ error: 'Failed to delete account' });
+      console.error("Supabase delete error:", deleteError);
+
+      return res.status(500).json({
+        error: "Failed to delete account",
+      });
     }
 
-    res.json({ ok: true });
+    return res.json({
+      ok: true,
+      message: "Account deleted successfully",
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Delete account error:", err);
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
   }
 });

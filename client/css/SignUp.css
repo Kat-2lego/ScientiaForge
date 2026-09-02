@@ -437,6 +437,36 @@ body {
     box-shadow: 0 10px 25px rgba(0, 43, 92, 0.25);
 }
 
+/* 5. Standard Plan Notice Styling */
+.standard-plan-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-top: 12px;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  background: #eff6ff;
+  color: #1e3a8a;
+}
+
+.plan-notice-icon {
+  color: #2563eb;
+  font-size: 1rem;
+  margin-top: 2px;
+}
+
+.standard-plan-notice strong {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.standard-plan-notice p {
+  margin: 3px 0 0;
+  font-size: 0.78rem;
+  color: #475569;
+}
+
 /* 4. Keeps components stable on rendering */
 .final-login-btn {
     width: 100% !important;
