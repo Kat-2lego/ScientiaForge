@@ -98,13 +98,13 @@
                             <div class="plan-header">
                                 <div class="plan-info">
                                     <div class="plan-badge-wrapper">
-                                        <span class="plan-badge" id="currentPlanBadge">Free</span>
+                                        <span class="plan-badge" id="currentPlanBadge" data-plan="free">Free</span>
                                         <span class="plan-status" id="planStatus">Active</span>
                                     </div>
                                     <h3 class="plan-name" id="currentPlanName">Free Plan</h3>
                                     <p class="plan-price" id="currentPlanPrice">R0<span>/month</span></p>
                                 </div>
-                                <div class="plan-icon-wrapper">
+                                <div class="plan-icon-wrapper" data-plan="free">
                                     <i data-lucide="crown" class="plan-icon"></i>
                                 </div>
                             </div>
@@ -125,12 +125,10 @@
                             </div>
 
                             <div class="plan-actions">
-                                <button class="btn-upgrade" id="upgradePlanBtn">
+                                
+                                <button class="btn-upgrade" id="upgradePlanBtn" onclick="window.location.href='payments.html'">
                                     <i data-lucide="zap"></i>
                                     Upgrade to Premium
-                                </button>
-                                <button class="btn-secondary-outline" id="comparePlansBtn">
-                                    Compare Plans
                                 </button>
                             </div>
 
@@ -139,6 +137,7 @@
                                     <span class="billing-label">Next billing date</span>
                                     <span class="billing-value" id="nextBillingDate">—</span>
                                 </div>
+
                                 <div class="billing-detail">
                                     <span class="billing-label">Payment method</span>
                                     <div class="payment-method-display" id="paymentMethod">
@@ -208,7 +207,7 @@
                                 <div class="plan-card-header">
                                     <h3 class="plan-card-name">Premium</h3>
                                     <div class="plan-card-price">
-                                        <span class="price-amount">R299</span>
+                                        <span class="price-amount">R149.00</span>
                                         <span class="price-period">/month</span>
                                     </div>
                                     <p class="plan-card-description">For serious career growth</p>
@@ -241,60 +240,16 @@
                                     </li>
                                 </ul>
 
-                                <button class="plan-card-btn primary" onclick="openPaywall('premium')">
+                                <button type="button" class="plan-card-btn primary" onclick="window.location.href='payments.html'">
                                     <i data-lucide="zap"></i>
                                     Upgrade to Premium
                                 </button>
-                            </div>
-
-                            <!-- Pro Plan -->
-                            <div class="plan-card" data-plan="pro">
-                                <div class="plan-card-header">
-                                    <h3 class="plan-card-name">Pro</h3>
-                                    <div class="plan-card-price">
-                                        <span class="price-amount">R599</span>
-                                        <span class="price-period">/month</span>
-                                    </div>
-                                    <p class="plan-card-description">Maximum career acceleration</p>
-                                </div>
-                                
-                                <ul class="plan-features">
-                                    <li class="feature-row">
-                                        <i data-lucide="check" class="feature-check"></i>
-                                        <span>Everything in Premium</span>
-                                    </li>
-                                    <li class="feature-row">
-                                        <i data-lucide="check" class="feature-check"></i>
-                                        <span>AI-powered career coaching</span>
-                                    </li>
-                                    <li class="feature-row">
-                                        <i data-lucide="check" class="feature-check"></i>
-                                        <span>Industry insights & trends</span>
-                                    </li>
-                                    <li class="feature-row">
-                                        <i data-lucide="check" class="feature-check"></i>
-                                        <span>Resume builder</span>
-                                    </li>
-                                    <li class="feature-row">
-                                        <i data-lucide="check" class="feature-check"></i>
-                                        <span>LinkedIn optimization</span>
-                                    </li>
-                                    <li class="feature-row">
-                                        <i data-lucide="check" class="feature-check"></i>
-                                        <span>Priority 24/7 support</span>
-                                    </li>
-                                </ul>
-
-                                <button class="plan-card-btn" onclick="openPaywall('pro')">
-                                    <i data-lucide="rocket"></i>
-                                    Upgrade to Pro
-                                </button>
-                            </div>
+                            </div>                        
                         </div>
                     </div>
 
                     <!-- Payment History -->
-                    <div class="section-container">
+                    <div class="section-container" id="paymentHistorySection">
                         <h2 class="section-title">Payment History</h2>
                         <p class="section-subtitle">View and download your past invoices.</p>
                         
@@ -337,7 +292,7 @@
                                                 <span class="description-sub">Payment ID: #INV-2026-0820</span>
                                             </td>
                                             <td class="amount-cell">
-                                                <span class="amount-value">R299.00</span>
+                                                <span class="amount-value">R149.00</span>
                                             </td>
                                             <td class="status-cell">
                                                 <span class="status-badge paid">
@@ -364,7 +319,7 @@
                                                 <span class="description-sub">Payment ID: #INV-2026-0720</span>
                                             </td>
                                             <td class="amount-cell">
-                                                <span class="amount-value">R299.00</span>
+                                                <span class="amount-value">R149.00</span>
                                             </td>
                                             <td class="status-cell">
                                                 <span class="status-badge paid">
@@ -391,7 +346,7 @@
                                                 <span class="description-sub">Payment ID: #INV-2026-0620</span>
                                             </td>
                                             <td class="amount-cell">
-                                                <span class="amount-value">R299.00</span>
+                                                <span class="amount-value">R149.00</span>
                                             </td>
                                             <td class="status-cell">
                                                 <span class="status-badge paid">
@@ -519,7 +474,7 @@
                                 </label>
                             </div>
                             <div class="divider"></div>
-                            <div class="setting-row">
+                            <div class="setting-row" id="cancelSubscriptionRow">
                                 <div class="setting-info">
                                     <h4>Cancel Subscription</h4>
                                     <p>Cancel your subscription at any time. You'll retain access until the end of your billing period.</p>

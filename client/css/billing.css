@@ -86,6 +86,10 @@
     padding: 24px;
     box-shadow: var(--shadow-sm);
 }
+.plan-overview-card[data-plan="premium"] {
+    border-color: #fbbf24;
+    background: linear-gradient(180deg, #fffbeb 0%, var(--bg-card) 12%);
+}
 
 .plan-header {
     display: flex;
@@ -125,10 +129,7 @@
     color: white;
 }
 
-.plan-badge[data-plan="pro"] {
-    background: linear-gradient(135deg, #2563eb, #3b82f6);
-    color: white;
-}
+
 
 .plan-status {
     padding: 5px 12px;
@@ -162,15 +163,21 @@
     width: 80px;
     height: 80px;
     border-radius: 16px;
-    background: linear-gradient(135deg, #f59e0b, #fbbf24);
     display: flex;
     align-items: center;
     justify-content: center;
+    background: var(--grey-100, #e2e8f0); /* free default */
+}
+.plan-icon-wrapper[data-plan="premium"] {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
 }
 
 .plan-icon {
     width: 40px;
     height: 40px;
+    color: var(--text-muted); /* free default */
+}
+.plan-icon-wrapper[data-plan="premium"] .plan-icon {
     color: white;
 }
 
@@ -304,6 +311,13 @@
     border-color: #f59e0b;
     box-shadow: 0 10px 30px rgba(245, 158, 11, 0.15);
 }
+.plan-card[data-plan="free"] {
+    background: var(--grey-50, #f8fafc);
+}
+
+.plan-card[data-plan="premium"] {
+    background: var(--bg-card);
+}
 
 .popular-badge {
     position: absolute;
@@ -410,10 +424,7 @@
     transition: all 0.2s;
 }
 
-.plan-card-btn:hover:not(:disabled) {
-    background: var(--bg-main);
-    border-color: var(--text-muted);
-}
+
 
 .plan-card-btn.primary {
     background: linear-gradient(135deg, #f59e0b, #fbbf24);
