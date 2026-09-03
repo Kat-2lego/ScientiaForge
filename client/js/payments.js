@@ -107,6 +107,30 @@ function validate() {
   return ok;
 }
 
+/*=========================================================
+   BACK BUTTON
+========================================================= */
+// Determine where "Back" should go.
+const backUrl = "billing_Subscription.html";
+
+// If you later want to support "upgrade from inside app" vs "signup checkout",
+// you can pass a query param, e.g. payments.html?context=upgrade
+// and then:
+// const params = new URLSearchParams(window.location.search);
+// const context = params.get("context");
+
+// if (context === "upgrade") {
+//   // User is already logged in and upgrading inside the app
+//   backUrl = "/pages/Dashboard.html"; // adjust path as needed
+// } else {
+//   // User is signing up / checking out as part of signup flow
+//   backUrl = "Login.html"; // or wherever makes sense for signup flow
+// }
+
+document.getElementById("backBtn")?.addEventListener("click", () => {
+  window.location.href = backUrl;
+});
+
 /* =========================================================
    CHECKOUT SUBMIT
 ========================================================= */

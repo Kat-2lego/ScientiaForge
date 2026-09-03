@@ -47,7 +47,55 @@
     overflow: hidden;
     box-shadow: 0 30px 70px -30px rgba(11,11,15,0.35);
   }
+  /* ---------------- Back Button ---------------- */
+  
+  /* Back button (top-left) */
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  color: #0f172a;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease;
+  z-index: 10;
+}
 
+.back-btn:hover {
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.back-btn:active {
+  transform: scale(0.98);
+}
+
+.back-btn svg {
+  display: block;
+}
+
+/* On smaller screens, keep it visible but slightly smaller */
+@media (max-width: 768px) {
+  .back-btn {
+    top: 12px;
+    left: 12px;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
+
+  .back-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+}
   /* ---------------- LEFT: SPEC PANEL ---------------- */
 
   .spec{

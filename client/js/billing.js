@@ -6,62 +6,93 @@ document.addEventListener('DOMContentLoaded', () => {
     loadBillingData();
 });
 
-// Your existing paywall integration functions
-function openPaywall(planType) {
-    const modal = document.getElementById('paywallModal');
-    const container = document.getElementById('paywallContainer');
-    
-    // Clear previous content
-    container.innerHTML = '';
-    
-    // Load your existing paywall here
-    // This is where you integrate with your backend
-    if (planType === 'premium') {
-        // Load premium paywall
-        container.innerHTML = `
-            <div style="padding: 40px; text-align: center;">
-                <h2 style="font-size: 2rem; margin-bottom: 16px;">Upgrade to Premium</h2>
-                <p style="color: var(--text-muted); margin-bottom: 32px;">Your paywall content loads here...</p>
-                <!-- Your existing paywall iframe or component -->
-            </div>
-        `;
-    } else if (planType === 'pro') {
-        // Load Pro paywall
-        container.innerHTML = `
-            <div style="padding: 40px; text-align: center;">
-                <h2 style="font-size: 2rem; margin-bottom: 16px;">Upgrade to Pro</h2>
-                <p style="color: var(--text-muted); margin-bottom: 32px;">Your paywall content loads here...</p>
-                <!-- Your existing paywall iframe or component -->
-            </div>
-        `;
+// ---- Plan catalog: single source of truth for plan card content ----
+// Keep this in sync with what plan_type values exist in the DB.
+const PLAN_CATALOG = {
+    free: {
+        name: 'Free',
+        price: 0,
+        features: [
+            '5 CV analyses per month',
+            'Basic career discovery',
+            '3 interview simulations'
+        ]
+    },
+    premium: {
+        name: 'Premium',
+        price: 149,
+        features: [
+            'Unlimited CV analyses',
+            'Advanced career discovery',
+            'Unlimited interview sims',
+            'Skill gap analysis',
+            'Progress tracking'
+        ]
     }
-    
-    modal.classList.add('active');
-}
+};
 
-function closePaywall() {
-    const modal = document.getElementById('paywallModal');
-    modal.classList.remove('active');
-}
+// Ranked low -> high so we know whether a given card is an "upgrade" or
+// "downgrade" relative to the user's current plan_type.
+const PLAN_ORDER = ['free', 'premium'];
 
-// Close modal on outside click
-document.getElementById('paywallModal')?.addEventListener('click', (e) => {
-    if (e.target.id === 'paywallModal') {
-        closePaywall();
-    }
+// Add event listener for Premium plan upgrade button
+document.addEventListener('DOMContentLoaded', () => {
+  const premiumUpgradeBtn = document.querySelector('.plan-card-btn.primary');
+  
+  if (premiumUpgradeBtn) {
+    premiumUpgradeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      window.location.href = 'payments.html';
+    });
+  }
+  
+  // Also ensure the first button works
+  const upgradePlanBtn = document.getElementById('upgradePlanBtn');
+  if (upgradePlanBtn) {
+    upgradePlanBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.href = 'payments.html';
+    });
+  }
 });
 
 // Load billing data from your backend
 async function loadBillingData() {
     try {
-        // Replace with your actual API endpoint
-        const response = await fetch('/api/billing/data');
+        // Same token key auth.js reads/writes on login and logout.
+        const token = localStorage.getItem('sb-access-token');
+
+        if (!token) {
+            // Not logged in (or token hasn't been saved yet) — don't bother
+            // calling an endpoint that will just 401.
+            loadDemoData();
+            return;
+        }
+
+        const response = await fetch('/api/billing/data', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        if (response.status === 401) {
+            // Session expired/invalid — send them back to log in rather than
+            // silently showing demo data as if it were their real billing info.
+            localStorage.removeItem('sb-access-token');
+            window.location.href = 'LogIn.html';
+            return;
+        }
+
+        if (!response.ok) throw new Error('Request failed');
         const data = await response.json();
-        
-        // Update current plan
-        updateCurrentPlan(data.currentPlan);
-        
-        // Update payment history
+
+        // plan_type is the source of truth from the DB. Map it defensively
+        // in case it comes back nested differently (data.plan_type,
+        // data.user.plan_type, or already inside data.currentPlan.type).
+        const planType = data.currentPlan?.type || data.plan_type || data.user?.plan_type || 'free';
+
+        updateCurrentPlan({ ...data.currentPlan, type: planType });
         updatePaymentHistory(data.paymentHistory);
         
         // Update billing details
@@ -75,55 +106,127 @@ async function loadBillingData() {
 }
 
 function updateCurrentPlan(plan) {
+    if (!plan || !plan.type) return;
+
+    const planType = plan.type;
+    const catalogEntry = PLAN_CATALOG[planType] || PLAN_CATALOG.free;
+
     const badge = document.getElementById('currentPlanBadge');
     const name = document.getElementById('currentPlanName');
     const price = document.getElementById('currentPlanPrice');
-    
-    if (plan) {
-        badge.textContent = plan.name;
-        badge.setAttribute('data-plan', plan.type);
-        name.textContent = `${plan.name} Plan`;
-        price.innerHTML = `R${plan.price}<span>/month</span>`;
-        
-        // Update features
-        const featuresContainer = document.getElementById('currentPlanFeatures');
-        featuresContainer.innerHTML = plan.features.map(feature => `
-            <div class="feature-item">
-                <i data-lucide="check-circle" class="feature-icon"></i>
-                <span>${feature}</span>
-            </div>
-        `).join('');
-        
-        lucide.createIcons();
-        
-        // Update button state
-        const upgradeBtn = document.getElementById('upgradePlanBtn');
-        const selectFreeBtn = document.getElementById('selectFreePlan');
-        
-        if (plan.type === 'free') {
-            upgradeBtn.style.display = 'flex';
-            if (selectFreeBtn) selectFreeBtn.disabled = true;
-            selectFreeBtn.textContent = 'Current Plan';
-        } else {
-            upgradeBtn.style.display = 'none';
-            if (selectFreeBtn) {
-                selectFreeBtn.disabled = true;
-                selectFreeBtn.textContent = 'Downgrade to Free';
-            }
-        }
+    const overviewCard = document.querySelector('.plan-overview-card');
+    const iconWrapper = document.querySelector('.plan-icon-wrapper');
+
+    const displayName = plan.name || catalogEntry.name;
+    const displayPrice = plan.price ?? catalogEntry.price;
+    const displayFeatures = (plan.features && plan.features.length) ? plan.features : catalogEntry.features;
+
+    badge.textContent = displayName;
+    badge.setAttribute('data-plan', planType);
+    overviewCard.setAttribute('data-plan', planType);
+    iconWrapper.setAttribute('data-plan', planType);
+    name.textContent = `${displayName} Plan`;
+    price.innerHTML = displayPrice > 0 ? `R${displayPrice}<span>/month</span>` : `R0<span>/month</span>`;
+
+    const featuresContainer = document.getElementById('currentPlanFeatures');
+    featuresContainer.innerHTML = displayFeatures.map(feature => `
+        <div class="feature-item">
+            <i data-lucide="check-circle" class="feature-icon"></i>
+            <span>${feature}</span>
+        </div>
+    `).join('');
+
+    // Next billing date only means something once you're actually paying.
+    const nextBillingEl = document.getElementById('nextBillingDate');
+    if (nextBillingEl) {
+        nextBillingEl.textContent = plan.nextBillingDate
+            ? new Date(plan.nextBillingDate).toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' })
+            : '—';
     }
+
+    highlightPlanCards(planType);
+    updateTopLevelActions(planType);
+    applyPlanBasedVisibility(planType);
+
+    lucide.createIcons();
+}
+
+// Highlight the plan card matching the user's plan_type, and set the
+// correct call-to-action (Upgrade / Downgrade / Current Plan) on every card.
+function highlightPlanCards(planType) {
+    document.querySelectorAll('.plan-card').forEach(card => {
+        const cardPlan = card.dataset.plan;
+        const btn = card.querySelector('.plan-card-btn');
+        const isCurrent = cardPlan === planType;
+
+        card.classList.toggle('current-plan', isCurrent);
+        // Inline fallback highlight in case Billing.css doesn't yet have a
+        // .plan-card.current-plan rule — safe to remove once it does.
+        card.style.outline = isCurrent ? '2px solid #6C5CE7' : '';
+        card.style.outlineOffset = isCurrent ? '2px' : '';
+
+        if (!btn) return;
+
+        if (isCurrent) {
+            btn.disabled = true;
+            btn.classList.remove('primary');
+            btn.innerHTML = 'Current Plan';
+            btn.onclick = null;
+            return;
+        }
+
+        btn.disabled = false;
+        const currentIndex = PLAN_ORDER.indexOf(planType);
+        const cardIndex = PLAN_ORDER.indexOf(cardPlan);
+        const isUpgrade = cardIndex > currentIndex;
+        const targetName = PLAN_CATALOG[cardPlan]?.name || cardPlan;
+
+        btn.innerHTML = isUpgrade
+            ? `<i data-lucide="zap"></i> Upgrade to ${targetName}`
+            : `Downgrade to ${targetName}`;
+        btn.onclick = isUpgrade ? () => openPaywall(cardPlan) : () => confirmDowngrade(cardPlan);
+    });
+}
+
+// The big "Upgrade to Premium" CTA on the overview card should disappear
+// once there's no higher tier left to upgrade to.
+function updateTopLevelActions(planType) {
+    const upgradeBtn = document.getElementById('upgradePlanBtn');
+    if (!upgradeBtn) return;
+    const hasHigherTier = PLAN_ORDER.indexOf(planType) < PLAN_ORDER.length - 1;
+    upgradeBtn.style.display = hasHigherTier ? 'flex' : 'none';
+}
+
+function confirmDowngrade(planType) {
+    const targetName = PLAN_CATALOG[planType]?.name || planType;
+    if (confirm(`Downgrade to the ${targetName} plan? You'll lose access to premium features at the end of your billing period.`)) {
+        console.log('Downgrade to', planType);
+        // Call your API to schedule the downgrade
+    }
+}
+
+// Free-plan users have no billing history and nothing to cancel — hide
+// those sections instead of showing an empty table / disabled button.
+function applyPlanBasedVisibility(planType) {
+    const isFree = planType === 'free';
+
+    const paymentHistorySection = document.getElementById('paymentHistorySection');
+    if (paymentHistorySection) paymentHistorySection.style.display = isFree ? 'none' : '';
+
+    const cancelRow = document.getElementById('cancelSubscriptionRow');
+    if (cancelRow) cancelRow.style.display = isFree ? 'none' : '';
 }
 
 function updatePaymentHistory(history) {
     const tbody = document.getElementById('paymentHistoryBody');
     const emptyState = document.getElementById('noPaymentsState');
-    
+
     if (!history || history.length === 0) {
         tbody.innerHTML = '';
         emptyState.classList.remove('hidden');
         return;
     }
-    
+
     emptyState.classList.add('hidden');
     tbody.innerHTML = history.map(payment => `
         <tr class="history-row">
@@ -159,21 +262,30 @@ function updatePaymentHistory(history) {
 }
 
 function updateBillingDetails(details) {
-    if (details) {
-        document.getElementById('billingEmail').value = details.email || '';
-        document.getElementById('billingName').value = details.name || '';
-        document.getElementById('billingCompany').value = details.company || '';
-        document.getElementById('billingCountry').value = details.country || 'ZA';
-        document.getElementById('billingPostal').value = details.postalCode || '';
-        
-        // Update payment methods
-        updatePaymentMethods(details.paymentMethods);
+    if (!details) return;
+
+    document.getElementById('billingEmail').value = details.email || '';
+    document.getElementById('billingName').value = details.name || '';
+    document.getElementById('billingCompany').value = details.company || '';
+    document.getElementById('billingCountry').value = details.country || 'ZA';
+    document.getElementById('billingPostal').value = details.postalCode || '';
+
+    updatePaymentMethods(details.paymentMethods);
+
+    // Reflect the primary card on the overview card too.
+    const overviewPaymentMethod = document.getElementById('paymentMethod');
+    if (overviewPaymentMethod) {
+        const primary = details.paymentMethods?.[0];
+        overviewPaymentMethod.innerHTML = primary
+            ? `<i data-lucide="credit-card"></i><span>${primary.cardBrand} ending in ${primary.lastFour}</span>`
+            : `<i data-lucide="credit-card"></i><span>Not added</span>`;
+        lucide.createIcons();
     }
 }
 
 function updatePaymentMethods(methods) {
     const container = document.getElementById('paymentMethodsList');
-    
+
     if (!methods || methods.length === 0) {
         container.innerHTML = `
             <div style="text-align: center; padding: 20px; color: var(--text-muted);">
@@ -182,7 +294,7 @@ function updatePaymentMethods(methods) {
         `;
         return;
     }
-    
+
     container.innerHTML = methods.map((method, index) => `
         <div class="payment-method-item ${index === 0 ? 'active' : ''}">
             <div class="payment-method-icon">
@@ -202,7 +314,7 @@ function updatePaymentMethods(methods) {
             </div>
         </div>
     `).join('');
-    
+
     lucide.createIcons();
 }
 
@@ -233,14 +345,14 @@ document.getElementById('saveBillingInfo')?.addEventListener('click', async () =
         country: document.getElementById('billingCountry').value,
         postalCode: document.getElementById('billingPostal').value
     };
-    
+
     try {
         const response = await fetch('/api/billing/update-details', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(billingData)
         });
-        
+
         if (response.ok) {
             alert('Billing information updated successfully!');
         } else {
@@ -273,43 +385,25 @@ document.getElementById('exportHistory')?.addEventListener('click', () => {
     window.open(`/api/billing/export?year=${year}`, '_blank');
 });
 
-// Demo data for testing (remove when integrating with real backend)
+// ---- Demo data for testing (remove once your backend is wired up) ----
+// Since real users are on the Free plan right now, that's the default here.
+// Append ?plan=premium to the page URL to preview the paid-plan view
+// without needing a backend response yet.
 function loadDemoData() {
+    const params = new URLSearchParams(window.location.search);
+    const requestedPlan = params.get('plan');
+    const planType = PLAN_CATALOG[requestedPlan] ? requestedPlan : 'free';
+    const isFree = planType === 'free';
+
     const demoData = {
         currentPlan: {
-            type: 'premium',
-            name: 'Premium',
-            price: 299,
-            features: [
-                'Unlimited CV analyses',
-                'Advanced career discovery',
-                'Unlimited interview simulations',
-                'Skill gap analysis',
-                'Progress tracking'
-            ]
+            type: planType,
+            nextBillingDate: isFree ? null : '2026-09-20'
         },
-        paymentHistory: [
-            {
-                date: '2026-08-20',
-                description: 'Premium Plan - Monthly',
-                amount: 299,
-                status: 'paid',
-                invoiceId: 'INV-2026-0820'
-            },
-            {
-                date: '2026-07-20',
-                description: 'Premium Plan - Monthly',
-                amount: 299,
-                status: 'paid',
-                invoiceId: 'INV-2026-0720'
-            },
-            {
-                date: '2026-06-20',
-                description: 'Premium Plan - Monthly',
-                amount: 299,
-                status: 'paid',
-                invoiceId: 'INV-2026-0620'
-            }
+        paymentHistory: isFree ? [] : [
+            { date: '2026-08-20', description: 'Premium Plan - Monthly', amount: 149, status: 'paid', invoiceId: 'INV-2026-0820' },
+            { date: '2026-07-20', description: 'Premium Plan - Monthly', amount: 149, status: 'paid', invoiceId: 'INV-2026-0720' },
+            { date: '2026-06-20', description: 'Premium Plan - Monthly', amount: 149, status: 'paid', invoiceId: 'INV-2026-0620' }
         ],
         billingDetails: {
             email: 'user@example.com',
@@ -317,17 +411,12 @@ function loadDemoData() {
             company: '',
             country: 'ZA',
             postalCode: '2000',
-            paymentMethods: [
-                {
-                    id: 'pm_1',
-                    cardBrand: 'Visa',
-                    lastFour: '4242',
-                    expiry: '12/2027'
-                }
+            paymentMethods: isFree ? [] : [
+                { id: 'pm_1', cardBrand: 'Visa', lastFour: '4242', expiry: '12/2027' }
             ]
         }
     };
-    
+
     updateCurrentPlan(demoData.currentPlan);
     updatePaymentHistory(demoData.paymentHistory);
     updateBillingDetails(demoData.billingDetails);
