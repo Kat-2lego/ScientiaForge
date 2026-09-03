@@ -125,12 +125,10 @@
                             </div>
 
                             <div class="plan-actions">
-                                <button class="btn-upgrade" id="upgradePlanBtn">
+                                
+                                <button class="btn-upgrade" id="upgradePlanBtn" onclick="window.location.href='payments.html'">
                                     <i data-lucide="zap"></i>
                                     Upgrade to Premium
-                                </button>
-                                <button class="btn-secondary-outline" id="comparePlansBtn">
-                                    Compare Plans
                                 </button>
                             </div>
 
@@ -139,6 +137,7 @@
                                     <span class="billing-label">Next billing date</span>
                                     <span class="billing-value" id="nextBillingDate">—</span>
                                 </div>
+
                                 <div class="billing-detail">
                                     <span class="billing-label">Payment method</span>
                                     <div class="payment-method-display" id="paymentMethod">
@@ -241,7 +240,7 @@
                                     </li>
                                 </ul>
 
-                                <button class="plan-card-btn primary" onclick="openPaywall('premium')">
+                                <button type="button" class="plan-card-btn primary" onclick="window.location.href='payments.html'">
                                     <i data-lucide="zap"></i>
                                     Upgrade to Premium
                                 </button>

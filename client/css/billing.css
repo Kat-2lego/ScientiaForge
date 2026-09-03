@@ -424,10 +424,7 @@
     transition: all 0.2s;
 }
 
-.plan-card-btn:hover:not(:disabled) {
-    background: var(--bg-main);
-    border-color: var(--text-muted);
-}
+
 
 .plan-card-btn.primary {
     background: linear-gradient(135deg, #f59e0b, #fbbf24);

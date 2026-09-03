@@ -35,39 +35,26 @@ const PLAN_CATALOG = {
 // "downgrade" relative to the user's current plan_type.
 const PLAN_ORDER = ['free', 'premium'];
 
-// Your existing paywall integration functions
-function openPaywall(planType) {
-    const modal = document.getElementById('paywallModal');
-    const container = document.getElementById('paywallContainer');
-    
-    // Clear previous content
-    container.innerHTML = '';
-    
-    // Load your existing paywall here
-    // This is where you integrate with your backend
-    if (planType === 'premium') {
-        // Load premium paywall
-        container.innerHTML = `
-            <div style="padding: 40px; text-align: center;">
-                <h2 style="font-size: 2rem; margin-bottom: 16px;">Upgrade to Premium</h2>
-                <p style="color: var(--text-muted); margin-bottom: 32px;">Your paywall content loads here...</p>
-            </div>
-        `;
-    }
-    
-    modal.classList.add('active');
-}
-
-function closePaywall() {
-    const modal = document.getElementById('paywallModal');
-    modal.classList.remove('active');
-}
-
-// Close modal on outside click
-document.getElementById('paywallModal')?.addEventListener('click', (e) => {
-    if (e.target.id === 'paywallModal') {
-        closePaywall();
-    }
+// Add event listener for Premium plan upgrade button
+document.addEventListener('DOMContentLoaded', () => {
+  const premiumUpgradeBtn = document.querySelector('.plan-card-btn.primary');
+  
+  if (premiumUpgradeBtn) {
+    premiumUpgradeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      window.location.href = 'payments.html';
+    });
+  }
+  
+  // Also ensure the first button works
+  const upgradePlanBtn = document.getElementById('upgradePlanBtn');
+  if (upgradePlanBtn) {
+    upgradePlanBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.href = 'payments.html';
+    });
+  }
 });
 
 // Load billing data from your backend
