@@ -8,13 +8,34 @@ import { fileURLToPath } from "url";
 import WebSocket from "ws";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 import cvRoutes from "./cv-analyzer/routes/cvRoutes.js";
-<<<<<<< HEAD
 import { dirname, join } from 'path';
 import Stripe from 'stripe';
-=======
 import careerPathfinderRoutes from "./routes/careerPathfinder.js";
 import studyHubRoutes from "./routes/studyHub.js";
->>>>>>> katlego-branch
+
+
+async function logAudit(userId, action, { entity = null, entityId = null, desc = null, req = null } = {}) {
+  try {
+    const ip = req?.ip || req?.headers?.["x-forwarded-for"] || null;
+    const ua = req?.headers?.["user-agent"] || null;
+
+    const { error } = await databaseClient.rpc("insert_audit_log", {
+      p_user_id: userId,
+      p_action: action,
+      p_entity: entity,
+      p_entity_id: entityId,
+      p_desc: desc,
+      p_ip: ip,
+      p_ua: ua,
+    });
+
+    if (error) {
+      console.warn("Audit log skipped:", error.message);
+    }
+  } catch (error) {
+    console.warn("Audit log skipped:", error.message);
+  }
+}
 
 /* =========================================================
    LOAD ENVIRONMENT VARIABLES
