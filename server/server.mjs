@@ -8,13 +8,10 @@ import { fileURLToPath } from "url";
 import WebSocket from "ws";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 import cvRoutes from "./cv-analyzer/routes/cvRoutes.js";
-<<<<<<< HEAD
 import { dirname, join } from 'path';
 import Stripe from 'stripe';
-=======
 import careerPathfinderRoutes from "./routes/careerPathfinder.js";
 import studyHubRoutes from "./routes/studyHub.js";
->>>>>>> katlego-branch
 
 /* =========================================================
    LOAD ENVIRONMENT VARIABLES
