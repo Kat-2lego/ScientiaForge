@@ -6,19 +6,22 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentJobId = null;
 
   // ================= AUTH HEADER HELPER =================
-  function getAuthHeaders(extra = {}) {
-    const token = localStorage.getItem("sb-access-token");
+function getAuthHeaders(extra = {}) {
+  const token = localStorage.getItem("sb-access-token");
 
-    if (!token) {
-      window.location.href = "LogIn.html";
-      return extra;
-    }
+  console.log("Skill Gap token exists:", Boolean(token));
 
-    return {
-      ...extra,
-      Authorization: `Bearer ${token}`,
-    };
+  if (!token) {
+    throw new Error(
+      "No login token found under sb-access-token. Log in again or fix the login token storage."
+    );
   }
+
+  return {
+    ...extra,
+    Authorization: `Bearer ${token}`,
+  };
+}
 
   // ================= FETCH USER SKILLS =================
   async function fetchUserSkills() {
@@ -31,9 +34,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ================= FETCH JOBS =================
-  async function fetchJobs() {
-    const res = await fetch(`${API_BASE}/jobs`);
-    if (!res.ok) throw new Error("Failed to load jobs.");
+  
+  async function fetchJobs(queryText) {
+    const url = new URL(`${API_BASE}/jobs`);
+    if (queryText) {
+      url.searchParams.set("q", queryText);
+    }
+
+    const res = await fetch(url.toString());
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      throw new Error(errBody.error || "Failed to load jobs.");
+    }
+
     const data = await res.json();
     return data.jobs || [];
   }
@@ -192,40 +205,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ================= INITIALIZE PAGE =================
   async function initSkillGap() {
-    const jobSelect = document.querySelector(".job-select");
+  const jobSelect = document.querySelector(".job-select");
 
-    try {
-      const [jobs, skills] = await Promise.all([
-        fetchJobs(),
-        fetchUserSkills(),
-      ]);
+  try {
+    const [jobs, skills] = await Promise.all([
+      fetchJobs(),
+      fetchUserSkills(),
+    ]);
 
-      currentSkills = skills;
-      renderHaveSkills();
+    currentSkills = skills;
+    renderHaveSkills();
 
-      jobSelect.innerHTML = "";
-      jobs.forEach((job) => {
-        const option = document.createElement("option");
-        option.value = job.id;
-        option.textContent = job.title;
-        jobSelect.appendChild(option);
-      });
+    jobSelect.innerHTML = "";
 
-      if (jobs.length > 0) {
-        currentJobId = jobs[0].id;
-        await refreshGapForCurrentJob();
-      }
-
-      jobSelect.addEventListener("change", async () => {
-        currentJobId = parseInt(jobSelect.value, 10);
-        await refreshGapForCurrentJob();
-      });
-
-    } catch (err) {
-      console.error("Skill Gap init error:", err);
-      alert(err.message || "Failed to load Skill Gap Analysis.");
+    if (jobs.length === 0) {
+      jobSelect.innerHTML = `<option value="">No careers available</option>`;
+      return;
     }
+
+    jobs.forEach((job) => {
+      const option = document.createElement("option");
+      option.value = job.id;
+      option.textContent = job.title;
+      jobSelect.appendChild(option);
+    });
+
+    currentJobId = jobs[0].id;
+    await refreshGapForCurrentJob();
+
+    jobSelect.addEventListener("change", async () => {
+      currentJobId = jobSelect.value;
+      await refreshGapForCurrentJob();
+    });
+  } catch (err) {
+    console.error("Skill Gap init error:", err);
+    alert(err.message || "Failed to load Skill Gap Analysis.");
   }
+}
 
   initSkillGap();
 });
