@@ -311,6 +311,18 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
         ? new Date(Date.now() + plan.duration_days * 86400000).toISOString()
         : null;
 
+      const planType = productId === 'premium' ? 'premium' : 'standard';
+
+      const { error: userError } = await databaseClient
+        .from('users')
+        .update({ plan_type: planType })
+        .eq('id', userId);
+
+        if (userError) {
+          console.error('Failed to update user plan_type:', userError);
+          break;
+        }
+
       // 2. Create or reactivate the user's subscription
       const { data: subscription, error: subError } = await databaseClient
         .from('user_subscriptions')
