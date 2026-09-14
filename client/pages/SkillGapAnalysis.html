@@ -131,10 +131,17 @@
           <p>Compare your current skills with job requirements</p>
         </div>
 
-        <select class="job-select">
-          <!-- options populated by JS -->
-        </select>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <select class="industry-select" id="industrySelect" aria-label="Select industry">
+            <option value="">Select industry…</option>
+            <!-- populated by JS -->
+          </select>
 
+          <select class="job-select" id="jobSelect" aria-label="Select career" disabled>
+            <option value="">Select career…</option>
+            <!-- populated by JS -->
+          </select>
+        </div>
       </div>
 
       <!-- METRICS -->

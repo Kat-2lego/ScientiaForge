@@ -16,6 +16,8 @@ import studyHubRoutes from "./routes/studyHub.js";
 import { getOccupationSkills } from "./escoClient.mjs";
 import { computeSkillGap } from "./skillMatcher.mjs";
 import { searchEscoOccupations } from "./escoClient.mjs";
+import { INDUSTRIES } from "./industries.mjs";
+
 
 
 
@@ -1611,6 +1613,50 @@ app.get("/api/jobs/search", (req, res) => {
 
   const results = JOB_TITLES.filter((title) => title.toLowerCase().includes(q)).slice(0, 8);
   return res.status(200).json({ results });
+});
+// GET /api/industries
+app.get("/api/industries", async (req, res) => {
+  try {
+    return res.json({
+      industries: INDUSTRIES.map((ind) => ({
+        id: ind.id,
+        label: ind.label,
+      })),
+    });
+  } catch (error) {
+    console.error("❌ /api/industries error:", error);
+    return res.status(500).json({
+      error: "Failed to load industries",
+      details: error.message,
+    });
+  }
+});
+
+// GET /api/industries/:id/careers
+
+app.get("/api/industries/:id/careers", async (req, res) => {
+  try {
+    const industry = INDUSTRIES.find((i) => i.id === req.params.id);
+
+    if (!industry) {
+      return res.status(404).json({
+        error: "Industry not found",
+      });
+    }
+
+    return res.json({
+      careers: industry.careers.map((c) => ({
+        title: c.title,
+        jobId: c.escoUri, // keep same shape as before
+      })),
+    });
+  } catch (error) {
+    console.error("❌ /api/industries/:id/careers error:", error);
+    return res.status(500).json({
+      error: "Failed to load careers",
+      details: error.message,
+    });
+  }
 });
 
 // Test ESCO route

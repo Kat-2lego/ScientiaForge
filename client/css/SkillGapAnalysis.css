@@ -139,7 +139,14 @@ body {
   align-items: center;
   flex-wrap: wrap;
 }
-
+.industry-select {
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--text);
+  font-size: 0.9rem;
+}
 .job-select {
   padding: 10px;
   border-radius: 999px;

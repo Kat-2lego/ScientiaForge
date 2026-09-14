@@ -32,60 +32,141 @@ const STOPWORDS = new Set([
   "develop",
 ]);
 
-const WEB_DEV_KEYWORDS = [
-  "web",
+// Core domain keywords that make a skill plausibly relevant to office/knowledge-work roles.
+// This is intentionally broad but excludes clearly physical/biological/medical domains.
+const CORE_SKILL_KEYWORDS = [
+  "communication",
+  "interpersonal",
+  "negotiation",
+  "negotiate",
+  "rights",
+  "human rights",
+  "law",
+  "legal",
+  "policy",
+  "compliance",
+  "advocacy",
+  "advise",
+  "counselling",
+  "counseling",
+  "support",
+  "victim",
+  "violation",
+  "investigate",
+  "research",
+  "analysis",
+  "analyse",
+  "analysis",
+  "data",
+  "information",
+  "documentation",
+  "reporting",
+  "stakeholder",
+  "engagement",
+  "community",
+  "social",
+  "service",
+  "case",
+  "management",
+  "project",
+  "planning",
+  "strategy",
+  "monitoring",
+  "evaluation",
+  "training",
+  "capacity building",
+  "awareness",
+  "campaign",
+  "fundraising",
+  "grant",
+  "budget",
+  "finance",
+  "administration",
+  "coordination",
+  "collaboration",
+  "partnership",
+  "networking",
+  "governance",
+  "ethics",
+  "risk",
+  "quality",
+  "improvement",
+  "development",
+  "implementation",
+  "monitor",
+  "evaluate",
+  "consultation",
+  "participation",
+  "inclusion",
+  "diversity",
+  "equality",
+  "equity",
+  "non-discrimination",
+  "discrimination",
+  "harassment",
+  "complaint",
+  "mediation",
+  "conflict",
+  "resolution",
+  "peace",
+  "justice",
+  "court",
+  "legislation",
+  "regulation",
+  "standard",
+  "procedure",
+  "guideline",
+  "framework",
+  "system",
+  "process",
+  "database",
+  "ict",
+  "digital",
   "software",
   "application",
-  "api",
-  "frontend",
-  "backend",
-  "database",
-  "server",
-  "cloud",
-  "devops",
+  "web",
+  "internet",
+  "technology",
   "security",
-  "testing",
-  "framework",
-  "cms",
-  "wordpress",
-  "joomla",
-  "drupal",
-  "analytics",
+  "privacy",
+  "confidentiality",
+  "record",
+  "records",
+  "knowledge",
+  "learning",
+  "education",
+  "teaching",
+  "curriculum",
+  "assessment",
   "marketing",
-  "seo",
-  "social media",
-  "version control",
-  "git",
-  "agile",
-  "scrum",
-  "ci/cd",
-  "container",
-  "docker",
-  "kubernetes",
-  "microservice",
-  "rest",
-  "graphql",
-  "javascript",
-  "typescript",
-  "python",
-  "java",
-  "php",
-  "ruby",
-  "node",
-  "react",
-  "angular",
-  "vue",
-  "sql",
-  "nosql",
-  "html",
-  "css",
-  "ux",
-  "ui",
-  "accessibility",
-  "w3c",
-  "owasp",
+  "brand",
+  "customer",
+  "client",
+  "sales",
+  "service",
+  "retail",
+  "finance",
+  "accounting",
+  "budgeting",
+  "audit",
+  "tax",
+  "investment",
+  "insurance",
+  "banking",
+  "economic",
+  "economy",
+  "trade",
+  "industry",
+  "supply chain",
+  "logistics",
+  "procurement",
+  "contract",
+  "tender",
+  "vendor",
+  "supplier",
 ];
 
+// Patterns that almost always indicate irrelevant skills for office/knowledge-work roles.
 const OBVIOUSLY_IRRELEVANT_PATTERNS = [
   /printing press/i,
   /flexographic/i,
@@ -94,12 +175,23 @@ const OBVIOUSLY_IRRELEVANT_PATTERNS = [
   /weaving/i,
   /rope lashing/i,
   /airport stakeholder/i,
-  /animal/i,
   /promote animals/i,
+  /animal.*promote/i,
   /liquid penetrant/i,
   /headbox/i,
   /vacuum forming/i,
   /vehicle.*accessibility equipment/i,
+  /measure the human body for wearing apparel/i,
+  /radiation effects on human body/i,
+  /human anatomy/i,
+  /human physiology/i,
+  /human ear/i,
+  /human dynamics as part of hospitality/i,
+  /human factors regarding safety/i,
+  /human resources department processes/i,
+  /forecast human population trends/i,
+  /provide treatment strategies for challenges to human health/i,
+  /human-computer interaction/i, // optional: remove if you DO want HCI
 ];
 
 function tokenize(text) {
@@ -117,6 +209,35 @@ export function isObviouslyIrrelevant(skillLabel) {
   return OBVIOUSLY_IRRELEVANT_PATTERNS.some((re) => re.test(skillLabel));
 }
 
+export function hasCoreSkillKeyword(skillLabel) {
+  const lower = skillLabel.toLowerCase();
+
+  // Direct phrase checks for multi-word keywords
+  const multiWord = [
+    "human rights",
+    "supply chain",
+    "conflict resolution",
+    "capacity building",
+  ];
+
+  for (const phrase of multiWord) {
+    if (lower.includes(phrase)) return true;
+  }
+
+  const tokens = tokenize(lower);
+  const tokenSet = new Set(tokens);
+
+  for (const kw of CORE_SKILL_KEYWORDS) {
+    if (kw.includes(" ")) {
+      if (lower.includes(kw)) return true;
+    } else {
+      if (tokenSet.has(kw)) return true;
+    }
+  }
+
+  return false;
+}
+
 export function scoreSkillRelevance(occupationTitle, skillLabel) {
   const occTokens = tokenize(occupationTitle);
   const skillTokens = tokenize(skillLabel);
@@ -126,26 +247,19 @@ export function scoreSkillRelevance(occupationTitle, skillLabel) {
   }
 
   const occSet = new Set(occTokens);
-  const webSet = new Set(WEB_DEV_KEYWORDS);
 
-  // Overlap with occupation tokens
   const occOverlap = skillTokens.filter((t) => occSet.has(t)).length;
 
-  // Overlap with general web/dev keywords
-  const webOverlap = skillTokens.filter((t) => webSet.has(t)).length;
-
-  // Bonus if skill starts with an occupation token
   const startsWithOccToken = occTokens.some((t) =>
     skillTokens[0]?.startsWith(t)
   )
     ? 0.5
     : 0;
 
-  // Penalize very long, generic-sounding skills
   const lengthPenalty =
     skillTokens.length > 6 ? (skillTokens.length - 6) * 0.05 : 0;
 
-  const baseScore = (occOverlap * 1.5 + webOverlap) / (occTokens.length + 1);
+  const baseScore = occOverlap / occTokens.length;
 
   return Math.max(0, baseScore + startsWithOccToken - lengthPenalty);
 }

@@ -1,6 +1,10 @@
 // server/escoClient.mjs
 
-import { scoreSkillRelevance, isObviouslyIrrelevant } from "./skillRelevance.mjs";
+import {
+  scoreSkillRelevance,
+  isObviouslyIrrelevant,
+  hasCoreSkillKeyword,
+} from "./skillRelevance.mjs";
 
 const ESCO_BASE_URL = "https://ec.europa.eu/esco/api";
 
@@ -143,21 +147,32 @@ export async function getOccupationSkills(escoUri, language = "en", options = {}
   });
 
   // 1) Hard filter: remove obviously irrelevant skills
-  const filtered = allSkills.filter((label) => !isObviouslyIrrelevant(label));
-
-  console.log(
-    `After domain filter: ${filtered.length} skills for "${occupationTitle}"`
+  const filteredByIrrelevance = allSkills.filter(
+    (label) => !isObviouslyIrrelevant(label)
   );
 
-  // 2) Score and sort by relevance
-  const scored = filtered.map((label) => ({
+  console.log(
+    `After irrelevance filter: ${filteredByIrrelevance.length} skills for "${occupationTitle}"`
+  );
+
+  // 2) Require at least one core skill keyword
+  const filteredByCore = filteredByIrrelevance.filter((label) =>
+    hasCoreSkillKeyword(label)
+  );
+
+  console.log(
+    `After core keyword filter: ${filteredByCore.length} skills for "${occupationTitle}"`
+  );
+
+  // 3) Score and sort by relevance
+  const scored = filteredByCore.map((label) => ({
     label,
     score: scoreSkillRelevance(occupationTitle, label),
   }));
 
   scored.sort((a, b) => b.score - a.score);
 
-  // 3) Take top N
+  // 4) Take top N
   const top = scored.slice(0, maxSkills);
 
   console.log(

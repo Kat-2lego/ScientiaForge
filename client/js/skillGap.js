@@ -33,6 +33,21 @@ function getAuthHeaders(extra = {}) {
     return data.skills || [];
   }
 
+  // ================= FETCH Industries =================
+
+  async function fetchIndustries() {
+    const res = await fetch(`${API_BASE}/industries`);
+    if (!res.ok) throw new Error("Failed to load industries.");
+    const data = await res.json();
+    return data.industries || [];
+  }
+
+  async function fetchCareersForIndustry(industryId) {
+    const res = await fetch(`${API_BASE}/industries/${industryId}/careers`);
+    if (!res.ok) throw new Error("Failed to load careers.");
+    const data = await res.json();
+    return data.careers || [];
+  }
   // ================= FETCH JOBS =================
   
   async function fetchJobs(queryText) {
@@ -203,45 +218,78 @@ function getAuthHeaders(extra = {}) {
     await commitPendingSkill();
   });
 
+  function clearGapResult() {
+  document.getElementById("matchScore").textContent = "–";
+  document.getElementById("haveCount").textContent = "–";
+  document.getElementById("missingCount").textContent = "–";
+  document.getElementById("missingSkills").innerHTML = "";
+  }
   // ================= INITIALIZE PAGE =================
   async function initSkillGap() {
-  const jobSelect = document.querySelector(".job-select");
+    const industrySelect = document.getElementById("industrySelect");
+    const jobSelect = document.getElementById("jobSelect");
 
-  try {
-    const [jobs, skills] = await Promise.all([
-      fetchJobs(),
-      fetchUserSkills(),
-    ]);
+    try {
+      const [industries, skills] = await Promise.all([
+        fetchIndustries(),
+        fetchUserSkills(),
+      ]);
 
-    currentSkills = skills;
-    renderHaveSkills();
+      currentSkills = skills;
+      renderHaveSkills();
 
-    jobSelect.innerHTML = "";
+      // Populate industries
+      industrySelect.innerHTML = '<option value="">Select industry…</option>';
+      industries.forEach((ind) => {
+        const option = document.createElement("option");
+        option.value = ind.id;
+        option.textContent = ind.label;
+        industrySelect.appendChild(option);
+      });
 
-    if (jobs.length === 0) {
-      jobSelect.innerHTML = `<option value="">No careers available</option>`;
-      return;
+      // When industry changes, load careers
+      industrySelect.addEventListener("change", async () => {
+        const indId = industrySelect.value;
+        jobSelect.innerHTML = '<option value="">Select career…</option>';
+        jobSelect.disabled = !indId;
+
+        if (!indId) {
+          currentJobId = null;
+          clearGapResult();
+          return;
+        }
+
+        const careers = await fetchCareersForIndustry(indId);
+        careers.forEach((career) => {
+          const option = document.createElement("option");
+          option.value = career.jobId;
+          option.textContent = career.title;
+          jobSelect.appendChild(option);
+        });
+
+        // Optionally auto-select first career
+        if (careers.length > 0) {
+          jobSelect.value = careers[0].jobId;
+          currentJobId = careers[0].jobId;
+          await refreshGapForCurrentJob();
+        }
+      });
+
+      // When career changes, recompute gap
+      jobSelect.addEventListener("change", async () => {
+        currentJobId = jobSelect.value;
+        if (currentJobId) {
+          await refreshGapForCurrentJob();
+        } else {
+          clearGapResult();
+        }
+      });
+
+    } catch (err) {
+      console.error("Skill Gap init error:", err);
+      alert(err.message || "Failed to load Skill Gap Analysis.");
     }
-
-    jobs.forEach((job) => {
-      const option = document.createElement("option");
-      option.value = job.id;
-      option.textContent = job.title;
-      jobSelect.appendChild(option);
-    });
-
-    currentJobId = jobs[0].id;
-    await refreshGapForCurrentJob();
-
-    jobSelect.addEventListener("change", async () => {
-      currentJobId = jobSelect.value;
-      await refreshGapForCurrentJob();
-    });
-  } catch (err) {
-    console.error("Skill Gap init error:", err);
-    alert(err.message || "Failed to load Skill Gap Analysis.");
   }
-}
 
   initSkillGap();
 });
