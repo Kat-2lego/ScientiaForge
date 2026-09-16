@@ -13,6 +13,13 @@ import Stripe from 'stripe';
 import careerPathfinderRoutes from "./routes/careerPathfinder.js";
 import studyHubRoutes from "./routes/studyHub.js";
 
+import { getOccupationSkills } from "./escoClient.mjs";
+import { computeSkillGap } from "./skillMatcher.mjs";
+import { searchEscoOccupations } from "./escoClient.mjs";
+import { INDUSTRIES } from "./industries.mjs";
+
+
+
 
 async function logAudit(userId, action, { entity = null, entityId = null, desc = null, req = null } = {}) {
   try {
@@ -1490,12 +1497,32 @@ const jobRoles = [
   { id: 4, title: "Data Analyst", requiredSkills: ["SQL", "Excel", "Python", "PowerBI", "Tableau", "Data Pipelines"] },
 ];
 
-app.get("/api/jobs", (req, res) => {
-  return res.status(200).json({
-    jobs: jobRoles.map((job) => ({ id: job.id, title: job.title })),
-  });
-});
+// ESCO-backed jobs endpoint
+app.get("/api/jobs", async (req, res) => {
+  try {
+    const q =
+      typeof req.query.q === "string" && req.query.q.trim()
+        ? req.query.q.trim()
+        : "software developer";
 
+    const occupations = await searchEscoOccupations(q);
+
+    // Map ESCO occupations to the shape your frontend expects
+    const jobs = occupations.map((occ) => ({
+      id: occ.escoUri,          // use ESCO URI as job id
+      title: occ.title,
+      escoOccupationUri: occ.escoUri,
+    }));
+
+    return res.json({ jobs });
+  } catch (error) {
+    console.error("❌ /api/jobs ESCO error:", error);
+    return res.status(500).json({
+      error: "Failed to load careers",
+      details: error.message,
+    });
+  }
+});
 /* =========================================================
    JOB TITLE SEARCH (for Interview Simulator target-role field)
 ========================================================= */
@@ -1599,42 +1626,136 @@ app.get("/api/jobs/search", (req, res) => {
   const results = JOB_TITLES.filter((title) => title.toLowerCase().includes(q)).slice(0, 8);
   return res.status(200).json({ results });
 });
+// GET /api/industries
+app.get("/api/industries", async (req, res) => {
+  try {
+    return res.json({
+      industries: INDUSTRIES.map((ind) => ({
+        id: ind.id,
+        label: ind.label,
+      })),
+    });
+  } catch (error) {
+    console.error("❌ /api/industries error:", error);
+    return res.status(500).json({
+      error: "Failed to load industries",
+      details: error.message,
+    });
+  }
+});
 
+// GET /api/industries/:id/careers
+
+app.get("/api/industries/:id/careers", async (req, res) => {
+  try {
+    const industry = INDUSTRIES.find((i) => i.id === req.params.id);
+
+    if (!industry) {
+      return res.status(404).json({
+        error: "Industry not found",
+      });
+    }
+
+    return res.json({
+      careers: industry.careers.map((c) => ({
+        title: c.title,
+        jobId: c.escoUri, // keep same shape as before
+      })),
+    });
+  } catch (error) {
+    console.error("❌ /api/industries/:id/careers error:", error);
+    return res.status(500).json({
+      error: "Failed to load careers",
+      details: error.message,
+    });
+  }
+});
+
+// Test ESCO route
+app.get("/api/esco/occupations", async (req, res) => {
+  try {
+    const q =
+      typeof req.query.q === "string" && req.query.q.trim()
+        ? req.query.q.trim()
+        : "data analyst";
+
+    console.log("ESCO occupations search for:", q);
+
+    const occupations = await searchEscoOccupations(q);
+
+    console.log("ESCO occupations result count:", occupations.length);
+
+    return res.json({ occupations });
+  } catch (error) {
+    console.error("❌ ESCO occupation search error:", error);
+    return res.status(500).json({
+      error: "Could not search ESCO occupations",
+      details: error.message,
+    });
+  }
+});
 /* =========================================================
    SKILL GAP (placeholder matching — swap once real data exists)
 ========================================================= */
 
-app.post("/api/skillgap", requireAuth, async (req, res) => {
-  const { jobId } = req.body;
+app.post("/api/skillgap", async (req, res) => {
+  try {
+    const { userSkillNames, jobId } = req.body;
 
-  const userSkillNames = Array.isArray(req.body.userSkillNames)
-    ? req.body.userSkillNames
-    : [];
+    console.log("🧠 /api/skillgap called");
+    console.log("  userSkillNames:", userSkillNames);
+    console.log("  jobId (ESCO URI):", jobId);
 
-  const job = jobRoles.find((j) => j.id === Number(jobId));
+    if (!Array.isArray(userSkillNames)) {
+      return res.status(400).json({
+        error: "userSkillNames must be an array of strings",
+      });
+    }
 
-  if (!job) {
-    return res.status(404).json({ error: "Job not found." });
+    if (!jobId || typeof jobId !== "string") {
+      return res.status(400).json({
+        error: "jobId must be a non-empty string (ESCO occupation URI)",
+      });
+    }
+
+    let requiredSkills = await getOccupationSkills(jobId, "en");
+
+    if (!requiredSkills || requiredSkills.length === 0) {
+      console.warn("No ESCO skills found for occupation:", jobId);
+      requiredSkills = [
+        "Communication",
+        "Problem solving",
+        "Teamwork",
+        "Time management",
+        "Adaptability",
+      ];
+    }
+
+    const { have, missing } = computeSkillGap(userSkillNames, requiredSkills, 0.5);
+
+    const matchScore = requiredSkills.length
+      ? Math.round((have.length / requiredSkills.length) * 100)
+      : 0;
+
+    return res.json({
+      have,
+      missing,
+      matchScore,
+      meta: {
+        source: requiredSkills.length > 0 && requiredSkills[0] !== "Communication"
+          ? "ESCO"
+          : "fallback",
+        occupationUri: jobId,
+      },
+    });
+  } catch (error) {
+    console.error("❌ /api/skillgap error:", error);
+    return res.status(500).json({
+      error: "Failed to compute skill gap",
+      details: error.message,
+    });
   }
-
-  const userSkillsNormalized = new Set(
-    userSkillNames.map((s) => s.trim().toLowerCase())
-  );
-
-  const have = job.requiredSkills.filter((skill) =>
-    userSkillsNormalized.has(skill.toLowerCase())
-  );
-
-  const missing = job.requiredSkills.filter(
-    (skill) => !userSkillsNormalized.has(skill.toLowerCase())
-  );
-
-  const matchScore = job.requiredSkills.length
-    ? Math.round((have.length / job.requiredSkills.length) * 100)
-    : 0;
-
-  return res.status(200).json({ have, missing, matchScore });
-});
+});;
 
 /* =========================================================
    CAREER DISCOVERY
@@ -2831,6 +2952,25 @@ app.post("/api/delete-account", async (req, res) => {
 
     return res.status(500).json({
       error: "Internal server error",
+    });
+  }
+});
+
+
+app.get("/api/esco/occupations", async (req, res) => {
+  try {
+    const q =
+      typeof req.query.q === "string" && req.query.q.trim()
+        ? req.query.q.trim()
+        : "software developer";
+
+    const occupations = await searchEscoOccupations(q);
+
+    return res.json({ occupations });
+  } catch (error) {
+    console.error("❌ ESCO occupation search error:", error);
+    return res.status(500).json({
+      error: "Could not search ESCO occupations",
     });
   }
 });
