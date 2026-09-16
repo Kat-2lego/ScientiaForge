@@ -453,13 +453,29 @@ document.addEventListener("DOMContentLoaded", () => {
     startBtn.disabled  = true;
     startBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Starting…';
 
-    const user_id = localStorage.getItem("skillforge_user_id") || "guest_user";
+    // The server derives the authenticated user from this Bearer token
+    // (via requireAuth on /api/interview/start) — it no longer trusts a
+    // user_id sent in the request body. Previously this handler sent no
+    // Authorization header at all, so every request was rejected with
+    // "Not authenticated." before the interview could ever start.
+    const token = localStorage.getItem("sb-access-token");
+
+    if (!token) {
+      alert("Your session has expired. Please log in again.");
+      window.location.href = "/pages/LogIn.html";
+      startBtn.disabled  = false;
+      startBtn.innerHTML = '<i class="fa-solid fa-play"></i> Start Interview';
+      return;
+    }
 
     try {
       const res  = await fetch("/api/interview/start", {
         method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id, job_role_id: currentRole === "any" ? null : currentRole,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ job_role_id: currentRole === "any" ? null : currentRole,
           question_type: currentType, persona: currentPersona, duration_minutes: interviewMinutes,
           question_count: targetQuestionCount }),
       });

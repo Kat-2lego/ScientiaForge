@@ -1,15 +1,17 @@
 /* ═══════════════════════════════════════════════════════════════
-   INTERVIEW SIMULATOR — visual redesign (v2: scale + restraint)
-   Base colors still come from the existing tokens (--primary,
-   --cyan, --text-main, --text-dark, --text-muted, --border,
-   --bg-card, --shadow-sm) defined in dashboard.css. A small set of
-   additional muted accents is introduced below (prefixed --isim-
-   so it can never collide with the existing design system) to give
-   each section its own identity instead of tinting everything the
-   same blue. Gradients are now reserved for exactly two places —
-   the primary action button and the interviewer badge — everything
-   else uses flat color with a colored accent edge, which reads far
-   more like a considered product than a template.
+   INTERVIEW SIMULATOR — visual redesign (v4: forced contrast)
+
+   The question bubble, timer, response panel and progress bar below
+   use !important on their background/text-color declarations. This
+   is deliberate: earlier passes set these colors normally, but the
+   box in production is still rendering dark with unreadable text,
+   which means something loaded after this file (most likely
+   InterviewReport.css, which loads after this file in your <head>)
+   is overriding them, or the browser is serving a cached copy.
+   !important guarantees these specific declarations win regardless
+   of load order once this file actually loads — it does not fix a
+   browser cache serving the old file, so a hard refresh is still
+   required after replacing it.
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
@@ -17,6 +19,15 @@
   --isim-teal: #0f766e;
   --isim-amber: #b45309;
   --isim-ink: #111827;
+
+  /* Self-contained, guaranteed-contrast text colors for the
+     in-interview screen. Never sourced from shared theme tokens. */
+  --isim-text-strong: #0f172a;   /* headings, question text, answers */
+  --isim-text-body:   #334155;   /* secondary body copy */
+  --isim-text-muted:  #64748b;   /* labels, hints, meta */
+  --isim-surface:     #ffffff;   /* card backgrounds */
+  --isim-surface-tint:#f8fafc;   /* subtle inset surfaces */
+  --isim-border:      #e2e8f0;   /* card borders on light surfaces */
 }
 
 .interview-dashboard {
@@ -60,7 +71,7 @@
   margin: 0;
 }
 
-/* ── Shared section-card shell ────────────────────────────────── */
+/* ── Shared section-card shell (setup screen) ─────────────────── */
 .setup-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -101,9 +112,6 @@
   background: color-mix(in srgb, var(--primary) 10%, transparent);
 }
 
-/* Each section gets its own identity color instead of uniform blue —
-   this is the "bit of color" throughout the page, kept to icon badges
-   and small accents only, never backgrounds or large surfaces. */
 .interview-type-section .section-icon {
   color: var(--isim-violet);
   background: color-mix(in srgb, var(--isim-violet) 10%, transparent);
@@ -554,9 +562,7 @@
   line-height: 1.6;
 }
 
-/* ── Interview summary (sticky) ──────────────────────────────────
-   A single top accent bar, not a full gradient wash — this is the
-   one place a gradient still appears besides the primary button. */
+/* ── Interview summary (sticky) ──────────────────────────────────── */
 .preview-card {
   position: relative;
   background: var(--bg-card);
@@ -700,29 +706,55 @@
 
 .preview-actions .btn-primary,
 .interview-controls .btn-primary {
-  background: linear-gradient(135deg, var(--primary), var(--cyan));
-  border: none;
+  background: linear-gradient(135deg, var(--primary), var(--cyan)) !important;
+  border: none !important;
+  color: #fff !important;
 }
 
-/* ── Interview session header ─────────────────────────────────── */
+.interview-controls .btn-secondary {
+  background: var(--isim-surface) !important;
+  border: 1.5px solid var(--isim-border) !important;
+  color: var(--isim-text-body) !important;
+}
+
+.interview-controls .btn-secondary:hover {
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   IN-INTERVIEW SCREEN — forced contrast zone.
+   Every rule below that controls a background or text color a
+   candidate must read uses !important. This is the block to check
+   first in DevTools if anything still looks wrong: if a color here
+   still shows as struck-through / overridden, something with even
+   higher specificity (an inline style, or another !important rule
+   later in the cascade) is the real conflict, and its selector will
+   be visible in the Styles panel.
+   ══════════════════════════════════════════════════════════════ */
+
 .interview-ui {
   margin-top: 4px;
 }
 
+/* ── Session header: interviewer badge + timer ───────────────── */
 .interview-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 14px;
 }
 
 .interviewer-badge {
   display: flex;
   align-items: center;
   gap: 14px;
-  background: var(--isim-ink);
+  background: var(--isim-ink) !important;
   border-radius: 999px;
   padding: 10px 22px 10px 16px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.16);
 }
 
 .interviewer-live-dot {
@@ -743,12 +775,12 @@
 
 .interviewer-name-block strong {
   font-size: 1rem;
-  color: #fff;
+  color: #ffffff !important;
 }
 
 .interviewer-name-block small {
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.65) !important;
 }
 
 .timer {
@@ -756,13 +788,18 @@
   align-items: center;
   gap: 10px;
   font-size: 1.15rem;
-  font-weight: 700;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
-  color: var(--text-dark);
-  background: var(--bg-card);
-  border: 1.5px solid var(--border);
+  color: var(--isim-text-strong) !important;
+  background: var(--isim-surface) !important;
+  border: 1.5px solid var(--isim-border);
   border-radius: 999px;
   padding: 10px 22px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.timer i {
+  color: var(--isim-text-muted) !important;
 }
 
 /* ── Interview stage: avatar + candidate ──────────────────────── */
@@ -778,8 +815,8 @@
 }
 
 .avatar-panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--isim-surface) !important;
+  border: 1px solid var(--isim-border);
   border-radius: 16px;
   padding: 28px;
   display: flex;
@@ -791,12 +828,14 @@
 .avatar-label {
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--text-muted);
+  color: var(--isim-text-muted) !important;
   text-transform: uppercase;
   letter-spacing: 0.07em;
   margin-bottom: 18px;
 }
 
+/* This wrap is deliberately dark — it's the frame around the avatar
+   canvas, not text-bearing, so it's fine as-is. */
 .avatar-canvas-wrap {
   position: relative;
   width: 100%;
@@ -836,14 +875,20 @@
 .speaking-indicator span:nth-child(2) { animation-delay: 0.15s; }
 .speaking-indicator span:nth-child(3) { animation-delay: 0.3s; }
 
+/* Question bubble — THIS is the box that was reported unreadable.
+   Background and text color are forced with !important so nothing
+   loaded after this file (e.g. InterviewReport.css) can silently
+   turn it dark again. */
 .question-bubble {
   position: relative;
   width: 100%;
   margin-top: 24px;
-  background: #fff;
-  border: 1px solid var(--border);
+  background: #ffffff !important;
+  border: 1px solid var(--isim-border);
+  border-left: 4px solid var(--primary);
   border-radius: 14px;
   padding: 20px 22px;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
 }
 
 .question-bubble::before {
@@ -853,9 +898,9 @@
   left: 36px;
   width: 14px;
   height: 14px;
-  background: #fff;
-  border-left: 1px solid var(--border);
-  border-top: 1px solid var(--border);
+  background: #ffffff !important;
+  border-left: 1px solid var(--isim-border);
+  border-top: 1px solid var(--isim-border);
   transform: rotate(45deg);
 }
 
@@ -878,11 +923,12 @@
 }
 
 #currentQuestion {
-  margin: 0;
-  font-size: 1.12rem;
-  line-height: 1.6;
-  color: var(--text-dark);
-  font-weight: 500;
+  margin: 0 !important;
+  font-size: 1.14rem !important;
+  line-height: 1.65 !important;
+  color: #0f172a !important;
+  font-weight: 600 !important;
+  background: transparent !important;
 }
 
 /* ── Candidate panel ───────────────────────────────────────────── */
@@ -898,7 +944,7 @@
   overflow: hidden;
   background: var(--isim-ink);
   aspect-ratio: 4 / 3;
-  border: 1px solid var(--border);
+  border: 1px solid var(--isim-border);
 }
 
 .webcam-wrap video {
@@ -969,7 +1015,7 @@
   animation: pulseDot 1.4s ease-in-out infinite;
 }
 
-/* ── Diagram / given-data box ──────────────────────────────────── */
+/* ── Diagram / given-data box (intentionally dark, code-style) ──── */
 .diagram-box {
   background: var(--isim-ink);
   border-radius: 14px;
@@ -1020,8 +1066,8 @@
 
 /* ── Response panel ────────────────────────────────────────────── */
 .response-panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--isim-surface) !important;
+  border: 1px solid var(--isim-border);
   border-radius: 16px;
   padding: 22px 24px;
   box-shadow: var(--shadow-sm);
@@ -1033,7 +1079,7 @@
 .response-panel > label {
   font-size: 0.92rem;
   font-weight: 700;
-  color: var(--text-dark);
+  color: var(--isim-text-strong) !important;
   margin-bottom: 12px;
 }
 
@@ -1046,7 +1092,7 @@
 
 .record-btn,
 .stop-btn {
-  border: 1.5px solid var(--border);
+  border: 1.5px solid var(--isim-border);
   border-radius: 10px;
   padding: 11px 18px;
   font-size: 0.92rem;
@@ -1056,19 +1102,19 @@
   align-items: center;
   gap: 8px;
   transition: border-color 0.15s ease, color 0.15s ease;
-  background: #fff;
-  color: var(--text-main);
+  background: var(--isim-surface) !important;
+  color: var(--isim-text-body) !important;
 }
 
 .record-btn:hover {
   border-color: var(--primary);
-  color: var(--primary);
+  color: var(--primary) !important;
 }
 
 .record-btn.recording {
-  background: #fef2f2;
+  background: #fef2f2 !important;
   border-color: #dc2626;
-  color: #dc2626;
+  color: #dc2626 !important;
 }
 
 .record-btn.recording i {
@@ -1076,22 +1122,26 @@
 }
 
 .stop-btn {
-  background: color-mix(in srgb, var(--primary) 6%, white);
+  background: color-mix(in srgb, var(--primary) 6%, white) !important;
 }
 
 textarea#transcript {
   width: 100%;
   min-height: 150px;
-  border: 1.5px solid var(--border);
+  border: 1.5px solid var(--isim-border);
   border-radius: 12px;
   padding: 16px;
   font-size: 1rem;
   font-family: inherit;
   line-height: 1.55;
   resize: vertical;
-  background: #fff;
-  color: var(--text-main);
+  background: #ffffff !important;
+  color: #0f172a !important;
   transition: border-color 0.15s ease;
+}
+
+textarea#transcript::placeholder {
+  color: var(--isim-text-muted) !important;
 }
 
 textarea#transcript:focus {
@@ -1109,7 +1159,7 @@ textarea#transcript:focus {
   gap: 7px;
   font-size: 0.9rem;
   font-weight: 700;
-  color: var(--text-main);
+  color: var(--isim-text-strong) !important;
   margin-bottom: 9px;
 }
 
@@ -1121,8 +1171,8 @@ textarea#transcript:focus {
   border-radius: 10px;
   font-size: 1.1rem;
   font-weight: 800;
-  color: var(--text-dark);
-  background: color-mix(in srgb, var(--primary) 5%, white);
+  color: var(--isim-text-strong) !important;
+  background: color-mix(in srgb, var(--primary) 5%, white) !important;
 }
 
 .final-answer-input:focus {
@@ -1138,8 +1188,8 @@ textarea#transcript:focus {
 }
 
 .interview-progress {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--isim-surface) !important;
+  border: 1px solid var(--isim-border);
   border-radius: 14px;
   padding: 18px 22px;
 }
@@ -1148,16 +1198,17 @@ textarea#transcript:focus {
   margin: 0 0 12px;
   font-size: 0.9rem;
   font-weight: 700;
-  color: var(--text-main);
+  color: var(--isim-text-strong) !important;
 }
 
 .progress-bar {
   width: 100%;
   height: 9px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--border) 60%, white);
+  background: var(--isim-surface-tint) !important;
   overflow: hidden;
   margin-bottom: 9px;
+  border: 1px solid var(--isim-border);
 }
 
 .bar-fill {
@@ -1171,7 +1222,7 @@ textarea#transcript:focus {
 .progress-label {
   font-size: 0.87rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--isim-text-muted) !important;
 }
 
 /* ── Feedback / report wrapper ────────────────────────────────── */
@@ -1282,13 +1333,11 @@ textarea:focus-visible {
 
 /* ═══════════════════════════════════════════════════════════════
    Feedback report internals
-   Populated by ReportGenerator.js — class names kept exactly as
-   they were, only visually refined to match the rest of the page.
    ═══════════════════════════════════════════════════════════════ */
 
 .feedback-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--isim-surface) !important;
+  border: 1px solid var(--isim-border);
   border-radius: 16px;
   padding: 28px;
   box-shadow: var(--shadow-sm);
@@ -1304,7 +1353,7 @@ textarea:focus-visible {
 .feedback-header h3 {
   font-size: 1.3rem;
   margin: 0;
-  color: var(--text-dark);
+  color: var(--isim-text-strong) !important;
   font-weight: 700;
 }
 
@@ -1316,13 +1365,13 @@ textarea:focus-visible {
 }
 
 .overall-score .label {
-  color: var(--text-muted);
+  color: var(--isim-text-muted) !important;
 }
 
 .overall-score .score {
   font-size: 1.6rem;
   font-weight: 800;
-  color: var(--text-dark);
+  color: var(--isim-text-strong) !important;
 }
 
 .feedback-grid {
@@ -1343,7 +1392,7 @@ textarea:focus-visible {
   margin: 0;
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--text-main);
+  color: var(--isim-text-strong) !important;
 }
 
 .score-badge {
@@ -1354,7 +1403,7 @@ textarea:focus-visible {
   padding: 8px 13px;
   border-radius: 9px;
   background: color-mix(in srgb, var(--primary) 8%, transparent);
-  color: var(--text-main);
+  color: var(--isim-text-strong) !important;
 }
 
 .score-badge .score {
@@ -1371,17 +1420,17 @@ textarea:focus-visible {
 
 .score-badge.high {
   background: color-mix(in srgb, #16a34a 14%, transparent);
-  color: #16a34a;
+  color: #15803d !important;
 }
 
 .score-badge.good {
   background: color-mix(in srgb, var(--isim-amber) 12%, transparent);
-  color: var(--isim-amber);
+  color: var(--isim-amber) !important;
 }
 
 .score-badge.weak {
   background: color-mix(in srgb, #dc2626 12%, transparent);
-  color: #dc2626;
+  color: #dc2626 !important;
 }
 
 .feedback-tips {
@@ -1392,7 +1441,7 @@ textarea:focus-visible {
   font-size: 1.05rem;
   font-weight: 700;
   margin: 0 0 14px;
-  color: var(--text-dark);
+  color: var(--isim-text-strong) !important;
 }
 
 .feedback-tips ul {
@@ -1404,7 +1453,7 @@ textarea:focus-visible {
 .feedback-tips li {
   margin-bottom: 9px;
   font-size: 0.97rem;
-  color: var(--text-main);
+  color: var(--isim-text-body) !important;
   line-height: 1.55;
 }
 
@@ -1415,22 +1464,22 @@ textarea:focus-visible {
 .qa-breakdown h4 {
   font-size: 1.05rem;
   font-weight: 700;
-  color: var(--text-dark);
+  color: var(--isim-text-strong) !important;
   margin: 0 0 14px;
 }
 
 .qa-item {
-  border: 1px solid var(--border);
+  border: 1px solid var(--isim-border);
   border-radius: 12px;
   padding: 18px;
   margin-bottom: 12px;
-  background: color-mix(in srgb, var(--border) 15%, white);
+  background: var(--isim-surface-tint) !important;
 }
 
 .qa-q {
   font-size: 0.94rem;
   font-weight: 700;
-  color: var(--text-dark);
+  color: var(--isim-text-strong) !important;
   margin-bottom: 9px;
   display: flex;
   gap: 9px;
@@ -1450,14 +1499,14 @@ textarea:focus-visible {
 
 .qa-a {
   font-size: 0.9rem;
-  color: var(--text-muted);
+  color: var(--isim-text-muted) !important;
   margin-bottom: 9px;
   line-height: 1.6;
 }
 
 .qa-fb {
   font-size: 0.9rem;
-  color: color-mix(in srgb, var(--primary) 70%, black 10%);
+  color: color-mix(in srgb, var(--primary) 70%, black 10%) !important;
   background: color-mix(in srgb, var(--primary) 8%, transparent);
   border-radius: 9px;
   padding: 11px 13px;

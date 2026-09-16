@@ -1,3 +1,4 @@
+console.log("THIS IS THE FRESH FILE");
 import express from "express";
 import cors from "cors";
 import { createClient } from "@supabase/supabase-js";
@@ -12,6 +13,7 @@ import { dirname, join } from 'path';
 import Stripe from 'stripe';
 import careerPathfinderRoutes from "./routes/careerPathfinder.js";
 import studyHubRoutes from "./routes/studyHub.js";
+import adminRoutes from "./routes/admin.js";
 
 
 async function logAudit(userId, action, { entity = null, entityId = null, desc = null, req = null } = {}) {
@@ -390,6 +392,7 @@ app.use(
 app.use("/api/cv", cvRoutes);
 app.use("/api/career-pathfinder", careerPathfinderRoutes);
 app.use("/api/study-hub", studyHubRoutes);
+app.use("/api/admin", adminRoutes);
 
 /* =========================================================
    MAIN PAGE
@@ -532,6 +535,57 @@ app.post(
             "Login failed. No user session was created.",
         });
       }
+            /*
+        Maintenance mode (toggled from the admin Settings page) blocks
+        sign-in for everyone except admins. This runs after Supabase has
+        already verified the password, so the response never reveals
+        whether a given email/password combination was valid.
+      */
+      try {
+        const { data: roleRow } = await databaseClient
+          .from("users")
+          .select("role")
+          .eq("id", data.user.id)
+          .maybeSingle();
+
+        if ((roleRow?.role || "user") !== "admin") {
+          const { data: settingRow } = await databaseClient
+            .from("app_settings")
+            .select("value")
+            .eq("key", "maintenance_mode")
+            .maybeSingle();
+
+          if (settingRow?.value === true) {
+            await supabase.auth.signOut();
+            return res.status(503).json({
+              error:
+                "SkillForge is temporarily down for maintenance. Please try again shortly.",
+            });
+          }
+        }
+      } catch (settingsError) {
+        // app_settings may not exist yet if the admin-panel migration
+        // hasn't been run — never block login over that.
+        console.warn("Maintenance-mode check skipped:", settingsError.message);
+      }
+
+      // One row per login — this is what "online now" and average
+      // session length are computed from in the admin dashboard.
+      // Best-effort: a failure here must never block a real login.
+      try {
+        await databaseClient.from("user_sessions").insert({
+          user_id: data.user.id,
+          user_agent: req.headers["user-agent"] || null,
+          ip: req.ip || req.headers["x-forwarded-for"] || null,
+        });
+
+        await databaseClient
+          .from("users")
+          .update({ last_seen_at: new Date().toISOString() })
+          .eq("id", data.user.id);
+      } catch (sessionError) {
+        console.warn("Could not record login session:", sessionError.message);
+      }
 
       logAudit(data.user.id, "sign_in", { desc: "User signed in", req });
 
@@ -588,6 +642,24 @@ app.post("/api/auth/signup", async (req, res) => {
     return res.status(400).json({
       error: "Email, password and name are required.",
     });
+  }
+
+    try {
+    const { data: settingRow } = await databaseClient
+      .from("app_settings")
+      .select("value")
+      .eq("key", "allow_new_signups")
+      .maybeSingle();
+
+    if (settingRow?.value === false) {
+      return res.status(503).json({
+        error: "New sign-ups are temporarily disabled. Please check back soon.",
+      });
+    }
+  } catch (settingsError) {
+    // app_settings may not exist yet if the admin-panel migration
+    // hasn't been run — never block signup over that.
+    console.warn("Allow-signups check skipped:", settingsError.message);
   }
 
   if (password.length < 8) {
@@ -829,6 +901,20 @@ app.post("/api/auth/logout", async (req, res) => {
       // Non-fatal — logout still proceeds even if we can't identify the user.
     }
 
+        // Close out the open user_sessions row this login created, so the
+    // admin dashboard can compute how long the session actually lasted.
+    if (loggingOutUserId) {
+      try {
+        await databaseClient
+          .from("user_sessions")
+          .update({ ended_at: new Date().toISOString() })
+          .eq("user_id", loggingOutUserId)
+          .is("ended_at", null);
+      } catch (sessionError) {
+        console.warn("Could not close login session:", sessionError.message);
+      }
+    }
+
     if (!supabaseAdmin) {
       // No service-role key configured — client-side token clearing is all we can do.
       if (loggingOutUserId) logAudit(loggingOutUserId, "sign_out", { desc: "User signed out (local only)", req });
@@ -946,10 +1032,24 @@ app.get(
           ?.split("@")[0] ||
         "User";
 
+      let role = "user";
+      try {
+        const { data: roleRow } = await databaseClient
+          .from("users")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle();
+        role = roleRow?.role || "user";
+      } catch (roleError) {
+        console.warn("Could not resolve role for /api/auth/me:", roleError.message);
+      }
+
       return res.status(200).json({
         id: user.id,
         firstName,
         email: user.email,
+        role,
+        isAdmin: role === "admin",
       });
 
     } catch (error) {
@@ -965,6 +1065,36 @@ app.get(
     }
   }
 );
+
+/* =========================================================
+   ACTIVITY HEARTBEAT
+   Pinged periodically by every logged-in page (see client/js/auth.js)
+   to keep last_seen_at fresh. This is what "online now" and session
+   length are built on in the admin dashboard.
+========================================================= */
+
+app.post("/api/activity/heartbeat", requireAuth, async (req, res) => {
+  const now = new Date().toISOString();
+
+  try {
+    await databaseClient
+      .from("users")
+      .update({ last_seen_at: now })
+      .eq("id", req.userId);
+
+    await databaseClient
+      .from("user_sessions")
+      .update({ last_seen_at: now })
+      .eq("user_id", req.userId)
+      .is("ended_at", null);
+
+    res.status(200).json({ ok: true });
+  } catch (error) {
+    // Heartbeats are fire-and-forget from the client — never worth a
+    // console.error flood, just quietly report failure.
+    res.status(200).json({ ok: false });
+  }
+});
 
 /* =========================================================
    AUTH: FORGOT PASSWORD
@@ -1632,6 +1762,13 @@ app.post("/api/skillgap", requireAuth, async (req, res) => {
   const matchScore = job.requiredSkills.length
     ? Math.round((have.length / job.requiredSkills.length) * 100)
     : 0;
+
+  logAudit(req.userId, "skillgap_run", {
+    entity: "job_role",
+    entityId: job.id,
+    desc: `Skill-gap analysis run against "${job.title || job.id}"`,
+    req,
+  });
 
   return res.status(200).json({ have, missing, matchScore });
 });
