@@ -98,16 +98,37 @@ function getAuthHeaders(extra = {}) {
     if (!res.ok) throw new Error("Failed to remove skill.");
   }
 
-  // ================= RENDER: MAIN PAGE =================
+
+  //================== RENDER: HAVE SKILLS (TRUNCATED) =================
+  let fullHaveSkills = [];     // all matched skills for this career
+  let fullMissingSkills = [];  // all required skills for this career
+  
+  const ITEMS_PER_ROW_ESTIMATE = 6; // adjust based on your layout
+  const MAX_VISIBLE_ITEMS = ITEMS_PER_ROW_ESTIMATE * 5; // ~5 rows
+
   function renderHaveSkills() {
     const container = document.getElementById("haveSkills");
     container.innerHTML = "";
-    currentSkills.forEach((skill) => {
+
+    fullHaveSkills = currentSkills
+      .filter((s) => /* optionally filter to skills relevant to this career */ true)
+      .map((s) => s.name);
+
+    const visible = fullHaveSkills.slice(0, MAX_VISIBLE_ITEMS);
+
+    visible.forEach((skillName) => {
       const item = document.createElement("span");
       item.className = "skill-item";
-      item.innerHTML = `<i data-lucide="check" class="skill-icon has"></i>${skill.name}`;
+      item.innerHTML = `<i data-lucide="check" class="skill-icon has"></i>${skillName}`;
       container.appendChild(item);
     });
+
+    if (fullHaveSkills.length > MAX_VISIBLE_ITEMS) {
+      container.classList.add("truncated");
+    } else {
+      container.classList.remove("truncated");
+    }
+
     lucide.createIcons();
   }
 
@@ -118,16 +139,77 @@ function getAuthHeaders(extra = {}) {
     document.getElementById("haveCount").textContent = have.length;
     document.getElementById("missingCount").textContent = missing.length;
 
+    // Store full lists
+    fullHaveSkills = have;
+    fullMissingSkills = missing;
+
+    // Render visible missing skills (truncated)
     const missingContainer = document.getElementById("missingSkills");
     missingContainer.innerHTML = "";
-    missing.forEach((skill) => {
+
+    const visibleMissing = fullMissingSkills.slice(0, MAX_VISIBLE_ITEMS);
+
+    visibleMissing.forEach((skill) => {
       const item = document.createElement("span");
       item.className = "skill-item";
       item.innerHTML = `<i data-lucide="x" class="skill-icon missing"></i>${skill}`;
       missingContainer.appendChild(item);
     });
+
+    if (fullMissingSkills.length > MAX_VISIBLE_ITEMS) {
+      missingContainer.classList.add("truncated");
+    } else {
+      missingContainer.classList.remove("truncated");
+    }
+
     lucide.createIcons();
   }
+
+  //================== MODAL: VIEW ALL HAVE / MISSING SKILLS =================
+
+  const allHaveSkillsModal = document.getElementById("allHaveSkillsModal");
+  const allMissingSkillsModal = document.getElementById("allMissingSkillsModal");
+  const allHaveSkillsList = document.getElementById("allHaveSkillsList");
+  const allMissingSkillsList = document.getElementById("allMissingSkillsList");
+
+  document.getElementById("viewAllHaveLink").addEventListener("click", () => {
+    allHaveSkillsList.innerHTML = "";
+    fullHaveSkills.forEach((skill) => {
+      const pill = document.createElement("span");
+      pill.className = "modal-skill-pill matched";
+      pill.textContent = skill;
+      allHaveSkillsList.appendChild(pill);
+    });
+    allHaveSkillsModal.classList.add("open");
+  });
+
+  document.getElementById("viewAllMissingLink").addEventListener("click", () => {
+    allMissingSkillsList.innerHTML = "";
+    fullMissingSkills.forEach((skill) => {
+      const pill = document.createElement("span");
+      pill.className = "modal-skill-pill missing";
+      pill.textContent = skill;
+      allMissingSkillsList.appendChild(pill);
+    });
+    allMissingSkillsModal.classList.add("open");
+  });
+
+  // Close modal buttons
+  document.querySelectorAll("[data-close-modal]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const modalId = btn.getAttribute("data-close-modal");
+      document.getElementById(modalId).classList.remove("open");
+    });
+  });
+
+  // Close on overlay click
+  [allHaveSkillsModal, allMissingSkillsModal].forEach((modal) => {
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.classList.remove("open");
+      }
+    });
+  });
 
   async function refreshGapForCurrentJob() {
     if (!currentJobId) return;
@@ -137,6 +219,7 @@ function getAuthHeaders(extra = {}) {
   }
 
 // ================= MODAL =================
+
   const overlay = document.getElementById("skillsModalOverlay");
   const modalList = document.getElementById("modalSkillsList");
   const newSkillInput = document.getElementById("newSkillInput");
@@ -224,7 +307,9 @@ function getAuthHeaders(extra = {}) {
   document.getElementById("missingCount").textContent = "–";
   document.getElementById("missingSkills").innerHTML = "";
   }
+
   // ================= INITIALIZE PAGE =================
+
   async function initSkillGap() {
     const industrySelect = document.getElementById("industrySelect");
     const jobSelect = document.getElementById("jobSelect");

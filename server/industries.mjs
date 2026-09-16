@@ -116,7 +116,7 @@ export const INDUSTRIES = [
     label: "Hospitality & Tourism",
     careers: [
       { title: "Hotel Manager", escoUri: "http://data.europa.eu/esco/occupation/53cdd34e-22f2-41bd-b3c7-de22bf9bbcae" },
-      { title: "Chef", escoUri: "http://data.europa.eu/esco/occupation/1009be17-7efd-45f1-a033-566bf179c588" },
+      { title: "Chef", escoUri: "http://data.europa.eu/esco/occupation/90f75f67-495d-49fa-ab57-2f320e251d7e" },
       { title: "Tour Guide", escoUri: "http://data.europa.eu/esco/occupation/b476f45f-2c79-44d5-a4d7-fa357aa83074" },
       // ...
     ],

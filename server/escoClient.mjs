@@ -1,11 +1,5 @@
 // server/escoClient.mjs
 
-import {
-  scoreSkillRelevance,
-  isObviouslyIrrelevant,
-  hasCoreSkillKeyword,
-} from "./skillRelevance.mjs";
-
 const ESCO_BASE_URL = "https://ec.europa.eu/esco/api";
 
 export async function searchEscoOccupations(searchText) {
@@ -63,12 +57,159 @@ export function extractIscoCode(concept) {
   return null;
 }
 
+/**
+ * Fetch skills for an occupation using ESCO's explicit essential/optional skill relations.
+ * Falls back to search-based method if the concept call fails.
+ */
 export async function getOccupationSkills(escoUri, language = "en", options = {}) {
   const {
-    maxSkills = 30,
+    maxSkills = 35,
     fetchLimit = 80,
   } = options;
 
+  try {
+    // --- PRIMARY: explicit relations (Option B) ---
+    const conceptUrl = new URL(`${ESCO_BASE_URL}/resource`);
+    conceptUrl.searchParams.set("uri", escoUri);
+
+    const conceptRes = await fetch(conceptUrl, {
+      headers: {
+        Accept: "application/json",
+        "User-Agent": "SkillForge/1.0",
+      },
+    });
+
+    if (!conceptRes.ok) {
+      throw new Error(
+        `ESCO concept request failed: ${conceptRes.status}. ` +
+        `Body: ${(await conceptRes.text().catch(() => "")).slice(0, 200)}`
+      );
+    }
+
+    const concept = await conceptRes.json();
+
+    const occupationTitle =
+      concept.preferredLabel?.[language] ||
+      concept.preferredLabel?.en ||
+      concept.title ||
+      "worker";
+
+    console.log(
+      `[Option B] Fetching skills for occupation: "${occupationTitle}" (${escoUri})`
+    );
+
+    // Extract skill URIs from essentialSkill / optionalSkill
+    const skillUris = new Set();
+
+    function collectSkillUris(field) {
+      const node = concept[field];
+      if (!node) return;
+
+      const arr = Array.isArray(node) ? node : [node];
+      for (const item of arr) {
+        const uri = item["@id"] || item.uri;
+        if (typeof uri === "string" && uri.startsWith("http://data.europa.eu/esco/skill/")) {
+          skillUris.add(uri);
+        }
+      }
+    }
+
+    collectSkillUris("http://data.europa.eu/esco/essentialSkill");
+    collectSkillUris("http://data.europa.eu/esco/optionalSkill");
+
+    if (skillUris.size === 0) {
+      collectSkillUris("http://data.europa.eu/esco/hasSkill");
+    }
+
+    console.log(
+      `[Option B] Found ${skillUris.size} explicit skill URIs for "${occupationTitle}"`
+    );
+
+    if (skillUris.size === 0) {
+      // No explicit skills; fall back to search
+      throw new Error("No explicit skills found; using fallback");
+    }
+
+    // Fetch skill concepts (batched)
+    const skillUriList = [...skillUris].slice(0, fetchLimit);
+
+    const skillPromises = skillUriList.map(async (uri) => {
+      const url = new URL(`${ESCO_BASE_URL}/resource`);
+      url.searchParams.set("uri", uri);
+
+      try {
+        const res = await fetch(url, {
+          headers: {
+            Accept: "application/json",
+            "User-Agent": "SkillForge/1.0",
+          },
+        });
+
+        if (!res.ok) return null;
+
+        const data = await res.json();
+        const label =
+          data.preferredLabel?.[language] ||
+          data.preferredLabel?.en ||
+          data.title ||
+          data.label ||
+          "Skill";
+
+        return label;
+      } catch {
+        return null;
+      }
+    });
+
+    const skillLabelsRaw = (await Promise.all(skillPromises)).filter(Boolean);
+
+    console.log(
+      `[Option B] Fetched ${skillLabelsRaw.length} skill labels for "${occupationTitle}"`
+    );
+
+    // Filter out obviously irrelevant skills
+    const { isObviouslyIrrelevant } = await import("./skillRelevance.mjs");
+
+    const filtered = skillLabelsRaw.filter(
+      (label) => !isObviouslyIrrelevant(label)
+    );
+
+    console.log(
+      `[Option B] After irrelevance filter: ${filtered.length} skills for "${occupationTitle}"`
+    );
+
+    const result = filtered.slice(0, maxSkills);
+
+    console.log(
+      `[Option B] Returning ${result.length} skills for "${occupationTitle}"`
+    );
+
+    if (result.length > 0) {
+      return result;
+    }
+
+    // If filtered list is empty, fall back to search
+    throw new Error("Explicit skills filtered to empty; using fallback");
+
+  } catch (err) {
+    // --- FALLBACK: search-based method (Option A) ---
+    console.warn(
+      `[Option B] Failed for ${escoUri}: ${err.message}. Falling back to search-based skills.`
+    );
+    return getOccupationSkillsViaSearch(escoUri, language, { maxSkills, fetchLimit });
+  }
+}
+
+/**
+ * Fallback: fetch skills via ESCO search (Option A).
+ */
+async function getOccupationSkillsViaSearch(escoUri, language = "en", options = {}) {
+  const {
+    maxSkills = 35,
+    fetchLimit = 100,
+  } = options;
+
+  // Fetch occupation concept to get title and ISCO
   const conceptUrl = new URL(`${ESCO_BASE_URL}/resource`);
   conceptUrl.searchParams.set("uri", escoUri);
 
@@ -111,7 +252,7 @@ export async function getOccupationSkills(escoUri, language = "en", options = {}
   skillsUrl.searchParams.set("isco", iscoCode);
 
   console.log(
-    `ESCO skills search: text="${occupationTitle}", isco=${iscoCode}, limit=${fetchLimit}`
+    `[Option A] ESCO skills search: text="${occupationTitle}", isco=${iscoCode}, limit=${fetchLimit}`
   );
 
   const skillsRes = await fetch(skillsUrl, {
@@ -133,7 +274,7 @@ export async function getOccupationSkills(escoUri, language = "en", options = {}
   const results = skillsData?._embedded?.results || [];
 
   console.log(
-    `ESCO skills search returned ${results.length} raw skills for ISCO ${iscoCode} ("${occupationTitle}")`
+    `[Option A] ESCO skills search returned ${results.length} raw skills for ISCO ${iscoCode} ("${occupationTitle}")`
   );
 
   let allSkills = results.map((s) => {
@@ -146,38 +287,15 @@ export async function getOccupationSkills(escoUri, language = "en", options = {}
     return label;
   });
 
-  // 1) Hard filter: remove obviously irrelevant skills
-  const filteredByIrrelevance = allSkills.filter(
+  const { isObviouslyIrrelevant } = await import("./skillRelevance.mjs");
+
+  const filtered = allSkills.filter(
     (label) => !isObviouslyIrrelevant(label)
   );
 
   console.log(
-    `After irrelevance filter: ${filteredByIrrelevance.length} skills for "${occupationTitle}"`
+    `[Option A] After irrelevance filter: ${filtered.length} skills for "${occupationTitle}"`
   );
 
-  // 2) Require at least one core skill keyword
-  const filteredByCore = filteredByIrrelevance.filter((label) =>
-    hasCoreSkillKeyword(label)
-  );
-
-  console.log(
-    `After core keyword filter: ${filteredByCore.length} skills for "${occupationTitle}"`
-  );
-
-  // 3) Score and sort by relevance
-  const scored = filteredByCore.map((label) => ({
-    label,
-    score: scoreSkillRelevance(occupationTitle, label),
-  }));
-
-  scored.sort((a, b) => b.score - a.score);
-
-  // 4) Take top N
-  const top = scored.slice(0, maxSkills);
-
-  console.log(
-    `Selected ${top.length} top skills for "${occupationTitle}"; top score=${top[0]?.score?.toFixed(3) ?? 0}, last score=${top[top.length - 1]?.score?.toFixed(3) ?? 0}`
-  );
-
-  return top.map((s) => s.label);
+  return filtered.slice(0, maxSkills);
 }
