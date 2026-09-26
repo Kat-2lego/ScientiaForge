@@ -165,6 +165,62 @@ function getAuthHeaders(extra = {}) {
     lucide.createIcons();
   }
 
+  async function refreshGapForCurrentJob() {
+  if (!currentJobId) {
+    clearGapResult();
+    return;
+  }
+
+  const skillNames = currentSkills.map((s) => s.name);
+  const result = await getSkillGap(skillNames, currentJobId);
+
+  renderGapResult(result);
+
+  // Generate roadmap based on missing skills
+  await loadRoadmap(result.missing);
+}
+
+async function loadRoadmap(missingSkills) {
+  const skillsParam = missingSkills.join(",");
+  const res = await fetch(`${API_BASE}/roadmap?skills=${encodeURIComponent(skillsParam)}`);
+  if (!res.ok) {
+    console.warn("Failed to load roadmap");
+    return;
+  }
+
+  const data = await res.json();
+  renderRoadmap(data.roadmap || []);
+}
+function renderRoadmap(roadmap) {
+  const container = document.querySelector(".roadmap-items");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  if (roadmap.length === 0) {
+    container.innerHTML = "<p style='color: var(--muted); font-size: 0.9rem;'>No specific learning recommendations available for this career yet.</p>";
+    return;
+  }
+
+  roadmap.forEach((module, idx) => {
+    const step = document.createElement("div");
+    step.className = "road-step";
+
+    step.innerHTML = `
+      <div class="step-num">${idx + 1}</div>
+      <div>
+        <h4>${module.title}</h4>
+        <p>${module.description}</p>
+        ${module.resourceUrl
+          ? `<a href="${module.resourceUrl}" target="_blank" rel="noopener" style="font-size:0.85rem; color: var(--blue);">View resource</a>`
+          : ""}
+      </div>
+    `;
+
+    container.appendChild(step);
+  });
+}
+
   //================== MODAL: VIEW ALL HAVE / MISSING SKILLS =================
 
   const allHaveSkillsModal = document.getElementById("allHaveSkillsModal");
@@ -212,11 +268,19 @@ function getAuthHeaders(extra = {}) {
   });
 
   async function refreshGapForCurrentJob() {
-    if (!currentJobId) return;
-    const skillNames = currentSkills.map((s) => s.name);
-    const result = await getSkillGap(skillNames, currentJobId);
-    renderGapResult(result);
+  if (!currentJobId) {
+    clearGapResult();
+    return;
   }
+
+  const skillNames = currentSkills.map((s) => s.name);
+  const result = await getSkillGap(skillNames, currentJobId);
+
+  renderGapResult(result);
+
+  // Generate roadmap based on missing skills
+  await loadRoadmap(result.missing);
+}
 
 // ================= MODAL =================
 
