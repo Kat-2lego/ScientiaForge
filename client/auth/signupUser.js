@@ -14,8 +14,8 @@ let selectedSkillsTags = new Set();
 // Taxonomy Data Definition Mapping Object Engine (10 Industries)
 const industryDataMap = {
     IT: {
-        roles: ["Software Developer", "UI/UX Designer", "Data Analyst", "Cybersecurity Analyst", "QA Tester"],
-        skills: ["JavaScript", "Python", "React", "SQL", "Figma", "Git", "Automated Testing"]
+        roles: ["Software Developer", "UI/UX Designer", "Data Analyst", "Cybersecurity Analyst", "QA Tester", "Data Scientist", "Data Architect"],
+        skills: ["JavaScript", "Python", "React", "SQL", "Figma", "Git", "Automated Testing", "Network Security", "Data Visualization", "Cloud Computing", "Python", "TensorFlow", "Deep Learning", "Data Pipelines", "PowerBI", "Tableau"]
     },
     Finance: {
         roles: ["Investment Analyst", "Financial Planner", "Risk Manager", "Accountant", "Quantitative Trader"],
@@ -41,14 +41,30 @@ const industryDataMap = {
         roles: ["Technical Product Manager", "Scrum Master", "Agile Project Manager", "Operations Manager"],
         skills: ["Product Roadmap", "Scrum framework", "Jira", "Resource Planning", "Stakeholder Management"]
     },
-    DataScience: {
-        roles: ["Machine Learning Engineer", "Data Scientist", "BI Developer", "Data Architect"],
-        skills: ["Python", "TensorFlow", "Deep Learning", "Data Pipelines", "PowerBI", "Tableau"]
-    },
     Sales: {
         roles: ["Account Executive", "Customer Success Manager", "Business Development Rep (BDR)"],
         skills: ["Inbound Sales", "Salesforce CRM", "Client Onboarding", "Cold Calling", "Retention Strategy"]
-    }
+    },
+    Hospitality: {
+        roles: ["Hotel Manager", "Event Coordinator", "Restaurant Supervisor", "Travel Consultant"],
+        skills: ["Customer Service", "Event Planning", "Hospitality Management", "Reservation Systems"]
+    },
+    Education: {
+        roles: ["Curriculum Developer", "Instructional Designer", "Online Course Creator", "Academic Advisor"],
+        skills: ["Learning Management Systems (LMS)", "Pedagogy", "E-learning Tools", "Student Assessment"]
+    },
+    Retail: {
+        roles: ["Store Manager", "Visual Merchandiser", "Retail Buyer", "Customer Experience Specialist"],
+        skills: ["Inventory Management", "Point of Sale (POS) Systems", "Merchandising", "Customer Engagement"]
+    },
+    Engineering: {
+        roles: ["Mechanical Engineer", "Electrical Engineer", "Civil Engineer", "Industrial Designer"],
+        skills: ["CAD Software", "Project Management", "Prototyping", "Quality Assurance"]
+    },
+    Construction: {
+        roles: ["Site Supervisor", "Construction Project Manager", "Estimator", "Safety Officer"],
+        skills: ["Blueprint Reading", "Construction Management Software", "Cost Estimation", "Safety Protocols"]
+    },     
 };
 
 /**
