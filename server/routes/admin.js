@@ -100,6 +100,44 @@ function buildDayBuckets(since, days) {
   return map;
 }
 
+// Every chart endpoint accepts EITHER ?days=N (last N days ending today,
+// the original behaviour) OR ?from=YYYY-MM-DD&to=YYYY-MM-DD (an explicit
+// range — pass the same date for both to look at a single day). `until`
+// is an EXCLUSIVE upper bound so callers can use it directly in .lt().
+function resolveDateRange(query, fallbackDays, maxDays) {
+  const isValidDay = (s) =>
+    /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(`${s}T00:00:00Z`));
+
+  const fromRaw = typeof query.from === "string" ? query.from.trim() : "";
+  const toRaw = typeof query.to === "string" ? query.to.trim() : "";
+
+  let since;
+  let days;
+
+  if (isValidDay(fromRaw) && isValidDay(toRaw)) {
+    const a = new Date(`${fromRaw}T00:00:00Z`);
+    const b = new Date(`${toRaw}T00:00:00Z`);
+    since = a < b ? a : b;
+    const later = a < b ? b : a;
+    const rawDays = Math.round((later - since) / (24 * 60 * 60 * 1000)) + 1;
+    days = Math.min(maxDays, Math.max(1, rawDays));
+  } else if (isValidDay(fromRaw)) {
+    // A single date with no "to" — just that one day.
+    since = new Date(`${fromRaw}T00:00:00Z`);
+    days = 1;
+  } else {
+    days = clampInt(query.days, fallbackDays, 1, maxDays);
+    since = new Date();
+    since.setUTCDate(since.getUTCDate() - (days - 1));
+    since.setUTCHours(0, 0, 0, 0);
+  }
+
+  const until = new Date(since);
+  until.setUTCDate(until.getUTCDate() + days);
+
+  return { since, until, days };
+}
+
 async function safeCount(warnings, label, query) {
   try {
     const { count, error } = await query;
@@ -218,10 +256,7 @@ router.get("/stats/overview", async (req, res) => {
 ========================================================= */
 
 router.get("/stats/growth", async (req, res) => {
-  const days = clampInt(req.query.days, 30, 1, 180);
-  const since = new Date();
-  since.setUTCDate(since.getUTCDate() - (days - 1));
-  since.setUTCHours(0, 0, 0, 0);
+  const { since, until, days } = resolveDateRange(req.query, 30, 180);
 
   try {
     const [{ data, error }, { count: totalBefore, error: beforeErr }] = await Promise.all([
@@ -229,6 +264,7 @@ router.get("/stats/growth", async (req, res) => {
         .from("users")
         .select("created_at")
         .gte("created_at", since.toISOString())
+        .lt("created_at", until.toISOString())
         .limit(20000),
       supabaseAdmin
         .from("users")
@@ -264,16 +300,14 @@ router.get("/stats/growth", async (req, res) => {
 ========================================================= */
 
 router.get("/stats/activity", async (req, res) => {
-  const days = clampInt(req.query.days, 14, 1, 90);
-  const since = new Date();
-  since.setUTCDate(since.getUTCDate() - (days - 1));
-  since.setUTCHours(0, 0, 0, 0);
+  const { since, until, days } = resolveDateRange(req.query, 14, 180);
 
   try {
     const { data, error } = await supabaseAdmin
       .from("user_sessions")
       .select("user_id, started_at")
       .gte("started_at", since.toISOString())
+      .lt("started_at", until.toISOString())
       .limit(50000);
 
     if (error) throw error;
@@ -310,13 +344,14 @@ router.get("/stats/activity", async (req, res) => {
 ========================================================= */
 
 router.get("/stats/peak-hours", async (req, res) => {
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const { since, until } = resolveDateRange(req.query, 30, 365);
 
   try {
     const { data, error } = await supabaseAdmin
       .from("user_sessions")
       .select("started_at")
-      .gte("started_at", thirtyDaysAgo.toISOString())
+      .gte("started_at", since.toISOString())
+      .lt("started_at", until.toISOString())
       .limit(50000);
 
     if (error) throw error;
@@ -345,12 +380,161 @@ router.get("/stats/feature-usage", async (req, res) => {
 
   const [cvAnalyses, interviewsStarted, interviewsCompleted, skillGapRuns] = await Promise.all([
     safeCount(warnings, "cvAnalyses", supabaseAdmin.from("cv_analyses").select("*", { count: "exact", head: true })),
-    safeCount(warnings, "interviewsStarted", supabaseAdmin.from("audit_log").select("*", { count: "exact", head: true }).eq("action", "interview_started")),
-    safeCount(warnings, "interviewsCompleted", supabaseAdmin.from("audit_log").select("*", { count: "exact", head: true }).eq("action", "interview_completed")),
-    safeCount(warnings, "skillGapRuns", supabaseAdmin.from("audit_log").select("*", { count: "exact", head: true }).eq("action", "skillgap_run")),
+    safeCount(warnings, "interviewsStarted", supabaseAdmin.from("audit_logs").select("*", { count: "exact", head: true }).eq("action", "interview_started")),
+    safeCount(warnings, "interviewsCompleted", supabaseAdmin.from("audit_logs").select("*", { count: "exact", head: true }).eq("action", "interview_completed")),
+    safeCount(warnings, "skillGapRuns", supabaseAdmin.from("audit_logs").select("*", { count: "exact", head: true }).eq("action", "skillgap_run")),
   ]);
 
   res.json({ cvAnalyses, interviewsStarted, interviewsCompleted, skillGapRuns, warnings });
+});
+
+/* =========================================================
+   GET /api/admin/stats/feature-timeline?days=30 (or ?from=&to=)
+   Daily "completed" counts per feature, from public.feature_events —
+   this is the table server.mjs/cvRoutes.js actually write to (unlike
+   the feature-usage endpoint above, which leans on the audit_log
+   table-name guess), so it's on solid ground regardless of that guess.
+   Powers the date-range-filterable feature usage chart.
+========================================================= */
+
+const TRACKED_FEATURES = ["interview_simulator", "cv_analyzer", "skill_gap", "career_discovery"];
+
+router.get("/stats/feature-timeline", async (req, res) => {
+  const { since, until, days } = resolveDateRange(req.query, 30, 365);
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("feature_events")
+      .select("feature, created_at")
+      .eq("event_type", "completed")
+      .gte("created_at", since.toISOString())
+      .lt("created_at", until.toISOString())
+      .limit(50000);
+
+    if (error) throw error;
+
+    const dayList = [...buildDayBuckets(since, days).keys()];
+    const countsByFeature = Object.fromEntries(
+      TRACKED_FEATURES.map((f) => [f, new Map(dayList.map((d) => [d, 0]))])
+    );
+
+    (data || []).forEach((row) => {
+      const map = countsByFeature[row.feature];
+      if (!map) return; // an untracked/unknown feature value — ignore rather than crash
+      const key = dayKey(new Date(row.created_at));
+      if (map.has(key)) map.set(key, map.get(key) + 1);
+    });
+
+    const series = TRACKED_FEATURES.map((feature) => ({
+      feature,
+      counts: dayList.map((d) => countsByFeature[feature].get(d)),
+    }));
+
+    res.json({ days: dayList, series });
+  } catch (err) {
+    console.error("GET /admin/stats/feature-timeline error:", err.message);
+    res.status(500).json({ error: "Could not load feature usage timeline.", days: [], series: [] });
+  }
+});
+
+/* =========================================================
+   GET /api/admin/stats/interview-usage?days=30 (or ?from=&to=)
+   Interview Simulator specifically, called out by name: completed
+   sessions per day and average duration per day, plus totals for
+   the selected range — from public.feature_events.
+========================================================= */
+
+router.get("/stats/interview-usage", async (req, res) => {
+  const { since, until, days } = resolveDateRange(req.query, 30, 365);
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("feature_events")
+      .select("created_at, duration_seconds")
+      .eq("feature", "interview_simulator")
+      .eq("event_type", "completed")
+      .gte("created_at", since.toISOString())
+      .lt("created_at", until.toISOString())
+      .limit(50000);
+
+    if (error) throw error;
+
+    const dayList = [...buildDayBuckets(since, days).keys()];
+    const countByDay = new Map(dayList.map((d) => [d, 0]));
+    const durationSumByDay = new Map(dayList.map((d) => [d, 0]));
+
+    (data || []).forEach((row) => {
+      const key = dayKey(new Date(row.created_at));
+      if (!countByDay.has(key)) return;
+      countByDay.set(key, countByDay.get(key) + 1);
+      durationSumByDay.set(key, durationSumByDay.get(key) + (row.duration_seconds || 0));
+    });
+
+    const series = dayList.map((day) => {
+      const completed = countByDay.get(day);
+      const avgDurationMinutes = completed > 0
+        ? Math.round((durationSumByDay.get(day) / completed / 60) * 10) / 10
+        : 0;
+      return { day, completed, avgDurationMinutes };
+    });
+
+    const totalCompleted = (data || []).length;
+    const totalDurationSeconds = (data || []).reduce((sum, r) => sum + (r.duration_seconds || 0), 0);
+    const overallAvgMinutes = totalCompleted > 0
+      ? Math.round((totalDurationSeconds / totalCompleted / 60) * 10) / 10
+      : 0;
+
+    res.json({ days: series, totalCompleted, overallAvgMinutes });
+  } catch (err) {
+    console.error("GET /admin/stats/interview-usage error:", err.message);
+    res.status(500).json({ error: "Could not load interview usage stats.", days: [], totalCompleted: 0, overallAvgMinutes: 0 });
+  }
+});
+
+/* =========================================================
+   GET /api/admin/stats/demographics
+   Age-bracket and gender breakdown, from public.user_profiles.
+   Aggregate counts only — never a per-user list of who is what
+   age/gender beyond the individual account view in /users/:id.
+========================================================= */
+
+const AGE_BRACKET_ORDER = ["Under 18", "18-24", "25-34", "35-44", "45+"];
+
+router.get("/stats/demographics", async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("user_profiles")
+      .select("age_bracket, gender")
+      .limit(50000);
+
+    if (error) throw error;
+
+    const ageCounts = {};
+    const genderCounts = {};
+    (data || []).forEach((row) => {
+      if (row.age_bracket) ageCounts[row.age_bracket] = (ageCounts[row.age_bracket] || 0) + 1;
+      if (row.gender) genderCounts[row.gender] = (genderCounts[row.gender] || 0) + 1;
+    });
+
+    const ageBrackets = AGE_BRACKET_ORDER.map((label) => ({ label, count: ageCounts[label] || 0 }));
+    Object.keys(ageCounts).forEach((label) => {
+      if (!AGE_BRACKET_ORDER.includes(label)) ageBrackets.push({ label, count: ageCounts[label] });
+    });
+
+    const genders = Object.entries(genderCounts).map(([label, count]) => ({ label, count }));
+
+    const totalWithAge = ageBrackets.reduce((sum, b) => sum + b.count, 0);
+    const totalWithGender = genders.reduce((sum, g) => sum + g.count, 0);
+    const mostCommonAgeBracket = ageBrackets.reduce(
+      (best, b) => (b.count > (best?.count || 0) ? b : best),
+      null
+    )?.label || null;
+
+    res.json({ ageBrackets, genders, totalWithAge, totalWithGender, mostCommonAgeBracket });
+  } catch (err) {
+    console.error("GET /admin/stats/demographics error:", err.message);
+    res.status(500).json({ error: "Could not load demographics.", ageBrackets: [], genders: [] });
+  }
 });
 
 /* =========================================================
@@ -433,7 +617,7 @@ router.get("/users/:id", async (req, res) => {
 
     const { data: profile } = await supabaseAdmin
       .from("user_profiles")
-      .select("first_name, last_name, target_industry, career_experience_level, target_roles")
+      .select("first_name, last_name, target_industry, career_experience_level, target_roles, phone, location, referral_source, linkedin_url, age_bracket, gender")
       .eq("user_id", userId)
       .maybeSingle();
 
@@ -476,6 +660,12 @@ router.get("/users/:id", async (req, res) => {
       targetIndustry: profile?.target_industry || null,
       careerExperienceLevel: profile?.career_experience_level || null,
       targetRoles: profile?.target_roles || [],
+      phone: profile?.phone || null,
+      location: profile?.location || null,
+      referralSource: profile?.referral_source || null,
+      linkedinUrl: profile?.linkedin_url || null,
+      ageBracket: profile?.age_bracket || null,
+      gender: profile?.gender || null,
       role: userRow.role,
       roleUpdatedAt: userRow.role_updated_at,
       createdAt: userRow.created_at,
@@ -609,8 +799,8 @@ router.get("/audit-log", async (req, res) => {
 
   try {
     let query = supabaseAdmin
-      .from("audit_log")
-      .select("id, user_id, action, entity, entity_id, desc, created_at", { count: "exact" });
+      .from("audit_logs")
+      .select("id, user_id, action, entity_name, entity_id, description, created_at", { count: "exact" });
 
     if (action) query = query.eq("action", action);
 
@@ -633,9 +823,9 @@ router.get("/audit-log", async (req, res) => {
         userId: r.user_id,
         userEmail: emailsById[r.user_id] || null,
         action: r.action,
-        entity: r.entity,
+        entity: r.entity_name,
         entityId: r.entity_id,
-        description: r.desc,
+        description: r.description,
         createdAt: r.created_at,
       })),
       total: count || 0,
@@ -720,4 +910,4 @@ router.put("/settings", async (req, res) => {
   }
 });
 
-export default router;
+export default router; 

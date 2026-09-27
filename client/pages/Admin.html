@@ -83,6 +83,23 @@
         </div>
       </section>
 
+      <!-- ===================== GLOBAL DATE RANGE ===================== -->
+      <section class="date-range-bar">
+        <div class="date-range-presets" id="dateRangePresets">
+          <button data-preset="7" class="active">7d</button>
+          <button data-preset="30">30d</button>
+          <button data-preset="90">90d</button>
+        </div>
+        <div class="date-range-custom">
+          <span>Custom:</span>
+          <input type="date" id="dateRangeFrom" />
+          <span>to</span>
+          <input type="date" id="dateRangeTo" />
+          <button id="applyDateRange" class="btn-chip promote">Apply</button>
+          <span class="date-range-label" id="dateRangeSummary"></span>
+        </div>
+      </section>
+
       <!-- ===================== PRIMARY KPI ROW ===================== -->
       <section class="kpi-grid">
         <article class="stat-card kpi-card">
@@ -183,10 +200,7 @@
         <div class="chart-panel">
           <div class="chart-panel-head">
             <h3>User Growth</h3>
-            <div class="chart-range-toggle">
-              <button data-range="30" class="active">30d</button>
-              <button data-range="90">90d</button>
-            </div>
+            <span>Selected range</span>
           </div>
           <div class="chart-canvas-wrap">
             <canvas id="growthChart"></canvas>
@@ -196,10 +210,33 @@
         <div class="chart-panel">
           <div class="chart-panel-head">
             <h3>Daily Active Users</h3>
-            <span>Last 14 days</span>
+            <span>Selected range</span>
           </div>
           <div class="chart-canvas-wrap">
             <canvas id="activityChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== CHARTS: feature timeline + interview usage ===================== -->
+      <section class="chart-grid">
+        <div class="chart-panel">
+          <div class="chart-panel-head">
+            <h3>Feature Usage Over Time</h3>
+            <span>Selected range</span>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="featureTimelineChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-panel">
+          <div class="chart-panel-head">
+            <h3>Interview Simulator</h3>
+            <span id="interviewUsageSummary">Selected range</span>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="interviewUsageChart"></canvas>
           </div>
         </div>
       </section>
@@ -219,10 +256,33 @@
         <div class="chart-panel">
           <div class="chart-panel-head">
             <h3>Peak Activity Hours</h3>
-            <span>SAST &middot; last 30 days</span>
+            <span>SAST &middot; selected range</span>
           </div>
           <div class="chart-canvas-wrap short">
             <canvas id="peakChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== CHARTS: demographics ===================== -->
+      <section class="chart-grid thirds">
+        <div class="chart-panel">
+          <div class="chart-panel-head">
+            <h3>Age Distribution</h3>
+            <span id="ageBracketSummary">All time</span>
+          </div>
+          <div class="chart-canvas-wrap short">
+            <canvas id="ageBracketChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-panel">
+          <div class="chart-panel-head">
+            <h3>Gender Distribution</h3>
+            <span id="genderSummary">All time</span>
+          </div>
+          <div class="chart-canvas-wrap short">
+            <canvas id="genderChart"></canvas>
           </div>
         </div>
       </section>

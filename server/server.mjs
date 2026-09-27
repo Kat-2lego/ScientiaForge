@@ -1,4 +1,3 @@
-console.log("THIS IS THE FRESH FILE");
 import express from "express";
 import cors from "cors";
 import { createClient } from "@supabase/supabase-js";
@@ -9,11 +8,16 @@ import { fileURLToPath } from "url";
 import WebSocket from "ws";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 import cvRoutes from "./cv-analyzer/routes/cvRoutes.js";
-import { dirname, join } from 'path';
-import Stripe from 'stripe';
 import careerPathfinderRoutes from "./routes/careerPathfinder.js";
 import studyHubRoutes from "./routes/studyHub.js";
 import adminRoutes from "./routes/admin.js";
+
+import { getOccupationSkills } from "./escoClient.mjs";
+import { computeSkillGap } from "./skillMatcher.mjs";
+import { searchEscoOccupations } from "./escoClient.mjs";
+import { INDUSTRIES } from "./industries.mjs";
+
+
 
 
 async function logAudit(userId, action, { entity = null, entityId = null, desc = null, req = null } = {}) {
@@ -38,6 +42,8 @@ async function logAudit(userId, action, { entity = null, entityId = null, desc =
     console.warn("Audit log skipped:", error.message);
   }
 }
+import { logFeatureEvent } from "./services/featureEvents.js";
+import { sendWelcomeEmail } from "./services/emailService.js";
 
 /* =========================================================
    LOAD ENVIRONMENT VARIABLES
@@ -163,10 +169,10 @@ const supabase = createClient(
 const supabaseAdmin =
   SUPABASE_SERVICE_ROLE_KEY
     ? createClient(
-        SUPABASE_URL,
-        SUPABASE_SERVICE_ROLE_KEY,
-        supabaseOptions
-      )
+      SUPABASE_URL,
+      SUPABASE_SERVICE_ROLE_KEY,
+      supabaseOptions
+    )
     : null;
 
 /*
@@ -182,8 +188,8 @@ const databaseClient =
 
 const groq = GROQ_API_KEY
   ? new Groq({
-      apiKey: GROQ_API_KEY,
-    })
+    apiKey: GROQ_API_KEY,
+  })
   : null;
 
 async function callGroq(
@@ -240,8 +246,7 @@ async function callGroq(
       }
 
       console.warn(
-        `Groq attempt ${
-          attempt + 1
+        `Groq attempt ${attempt + 1
         } failed. Retrying...`
       );
 
@@ -255,13 +260,6 @@ async function callGroq(
     "Groq request failed."
   );
 }
-
-/* =========================================================
-   STRIPE CONFIGURATION
-   (must exist before the /webhook route below uses it)
-========================================================= */
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 /* =========================================================
    MIDDLEWARE
@@ -296,6 +294,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
     case 'payment_intent.succeeded': {
       const userId = intent.metadata.userId;
       const productId = intent.metadata.productId;
+      const autoRenew = intent.metadata.autoRenew === 'true';
 
       // 1. Look up the plan in subscription_plans so we know how long it lasts
       const { data: plan, error: planError } = await databaseClient
@@ -320,10 +319,10 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
         .update({ plan_type: planType })
         .eq('id', userId);
 
-        if (userError) {
-          console.error('Failed to update user plan_type:', userError);
-          break;
-        }
+      if (userError) {
+        console.error('Failed to update user plan_type:', userError);
+        break;
+      }
 
       // 2. Create or reactivate the user's subscription
       const { data: subscription, error: subError } = await databaseClient
@@ -334,6 +333,13 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
           status: 'active',
           start_date: new Date().toISOString(),
           end_date: endDate,
+          auto_renew: autoRenew,
+          // Only overwrite the saved payment method if this charge actually
+          // saved one (off-session future use) — otherwise leave whatever
+          // was saved previously untouched.
+          ...(autoRenew && intent.payment_method
+            ? { stripe_payment_method_id: intent.payment_method }
+            : {}),
         }, { onConflict: 'user_id' })
         .select()
         .single();
@@ -535,7 +541,8 @@ app.post(
             "Login failed. No user session was created.",
         });
       }
-            /*
+
+      /*
         Maintenance mode (toggled from the admin Settings page) blocks
         sign-in for everyone except admins. This runs after Supabase has
         already verified the password, so the response never reveals
@@ -644,7 +651,7 @@ app.post("/api/auth/signup", async (req, res) => {
     });
   }
 
-    try {
+  try {
     const { data: settingRow } = await databaseClient
       .from("app_settings")
       .select("value")
@@ -685,20 +692,45 @@ app.post("/api/auth/signup", async (req, res) => {
   const rolesTargeted =
     Array.isArray(req.body.rolesTargeted)
       ? req.body.rolesTargeted
-          .map((role) =>
-            typeof role === "string" ? role.trim() : ""
-          )
-          .filter(Boolean)
+        .map((role) =>
+          typeof role === "string" ? role.trim() : ""
+        )
+        .filter(Boolean)
       : [];
 
   const skillsInterests =
     Array.isArray(req.body.skillsInterests)
       ? req.body.skillsInterests
-          .map((skill) =>
-            typeof skill === "string" ? skill.trim() : ""
-          )
-          .filter(Boolean)
+        .map((skill) =>
+          typeof skill === "string" ? skill.trim() : ""
+        )
+        .filter(Boolean)
       : [];
+
+  // Optional — collected on the last signup step, never blocks account
+  // creation if left blank.
+  const phone =
+    typeof req.body.phone === "string" ? req.body.phone.trim() : "";
+
+  const location =
+    typeof req.body.location === "string" ? req.body.location.trim() : "";
+
+  const referralSource =
+    typeof req.body.referralSource === "string"
+      ? req.body.referralSource.trim()
+      : "";
+
+  const linkedinUrl =
+    typeof req.body.linkedinUrl === "string"
+      ? req.body.linkedinUrl.trim()
+      : "";
+
+      
+  const ageBracket =
+    typeof req.body.ageBracket === "string" ? req.body.ageBracket.trim() : "";
+
+  const gender =
+    typeof req.body.gender === "string" ? req.body.gender.trim() : "";
 
   if (
     !industry ||
@@ -741,17 +773,17 @@ app.post("/api/auth/signup", async (req, res) => {
     // Table users upsert
 
     const { error: usersInsertError } =
-    await databaseClient.from("users").upsert(
-      {
-        id: userId,
-        email,
-        role: "job_seeker",
-        auth_provider: "email",
-        plan_type: "standard",
-        is_active: true,
-      },
-      { onConflict: "id" }
-    );
+      await databaseClient.from("users").upsert(
+        {
+          id: userId,
+          email,
+          role: "job_seeker",
+          auth_provider: "email",
+          plan_type: "standard",
+          is_active: true,
+        },
+        { onConflict: "id" }
+      );
 
     if (usersInsertError) {
       console.error(
@@ -783,6 +815,12 @@ app.post("/api/auth/signup", async (req, res) => {
           target_industry: targetIndustry || null,
           career_experience_level: experienceLevel || null,
           target_roles: rolesTargeted,
+          phone: phone || null,
+          location: location || null,
+          referral_source: referralSource || null,
+          linkedin_url: linkedinUrl || null,
+          age_bracket: ageBracket || null,
+          gender: gender || null,
         },
         { onConflict: "user_id" }
       );
@@ -854,6 +892,7 @@ app.post("/api/auth/signup", async (req, res) => {
     }
 
     logAudit(userId, "sign_up", { desc: "User account created", req });
+    sendWelcomeEmail(email, firstName);
 
     return res.status(201).json({
       success: true,
@@ -901,7 +940,7 @@ app.post("/api/auth/logout", async (req, res) => {
       // Non-fatal — logout still proceeds even if we can't identify the user.
     }
 
-        // Close out the open user_sessions row this login created, so the
+    // Close out the open user_sessions row this login created, so the
     // admin dashboard can compute how long the session actually lasted.
     if (loggingOutUserId) {
       try {
@@ -1165,13 +1204,13 @@ app.patch(
   async (req, res) => {
     const accessToken =
       typeof req.body.access_token ===
-      "string"
+        "string"
         ? req.body.access_token.trim()
         : "";
 
     const newPassword =
       typeof req.body.new_password ===
-      "string"
+        "string"
         ? req.body.new_password
         : "";
 
@@ -1298,179 +1337,131 @@ async function requireAuth(req, res, next) {
 }
 
 /* =========================================================
-   PREMIUM ACCESS CHECK
-   Gate any premium-only route with: requireAuth, requirePremium
+   SCORE SCALING HELPER
+   The interview AI evaluates on a 1-10 scale; every other score in the
+   schema (CV scores, skill-gap readiness) is 0-100. Converts the former
+   to the latter for storage so cross-feature aggregates stay meaningful.
 ========================================================= */
 
-async function requirePremium(req, res, next) {
-  const { data, error } = await databaseClient
-    .from('user_subscriptions')
-    .select('status, end_date')
-    .eq('user_id', req.userId)
-    .eq('status', 'active')
-    .maybeSingle();
-
-  if (error) {
-    console.error('Premium check failed:', error);
-    return res.status(500).json({ error: 'Could not verify subscription status.' });
-  }
-
-  if (!data) {
-    return res.status(403).json({ error: 'This feature requires a premium subscription.' });
-  }
-
-  if (data.end_date && new Date(data.end_date) < new Date()) {
-    return res.status(403).json({ error: 'Your subscription has expired.' });
-  }
-
-  next();
+function toHundredScale(scoreOutOfTen) {
+  const n = Number(scoreOutOfTen);
+  if (!Number.isFinite(n)) return null;
+  return Math.min(100, Math.max(0, Math.round(n * 10)));
 }
 
 /* =========================================================
-   STRIPE PAYMENT
+   AUDIT LOG HELPER
+   Wraps the insert_audit_log() SECURITY DEFINER function from the
+   schema. Best-effort — a logging failure should never break the
+   actual request.
 ========================================================= */
 
-const PRODUCTS = {
-  premium: {
-    amount: Number(process.env.PREMIUM_AMOUNT),
-    currency: 'zar',
-    label: 'Premium Plan',
-  },
-};
 
-app.post('/create-payment-intent', requireAuth, async (req, res) => {
+
+/* =========================================================
+   AUTO RENEW PAYMENT
+========================================================= */
+
+app.post('/api/billing/auto-renew', requireAuth, async (req, res) => {
   try {
-    const { productId } = req.body;
+    const { autoRenew } = req.body;
 
-    if (!productId || typeof productId !== 'string') {
-      return res.status(400).json({ error: 'A valid productId is required' });
+    if (typeof autoRenew !== 'boolean') {
+      return res.status(400).json({ error: 'autoRenew must be true or false' });
     }
 
-    const product = PRODUCTS[productId];
+    // Can't turn ON auto-renew if there's no saved card to charge later —
+    // that only gets saved when a payment was made with autoRenew: true.
+    if (autoRenew) {
+      const { data: subscription, error: fetchError } = await databaseClient
+        .from('user_subscriptions')
+        .select('stripe_payment_method_id')
+        .eq('user_id', req.userId)
+        .single();
 
-    if (!product) {
-      return res.status(400).json({ error: 'Unknown product' });
+      if (fetchError) {
+        console.error('Failed to check saved payment method:', fetchError);
+        return res.status(500).json({ error: 'Something went wrong updating auto-renewal' });
+      }
+
+      if (!subscription?.stripe_payment_method_id) {
+        return res.status(400).json({
+          error: 'No saved payment method on file. Please add a payment method before enabling auto-renewal.',
+        });
+      }
     }
 
-    if (!product.amount || product.amount <= 0) {
-      console.error(`Invalid amount configured for product "${productId}"`);
-      return res.status(500).json({ error: 'Product is misconfigured, please contact support' });
+    const { error: updateError } = await databaseClient
+      .from('user_subscriptions')
+      .update({ auto_renew: autoRenew })
+      .eq('user_id', req.userId);
+
+    if (updateError) {
+      console.error('Failed to update auto_renew:', updateError);
+      return res.status(500).json({ error: 'Something went wrong updating auto-renewal' });
     }
 
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: product.amount,
-      currency: product.currency,
-      automatic_payment_methods: { enabled: true },
-      metadata: {
-        productId,
-        userId: req.userId, // set by requireAuth above
-      },
-    });
-
-    res.json({
-      clientSecret: paymentIntent.client_secret,
-      amount: product.amount,
-      currency: product.currency,
-    });
+    res.json({ success: true, autoRenew });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Something went wrong creating the payment' });
+    res.status(500).json({ error: 'Something went wrong updating auto-renewal' });
   }
 });
 
 /* =========================================================
    BILLING: GET BILLING DATA
+   JOB ROLE RESOLUTION HELPER
+   Shared by the interview simulator, CV analyzer, and skill gap
+   endpoints. The frontend only ever sends a free-text role title
+   (e.g. "Backend Developer", or "any"/null for no preference) — this
+   finds or creates the matching row in job_roles so that data across
+   features (interviews taken, CVs analysed, skill gaps run) can all
+   be joined back to the same role instead of living as disconnected
+   text strings.
 ========================================================= */
 
-// Maps the DB's account_plan enum values to the plan keys the billing
-// UI already renders (Billing.html's data-plan="free" / data-plan="premium").
-// Update this map — not the frontend — if the enum grows more tiers.
-const PLAN_TYPE_MAP = {
-  standard: 'free',
-  premium: 'premium',
-};
+async function getOrCreateJobRoleId(roleTitle) {
+  const cleanTitle =
+    typeof roleTitle === "string" ? roleTitle.trim() : "";
 
-app.get('/api/billing/data', requireAuth, async (req, res) => {
+  if (!cleanTitle || cleanTitle.toLowerCase() === "any") {
+    return null;
+  }
+
   try {
-    // 1. Current plan — plan_type lives on public.users
-    const { data: userRow, error: userError } = await databaseClient
-      .from('users')
-      .select('plan_type')
-      .eq('id', req.userId)
-      .single();
-
-    if (userError || !userRow) {
-      console.error('❌ Error fetching user plan_type:', userError);
-      return res.status(500).json({ error: 'Failed to load billing data.' });
-    }
-
-    const planType = PLAN_TYPE_MAP[userRow.plan_type] || 'free';
-
-    // 2. Active subscription — used for the "next billing date" field
-    const { data: subscription, error: subError } = await databaseClient
-      .from('user_subscriptions')
-      .select('status, end_date')
-      .eq('user_id', req.userId)
-      .eq('status', 'active')
+    const { data: existing, error: selectError } = await databaseClient
+      .from("job_roles")
+      .select("job_role_id")
+      .ilike("title", cleanTitle)
+      .limit(1)
       .maybeSingle();
 
-    if (subError) {
-      console.warn('⚠️ Could not load subscription:', subError.message);
+    if (selectError) {
+      console.warn("getOrCreateJobRoleId select skipped:", selectError.message);
+      return null;
     }
 
-    // 3. Payment history
-    const { data: payments, error: paymentsError } = await databaseClient
-      .from('payments')
-      .select('provider_ref, amount_zar, currency, status, paid_at')
-      .eq('user_id', req.userId)
-      .order('paid_at', { ascending: false });
-
-    if (paymentsError) {
-      console.warn('⚠️ Could not load payment history:', paymentsError.message);
+    if (existing) {
+      return existing.job_role_id;
     }
 
-    const paymentHistory = (payments || [])
-      .filter((payment) => payment.paid_at) // skip rows with no paid_at (e.g. failed attempts)
-      .map((payment) => ({
-        date: payment.paid_at,
-        description: planType === 'premium' ? 'Premium Plan - Monthly' : 'Plan payment',
-        // Stripe amounts are stored in the smallest currency unit (cents).
-        amount: (payment.amount_zar || 0) / 100,
-        status: payment.status === 'succeeded' ? 'paid' : payment.status,
-        invoiceId: payment.provider_ref,
-      }));
+    const { data: created, error: insertError } = await databaseClient
+      .from("job_roles")
+      .insert({ title: cleanTitle })
+      .select("job_role_id")
+      .single();
 
-    // 4. Billing details — there's no billing_details table yet, so this
-    // is populated from the authenticated Supabase user for now.
-    const rawToken = req.headers.authorization.replace('Bearer ', '').trim();
-    const { data: { user: authUser } } = await supabase.auth.getUser(rawToken);
+    if (insertError) {
+      console.warn("getOrCreateJobRoleId insert skipped:", insertError.message);
+      return null;
+    }
 
-    return res.status(200).json({
-      currentPlan: {
-        type: planType,
-        nextBillingDate: subscription?.end_date || null,
-      },
-      paymentHistory,
-      billingDetails: {
-        email: authUser?.email || null,
-        name: authUser?.user_metadata?.first_name
-          ? `${authUser.user_metadata.first_name} ${authUser.user_metadata.last_name || ''}`.trim()
-          : null,
-        company: null,
-        country: null,
-        postalCode: null,
-        // No card details are stored yet (no payment_methods table, and
-        // the Stripe webhook doesn't persist a customer/payment-method
-        // ID). Wire this up once that data exists — until then the
-        // frontend correctly shows "Not added".
-        paymentMethods: [],
-      },
-    });
+    return created?.job_role_id || null;
   } catch (error) {
-    console.error('❌ /api/billing/data error:', error.message);
-    return res.status(500).json({ error: 'An internal server error occurred.' });
+    console.warn("getOrCreateJobRoleId failed:", error.message);
+    return null;
   }
-});
+}
 
 /* =========================================================
    SKILL CATEGORY HELPER (shared with signup logic)
@@ -1620,12 +1611,32 @@ const jobRoles = [
   { id: 4, title: "Data Analyst", requiredSkills: ["SQL", "Excel", "Python", "PowerBI", "Tableau", "Data Pipelines"] },
 ];
 
-app.get("/api/jobs", (req, res) => {
-  return res.status(200).json({
-    jobs: jobRoles.map((job) => ({ id: job.id, title: job.title })),
-  });
-});
+// ESCO-backed jobs endpoint
+app.get("/api/jobs", async (req, res) => {
+  try {
+    const q =
+      typeof req.query.q === "string" && req.query.q.trim()
+        ? req.query.q.trim()
+        : "software developer";
 
+    const occupations = await searchEscoOccupations(q);
+
+    // Map ESCO occupations to the shape your frontend expects
+    const jobs = occupations.map((occ) => ({
+      id: occ.escoUri,          // use ESCO URI as job id
+      title: occ.title,
+      escoOccupationUri: occ.escoUri,
+    }));
+
+    return res.json({ jobs });
+  } catch (error) {
+    console.error("❌ /api/jobs ESCO error:", error);
+    return res.status(500).json({
+      error: "Failed to load careers",
+      details: error.message,
+    });
+  }
+});
 /* =========================================================
    JOB TITLE SEARCH (for Interview Simulator target-role field)
 ========================================================= */
@@ -1729,22 +1740,134 @@ app.get("/api/jobs/search", (req, res) => {
   const results = JOB_TITLES.filter((title) => title.toLowerCase().includes(q)).slice(0, 8);
   return res.status(200).json({ results });
 });
+// GET /api/industries
+app.get("/api/industries", async (req, res) => {
+  try {
+    return res.json({
+      industries: INDUSTRIES.map((ind) => ({
+        id: ind.id,
+        label: ind.label,
+      })),
+    });
+  } catch (error) {
+    console.error("❌ /api/industries error:", error);
+    return res.status(500).json({
+      error: "Failed to load industries",
+      details: error.message,
+    });
+  }
+});
 
+// GET /api/industries/:id/careers
+
+app.get("/api/industries/:id/careers", async (req, res) => {
+  try {
+    const industry = INDUSTRIES.find((i) => i.id === req.params.id);
+
+    if (!industry) {
+      return res.status(404).json({
+        error: "Industry not found",
+      });
+    }
+
+    return res.json({
+      careers: industry.careers.map((c) => ({
+        title: c.title,
+        jobId: c.escoUri, // keep same shape as before
+      })),
+    });
+  } catch (error) {
+    console.error("❌ /api/industries/:id/careers error:", error);
+    return res.status(500).json({
+      error: "Failed to load careers",
+      details: error.message,
+    });
+  }
+});
+
+// Test ESCO route
+app.get("/api/esco/occupations", async (req, res) => {
+  try {
+    const q =
+      typeof req.query.q === "string" && req.query.q.trim()
+        ? req.query.q.trim()
+        : "data analyst";
+
+    console.log("ESCO occupations search for:", q);
+
+    const occupations = await searchEscoOccupations(q);
+
+    console.log("ESCO occupations result count:", occupations.length);
+
+    return res.json({ occupations });
+  } catch (error) {
+    console.error("❌ ESCO occupation search error:", error);
+    return res.status(500).json({
+      error: "Could not search ESCO occupations",
+      details: error.message,
+    });
+  }
+});
 /* =========================================================
    SKILL GAP (placeholder matching — swap once real data exists)
 ========================================================= */
 
-app.post("/api/skillgap", requireAuth, async (req, res) => {
-  const { jobId } = req.body;
+app.post("/api/skillgap", async (req, res) => {
+  try {
+    const { userSkillNames, jobId } = req.body;
 
-  const userSkillNames = Array.isArray(req.body.userSkillNames)
-    ? req.body.userSkillNames
-    : [];
+    console.log("🧠 /api/skillgap called");
+    console.log("  userSkillNames:", userSkillNames);
+    console.log("  jobId (ESCO URI):", jobId);
 
-  const job = jobRoles.find((j) => j.id === Number(jobId));
+    if (!Array.isArray(userSkillNames)) {
+      return res.status(400).json({
+        error: "userSkillNames must be an array of strings",
+      });
+    }
 
-  if (!job) {
-    return res.status(404).json({ error: "Job not found." });
+    if (!jobId || typeof jobId !== "string") {
+      return res.status(400).json({
+        error: "jobId must be a non-empty string (ESCO occupation URI)",
+      });
+    }
+
+    let requiredSkills = await getOccupationSkills(jobId, "en");
+
+    if (!requiredSkills || requiredSkills.length === 0) {
+      console.warn("No ESCO skills found for occupation:", jobId);
+      requiredSkills = [
+        "Communication",
+        "Problem solving",
+        "Teamwork",
+        "Time management",
+        "Adaptability",
+      ];
+    }
+
+    const { have, missing } = computeSkillGap(userSkillNames, requiredSkills, 0.5);
+
+    const matchScore = requiredSkills.length
+      ? Math.round((have.length / requiredSkills.length) * 100)
+      : 0;
+
+    return res.json({
+      have,
+      missing,
+      matchScore,
+      meta: {
+        source: requiredSkills.length > 0 && requiredSkills[0] !== "Communication"
+          ? "ESCO"
+          : "fallback",
+        occupationUri: jobId,
+      },
+    });
+  } catch (error) {
+    console.error("❌ /api/skillgap error:", error);
+    return res.status(500).json({
+      error: "Failed to compute skill gap",
+      details: error.message,
+    });
   }
 
   const userSkillsNormalized = new Set(
@@ -1768,6 +1891,10 @@ app.post("/api/skillgap", requireAuth, async (req, res) => {
     entityId: job.id,
     desc: `Skill-gap analysis run against "${job.title || job.id}"`,
     req,
+  });
+
+  logFeatureEvent(req.userId, "skill_gap", "completed", {
+    metadata: { jobId: job.id, jobTitle: job.title, matchScore },
   });
 
   return res.status(200).json({ have, missing, matchScore });
@@ -1918,6 +2045,10 @@ app.post(
       });
     }
 
+    logFeatureEvent(user_id, "career_discovery", "completed", {
+      metadata: { scores: scores || {} },
+    });
+
     /*
       Scores can be saved to Supabase here later.
     */
@@ -2058,7 +2189,7 @@ For EACH question object, include:
 - "diagram": when the question involves given data, measurements, forces,
   a dataset, or a scenario that benefits from a simple visual, provide a
   plain-text/ASCII diagram or a clearly labeled list of given values (e.g.
-  "Beam length: 4m\\nLoad: 500N at midpoint\\nSupports: pinned at both ends").
+  "Beam length: 4m\nLoad: 500N at midpoint\nSupports: pinned at both ends").
   Otherwise set this to null. Never reference or describe an actual image
   file — plain text only.
 
@@ -2260,6 +2391,14 @@ app.post(
         req,
       });
 
+      logFeatureEvent(user_id, "interview_simulator", "started", {
+        metadata: {
+          questionType: question_type || "hr",
+          personaId: persona.id || persona.name,
+          durationMinutes,
+        },
+      });
+
       return res.status(200).json({
         session_id:
           sessionId,
@@ -2430,10 +2569,10 @@ app.post(
 
       const prompt = `
 ${buildPersonaPrompt(
-  selectedPersona,
-  session.job_role_id,
-  session.question_type
-)}
+        selectedPersona,
+        session.job_role_id,
+        session.question_type
+      )}
 
 Interview question:
 "${question.text}"
@@ -2442,11 +2581,10 @@ Candidate's working / answer:
 "${user_answer}"
 ${finalAnswerText ? `\nCandidate's stated final numeric answer: ${finalAnswerText}` : ""}
 
-Evaluate the answer${
-        question.answerFormat === "numeric"
+Evaluate the answer${question.answerFormat === "numeric"
           ? ", including whether the final numeric answer is correct and whether the reasoning that led to it makes sense"
           : ""
-      }.
+        }.
 
 Return only a valid JSON object using this structure:
 
@@ -2479,8 +2617,7 @@ Every score must be a whole number from 1 to 10.
 
         if (!match) {
           console.warn(
-            `No answer-evaluation JSON object on attempt ${
-              attempt + 1
+            `No answer-evaluation JSON object on attempt ${attempt + 1
             }.`
           );
 
@@ -2495,8 +2632,7 @@ Every score must be a whole number from 1 to 10.
 
         } catch (error) {
           console.warn(
-            `Answer JSON parsing failed on attempt ${
-              attempt + 1
+            `Answer JSON parsing failed on attempt ${attempt + 1
             }.`
           );
         }
@@ -2644,23 +2780,23 @@ app.post(
     const overallScore =
       answered.length
         ? Math.round(
-            answered.reduce(
+          answered.reduce(
+            (
+              total,
+              answer
+            ) =>
+              total +
               (
-                total,
-                answer
-              ) =>
-                total +
-                (
-                  Number(
-                    answer
-                      .evaluation
-                      ?.score
-                  ) || 0
-                ),
-              0
-            ) /
-            answered.length
-          )
+                Number(
+                  answer
+                    .evaluation
+                    ?.score
+                ) || 0
+              ),
+            0
+          ) /
+          answered.length
+        )
         : 0;
 
     let tips = [];
@@ -2684,10 +2820,10 @@ ${answer.evaluation?.feedback || ""}
 
       const prompt = `
 ${buildPersonaPrompt(
-  session.persona,
-  session.job_role_id,
-  session.question_type
-)}
+        session.persona,
+        session.job_role_id,
+        session.question_type
+      )}
 
 Full interview transcript:
 
@@ -2711,8 +2847,7 @@ Return only a valid JSON array of strings.
 
         if (!match) {
           console.warn(
-            `No interview-tips JSON array on attempt ${
-              attempt + 1
+            `No interview-tips JSON array on attempt ${attempt + 1
             }.`
           );
 
@@ -2730,8 +2865,7 @@ Return only a valid JSON array of strings.
 
         } catch (error) {
           console.warn(
-            `Tips JSON parsing failed on attempt ${
-              attempt + 1
+            `Tips JSON parsing failed on attempt ${attempt + 1
             }.`
           );
         }
@@ -2818,6 +2952,19 @@ Return only a valid JSON array of strings.
           entityId: session_id,
           desc: `Completed interview, overall score ${overallScore}/10`,
           req,
+        });
+
+        const elapsedSeconds = Math.round(
+          (Date.now() - new Date(session.started_at).getTime()) / 1000
+        );
+
+        logFeatureEvent(session.user_id, "interview_simulator", "completed", {
+          durationSeconds: elapsedSeconds > 0 ? elapsedSeconds : null,
+          metadata: {
+            overallScore,
+            questionsAnswered: answered.length,
+            questionType: session.question_type,
+          },
         });
       }
 
@@ -2947,7 +3094,7 @@ app.post("/api/delete-account", async (req, res) => {
     }
 
     const userId = user.id;
-// Delete user via admin client
+    // Delete user via admin client
     const { error: deleteError } =
       await supabaseAdmin.auth.admin.deleteUser(userId);
 
@@ -2968,6 +3115,25 @@ app.post("/api/delete-account", async (req, res) => {
 
     return res.status(500).json({
       error: "Internal server error",
+    });
+  }
+});
+
+
+app.get("/api/esco/occupations", async (req, res) => {
+  try {
+    const q =
+      typeof req.query.q === "string" && req.query.q.trim()
+        ? req.query.q.trim()
+        : "software developer";
+
+    const occupations = await searchEscoOccupations(q);
+
+    return res.json({ occupations });
+  } catch (error) {
+    console.error("❌ ESCO occupation search error:", error);
+    return res.status(500).json({
+      error: "Could not search ESCO occupations",
     });
   }
 });

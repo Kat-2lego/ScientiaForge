@@ -126,6 +126,17 @@ async function openDetailModal(id) {
       ${detailRow("Status", onlineStatusHtml(u.online, u.lastSeenAt))}
       ${detailRow("Target industry", escapeHtml(u.targetIndustry || "\u2014"))}
       ${detailRow("Experience level", escapeHtml(u.careerExperienceLevel || "\u2014"))}
+      ${detailRow("Phone", escapeHtml(u.phone || "\u2014"))}
+      ${detailRow("Location", escapeHtml(u.location || "\u2014"))}
+      ${detailRow("Heard about us via", escapeHtml(u.referralSource || "\u2014"))}
+      ${detailRow(
+        "LinkedIn",
+        u.linkedinUrl && /^https?:\/\//i.test(u.linkedinUrl)
+          ? `<a href="${escapeHtml(u.linkedinUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(u.linkedinUrl)}</a>`
+          : escapeHtml(u.linkedinUrl || "\u2014")
+      )}
+      ${detailRow("Age group", escapeHtml(u.ageBracket || "\u2014"))}
+      ${detailRow("Gender", escapeHtml(u.gender || "\u2014"))}
       <div class="divider"></div>
       ${detailRow("CV analyses run", String(u.stats.cvAnalyses))}
       ${detailRow("Recent sessions", String(u.stats.sessionsCount))}

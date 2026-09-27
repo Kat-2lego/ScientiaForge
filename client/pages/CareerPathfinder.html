@@ -136,7 +136,20 @@
           <p class="cp-subtext">Add each subject you're doing and the level you're achieving (or aiming for). We'll match you to degrees and diplomas you meet the requirements for.</p>
 
           <div class="subject-row" id="subjectAddRow">
-            <select id="subjectSelect"><option value="">Select a subject…</option></select>
+            <div class="subject-combobox" id="subjectCombobox">
+              <input
+                type="text"
+                id="subjectSearchInput"
+                placeholder="Search subjects (e.g. Mathematics, isiZulu, Accounting)…"
+                autocomplete="off"
+                role="combobox"
+                aria-expanded="false"
+                aria-autocomplete="list"
+                aria-controls="subjectOptions"
+              />
+              <input type="hidden" id="subjectSelect" value="" />
+              <div class="subject-options" id="subjectOptions" role="listbox" hidden></div>
+            </div>
             <select id="levelSelect">
               <option value="">Level</option>
               <option value="7">7 (80–100%)</option>
@@ -169,21 +182,6 @@
               <option value="university_of_technology">University of Technology</option>
               <option value="tvet_college">TVET College</option>
               <option value="private_college">Private College</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label>Province</label>
-            <select id="provinceFilter">
-              <option value="">Any</option>
-              <option>Eastern Cape</option>
-              <option>Free State</option>
-              <option>Gauteng</option>
-              <option>KwaZulu-Natal</option>
-              <option>Limpopo</option>
-              <option>Mpumalanga</option>
-              <option>Northern Cape</option>
-              <option>North West</option>
-              <option>Western Cape</option>
             </select>
           </div>
           <button class="btn-primary" id="findMatchesBtn">Find matches</button>

@@ -6,19 +6,22 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentJobId = null;
 
   // ================= AUTH HEADER HELPER =================
-  function getAuthHeaders(extra = {}) {
-    const token = localStorage.getItem("sb-access-token");
+function getAuthHeaders(extra = {}) {
+  const token = localStorage.getItem("sb-access-token");
 
-    if (!token) {
-      window.location.href = "LogIn.html";
-      return extra;
-    }
+  console.log("Skill Gap token exists:", Boolean(token));
 
-    return {
-      ...extra,
-      Authorization: `Bearer ${token}`,
-    };
+  if (!token) {
+    throw new Error(
+      "No login token found under sb-access-token. Log in again or fix the login token storage."
+    );
   }
+
+  return {
+    ...extra,
+    Authorization: `Bearer ${token}`,
+  };
+}
 
   // ================= FETCH USER SKILLS =================
   async function fetchUserSkills() {
@@ -30,10 +33,35 @@ document.addEventListener('DOMContentLoaded', () => {
     return data.skills || [];
   }
 
+  // ================= FETCH Industries =================
+
+  async function fetchIndustries() {
+    const res = await fetch(`${API_BASE}/industries`);
+    if (!res.ok) throw new Error("Failed to load industries.");
+    const data = await res.json();
+    return data.industries || [];
+  }
+
+  async function fetchCareersForIndustry(industryId) {
+    const res = await fetch(`${API_BASE}/industries/${industryId}/careers`);
+    if (!res.ok) throw new Error("Failed to load careers.");
+    const data = await res.json();
+    return data.careers || [];
+  }
   // ================= FETCH JOBS =================
-  async function fetchJobs() {
-    const res = await fetch(`${API_BASE}/jobs`);
-    if (!res.ok) throw new Error("Failed to load jobs.");
+  
+  async function fetchJobs(queryText) {
+    const url = new URL(`${API_BASE}/jobs`);
+    if (queryText) {
+      url.searchParams.set("q", queryText);
+    }
+
+    const res = await fetch(url.toString());
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      throw new Error(errBody.error || "Failed to load jobs.");
+    }
+
     const data = await res.json();
     return data.jobs || [];
   }
@@ -70,16 +98,37 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!res.ok) throw new Error("Failed to remove skill.");
   }
 
-  // ================= RENDER: MAIN PAGE =================
+
+  //================== RENDER: HAVE SKILLS (TRUNCATED) =================
+  let fullHaveSkills = [];     // all matched skills for this career
+  let fullMissingSkills = [];  // all required skills for this career
+  
+  const ITEMS_PER_ROW_ESTIMATE = 6; // adjust based on your layout
+  const MAX_VISIBLE_ITEMS = ITEMS_PER_ROW_ESTIMATE * 5; // ~5 rows
+
   function renderHaveSkills() {
     const container = document.getElementById("haveSkills");
     container.innerHTML = "";
-    currentSkills.forEach((skill) => {
+
+    fullHaveSkills = currentSkills
+      .filter((s) => /* optionally filter to skills relevant to this career */ true)
+      .map((s) => s.name);
+
+    const visible = fullHaveSkills.slice(0, MAX_VISIBLE_ITEMS);
+
+    visible.forEach((skillName) => {
       const item = document.createElement("span");
       item.className = "skill-item";
-      item.innerHTML = `<i data-lucide="check" class="skill-icon has"></i>${skill.name}`;
+      item.innerHTML = `<i data-lucide="check" class="skill-icon has"></i>${skillName}`;
       container.appendChild(item);
     });
+
+    if (fullHaveSkills.length > MAX_VISIBLE_ITEMS) {
+      container.classList.add("truncated");
+    } else {
+      container.classList.remove("truncated");
+    }
+
     lucide.createIcons();
   }
 
@@ -90,16 +139,77 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById("haveCount").textContent = have.length;
     document.getElementById("missingCount").textContent = missing.length;
 
+    // Store full lists
+    fullHaveSkills = have;
+    fullMissingSkills = missing;
+
+    // Render visible missing skills (truncated)
     const missingContainer = document.getElementById("missingSkills");
     missingContainer.innerHTML = "";
-    missing.forEach((skill) => {
+
+    const visibleMissing = fullMissingSkills.slice(0, MAX_VISIBLE_ITEMS);
+
+    visibleMissing.forEach((skill) => {
       const item = document.createElement("span");
       item.className = "skill-item";
       item.innerHTML = `<i data-lucide="x" class="skill-icon missing"></i>${skill}`;
       missingContainer.appendChild(item);
     });
+
+    if (fullMissingSkills.length > MAX_VISIBLE_ITEMS) {
+      missingContainer.classList.add("truncated");
+    } else {
+      missingContainer.classList.remove("truncated");
+    }
+
     lucide.createIcons();
   }
+
+  //================== MODAL: VIEW ALL HAVE / MISSING SKILLS =================
+
+  const allHaveSkillsModal = document.getElementById("allHaveSkillsModal");
+  const allMissingSkillsModal = document.getElementById("allMissingSkillsModal");
+  const allHaveSkillsList = document.getElementById("allHaveSkillsList");
+  const allMissingSkillsList = document.getElementById("allMissingSkillsList");
+
+  document.getElementById("viewAllHaveLink").addEventListener("click", () => {
+    allHaveSkillsList.innerHTML = "";
+    fullHaveSkills.forEach((skill) => {
+      const pill = document.createElement("span");
+      pill.className = "modal-skill-pill matched";
+      pill.textContent = skill;
+      allHaveSkillsList.appendChild(pill);
+    });
+    allHaveSkillsModal.classList.add("open");
+  });
+
+  document.getElementById("viewAllMissingLink").addEventListener("click", () => {
+    allMissingSkillsList.innerHTML = "";
+    fullMissingSkills.forEach((skill) => {
+      const pill = document.createElement("span");
+      pill.className = "modal-skill-pill missing";
+      pill.textContent = skill;
+      allMissingSkillsList.appendChild(pill);
+    });
+    allMissingSkillsModal.classList.add("open");
+  });
+
+  // Close modal buttons
+  document.querySelectorAll("[data-close-modal]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const modalId = btn.getAttribute("data-close-modal");
+      document.getElementById(modalId).classList.remove("open");
+    });
+  });
+
+  // Close on overlay click
+  [allHaveSkillsModal, allMissingSkillsModal].forEach((modal) => {
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.classList.remove("open");
+      }
+    });
+  });
 
   async function refreshGapForCurrentJob() {
     if (!currentJobId) return;
@@ -109,6 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 // ================= MODAL =================
+
   const overlay = document.getElementById("skillsModalOverlay");
   const modalList = document.getElementById("modalSkillsList");
   const newSkillInput = document.getElementById("newSkillInput");
@@ -190,35 +301,73 @@ document.addEventListener('DOMContentLoaded', () => {
     await commitPendingSkill();
   });
 
+  function clearGapResult() {
+  document.getElementById("matchScore").textContent = "–";
+  document.getElementById("haveCount").textContent = "–";
+  document.getElementById("missingCount").textContent = "–";
+  document.getElementById("missingSkills").innerHTML = "";
+  }
+
   // ================= INITIALIZE PAGE =================
+
   async function initSkillGap() {
-    const jobSelect = document.querySelector(".job-select");
+    const industrySelect = document.getElementById("industrySelect");
+    const jobSelect = document.getElementById("jobSelect");
 
     try {
-      const [jobs, skills] = await Promise.all([
-        fetchJobs(),
+      const [industries, skills] = await Promise.all([
+        fetchIndustries(),
         fetchUserSkills(),
       ]);
 
       currentSkills = skills;
       renderHaveSkills();
 
-      jobSelect.innerHTML = "";
-      jobs.forEach((job) => {
+      // Populate industries
+      industrySelect.innerHTML = '<option value="">Select industry…</option>';
+      industries.forEach((ind) => {
         const option = document.createElement("option");
-        option.value = job.id;
-        option.textContent = job.title;
-        jobSelect.appendChild(option);
+        option.value = ind.id;
+        option.textContent = ind.label;
+        industrySelect.appendChild(option);
       });
 
-      if (jobs.length > 0) {
-        currentJobId = jobs[0].id;
-        await refreshGapForCurrentJob();
-      }
+      // When industry changes, load careers
+      industrySelect.addEventListener("change", async () => {
+        const indId = industrySelect.value;
+        jobSelect.innerHTML = '<option value="">Select career…</option>';
+        jobSelect.disabled = !indId;
 
+        if (!indId) {
+          currentJobId = null;
+          clearGapResult();
+          return;
+        }
+
+        const careers = await fetchCareersForIndustry(indId);
+        careers.forEach((career) => {
+          const option = document.createElement("option");
+          option.value = career.jobId;
+          option.textContent = career.title;
+          jobSelect.appendChild(option);
+        });
+
+        // Optionally auto-select first career
+        if (careers.length > 0) {
+          jobSelect.value = careers[0].jobId;
+          currentJobId = careers[0].jobId;
+          await refreshGapForCurrentJob();
+        }
+      });
+
+      // When career changes, recompute gap
       jobSelect.addEventListener("change", async () => {
-        currentJobId = parseInt(jobSelect.value, 10);
-        await refreshGapForCurrentJob();
+        currentJobId = jobSelect.value;
+        if (currentJobId) {
+          await refreshGapForCurrentJob();
+        } else {
+          clearGapResult();
+        }
       });
 
     } catch (err) {

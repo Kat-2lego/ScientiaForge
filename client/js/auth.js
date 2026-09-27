@@ -79,7 +79,7 @@ async function revealAdminLinksIfAdmin() {
 
     const { isAdmin } = await res.json();
     if (isAdmin) {
-      adminLinks.forEach((el) => el.removeAttribute("hidden"));
+      adminLinks.forEach((el) => { el.style.display = ""; });
     }
   } catch (err) {
     // Leave the admin link hidden on failure.

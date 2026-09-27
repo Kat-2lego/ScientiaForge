@@ -123,6 +123,74 @@
   padding: 0;
 }
 
+/* ---------- Searchable subject picker ---------- */
+
+.subject-combobox {
+  position: relative;
+  flex: 1;
+  min-width: 160px;
+}
+
+.subject-combobox input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-main);
+  font-size: 14px;
+  color: var(--text-main);
+}
+
+.subject-combobox input[type="text"]:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.subject-options {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 260px;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  z-index: 20;
+}
+
+.subject-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.subject-option:hover,
+.subject-option.highlighted {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.subject-option-category {
+  font-size: 11px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.subject-option-empty {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
 /* ---------- Filters ---------- */
 
 .cp-filters {
@@ -204,6 +272,14 @@
   color: var(--text-muted);
 }
 
+.programme-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
 .status-badge {
   padding: 6px 12px;
   border-radius: 999px;
@@ -218,6 +294,24 @@
 }
 
 .status-badge.not-qualifies {
+  background: var(--orange-light);
+  color: var(--orange);
+}
+
+.aps-badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.aps-badge.met {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.aps-badge.unmet {
   background: var(--orange-light);
   color: var(--orange);
 }
@@ -282,10 +376,22 @@
   gap: 12px;
 }
 
+.bursary-group-heading {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 4px 0 10px;
+}
+
 .bursary-item {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
+}
+
+.bursary-item.urgent {
+  border-color: #fecaca;
+  border-left: 4px solid #dc2626;
 }
 
 .bursary-summary {
@@ -320,6 +426,61 @@
 
 .bursary-item.open .bursary-summary i {
   transform: rotate(180deg);
+}
+
+.bursary-summary-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.bursary-status {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-open {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-soon {
+  background: #fef9c3;
+  color: #a16207;
+}
+
+.status-closed {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.bursary-urgent {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.bursary-match-tag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-top: 4px;
+}
+
+.bursary-match-tag i {
+  width: 12px;
+  height: 12px;
 }
 
 .bursary-details {

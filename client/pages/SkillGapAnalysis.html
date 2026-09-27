@@ -131,10 +131,17 @@
           <p>Compare your current skills with job requirements</p>
         </div>
 
-        <select class="job-select">
-          <!-- options populated by JS -->
-        </select>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <select class="industry-select" id="industrySelect" aria-label="Select industry">
+            <option value="">Select industry…</option>
+            <!-- populated by JS -->
+          </select>
 
+          <select class="job-select" id="jobSelect" aria-label="Select career" disabled>
+            <option value="">Select career…</option>
+            <!-- populated by JS -->
+          </select>
+        </div>
       </div>
 
       <!-- METRICS -->
@@ -174,17 +181,38 @@
 
         <div class="skill-box">
           <div class="skill-box-header">
-            <h2 class="good"><i data-lucide="check-circle-2" style="color: #28a745;"></i> Your Skills</h2>
-            <button id="editSkillsBtn" class="edit-skills-btn" type="button" style="background-color: #90c4f9; color: rgb(0, 0, 0);  padding: 5px 5px; border-radius: 4px; cursor: pointer;">
-              <i data-lucide="plus" style="color: #003671; width: 16px; height: 16px;"></i> Edit 
+            <h2 class="good">
+              <i data-lucide="check-circle-2" style="color: #28a745;"></i>
+              Your Skills
+            </h2>
+            <button id="editSkillsBtn" class="edit-skills-btn" type="button">
+              <i data-lucide="plus" style="color: #003671; width: 16px; height: 16px;"></i>
+              Edit
             </button>
           </div>
-          <div class="skill-list" id="haveSkills"><!-- populated by JS --></div>
+
+          <div class="skill-list" id="haveSkills">
+            <!-- populated by JS -->
+          </div>
+
+          <div class="view-all-link" id="viewAllHaveLink">
+            View all your skills
+          </div>
         </div>
 
         <div class="skill-box">
-          <h2 class="missing"><i data-lucide="x-circle" style="color: #dc3545;"></i> Missing Skills</h2>
-          <div class="skill-list" id="missingSkills"><!-- populated by JS --></div>
+          <h2 class="missing">
+            <i data-lucide="x-circle" style="color: #dc3545;"></i>
+            Missing Skills
+          </h2>
+
+          <div class="skill-list" id="missingSkills">
+            <!-- populated by JS -->
+          </div>
+
+          <div class="view-all-link" id="viewAllMissingLink">
+            View all missing skills
+          </div>
         </div>
 
       </div>
@@ -256,6 +284,37 @@
     </div>
   </div>
 </div>
+
+<!-- Modal: All Your Skills -->
+<div class="modal-overlay" id="allHaveSkillsModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>All Your Skills for This Career</h3>
+      <button class="modal-close-btn" data-close-modal="allHaveSkillsModal" type="button">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-skill-list" id="allHaveSkillsList">
+        <!-- populated by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: All Missing Skills -->
+<div class="modal-overlay" id="allMissingSkillsModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>All Required Skills You’re Missing</h3>
+      <button class="modal-close-btn" data-close-modal="allMissingSkillsModal" type="button">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-skill-list" id="allMissingSkillsList">
+        <!-- populated by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>
 lucide.createIcons();

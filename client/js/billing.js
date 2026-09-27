@@ -6,6 +6,36 @@ document.addEventListener('DOMContentLoaded', () => {
     loadBillingData();
 });
 
+// Auto-renewal toggle
+document.getElementById('autoRenewal')?.addEventListener('change', async (e) => {
+    const newValue = e.target.checked;
+    const token = localStorage.getItem('sb-access-token');
+
+    try {
+        const response = await fetch('/api/billing/auto-renew', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ autoRenew: newValue }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            // Revert the toggle visually since the change didn't actually save
+            e.target.checked = !newValue;
+            alert(data.error || 'Failed to update auto-renewal setting.');
+            return;
+        }
+    } catch (error) {
+        console.error('Error updating auto-renewal:', error);
+        e.target.checked = !newValue;
+        alert('Failed to update auto-renewal setting. Please try again.');
+    }
+});
+
 // ---- Plan catalog: single source of truth for plan card content ----
 // Keep this in sync with what plan_type values exist in the DB.
 const PLAN_CATALOG = {
@@ -270,9 +300,14 @@ function updateBillingDetails(details) {
     document.getElementById('billingCountry').value = details.country || 'ZA';
     document.getElementById('billingPostal').value = details.postalCode || '';
 
+    // Reflect the actual saved auto-renew state, not the HTML default
+    const autoRenewToggle = document.getElementById('autoRenewal');
+    if (autoRenewToggle) {
+        autoRenewToggle.checked = Boolean(details.autoRenew);
+    }
+
     updatePaymentMethods(details.paymentMethods);
 
-    // Reflect the primary card on the overview card too.
     const overviewPaymentMethod = document.getElementById('paymentMethod');
     if (overviewPaymentMethod) {
         const primary = details.paymentMethods?.[0];
