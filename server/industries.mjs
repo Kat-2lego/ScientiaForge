@@ -163,30 +163,30 @@ export const INDUSTRIES = [
       // ...
     ],
   },
-  {
-    id: "construction",
-    label: "Construction & Trades",
-    careers: [
-      { title: "Building Construction Worker", escoUri: "http://data.europa.eu/esco/occupation/fb7e2f4f-1545-42f1-972e-94082e49c6dc" },
-      { title: "Domestic Electrician", escoUri: "http://data.europa.eu/esco/occupation/5dbb9cf0-b226-402c-a295-2f42ef05ff8b" },
-      { title: "Plumber", escoUri: "http://data.europa.eu/esco/occupation/ed3cf43d-c2c1-4c46-82fc-1375e27e0290" },
+  // {
+  //   id: "construction",
+  //   label: "Construction & Trades",
+  //   careers: [
+  //     { title: "Building Construction Worker", escoUri: "http://data.europa.eu/esco/occupation/fb7e2f4f-1545-42f1-972e-94082e49c6dc" },
+  //     { title: "Domestic Electrician", escoUri: "http://data.europa.eu/esco/occupation/5dbb9cf0-b226-402c-a295-2f42ef05ff8b" },
+  //     { title: "Plumber", escoUri: "http://data.europa.eu/esco/occupation/ed3cf43d-c2c1-4c46-82fc-1375e27e0290" },
 
-      { title: "Carpenter", escoUri: "http://data.europa.eu/esco/occupation/2a22ff9e-de3b-408d-b312-5034896cc4f4" },
-      { title: "Bricklayer", escoUri: "http://data.europa.eu/esco/occupation/05f321f8-055b-407d-bf19-e0ddabda56b7" },
-      { title: "Welder", escoUri: "http://data.europa.eu/esco/occupation/7aedaa07-3884-4c5b-88f9-80997b2aa54b" },
+  //     //{ title: "Carpenter", escoUri: "http://data.europa.eu/esco/occupation/2a22ff9e-de3b-408d-b312-5034896cc4f4" },
+  //     //{ title: "Bricklayer", escoUri: "http://data.europa.eu/esco/occupation/05f321f8-055b-407d-bf19-e0ddabda56b7" },
+  //     //{ title: "Welder", escoUri: "http://data.europa.eu/esco/occupation/7aedaa07-3884-4c5b-88f9-80997b2aa54b" },
 
-      { title: "Construction Safety Manager", escoUri: "http://data.europa.eu/esco/occupation/3f54ceba-3c4e-4ba1-8ddb-9e49a881a60a" },
-      { title: "Construction Painter", escoUri: "http://data.europa.eu/esco/occupation/15620506-fb5d-49cd-87a2-1c9047fb406a" },
-      { title: "Roofer", escoUri: "http://data.europa.eu/esco/occupation/b4c6d1b0-929e-48be-9f67-47bd8c30658b" },
+  //     { title: "Construction Safety Manager", escoUri: "http://data.europa.eu/esco/occupation/3f54ceba-3c4e-4ba1-8ddb-9e49a881a60a" },
+  //     { title: "Construction Painter", escoUri: "http://data.europa.eu/esco/occupation/15620506-fb5d-49cd-87a2-1c9047fb406a" },
+  //     //{ title: "Roofer", escoUri: "http://data.europa.eu/esco/occupation/b4c6d1b0-929e-48be-9f67-47bd8c30658b" },
       
-      { title: "Construction Scaffolding Supervisor", escoUri: "http://data.europa.eu/esco/occupation/2ea3070e-3d0b-4de6-b5bd-fe4a04649b04" },
-      { title: "Construction Equipment Technician", escoUri: "http://data.europa.eu/esco/occupation/b0480558-269d-4903-9bc7-f390cd6a6964" },
-      { title: "Tile Fitter", escoUri: "http://data.europa.eu/esco/occupation/02447817-ea01-4d8b-b09c-8bc128e447e6" },
+  //     { title: "Construction Scaffolding Supervisor", escoUri: "http://data.europa.eu/esco/occupation/2ea3070e-3d0b-4de6-b5bd-fe4a04649b04" },
+  //     { title: "Construction Equipment Technician", escoUri: "http://data.europa.eu/esco/occupation/b0480558-269d-4903-9bc7-f390cd6a6964" },
+  //     { title: "Tile Fitter", escoUri: "http://data.europa.eu/esco/occupation/02447817-ea01-4d8b-b09c-8bc128e447e6" },
  
 
-      // ...
-    ],
-  },
+  //     // ...
+  //   ],
+  // },
   {
     id: "agriculture",
     label: "Agriculture & Farming",
@@ -219,7 +219,7 @@ export const INDUSTRIES = [
       { title: "Chef", escoUri: "http://data.europa.eu/esco/occupation/90f75f67-495d-49fa-ab57-2f320e251d7e" },
       { title: "Tour Guide", escoUri: "http://data.europa.eu/esco/occupation/b476f45f-2c79-44d5-a4d7-fa357aa83074" },
 
-      { title: "Bartender", escoUri: "http://data.europa.eu/esco/occupation/2f5e38a0-6578-4665-bdbd-e2ab505be140" },
+      //{ title: "Bartender", escoUri: "http://data.europa.eu/esco/occupation/2f5e38a0-6578-4665-bdbd-e2ab505be140" },
       { title: "Housekeeping Supervisor", escoUri: "http://data.europa.eu/esco/occupation/fae51298-03a8-4df4-829a-685dddc1580e" },
       { title: "Travel Agent", escoUri: "http://data.europa.eu/esco/occupation/79f8f68c-5509-4119-9373-8bef1c364d31" },
      
@@ -228,8 +228,8 @@ export const INDUSTRIES = [
       { title: "Hospitality Establishment Receptionist", escoUri: "http://data.europa.eu/esco/occupation/82025c02-9082-416c-998b-f51eb0359ee6" },
       
       { title: "Tour Organiser", escoUri: "http://data.europa.eu/esco/occupation/5b9a678a-7c35-4c50-a804-754b82652ee6" },
-      { title: "Sommelier", escoUri: "http://data.europa.eu/esco/occupation/499f80e3-860c-48ef-8286-be929a93e254" },
-      { title: "Waiter/Waitress", escoUri: "http://data.europa.eu/esco/occupation/d5db9d5c-2ebf-4a54-a79a-1b7e7ff70471" },
+      //{ title: "Sommelier", escoUri: "http://data.europa.eu/esco/occupation/499f80e3-860c-48ef-8286-be929a93e254" },
+     // { title: "Waiter/Waitress", escoUri: "http://data.europa.eu/esco/occupation/d5db9d5c-2ebf-4a54-a79a-1b7e7ff70471" },
 
       // ...
     ],
