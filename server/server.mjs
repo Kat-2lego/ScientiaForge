@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import { createClient } from "@supabase/supabase-js";
 import Groq from "groq-sdk";
+import Stripe from "stripe";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -88,6 +89,10 @@ console.log(
 console.log(
   "✅ Groq API key loaded:",
   GROQ_API_KEY ? "Yes" : "No"
+);
+console.log(
+  "✅ Stripe secret key loaded:",
+  process.env.STRIPE_SECRET_KEY ? "Yes" : "No"
 );
 
 /* =========================================================
@@ -260,6 +265,19 @@ async function callGroq(
     "Groq request failed."
   );
 }
+
+/* =========================================================
+   STRIPE CONFIGURATION
+   (must exist before the /webhook route below uses it)
+========================================================= */
+
+if (!process.env.STRIPE_SECRET_KEY) {
+  console.error(
+    "❌ Missing STRIPE_SECRET_KEY in server/.env — Stripe routes will fail."
+  );
+}
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 /* =========================================================
    MIDDLEWARE
@@ -1337,6 +1355,35 @@ async function requireAuth(req, res, next) {
 }
 
 /* =========================================================
+   PREMIUM ACCESS CHECK
+   Gate any premium-only route with: requireAuth, requirePremium
+========================================================= */
+
+async function requirePremium(req, res, next) {
+  const { data, error } = await databaseClient
+    .from('user_subscriptions')
+    .select('status, end_date')
+    .eq('user_id', req.userId)
+    .eq('status', 'active')
+    .maybeSingle();
+
+  if (error) {
+    console.error('Premium check failed:', error);
+    return res.status(500).json({ error: 'Could not verify subscription status.' });
+  }
+
+  if (!data) {
+    return res.status(403).json({ error: 'This feature requires a premium subscription.' });
+  }
+
+  if (data.end_date && new Date(data.end_date) < new Date()) {
+    return res.status(403).json({ error: 'Your subscription has expired.' });
+  }
+
+  next();
+}
+
+/* =========================================================
    SCORE SCALING HELPER
    The interview AI evaluates on a 1-10 scale; every other score in the
    schema (CV scores, skill-gap readiness) is 0-100. Converts the former
@@ -1350,13 +1397,101 @@ function toHundredScale(scoreOutOfTen) {
 }
 
 /* =========================================================
-   AUDIT LOG HELPER
-   Wraps the insert_audit_log() SECURITY DEFINER function from the
-   schema. Best-effort — a logging failure should never break the
-   actual request.
+   STRIPE PAYMENT
 ========================================================= */
 
+const PRODUCTS = {
+  premium: {
+    amount: Number(process.env.PREMIUM_AMOUNT),
+    currency: 'zar',
+    label: 'Premium Plan',
+  },
+};
 
+app.post('/create-payment-intent', requireAuth, async (req, res) => {
+  try {
+    const { productId, autoRenew } = req.body;
+
+    if (!productId || typeof productId !== 'string') {
+      return res.status(400).json({ error: 'A valid productId is required' });
+    }
+
+    const product = PRODUCTS[productId];
+
+    if (!product) {
+      return res.status(400).json({ error: 'Unknown product' });
+    }
+
+    if (!product.amount || product.amount <= 0) {
+      console.error(`Invalid amount configured for product "${productId}"`);
+      return res.status(500).json({ error: 'Product is misconfigured, please contact support' });
+    }
+
+    // Get or create a Stripe Customer for this user, so we have somewhere
+    // to attach a saved payment method for future auto-renew charges.
+    const { data: userRow, error: userFetchError } = await databaseClient
+      .from('users')
+      .select('stripe_customer_id, email')
+      .eq('id', req.userId)
+      .single();
+
+    if (userFetchError) {
+      console.error('Failed to fetch user for Stripe customer lookup:', userFetchError);
+      return res.status(500).json({ error: 'Something went wrong creating the payment' });
+    }
+
+    let customerId = userRow?.stripe_customer_id;
+
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: userRow?.email,
+        metadata: { userId: req.userId },
+      });
+
+      customerId = customer.id;
+
+      const { error: userUpdateError } = await databaseClient
+        .from('users')
+        .update({ stripe_customer_id: customerId })
+        .eq('id', req.userId);
+
+      if (userUpdateError) {
+        // Not fatal — the customer still exists on Stripe's side, we just
+        // failed to cache the ID. Log it so it can be reconciled later.
+        console.error('Failed to save stripe_customer_id:', userUpdateError);
+      }
+    }
+
+    const paymentIntentParams = {
+      amount: product.amount,
+      currency: product.currency,
+      customer: customerId,
+      automatic_payment_methods: { enabled: true },
+      metadata: {
+        productId,
+        userId: req.userId,
+        autoRenew: autoRenew ? 'true' : 'false',
+      },
+    };
+
+    // Only ask Stripe to save the payment method if the user opted into
+    // auto-renew — no reason to store a card for someone who didn't ask for it.
+    if (autoRenew) {
+      paymentIntentParams.setup_future_usage = 'off_session';
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create(paymentIntentParams);
+
+    res.json({
+      clientSecret: paymentIntent.client_secret,
+      amount: product.amount,
+      currency: product.currency,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Something went wrong creating the payment' });
+  }
+});
 
 /* =========================================================
    AUTO RENEW PAYMENT
@@ -1410,6 +1545,99 @@ app.post('/api/billing/auto-renew', requireAuth, async (req, res) => {
 
 /* =========================================================
    BILLING: GET BILLING DATA
+========================================================= */
+
+// Maps the DB's account_plan enum values to the plan keys the billing
+// UI already renders (Billing.html's data-plan="free" / data-plan="premium").
+// Update this map — not the frontend — if the enum grows more tiers.
+const PLAN_TYPE_MAP = {
+  standard: 'free',
+  premium: 'premium',
+};
+
+app.get('/api/billing/data', requireAuth, async (req, res) => {
+  try {
+    // 1. Current plan — plan_type lives on public.users
+    const { data: userRow, error: userError } = await databaseClient
+      .from('users')
+      .select('plan_type')
+      .eq('id', req.userId)
+      .single();
+
+    if (userError || !userRow) {
+      console.error('❌ Error fetching user plan_type:', userError);
+      return res.status(500).json({ error: 'Failed to load billing data.' });
+    }
+
+    const planType = PLAN_TYPE_MAP[userRow.plan_type] || 'free';
+
+    // 2. Active subscription — used for the "next billing date" field
+    const { data: subscription, error: subError } = await databaseClient
+      .from('user_subscriptions')
+      .select('status, end_date')
+      .eq('user_id', req.userId)
+      .eq('status', 'active')
+      .maybeSingle();
+
+    if (subError) {
+      console.warn('⚠️ Could not load subscription:', subError.message);
+    }
+
+    // 3. Payment history
+    const { data: payments, error: paymentsError } = await databaseClient
+      .from('payments')
+      .select('provider_ref, amount_zar, currency, status, paid_at')
+      .eq('user_id', req.userId)
+      .order('paid_at', { ascending: false });
+
+    if (paymentsError) {
+      console.warn('⚠️ Could not load payment history:', paymentsError.message);
+    }
+
+    const paymentHistory = (payments || [])
+      .filter((payment) => payment.paid_at) // skip rows with no paid_at (e.g. failed attempts)
+      .map((payment) => ({
+        date: payment.paid_at,
+        description: planType === 'premium' ? 'Premium Plan - Monthly' : 'Plan payment',
+        // Stripe amounts are stored in the smallest currency unit (cents).
+        amount: (payment.amount_zar || 0) / 100,
+        status: payment.status === 'succeeded' ? 'paid' : payment.status,
+        invoiceId: payment.provider_ref,
+      }));
+
+    // 4. Billing details — there's no billing_details table yet, so this
+    // is populated from the authenticated Supabase user for now.
+    const rawToken = req.headers.authorization.replace('Bearer ', '').trim();
+    const { data: { user: authUser } } = await supabase.auth.getUser(rawToken);
+
+    return res.status(200).json({
+      currentPlan: {
+        type: planType,
+        nextBillingDate: subscription?.end_date || null,
+      },
+      paymentHistory,
+      billingDetails: {
+        email: authUser?.email || null,
+        name: authUser?.user_metadata?.first_name
+          ? `${authUser.user_metadata.first_name} ${authUser.user_metadata.last_name || ''}`.trim()
+          : null,
+        company: null,
+        country: null,
+        postalCode: null,
+        // No card details are stored yet (no payment_methods table, and
+        // the Stripe webhook doesn't persist a customer/payment-method
+        // ID). Wire this up once that data exists — until then the
+        // frontend correctly shows "Not added".
+        paymentMethods: [],
+      },
+    });
+  } catch (error) {
+    console.error('❌ /api/billing/data error:', error.message);
+    return res.status(500).json({ error: 'An internal server error occurred.' });
+  }
+});
+
+/* =========================================================
    JOB ROLE RESOLUTION HELPER
    Shared by the interview simulator, CV analyzer, and skill gap
    endpoints. The frontend only ever sends a free-text role title
@@ -1869,35 +2097,6 @@ app.post("/api/skillgap", async (req, res) => {
       details: error.message,
     });
   }
-
-  const userSkillsNormalized = new Set(
-    userSkillNames.map((s) => s.trim().toLowerCase())
-  );
-
-  const have = job.requiredSkills.filter((skill) =>
-    userSkillsNormalized.has(skill.toLowerCase())
-  );
-
-  const missing = job.requiredSkills.filter(
-    (skill) => !userSkillsNormalized.has(skill.toLowerCase())
-  );
-
-  const matchScore = job.requiredSkills.length
-    ? Math.round((have.length / job.requiredSkills.length) * 100)
-    : 0;
-
-  logAudit(req.userId, "skillgap_run", {
-    entity: "job_role",
-    entityId: job.id,
-    desc: `Skill-gap analysis run against "${job.title || job.id}"`,
-    req,
-  });
-
-  logFeatureEvent(req.userId, "skill_gap", "completed", {
-    metadata: { jobId: job.id, jobTitle: job.title, matchScore },
-  });
-
-  return res.status(200).json({ have, missing, matchScore });
 });
 
 /* =========================================================
@@ -2137,10 +2336,6 @@ function clampTargetQuestionCount(count) {
    QUESTION GENERATION (shared by start + on-demand top-up)
 ========================================================= */
 
-// Question objects now carry richer metadata so the frontend can:
-//  - show a suggested time budget (quant/engineering questions get longer)
-//  - render a plain-text diagram / given-data block for problems that need one
-//  - show a "final numeric answer" field when a specific number is expected
 function buildQuestionBatchPrompt(persona, job_role_id, question_type, { count, isOpening }) {
   const base = buildPersonaPrompt(persona, job_role_id, question_type);
 
@@ -2233,8 +2428,6 @@ async function generateQuestionBatch(persona, job_role_id, question_type, { coun
   return null;
 }
 
-// Internal safety cap — prevents runaway generation even for "no limit"
-// sessions if a client keeps requesting new questions indefinitely.
 const MAX_QUESTIONS_PER_SESSION = 200;
 
 /* =========================================================
@@ -2253,12 +2446,6 @@ app.post(
       question_count,
     } = req.body;
 
-    // The authenticated user is the source of truth for user_id — not
-    // whatever the client sends. Previously this came from a
-    // localStorage key ("skillforge_user_id") that was never actually
-    // set anywhere in the frontend, so every session was silently being
-    // attributed to the literal string "guest_user", which isn't a
-    // valid UUID and would fail the FK constraint on insert.
     const user_id = req.userId;
 
     if (
@@ -2298,10 +2485,6 @@ app.post(
         diagram: typeof q.diagram === "string" && q.diagram.trim() ? q.diagram : null,
       }));
 
-      // A real UUID now, not a human-readable "sess_..." string — the
-      // interview_sessions.id column is typed uuid, and the mismatch
-      // between the two was the exact cause of the
-      // "invalid input syntax for type uuid" errors.
       const sessionId = crypto.randomUUID();
 
       sessions.set(
@@ -2336,10 +2519,6 @@ app.post(
         }
       );
 
-      /*
-        Save the session to Supabase.
-        Failure does not stop the interview.
-      */
       try {
         const {
           error: insertError,
@@ -2450,8 +2629,6 @@ app.post(
     }
 
     if (session.questions.length >= MAX_QUESTIONS_PER_SESSION) {
-      // Extremely unlikely in practice at 5-30 min, but guards against a
-      // stuck client hammering this endpoint indefinitely.
       return res.status(200).json({
         question: session.questions[session.questions.length - 1],
       });
@@ -2659,10 +2836,6 @@ Every score must be a whole number from 1 to 10.
         evaluation,
       });
 
-      // Persist this Q&A to interview_responses — previously this data was
-      // generated, shown to the candidate once, and then thrown away
-      // entirely. Scores are stored on a 0-100 scale (score * 10) to match
-      // every other score column in the schema.
       try {
         const { error: responseInsertError } = await databaseClient
           .from("interview_responses")
@@ -2903,10 +3076,6 @@ Return only a valid JSON array of strings.
         })
       );
 
-    /*
-      Update the database session.
-      Failure does not block the final result.
-    */
     try {
       const {
         error: updateError,
@@ -2928,10 +3097,6 @@ Return only a valid JSON array of strings.
               new Date()
                 .toISOString(),
 
-            // Scaled to 0-100 — see toHundredScale. This UPDATE is what
-            // fires trg_snapshot_on_interview, which copies avg_score into
-            // progress_snapshots alongside cv_score/readiness_score, all
-            // on the same 0-100 scale.
             avg_score: toHundredScale(overallScore),
 
             overall_score: toHundredScale(overallScore),
@@ -3047,93 +3212,3 @@ app.listen(
     );
   }
 );
-/* =========================================================
-   AUTH: DELETE ACCOUNT
-========================================================= */
-
-app.post("/api/delete-account", async (req, res) => {
-  console.log("DELETE ACCOUNT HIT");
-
-  try {
-    if (!supabaseAdmin) {
-      return res.status(500).json({
-        error: "Server not configured for account deletion",
-      });
-    }
-
-    const authHeader = req.headers.authorization;
-
-    if (
-      typeof authHeader !== "string" ||
-      !authHeader.startsWith("Bearer ")
-    ) {
-      return res.status(401).json({
-        error: "Authorization token missing",
-      });
-    }
-
-    const token = authHeader.slice("Bearer ".length).trim();
-
-    if (!token) {
-      return res.status(401).json({
-        error: "Authorization token missing",
-      });
-    }
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabaseAdmin.auth.getUser(token);
-
-    if (userError || !user) {
-      console.error("Token verification failed:", userError);
-
-      return res.status(401).json({
-        error: "Invalid or expired token",
-      });
-    }
-
-    const userId = user.id;
-    // Delete user via admin client
-    const { error: deleteError } =
-      await supabaseAdmin.auth.admin.deleteUser(userId);
-
-    if (deleteError) {
-      console.error("Supabase delete error:", deleteError);
-
-      return res.status(500).json({
-        error: "Failed to delete account",
-      });
-    }
-
-    return res.json({
-      ok: true,
-      message: "Account deleted successfully",
-    });
-  } catch (err) {
-    console.error("Delete account error:", err);
-
-    return res.status(500).json({
-      error: "Internal server error",
-    });
-  }
-});
-
-
-app.get("/api/esco/occupations", async (req, res) => {
-  try {
-    const q =
-      typeof req.query.q === "string" && req.query.q.trim()
-        ? req.query.q.trim()
-        : "software developer";
-
-    const occupations = await searchEscoOccupations(q);
-
-    return res.json({ occupations });
-  } catch (error) {
-    console.error("❌ ESCO occupation search error:", error);
-    return res.status(500).json({
-      error: "Could not search ESCO occupations",
-    });
-  }
-});
