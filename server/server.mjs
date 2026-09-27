@@ -168,10 +168,10 @@ const supabase = createClient(
 const supabaseAdmin =
   SUPABASE_SERVICE_ROLE_KEY
     ? createClient(
-        SUPABASE_URL,
-        SUPABASE_SERVICE_ROLE_KEY,
-        supabaseOptions
-      )
+      SUPABASE_URL,
+      SUPABASE_SERVICE_ROLE_KEY,
+      supabaseOptions
+    )
     : null;
 
 /*
@@ -187,8 +187,8 @@ const databaseClient =
 
 const groq = GROQ_API_KEY
   ? new Groq({
-      apiKey: GROQ_API_KEY,
-    })
+    apiKey: GROQ_API_KEY,
+  })
   : null;
 
 async function callGroq(
@@ -245,8 +245,7 @@ async function callGroq(
       }
 
       console.warn(
-        `Groq attempt ${
-          attempt + 1
+        `Groq attempt ${attempt + 1
         } failed. Retrying...`
       );
 
@@ -301,6 +300,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
     case 'payment_intent.succeeded': {
       const userId = intent.metadata.userId;
       const productId = intent.metadata.productId;
+      const autoRenew = intent.metadata.autoRenew === 'true';
 
       // 1. Look up the plan in subscription_plans so we know how long it lasts
       const { data: plan, error: planError } = await databaseClient
@@ -325,10 +325,10 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
         .update({ plan_type: planType })
         .eq('id', userId);
 
-        if (userError) {
-          console.error('Failed to update user plan_type:', userError);
-          break;
-        }
+      if (userError) {
+        console.error('Failed to update user plan_type:', userError);
+        break;
+      }
 
       // 2. Create or reactivate the user's subscription
       const { data: subscription, error: subError } = await databaseClient
@@ -339,6 +339,13 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
           status: 'active',
           start_date: new Date().toISOString(),
           end_date: endDate,
+          auto_renew: autoRenew,
+          // Only overwrite the saved payment method if this charge actually
+          // saved one (off-session future use) — otherwise leave whatever
+          // was saved previously untouched.
+          ...(autoRenew && intent.payment_method
+            ? { stripe_payment_method_id: intent.payment_method }
+            : {}),
         }, { onConflict: 'user_id' })
         .select()
         .single();
@@ -620,19 +627,19 @@ app.post("/api/auth/signup", async (req, res) => {
   const rolesTargeted =
     Array.isArray(req.body.rolesTargeted)
       ? req.body.rolesTargeted
-          .map((role) =>
-            typeof role === "string" ? role.trim() : ""
-          )
-          .filter(Boolean)
+        .map((role) =>
+          typeof role === "string" ? role.trim() : ""
+        )
+        .filter(Boolean)
       : [];
 
   const skillsInterests =
     Array.isArray(req.body.skillsInterests)
       ? req.body.skillsInterests
-          .map((skill) =>
-            typeof skill === "string" ? skill.trim() : ""
-          )
-          .filter(Boolean)
+        .map((skill) =>
+          typeof skill === "string" ? skill.trim() : ""
+        )
+        .filter(Boolean)
       : [];
 
   if (
@@ -676,17 +683,17 @@ app.post("/api/auth/signup", async (req, res) => {
     // Table users upsert
 
     const { error: usersInsertError } =
-    await databaseClient.from("users").upsert(
-      {
-        id: userId,
-        email,
-        role: "job_seeker",
-        auth_provider: "email",
-        plan_type: "standard",
-        is_active: true,
-      },
-      { onConflict: "id" }
-    );
+      await databaseClient.from("users").upsert(
+        {
+          id: userId,
+          email,
+          role: "job_seeker",
+          auth_provider: "email",
+          plan_type: "standard",
+          is_active: true,
+        },
+        { onConflict: "id" }
+      );
 
     if (usersInsertError) {
       console.error(
@@ -1042,13 +1049,13 @@ app.patch(
   async (req, res) => {
     const accessToken =
       typeof req.body.access_token ===
-      "string"
+        "string"
         ? req.body.access_token.trim()
         : "";
 
     const newPassword =
       typeof req.body.new_password ===
-      "string"
+        "string"
         ? req.body.new_password
         : "";
 
@@ -1217,7 +1224,7 @@ const PRODUCTS = {
 
 app.post('/create-payment-intent', requireAuth, async (req, res) => {
   try {
-    const { productId } = req.body;
+    const { productId, autoRenew } = req.body;
 
     if (!productId || typeof productId !== 'string') {
       return res.status(400).json({ error: 'A valid productId is required' });
@@ -1234,15 +1241,60 @@ app.post('/create-payment-intent', requireAuth, async (req, res) => {
       return res.status(500).json({ error: 'Product is misconfigured, please contact support' });
     }
 
-    const paymentIntent = await stripe.paymentIntents.create({
+    // Get or create a Stripe Customer for this user, so we have somewhere
+    // to attach a saved payment method for future auto-renew charges.
+    const { data: userRow, error: userFetchError } = await databaseClient
+      .from('users')
+      .select('stripe_customer_id, email')
+      .eq('id', req.userId)
+      .single();
+
+    if (userFetchError) {
+      console.error('Failed to fetch user for Stripe customer lookup:', userFetchError);
+      return res.status(500).json({ error: 'Something went wrong creating the payment' });
+    }
+
+    let customerId = userRow?.stripe_customer_id;
+
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: userRow?.email,
+        metadata: { userId: req.userId },
+      });
+
+      customerId = customer.id;
+
+      const { error: userUpdateError } = await databaseClient
+        .from('users')
+        .update({ stripe_customer_id: customerId })
+        .eq('id', req.userId);
+
+      if (userUpdateError) {
+        // Not fatal — the customer still exists on Stripe's side, we just
+        // failed to cache the ID. Log it so it can be reconciled later.
+        console.error('Failed to save stripe_customer_id:', userUpdateError);
+      }
+    }
+
+    const paymentIntentParams = {
       amount: product.amount,
       currency: product.currency,
+      customer: customerId,
       automatic_payment_methods: { enabled: true },
       metadata: {
         productId,
-        userId: req.userId, // set by requireAuth above
+        userId: req.userId,
+        autoRenew: autoRenew ? 'true' : 'false',
       },
-    });
+    };
+
+    // Only ask Stripe to save the payment method if the user opted into
+    // auto-renew — no reason to store a card for someone who didn't ask for it.
+    if (autoRenew) {
+      paymentIntentParams.setup_future_usage = 'off_session';
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create(paymentIntentParams);
 
     res.json({
       clientSecret: paymentIntent.client_secret,
@@ -1252,6 +1304,56 @@ app.post('/create-payment-intent', requireAuth, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Something went wrong creating the payment' });
+  }
+});
+
+/* =========================================================
+   AUTO RENEW PAYMENT
+========================================================= */
+
+app.post('/api/billing/auto-renew', requireAuth, async (req, res) => {
+  try {
+    const { autoRenew } = req.body;
+
+    if (typeof autoRenew !== 'boolean') {
+      return res.status(400).json({ error: 'autoRenew must be true or false' });
+    }
+
+    // Can't turn ON auto-renew if there's no saved card to charge later —
+    // that only gets saved when a payment was made with autoRenew: true.
+    if (autoRenew) {
+      const { data: subscription, error: fetchError } = await databaseClient
+        .from('user_subscriptions')
+        .select('stripe_payment_method_id')
+        .eq('user_id', req.userId)
+        .single();
+
+      if (fetchError) {
+        console.error('Failed to check saved payment method:', fetchError);
+        return res.status(500).json({ error: 'Something went wrong updating auto-renewal' });
+      }
+
+      if (!subscription?.stripe_payment_method_id) {
+        return res.status(400).json({
+          error: 'No saved payment method on file. Please add a payment method before enabling auto-renewal.',
+        });
+      }
+    }
+
+    const { error: updateError } = await databaseClient
+      .from('user_subscriptions')
+      .update({ auto_renew: autoRenew })
+      .eq('user_id', req.userId);
+
+    if (updateError) {
+      console.error('Failed to update auto_renew:', updateError);
+      return res.status(500).json({ error: 'Something went wrong updating auto-renewal' });
+    }
+
+    res.json({ success: true, autoRenew });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Something went wrong updating auto-renewal' });
   }
 });
 
@@ -2414,10 +2516,10 @@ app.post(
 
       const prompt = `
 ${buildPersonaPrompt(
-  selectedPersona,
-  session.job_role_id,
-  session.question_type
-)}
+        selectedPersona,
+        session.job_role_id,
+        session.question_type
+      )}
 
 Interview question:
 "${question.text}"
@@ -2426,11 +2528,10 @@ Candidate's working / answer:
 "${user_answer}"
 ${finalAnswerText ? `\nCandidate's stated final numeric answer: ${finalAnswerText}` : ""}
 
-Evaluate the answer${
-        question.answerFormat === "numeric"
+Evaluate the answer${question.answerFormat === "numeric"
           ? ", including whether the final numeric answer is correct and whether the reasoning that led to it makes sense"
           : ""
-      }.
+        }.
 
 Return only a valid JSON object using this structure:
 
@@ -2463,8 +2564,7 @@ Every score must be a whole number from 1 to 10.
 
         if (!match) {
           console.warn(
-            `No answer-evaluation JSON object on attempt ${
-              attempt + 1
+            `No answer-evaluation JSON object on attempt ${attempt + 1
             }.`
           );
 
@@ -2479,8 +2579,7 @@ Every score must be a whole number from 1 to 10.
 
         } catch (error) {
           console.warn(
-            `Answer JSON parsing failed on attempt ${
-              attempt + 1
+            `Answer JSON parsing failed on attempt ${attempt + 1
             }.`
           );
         }
@@ -2628,23 +2727,23 @@ app.post(
     const overallScore =
       answered.length
         ? Math.round(
-            answered.reduce(
+          answered.reduce(
+            (
+              total,
+              answer
+            ) =>
+              total +
               (
-                total,
-                answer
-              ) =>
-                total +
-                (
-                  Number(
-                    answer
-                      .evaluation
-                      ?.score
-                  ) || 0
-                ),
-              0
-            ) /
-            answered.length
-          )
+                Number(
+                  answer
+                    .evaluation
+                    ?.score
+                ) || 0
+              ),
+            0
+          ) /
+          answered.length
+        )
         : 0;
 
     let tips = [];
@@ -2668,10 +2767,10 @@ ${answer.evaluation?.feedback || ""}
 
       const prompt = `
 ${buildPersonaPrompt(
-  session.persona,
-  session.job_role_id,
-  session.question_type
-)}
+        session.persona,
+        session.job_role_id,
+        session.question_type
+      )}
 
 Full interview transcript:
 
@@ -2695,8 +2794,7 @@ Return only a valid JSON array of strings.
 
         if (!match) {
           console.warn(
-            `No interview-tips JSON array on attempt ${
-              attempt + 1
+            `No interview-tips JSON array on attempt ${attempt + 1
             }.`
           );
 
@@ -2714,8 +2812,7 @@ Return only a valid JSON array of strings.
 
         } catch (error) {
           console.warn(
-            `Tips JSON parsing failed on attempt ${
-              attempt + 1
+            `Tips JSON parsing failed on attempt ${attempt + 1
             }.`
           );
         }
@@ -2931,7 +3028,7 @@ app.post("/api/delete-account", async (req, res) => {
     }
 
     const userId = user.id;
-// Delete user via admin client
+    // Delete user via admin client
     const { error: deleteError } =
       await supabaseAdmin.auth.admin.deleteUser(userId);
 
