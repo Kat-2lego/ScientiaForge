@@ -135,10 +135,26 @@ body {
 
 .skill-dashboard-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: nowrap;
+  width: 100%;
 }
+.skill-dashboard-header > div:first-child {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.skill-dashboard-header > div:last-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  margin-left: auto;
+}
+
 .industry-select {
   padding: 10px 12px;
   border-radius: 999px;
@@ -152,7 +168,34 @@ body {
   border-radius: 999px;
   border: 1px solid var(--line);
 }
+.header-selects {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+}
+.industry-select,
+.job-select {
+  width: 220px;
+  min-width: 0;
+}
+@media (max-width: 800px) {
+  .skill-dashboard-header {
+    flex-wrap: wrap;
+  }
 
+  .skill-dashboard-header > div:last-child {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .industry-select,
+  .job-select {
+    flex: 1 1 0;
+    width: auto;
+  }
+}
 /* METRICS */
 .skill-metrics {
   display: grid;
@@ -338,6 +381,34 @@ body {
 
 .view-all-link:hover {
   opacity: 1;
+}
+
+/* Inline loading row inside skill boxes */
+.skill-loading {
+  display: none;               /* controlled by JS */
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-style: italic;
+  width: 100%;
+}
+
+/* Bigger spinner circle */
+.skill-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e2e8f0;
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* Modal overlay and card (reuse your existing modal styles if you have them) */

@@ -165,6 +165,90 @@ function getAuthHeaders(extra = {}) {
     lucide.createIcons();
   }
 
+
+  function showHaveLoading() {
+    const list = document.getElementById("haveSkills");
+    const loader = document.getElementById("haveSkillsLoading");
+
+    if (list) list.innerHTML = "";
+    if (loader) loader.style.display = "flex";
+  }
+
+  function hideHaveLoading() {
+    const loader = document.getElementById("haveSkillsLoading");
+    if (loader) loader.style.display = "none";
+  }
+
+  function showMissingLoading() {
+    const list = document.getElementById("missingSkills");
+    const loader = document.getElementById("missingSkillsLoading");
+
+    if (list) list.innerHTML = "";
+    if (loader) loader.style.display = "flex";
+  }
+
+  function hideMissingLoading() {
+    const loader = document.getElementById("missingSkillsLoading");
+    if (loader) loader.style.display = "none";
+  }
+
+
+  async function refreshGapForCurrentJob() {
+  if (!currentJobId) {
+    clearGapResult();
+    return;
+  }
+
+  const skillNames = currentSkills.map((s) => s.name);
+  const result = await getSkillGap(skillNames, currentJobId);
+
+  renderGapResult(result);
+
+  // Generate roadmap based on missing skills
+  await loadRoadmap(result.missing);
+}
+
+async function loadRoadmap(missingSkills) {
+  const skillsParam = missingSkills.join(",");
+  const res = await fetch(`${API_BASE}/roadmap?skills=${encodeURIComponent(skillsParam)}`);
+  if (!res.ok) {
+    console.warn("Failed to load roadmap");
+    return;
+  }
+
+  const data = await res.json();
+  renderRoadmap(data.roadmap || []);
+}
+function renderRoadmap(roadmap) {
+  const container = document.querySelector(".roadmap-items");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  if (roadmap.length === 0) {
+    container.innerHTML = "<p style='color: var(--muted); font-size: 0.9rem;'>No specific learning recommendations available for this career yet.</p>";
+    return;
+  }
+
+  roadmap.forEach((module, idx) => {
+    const step = document.createElement("div");
+    step.className = "road-step";
+
+    step.innerHTML = `
+      <div class="step-num">${idx + 1}</div>
+      <div>
+        <h4>${module.title}</h4>
+        <p>${module.description}</p>
+        ${module.resourceUrl
+          ? `<a href="${module.resourceUrl}" target="_blank" rel="noopener" style="font-size:0.85rem; color: var(--blue);">View resource</a>`
+          : ""}
+      </div>
+    `;
+
+    container.appendChild(step);
+  });
+}
+
   //================== MODAL: VIEW ALL HAVE / MISSING SKILLS =================
 
   const allHaveSkillsModal = document.getElementById("allHaveSkillsModal");
@@ -212,10 +296,24 @@ function getAuthHeaders(extra = {}) {
   });
 
   async function refreshGapForCurrentJob() {
-    if (!currentJobId) return;
-    const skillNames = currentSkills.map((s) => s.name);
-    const result = await getSkillGap(skillNames, currentJobId);
-    renderGapResult(result);
+    if (!currentJobId) {
+      clearGapResult();
+      return;
+    }
+
+    showMissingLoading();
+
+    try {
+      const skillNames = currentSkills.map((s) => s.name);
+      const result = await getSkillGap(skillNames, currentJobId);
+
+      renderGapResult(result);
+      await loadRoadmap(result.missing);
+    } catch (err) {
+      console.error("Error refreshing skill gap:", err);
+    } finally {
+      hideMissingLoading();
+    }
   }
 
 // ================= MODAL =================
@@ -311,6 +409,17 @@ function getAuthHeaders(extra = {}) {
   // ================= INITIALIZE PAGE =================
 
   async function initSkillGap() {
+     showHaveLoading();
+
+    try {
+      const skills = await fetchUserSkills();
+      currentSkills = skills;
+      renderHaveSkills();
+    } catch (err) {
+      console.error("Error loading user skills:", err);
+    } finally {
+      hideHaveLoading();
+    }
     const industrySelect = document.getElementById("industrySelect");
     const jobSelect = document.getElementById("jobSelect");
 
@@ -345,6 +454,7 @@ function getAuthHeaders(extra = {}) {
         }
 
         const careers = await fetchCareersForIndustry(indId);
+        console.log("Industry:", indId, "Careers:", careers);
         careers.forEach((career) => {
           const option = document.createElement("option");
           option.value = career.jobId;

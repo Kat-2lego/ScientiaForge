@@ -1,4 +1,150 @@
 // server/skillRelevance.mjs
+const OCCUPATION_FAMILIES = {
+  technology: [
+    "software",
+    "developer",
+    "programmer",
+    "engineer",
+    "ict",
+    "it",
+    "web",
+    "data analyst",
+    "data scientist",
+    "cyber",
+    "network",
+    "systems administrator",
+    "devops",
+    "cloud",
+  ],
+  culinary: [
+    "chef",
+    "cook",
+    "pastry",
+    "baker",
+    "culinary",
+    "kitchen",
+    "catering",
+  ],
+  healthcare: [
+    "nurse",
+    "doctor",
+    "physician",
+    "therapist",
+    "pharmacist",
+    "radiographer",
+    "paramedic",
+    "dentist",
+    "midwife",
+    "clinician",
+    "healthcare",
+    "health care",
+  ],
+  engineering: [
+    "engineer",
+    "civil engineer",
+    "mechanical engineer",
+    "electrical engineer",
+    "industrial engineer",
+    "chemical engineer",
+  ],
+  hospitality: [
+    "hotel",
+    "restaurant",
+    "waiter",
+    "waitress",
+    "bartender",
+    "front desk",
+    "housekeeping",
+    "tour guide",
+    "travel agent",
+  ],
+  // Add more families as needed
+};
+
+function getOccupationFamily(occupationTitle) {
+  const title = occupationTitle.toLowerCase();
+
+  if (OCCUPATION_FAMILIES.technology.some((k) => title.includes(k))) {
+    return "technology";
+  }
+  if (OCCUPATION_FAMILIES.culinary.some((k) => title.includes(k))) {
+    return "culinary";
+  }
+  if (OCCUPATION_FAMILIES.healthcare.some((k) => title.includes(k))) {
+    return "healthcare";
+  }
+  if (OCCUPATION_FAMILIES.engineering.some((k) => title.includes(k))) {
+    return "engineering";
+  }
+  if (OCCUPATION_FAMILIES.hospitality.some((k) => title.includes(k))) {
+    return "hospitality";
+  }
+
+  return "general";
+}
+const FAMILY_NEGATIVE_KEYWORDS = {
+  technology: [
+    "circuit design",
+    "wafer",
+    "bleach",
+    "camping gear",
+    "residential care",
+    "healthcare user",
+    "patient",
+    "nursing",
+    "cooking techniques",
+    "cook meat",
+    "prepare meals",
+  ],
+  culinary: [
+    "circuit design",
+    "wafer",
+    "bleach",
+    "camping gear",
+    "residential care",
+    "healthcare user",
+    "patient",
+    "nursing",
+    "software configuration",
+    "devops",
+    "infrastructure as code",
+  ],
+  healthcare: [
+    "circuit design",
+    "wafer",
+    "bleach",
+    "camping gear",
+    "cooking techniques",
+    "cook meat",
+    "prepare meals",
+    "software configuration",
+    "devops",
+  ],
+  engineering: [
+    "cook meat",
+    "prepare meals",
+    "cooking techniques",
+    "bleach",
+    "camping gear",
+    "residential care",
+    "healthcare user",
+    "patient",
+    "nursing",
+  ],
+  hospitality: [
+    "circuit design",
+    "wafer",
+    "bleach",
+    "camping gear",
+    "residential care",
+    "healthcare user",
+    "patient",
+    "nursing",
+    "software configuration",
+    "devops",
+  ],
+  general: [],
+};
 
 const OBVIOUSLY_IRRELEVANT_PATTERNS = [
   /printing press/i,
@@ -54,8 +200,27 @@ const OBVIOUSLY_IRRELEVANT_PATTERNS = [
   /types of digesters/i,
 ];
 
-export function isObviouslyIrrelevant(skillLabel) {
-  return OBVIOUSLY_IRRELEVANT_PATTERNS.some((re) => re.test(skillLabel));
+export function isObviouslyIrrelevant(skillLabel, occupationTitle = "") {
+  // Global patterns that are always irrelevant
+  const globalIrrelevant = OBVIOUSLY_IRRELEVANT_PATTERNS.some((re) =>
+    re.test(skillLabel)
+  );
+
+  if (globalIrrelevant) return true;
+
+  // Occupation-family-specific negative keywords
+  const family = getOccupationFamily(occupationTitle);
+  const negatives = FAMILY_NEGATIVE_KEYWORDS[family] || [];
+
+  const lower = skillLabel.toLowerCase();
+
+  for (const kw of negatives) {
+    if (lower.includes(kw)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 // You can keep scoreSkillRelevance if you want, but it’s no longer used

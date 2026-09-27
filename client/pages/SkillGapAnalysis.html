@@ -131,7 +131,7 @@
           <p>Compare your current skills with job requirements</p>
         </div>
 
-        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <div class="header-selects">
           <select class="industry-select" id="industrySelect" aria-label="Select industry">
             <option value="">Select industry…</option>
             <!-- populated by JS -->
@@ -186,8 +186,7 @@
               Your Skills
             </h2>
             <button id="editSkillsBtn" class="edit-skills-btn" type="button">
-              <i data-lucide="plus" style="color: #003671; width: 16px; height: 16px;"></i>
-              Edit
+              <i data-lucide="plus"></i> Edit
             </button>
           </div>
 
@@ -195,9 +194,13 @@
             <!-- populated by JS -->
           </div>
 
-          <div class="view-all-link" id="viewAllHaveLink">
-            View all your skills
+          <!-- Spinner for Your Skills -->
+          <div class="skill-loading" id="haveSkillsLoading" style="display:none;">
+            <div class="skill-spinner"></div>
+            <span>Loading your skills…</span>
           </div>
+
+          <div class="view-all-link" id="viewAllHaveLink">View all your skills</div>
         </div>
 
         <div class="skill-box">
@@ -210,9 +213,13 @@
             <!-- populated by JS -->
           </div>
 
-          <div class="view-all-link" id="viewAllMissingLink">
-            View all missing skills
+          <!-- Spinner for Missing Skills (ESCO) -->
+          <div class="skill-loading" id="missingSkillsLoading" style="display:none;">
+            <div class="skill-spinner"></div>
+            <span>Loading career skills from ESCO…</span>
           </div>
+
+          <div class="view-all-link" id="viewAllMissingLink">View all missing skills</div>
         </div>
 
       </div>

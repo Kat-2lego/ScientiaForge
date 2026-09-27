@@ -17,6 +17,8 @@ import { getOccupationSkills } from "./escoClient.mjs";
 import { computeSkillGap } from "./skillMatcher.mjs";
 import { searchEscoOccupations } from "./escoClient.mjs";
 import { INDUSTRIES } from "./industries.mjs";
+import { LEARNING_MODULES } from "./learningModules.mjs";
+
 
 
 
@@ -1859,6 +1861,57 @@ app.post("/api/skillgap", async (req, res) => {
   }
 });;
 
+// GET /api/roadmap?skills=skill1,skill2,skill3
+
+app.get("/api/roadmap", async (req, res) => {
+  try {
+    const skillsParam = req.query.skills || "";
+
+    const userSkills = skillsParam
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    if (userSkills.length === 0) {
+      return res.json({ roadmap: [] });
+    }
+
+    const userSkillsLower = userSkills.map((s) => s.toLowerCase());
+    const userSet = new Set(userSkillsLower);
+
+    // Score modules by how many missing skills they cover
+    const scoredModules = LEARNING_MODULES.map((mod) => {
+      const modSkillsLower = mod.skills.map((s) => s.toLowerCase());
+      const overlap = modSkillsLower.filter((s) => userSet.has(s)).length;
+      return { module: mod, overlap };
+    });
+
+    // Keep only modules that match at least one missing skill
+    const relevant = scoredModules
+      .filter((m) => m.overlap > 0)
+      .sort((a, b) => b.overlap - a.overlap)
+      .slice(0, 5); // top 5
+
+    const roadmap = relevant.map((m) => ({
+      id: m.module.id,
+      title: m.module.title,
+      description: m.module.description,
+      steps: m.module.steps,
+      resourceUrl: m.module.resourceUrl,
+      matchedSkills: m.module.skills.filter((s) =>
+        userSet.has(s.toLowerCase())
+      ),
+    }));
+
+    return res.json({ roadmap });
+  } catch (error) {
+    console.error("❌ /api/roadmap error:", error);
+    return res.status(500).json({
+      error: "Failed to generate roadmap",
+      details: error.message,
+    });
+  }
+});
 /* =========================================================
    CAREER DISCOVERY
 ========================================================= */

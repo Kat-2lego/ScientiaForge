@@ -61,6 +61,8 @@ export function extractIscoCode(concept) {
  * Fetch skills for an occupation using ESCO's explicit essential/optional skill relations.
  * Falls back to search-based method if the concept call fails.
  */
+
+
 export async function getOccupationSkills(escoUri, language = "en", options = {}) {
   const {
     maxSkills = 35,
@@ -171,7 +173,7 @@ export async function getOccupationSkills(escoUri, language = "en", options = {}
     const { isObviouslyIrrelevant } = await import("./skillRelevance.mjs");
 
     const filtered = skillLabelsRaw.filter(
-      (label) => !isObviouslyIrrelevant(label)
+      (label) => !isObviouslyIrrelevant(label, occupationTitle)
     );
 
     console.log(
@@ -290,7 +292,7 @@ async function getOccupationSkillsViaSearch(escoUri, language = "en", options = 
   const { isObviouslyIrrelevant } = await import("./skillRelevance.mjs");
 
   const filtered = allSkills.filter(
-    (label) => !isObviouslyIrrelevant(label)
+    (label) => !isObviouslyIrrelevant(label, occupationTitle)
   );
 
   console.log(
