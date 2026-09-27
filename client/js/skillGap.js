@@ -165,6 +165,34 @@ function getAuthHeaders(extra = {}) {
     lucide.createIcons();
   }
 
+
+  function showHaveLoading() {
+    const list = document.getElementById("haveSkills");
+    const loader = document.getElementById("haveSkillsLoading");
+
+    if (list) list.innerHTML = "";
+    if (loader) loader.style.display = "flex";
+  }
+
+  function hideHaveLoading() {
+    const loader = document.getElementById("haveSkillsLoading");
+    if (loader) loader.style.display = "none";
+  }
+
+  function showMissingLoading() {
+    const list = document.getElementById("missingSkills");
+    const loader = document.getElementById("missingSkillsLoading");
+
+    if (list) list.innerHTML = "";
+    if (loader) loader.style.display = "flex";
+  }
+
+  function hideMissingLoading() {
+    const loader = document.getElementById("missingSkillsLoading");
+    if (loader) loader.style.display = "none";
+  }
+
+
   async function refreshGapForCurrentJob() {
   if (!currentJobId) {
     clearGapResult();
@@ -268,19 +296,25 @@ function renderRoadmap(roadmap) {
   });
 
   async function refreshGapForCurrentJob() {
-  if (!currentJobId) {
-    clearGapResult();
-    return;
+    if (!currentJobId) {
+      clearGapResult();
+      return;
+    }
+
+    showMissingLoading();
+
+    try {
+      const skillNames = currentSkills.map((s) => s.name);
+      const result = await getSkillGap(skillNames, currentJobId);
+
+      renderGapResult(result);
+      await loadRoadmap(result.missing);
+    } catch (err) {
+      console.error("Error refreshing skill gap:", err);
+    } finally {
+      hideMissingLoading();
+    }
   }
-
-  const skillNames = currentSkills.map((s) => s.name);
-  const result = await getSkillGap(skillNames, currentJobId);
-
-  renderGapResult(result);
-
-  // Generate roadmap based on missing skills
-  await loadRoadmap(result.missing);
-}
 
 // ================= MODAL =================
 
@@ -375,6 +409,17 @@ function renderRoadmap(roadmap) {
   // ================= INITIALIZE PAGE =================
 
   async function initSkillGap() {
+     showHaveLoading();
+
+    try {
+      const skills = await fetchUserSkills();
+      currentSkills = skills;
+      renderHaveSkills();
+    } catch (err) {
+      console.error("Error loading user skills:", err);
+    } finally {
+      hideHaveLoading();
+    }
     const industrySelect = document.getElementById("industrySelect");
     const jobSelect = document.getElementById("jobSelect");
 
@@ -409,6 +454,7 @@ function renderRoadmap(roadmap) {
         }
 
         const careers = await fetchCareersForIndustry(indId);
+        console.log("Industry:", indId, "Careers:", careers);
         careers.forEach((career) => {
           const option = document.createElement("option");
           option.value = career.jobId;

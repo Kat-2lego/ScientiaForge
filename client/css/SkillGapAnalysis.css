@@ -340,6 +340,34 @@ body {
   opacity: 1;
 }
 
+/* Inline loading row inside skill boxes */
+.skill-loading {
+  display: none;               /* controlled by JS */
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-style: italic;
+  width: 100%;
+}
+
+/* Bigger spinner circle */
+.skill-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e2e8f0;
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* Modal overlay and card (reuse your existing modal styles if you have them) */
 .modal-overlay {
   display: none;

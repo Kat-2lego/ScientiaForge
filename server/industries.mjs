@@ -194,6 +194,20 @@ export const INDUSTRIES = [
       { title: "Farm Manager", escoUri: "http://data.europa.eu/esco/occupation/4552095e-3396-4831-86ad-4fc34ec39a19" },
       { title: "Agricultural Engineer", escoUri: "http://data.europa.eu/esco/occupation/4d5bd738-9202-4fd7-bd8c-7dbe914048de" },
       { title: "General Veterinarian", escoUri: "http://data.europa.eu/esco/occupation/eb6efbb9-9216-4e86-bc3b-de2223cd4667" },
+      
+      { title: "Agricultural Technician", escoUri: "http://data.europa.eu/esco/occupation/1f8314c2-01bd-4af4-babc-04d7034591b8" },
+      { title: "Agronomist", escoUri: "http://data.europa.eu/esco/occupation/c40ef517-d4ab-4932-b184-9c2ea5b24fe2" },
+      { title: "Horticulture Production Manager", escoUri: "http://data.europa.eu/esco/occupation/d36b66f8-c08a-4416-953b-62c271ca7509" },
+     
+      { title: "Mixed Farmer", escoUri: "http://data.europa.eu/esco/occupation/1c1e86f9-6347-42d6-aa6e-c95b138bf640" },
+      { title: "Agricultural Inspector", escoUri: "http://data.europa.eu/esco/occupation/715b902f-b1b6-4366-afc6-ddb8ab715229" },
+      { title: "Forestry Technician", escoUri: "http://data.europa.eu/esco/occupation/fbf3aefb-70ff-440b-8724-bac3ed5e2c93" },
+      
+      { title: "Pest Management Worker", escoUri: "http://data.europa.eu/esco/occupation/21cba86a-68c5-456c-aec2-cc04840b3c0e" },
+      { title: "Irrigation Technician", escoUri: "http://data.europa.eu/esco/occupation/534d18fe-eae4-4a02-af4d-f78e92faa5d5" },
+      { title: "Animal Feed Nutritionist", escoUri: "http://data.europa.eu/esco/occupation/e97ce81a-cf24-4012-b39e-f87bedc5b450" },
+      { title: "Agricultural Machinery Technician", escoUri: "http://data.europa.eu/esco/occupation/f7145f87-5940-43f5-bc98-aa1a2b872b47" },
+
       // ...
     ],
   },
@@ -204,6 +218,19 @@ export const INDUSTRIES = [
       { title: "Hotel Manager", escoUri: "http://data.europa.eu/esco/occupation/53cdd34e-22f2-41bd-b3c7-de22bf9bbcae" },
       { title: "Chef", escoUri: "http://data.europa.eu/esco/occupation/90f75f67-495d-49fa-ab57-2f320e251d7e" },
       { title: "Tour Guide", escoUri: "http://data.europa.eu/esco/occupation/b476f45f-2c79-44d5-a4d7-fa357aa83074" },
+
+      { title: "Bartender", escoUri: "http://data.europa.eu/esco/occupation/2f5e38a0-6578-4665-bdbd-e2ab505be140" },
+      { title: "Housekeeping Supervisor", escoUri: "http://data.europa.eu/esco/occupation/fae51298-03a8-4df4-829a-685dddc1580e" },
+      { title: "Travel Agent", escoUri: "http://data.europa.eu/esco/occupation/79f8f68c-5509-4119-9373-8bef1c364d31" },
+     
+      { title: "Event Manager", escoUri: "http://data.europa.eu/esco/occupation/1b38a27d-ef98-4d9f-b1b2-8c109bf47e79" },
+      { title: "Restaurant Manager", escoUri: "http://data.europa.eu/esco/occupation/d5eb6150-bbff-4a9c-9d0c-21eab4dbe2b6" },
+      { title: "Hospitality Establishment Receptionist", escoUri: "http://data.europa.eu/esco/occupation/82025c02-9082-416c-998b-f51eb0359ee6" },
+      
+      { title: "Tour Organiser", escoUri: "http://data.europa.eu/esco/occupation/5b9a678a-7c35-4c50-a804-754b82652ee6" },
+      { title: "Sommelier", escoUri: "http://data.europa.eu/esco/occupation/499f80e3-860c-48ef-8286-be929a93e254" },
+      { title: "Waiter/Waitress", escoUri: "http://data.europa.eu/esco/occupation/d5db9d5c-2ebf-4a54-a79a-1b7e7ff70471" },
+
       // ...
     ],
   },
@@ -214,6 +241,19 @@ export const INDUSTRIES = [
       { title: "Marketing Specialist", escoUri: "http://data.europa.eu/esco/occupation/4791e217-d607-40d5-9f84-df1d0a071cbc" },
       { title: "Journalist", escoUri: "http://data.europa.eu/esco/occupation/a47f82d3-4cf7-4abf-bb36-2c8cbad28234" },
       { title: "Public Relations Officer", escoUri: "http://data.europa.eu/esco/occupation/c0489e22-6a1b-4e52-974a-eb71bbb42134" },
+
+      { title: "Advertising Manager", escoUri: "http://data.europa.eu/esco/occupation/4ebf2dae-c326-4627-befe-fbc91410f432" },
+      { title: "Brand Manager", escoUri: "http://data.europa.eu/esco/occupation/de80bbf0-447d-4a6a-845a-fdba4e0dc30c" },
+      { title: "Presenter", escoUri: "http://data.europa.eu/esco/occupation/09a9a956-db70-436f-8398-d85a17f6cdfe" },
+      
+      { title: "Advertising Media Planner", escoUri: "http://data.europa.eu/esco/occupation/b55718eb-e8ff-4485-8ad0-bbac32cbd77b" },
+      { title: "Broadcast News Editor", escoUri: "http://data.europa.eu/esco/occupation/b65530b8-0b50-49da-8e9e-331b161374a5" },
+      { title: "News Anchor", escoUri: "http://data.europa.eu/esco/occupation/83e45d86-1bce-45c5-ba8b-097738f9f28b" },
+      
+      { title: "Communication Manager", escoUri: "http://data.europa.eu/esco/occupation/cd7b838c-51f6-41ec-9067-bb974c0f991b" },
+      { title: "Advertising Photographer", escoUri: "http://data.europa.eu/esco/occupation/b1ab3572-fa2f-4624-8eac-3c3d986d237b" },
+      { title: "Copywriter", escoUri: "http://data.europa.eu/esco/occupation/a47f82d3-4cf7-4abf-bb36-2c8cbad28234" },
+
       // ...
     ],
   },
@@ -224,6 +264,18 @@ export const INDUSTRIES = [
       { title: "Lawyer", escoUri: "http://data.europa.eu/esco/occupation/974d4eab-fbee-4c52-b16e-73bdd8c25b53" },
       { title: "Human Rights Officer", escoUri: "http://data.europa.eu/esco/occupation/8801ef16-92a4-4889-8f80-9b78206c7ec0" },
       { title: "Tax Compliance Officer", escoUri: "http://data.europa.eu/esco/occupation/4a39fddb-17e7-4431-be03-613edab8d1c8" },
+
+      { title: "Judge", escoUri: "http://data.europa.eu/esco/occupation/07bd65d7-c13f-443a-bdf6-88903f3822be" },
+      { title: "Corporate Lawyer", escoUri: "http://data.europa.eu/esco/occupation/fdfce14e-992d-4ff4-9f9d-7a353c75654e" },
+      { title: "Conveyance Clerk", escoUri: "http://data.europa.eu/esco/occupation/a9411821-4f54-406e-ba37-4c6e5a39f9fe" },
+
+      { title: "Prosecutor", escoUri: "http://data.europa.eu/esco/occupation/acf462a3-9c34-46cb-952a-c612c38299f4" },
+      { title: "Legal Policy Officer", escoUri: "http://data.europa.eu/esco/occupation/5d601b40-7e0e-404e-bbff-bb98e147437c" },
+      { title: "Regulatory Affairs Manager", escoUri: "http://data.europa.eu/esco/occupation/779d13be-60b4-48f3-a339-fe483be96c7f" },
+
+      { title: "Court Jury Coordinator", escoUri: "http://data.europa.eu/esco/occupation/76884a72-d8b8-4819-bd40-71d6420a9a42" },
+      { title: "Notary Public", escoUri: "http://data.europa.eu/esco/occupation/d21890a3-cbe9-49df-9a19-a4120d866548" },
+
       // ...
     ],
   },
@@ -234,7 +286,19 @@ export const INDUSTRIES = [
       { title: "Cargo Vehicle Driver", escoUri: "http://data.europa.eu/esco/occupation/45037d43-a8f5-4f46-b332-b2935bc305f4" },
       { title: "Logistics and Distribution Manager", escoUri: "http://data.europa.eu/esco/occupation/823db06f-25e1-4658-b063-d6ef956b41f5" },
       { title: "Warehouse Manager", escoUri: "http://data.europa.eu/esco/occupation/2f5de1ab-eddf-4715-8193-e994912c22ea" },
+      
       { title: "Forklift Operator", escoUri: "http://data.europa.eu/esco/occupation/eeac6251-1974-42f5-91ed-513c6c883755" },
+      { title: "Freight Transport Dispatcher", escoUri: "http://data.europa.eu/esco/occupation/49e28648-4fa8-4b36-ac4d-781c108547bf" },
+      { title: "Supply Chain Manager", escoUri: "http://data.europa.eu/esco/occupation/aacc3918-b5d3-484b-9480-5d29aa550d74" },
+
+      { title: "Air Traffic Controller", escoUri: "http://data.europa.eu/esco/occupation/3c2da05f-eb24-41f7-8307-46c96660fee0" },
+      { title: "Port Coordinator", escoUri: "http://data.europa.eu/esco/occupation/fa404a79-4091-47f9-a635-c2e3c576ece8" },
+      { title: "Flight Attendant", escoUri: "http://data.europa.eu/esco/occupation/f20d3ae6-baeb-482c-b68d-c2fb115e5dde" },
+
+      { title: "Rail Logistics Coordinator", escoUri: "http://data.europa.eu/esco/occupation/279c0ab1-212b-4e89-a41f-048f5de9dadf" },
+      { title: "Road Operations Manager", escoUri: "http://data.europa.eu/esco/occupation/4ea620f2-5c75-49ee-85a0-b2fb6bbf3624" },
+      { title: "Forwarding Manager", escoUri: "http://data.europa.eu/esco/occupation/39803100-c338-4f01-ad2c-085d488920ca" },
+
 
       // ...
     ],
@@ -246,6 +310,19 @@ export const INDUSTRIES = [
       { title: "Administrative Officer", escoUri: "http://data.europa.eu/esco/occupation/1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p" },
       { title: "Policy Officer", escoUri: "http://data.europa.eu/esco/occupation/caf7b8fb-b2d6-46b7-bffa-bea7f8e4aed8" },
       { title: "Social Worker", escoUri: "http://data.europa.eu/esco/occupation/4b05bef2-ded4-4b09-ab94-f4c6a555a775" },
+
+      { title: "Pensions Administrator", escoUri: "http://data.europa.eu/esco/occupation/6724e558-2d75-4116-a473-91a4c14d4c69" },
+      { title: "Customs Officer", escoUri: "http://data.europa.eu/esco/occupation/5f16819d-50b9-475b-a2d8-607ee6d99a9d" },
+      { title: "Urban Planner", escoUri: "http://data.europa.eu/esco/occupation/e14548c8-c2b9-4ef8-8670-d5967d7ad804" },
+
+      { title: "Community Development Officer", escoUri: "http://data.europa.eu/esco/occupation/39e9fc8f-02bd-4577-b603-2dc96204ce74" },
+      { title: "Public Housing Manager", escoUri: "http://data.europa.eu/esco/occupation/5cff1eee-9027-4064-8a26-35b1877e4eb3" },
+      { title: "Public Affairs Consultant", escoUri: "http://data.europa.eu/esco/occupation/9e285322-2cfa-430f-9b66-41be57d698e2" },
+
+      { title: "Immigration Officer", escoUri: "http://data.europa.eu/esco/occupation/6296faea-1909-4943-b0e0-662b43ad855d" },
+      { title: "Public Health Policy Officer", escoUri: "http://data.europa.eu/esco/occupation/d4d6842b-27f0-4222-85db-c542acf6d434" },
+      { title: "Labour Relations Officer", escoUri: "http://data.europa.eu/esco/occupation/20b9f370-6b56-4679-8c06-c23b866a5bd0" },
+
       // ...
     ],
   },
@@ -256,7 +333,19 @@ export const INDUSTRIES = [
       { title: "Graphic Designer", escoUri: "http://data.europa.eu/esco/occupation/69bcbb0a-8d80-4ecd-b0a4-9adea2a40de2" },
       { title: "Costume Designer", escoUri: "http://data.europa.eu/esco/occupation/d1b1dfdf-7d60-430a-b569-7dd71b2ebeaa" },
       { title: "Video Editor", escoUri: "http://data.europa.eu/esco/occupation/ac734172-ae9a-41ab-80a0-a7b33694e027" },
+
       { title: "Photographer", escoUri: "http://data.europa.eu/esco/occupation/66542dd6-05a6-4d9e-97ff-3f4858c31ff9" },
+      { title: "UI Designer", escoUri: "http://data.europa.eu/esco/occupation/96e20037-0a25-4bf6-a25e-808d1605d890" },
+      { title: "Interior Designer", escoUri: "http://data.europa.eu/esco/occupation/73e776fb-4d99-4031-bad4-7716f121155d" },
+
+      { title: "Art Director", escoUri: "http://data.europa.eu/esco/occupation/cb93fd23-1f51-4495-867a-936c1967066b" },
+      { title: "Fashion Designer", escoUri: "http://data.europa.eu/esco/occupation/77bfd6e7-5598-4818-84cb-31e2651eb046" },
+      { title: "Actor/Actress", escoUri: "http://data.europa.eu/esco/occupation/26171f39-e85a-448f-bd28-a73a5a99927f" },
+
+      { title: "Video & Motion Picture Director", escoUri: "http://data.europa.eu/esco/occupation/1a7fb683-6544-4442-b54c-ec72ef468ff0" },
+      { title: "Animator", escoUri: "http://data.europa.eu/esco/occupation/48c8eccb-4bd0-487e-a187-4953cbbe956e" },
+      { title: "Musician", escoUri: "http://data.europa.eu/esco/occupation/f6803a58-91d9-4251-9a07-09fc387cec16" },
+
 
       // ...
     ],
