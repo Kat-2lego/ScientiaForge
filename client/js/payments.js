@@ -55,6 +55,7 @@ const els = {
   successState: document.getElementById('successState'),
   formPanel: document.getElementById('formPanel'),
   cardErrors: document.getElementById('card-errors'),
+  autoRenewCheckbox: document.getElementById('autoRenewCheckbox'),
 };
 
 let cardComplete = false;
@@ -157,7 +158,10 @@ els.form.addEventListener('submit', async (e) => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
       },
-      body: JSON.stringify({ productId: 'premium' }),
+      body: JSON.stringify({
+        productId: 'premium',
+        autoRenew: els.autoRenewCheckbox?.checked ?? false,
+      }),
     });
 
     const intentData = await intentRes.json();
@@ -183,8 +187,10 @@ els.form.addEventListener('submit', async (e) => {
     }
 
     if (result.paymentIntent.status === 'succeeded') {
-      els.formPanel.classList.add('hidden-form');
-      els.successState.classList.add('show');
+      // Redirect back to Billing so the user immediately sees their
+      // updated plan, payment history, and (if applicable) saved card,
+      // rather than staying on a separate success screen here.
+      window.location.href = 'billing_Subscription.html?payment=success';
     } else {
       throw new Error(`Payment status: ${result.paymentIntent.status}. Please try again.`);
     }
