@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkillForge Admin — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/admin.css" />
+</head>
+<body class="admin-auth-pending">
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div>
+        <div class="logo">
+          <span class="logo-dark">Skill</span><span class="logo-blue">Forge</span>
+        </div>
+
+        <nav class="nav">
+          <a class="nav-item active" href="Admin.html" data-label="Dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+
+          <a class="nav-item" href="AdminUsers.html" data-label="Users">
+            <i data-lucide="users"></i>
+            <span>Users</span>
+          </a>
+
+          <a class="nav-item" href="AdminSettings.html" data-label="Settings">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+          </a>
+
+          <a class="nav-item" href="Dashboard.html" data-label="Back to App">
+            <i data-lucide="arrow-left-circle"></i>
+            <span>Back to App</span>
+          </a>
+
+          <a class="nav-item" href="" data-label="Log Out">
+            <i data-lucide="log-out"></i>
+            <span>Logout</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="download-card">
+        <div class="download-icon"><i data-lucide="shield"></i></div>
+        <h3>You're in Admin Mode</h3>
+        <p>Actions here affect real user accounts.</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+            <i data-lucide="menu"></i>
+          </button>
+          <div class="admin-pill"><i data-lucide="shield-check"></i>Admin Panel</div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="profile">
+            <div class="avatar"></div>
+            <div>
+              <div class="profile-name" data-admin-name>&hellip;</div>
+              <div class="profile-email" data-admin-email>&hellip;</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="admin-header">
+        <div>
+          <h1><i data-lucide="layout-dashboard"></i> Admin Dashboard</h1>
+          <p>Live stats, growth, and activity across SkillForge.</p>
+        </div>
+      </section>
+
+      <!-- ===================== GLOBAL DATE RANGE ===================== -->
+      <section class="date-range-bar">
+        <div class="date-range-presets" id="dateRangePresets">
+          <button data-preset="7" class="active">7d</button>
+          <button data-preset="30">30d</button>
+          <button data-preset="90">90d</button>
+        </div>
+        <div class="date-range-custom">
+          <span>Custom:</span>
+          <input type="date" id="dateRangeFrom" />
+          <span>to</span>
+          <input type="date" id="dateRangeTo" />
+          <button id="applyDateRange" class="btn-chip promote">Apply</button>
+          <span class="date-range-label" id="dateRangeSummary"></span>
+        </div>
+      </section>
+
+      <!-- ===================== PRIMARY KPI ROW ===================== -->
+      <section class="kpi-grid">
+        <article class="stat-card kpi-card">
+          <div class="stat-head">
+            <div class="stat-icon blue"><i data-lucide="users"></i></div>
+            <h3>Total Users</h3>
+          </div>
+          <div class="stat-value-row">
+            <div class="stat-value" id="kpiTotalUsers">0</div>
+          </div>
+          <span class="stat-delta neutral">All registered accounts</span>
+        </article>
+
+        <article class="stat-card kpi-card">
+          <div class="stat-head">
+            <div class="stat-icon green"><i data-lucide="radio"></i></div>
+            <h3>Online Now</h3>
+          </div>
+          <div class="stat-value-row">
+            <div class="stat-value" id="kpiOnlineNow">0</div>
+            <span class="kpi-live-dot" title="Live"></span>
+          </div>
+          <span class="stat-delta neutral">Active in the last 2 minutes</span>
+        </article>
+
+        <article class="stat-card kpi-card">
+          <div class="stat-head">
+            <div class="stat-icon orange"><i data-lucide="user-plus"></i></div>
+            <h3>New This Week</h3>
+          </div>
+          <div class="stat-value-row">
+            <div class="stat-value" id="kpiNewWeek">0</div>
+          </div>
+          <span class="stat-delta neutral" id="kpiNewWeekDelta">vs last week</span>
+        </article>
+
+        <article class="stat-card kpi-card">
+          <div class="stat-head">
+            <div class="stat-icon soft-green"><i data-lucide="clock"></i></div>
+            <h3>Avg. Session</h3>
+          </div>
+          <div class="stat-value-row">
+            <div class="stat-value" id="kpiAvgSession">&mdash;</div>
+          </div>
+          <span class="stat-delta neutral">Last 30 days</span>
+        </article>
+      </section>
+
+      <!-- ===================== SECONDARY KPI ROW ===================== -->
+      <section class="kpi-grid secondary">
+        <article class="stat-card kpi-card">
+          <div class="stat-head">
+            <div class="stat-icon blue"><i data-lucide="file-search"></i></div>
+            <h3>CV Analyses</h3>
+          </div>
+          <div class="stat-value-row">
+            <div class="stat-value" id="kpiCvAnalyses">&mdash;</div>
+          </div>
+          <span class="stat-delta neutral">All time</span>
+        </article>
+
+        <article class="stat-card kpi-card">
+          <div class="stat-head">
+            <div class="stat-icon orange"><i data-lucide="mic"></i></div>
+            <h3>Interviews</h3>
+          </div>
+          <div class="stat-value-row">
+            <div class="stat-value" id="kpiInterviews">&mdash;</div>
+          </div>
+          <span class="stat-delta neutral">Completed / started</span>
+        </article>
+
+        <article class="stat-card kpi-card">
+          <div class="stat-head">
+            <div class="stat-icon green"><i data-lucide="bar-chart-3"></i></div>
+            <h3>Skill-Gap Runs</h3>
+          </div>
+          <div class="stat-value-row">
+            <div class="stat-value" id="kpiSkillGap">&mdash;</div>
+          </div>
+          <span class="stat-delta neutral">All time</span>
+        </article>
+
+        <article class="stat-card kpi-card">
+          <div class="stat-head">
+            <div class="stat-icon soft-green"><i data-lucide="shield-check"></i></div>
+            <h3>Admins</h3>
+          </div>
+          <div class="stat-value-row">
+            <div class="stat-value" id="kpiTotalAdmins">0</div>
+          </div>
+          <span class="stat-delta neutral">With panel access</span>
+        </article>
+      </section>
+
+      <!-- ===================== CHARTS: growth + DAU ===================== -->
+      <section class="chart-grid">
+        <div class="chart-panel">
+          <div class="chart-panel-head">
+            <h3>User Growth</h3>
+            <span>Selected range</span>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="growthChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-panel">
+          <div class="chart-panel-head">
+            <h3>Daily Active Users</h3>
+            <span>Selected range</span>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="activityChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== CHARTS: feature timeline + interview usage ===================== -->
+      <section class="chart-grid">
+        <div class="chart-panel">
+          <div class="chart-panel-head">
+            <h3>Feature Usage Over Time</h3>
+            <span>Selected range</span>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="featureTimelineChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-panel">
+          <div class="chart-panel-head">
+            <h3>Interview Simulator</h3>
+            <span id="interviewUsageSummary">Selected range</span>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="interviewUsageChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== CHARTS: feature usage + peak hours ===================== -->
+      <section class="chart-grid thirds">
+        <div class="chart-panel">
+          <div class="chart-panel-head">
+            <h3>Feature Usage</h3>
+            <span>All time</span>
+          </div>
+          <div class="chart-canvas-wrap short">
+            <canvas id="featureChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-panel">
+          <div class="chart-panel-head">
+            <h3>Peak Activity Hours</h3>
+            <span>SAST &middot; selected range</span>
+          </div>
+          <div class="chart-canvas-wrap short">
+            <canvas id="peakChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== CHARTS: demographics ===================== -->
+      <section class="chart-grid thirds">
+        <div class="chart-panel">
+          <div class="chart-panel-head">
+            <h3>Age Distribution</h3>
+            <span id="ageBracketSummary">All time</span>
+          </div>
+          <div class="chart-canvas-wrap short">
+            <canvas id="ageBracketChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-panel">
+          <div class="chart-panel-head">
+            <h3>Gender Distribution</h3>
+            <span id="genderSummary">All time</span>
+          </div>
+          <div class="chart-canvas-wrap short">
+            <canvas id="genderChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== ACTIVITY FEED + QUICK LINKS ===================== -->
+      <section class="chart-grid">
+        <div class="panel">
+          <h2>Live Activity</h2>
+          <div class="activity-feed" id="activityFeed">
+            <div class="table-empty">Loading&hellip;</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Quick Links</h2>
+          <a class="list-card" href="AdminUsers.html">
+            <div class="list-left"><i data-lucide="users"></i> Manage Users</div>
+            <i data-lucide="chevron-right"></i>
+          </a>
+          <a class="list-card" href="AdminSettings.html">
+            <div class="list-left"><i data-lucide="settings"></i> Site Settings</div>
+            <i data-lucide="chevron-right"></i>
+          </a>
+          <a class="list-card" href="AdminSettings.html">
+            <div class="list-left"><i data-lucide="scroll-text"></i> Full Audit Log</div>
+            <i data-lucide="chevron-right"></i>
+          </a>
+          <a class="list-card" href="Dashboard.html">
+            <div class="list-left"><i data-lucide="arrow-left-circle"></i> Back to the Main App</div>
+            <i data-lucide="chevron-right"></i>
+          </a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toastHost"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../js/adminGuard.js"></script>
+  <script src="../js/adminDashboard.js"></script>
+  <script src="../js/auth.js"></script>
+</body>
+</html>

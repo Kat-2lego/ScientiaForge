@@ -2,16 +2,16 @@ import express from "express";
 import cors from "cors";
 import { createClient } from "@supabase/supabase-js";
 import Groq from "groq-sdk";
+import Stripe from "stripe";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import WebSocket from "ws";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 import cvRoutes from "./cv-analyzer/routes/cvRoutes.js";
-import { dirname, join } from 'path';
-import Stripe from 'stripe';
 import careerPathfinderRoutes from "./routes/careerPathfinder.js";
 import studyHubRoutes from "./routes/studyHub.js";
+import adminRoutes from "./routes/admin.js";
 
 import { getOccupationSkills } from "./escoClient.mjs";
 import { computeSkillGap } from "./skillMatcher.mjs";
@@ -45,6 +45,8 @@ async function logAudit(userId, action, { entity = null, entityId = null, desc =
     console.warn("Audit log skipped:", error.message);
   }
 }
+import { logFeatureEvent } from "./services/featureEvents.js";
+import { sendWelcomeEmail } from "./services/emailService.js";
 
 /* =========================================================
    LOAD ENVIRONMENT VARIABLES
@@ -89,6 +91,10 @@ console.log(
 console.log(
   "✅ Groq API key loaded:",
   GROQ_API_KEY ? "Yes" : "No"
+);
+console.log(
+  "✅ Stripe secret key loaded:",
+  process.env.STRIPE_SECRET_KEY ? "Yes" : "No"
 );
 
 /* =========================================================
@@ -267,6 +273,12 @@ async function callGroq(
    (must exist before the /webhook route below uses it)
 ========================================================= */
 
+if (!process.env.STRIPE_SECRET_KEY) {
+  console.error(
+    "❌ Missing STRIPE_SECRET_KEY in server/.env — Stripe routes will fail."
+  );
+}
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 /* =========================================================
@@ -406,6 +418,7 @@ app.use(
 app.use("/api/cv", cvRoutes);
 app.use("/api/career-pathfinder", careerPathfinderRoutes);
 app.use("/api/study-hub", studyHubRoutes);
+app.use("/api/admin", adminRoutes);
 
 /* =========================================================
    MAIN PAGE
@@ -549,6 +562,58 @@ app.post(
         });
       }
 
+      /*
+        Maintenance mode (toggled from the admin Settings page) blocks
+        sign-in for everyone except admins. This runs after Supabase has
+        already verified the password, so the response never reveals
+        whether a given email/password combination was valid.
+      */
+      try {
+        const { data: roleRow } = await databaseClient
+          .from("users")
+          .select("role")
+          .eq("id", data.user.id)
+          .maybeSingle();
+
+        if ((roleRow?.role || "user") !== "admin") {
+          const { data: settingRow } = await databaseClient
+            .from("app_settings")
+            .select("value")
+            .eq("key", "maintenance_mode")
+            .maybeSingle();
+
+          if (settingRow?.value === true) {
+            await supabase.auth.signOut();
+            return res.status(503).json({
+              error:
+                "SkillForge is temporarily down for maintenance. Please try again shortly.",
+            });
+          }
+        }
+      } catch (settingsError) {
+        // app_settings may not exist yet if the admin-panel migration
+        // hasn't been run — never block login over that.
+        console.warn("Maintenance-mode check skipped:", settingsError.message);
+      }
+
+      // One row per login — this is what "online now" and average
+      // session length are computed from in the admin dashboard.
+      // Best-effort: a failure here must never block a real login.
+      try {
+        await databaseClient.from("user_sessions").insert({
+          user_id: data.user.id,
+          user_agent: req.headers["user-agent"] || null,
+          ip: req.ip || req.headers["x-forwarded-for"] || null,
+        });
+
+        await databaseClient
+          .from("users")
+          .update({ last_seen_at: new Date().toISOString() })
+          .eq("id", data.user.id);
+      } catch (sessionError) {
+        console.warn("Could not record login session:", sessionError.message);
+      }
+
       logAudit(data.user.id, "sign_in", { desc: "User signed in", req });
 
       return res.status(200).json({
@@ -606,6 +671,24 @@ app.post("/api/auth/signup", async (req, res) => {
     });
   }
 
+  try {
+    const { data: settingRow } = await databaseClient
+      .from("app_settings")
+      .select("value")
+      .eq("key", "allow_new_signups")
+      .maybeSingle();
+
+    if (settingRow?.value === false) {
+      return res.status(503).json({
+        error: "New sign-ups are temporarily disabled. Please check back soon.",
+      });
+    }
+  } catch (settingsError) {
+    // app_settings may not exist yet if the admin-panel migration
+    // hasn't been run — never block signup over that.
+    console.warn("Allow-signups check skipped:", settingsError.message);
+  }
+
   if (password.length < 8) {
     return res.status(400).json({
       error: "Password must be at least 8 characters long.",
@@ -643,6 +726,31 @@ app.post("/api/auth/signup", async (req, res) => {
         )
         .filter(Boolean)
       : [];
+
+  // Optional — collected on the last signup step, never blocks account
+  // creation if left blank.
+  const phone =
+    typeof req.body.phone === "string" ? req.body.phone.trim() : "";
+
+  const location =
+    typeof req.body.location === "string" ? req.body.location.trim() : "";
+
+  const referralSource =
+    typeof req.body.referralSource === "string"
+      ? req.body.referralSource.trim()
+      : "";
+
+  const linkedinUrl =
+    typeof req.body.linkedinUrl === "string"
+      ? req.body.linkedinUrl.trim()
+      : "";
+
+      
+  const ageBracket =
+    typeof req.body.ageBracket === "string" ? req.body.ageBracket.trim() : "";
+
+  const gender =
+    typeof req.body.gender === "string" ? req.body.gender.trim() : "";
 
   if (
     !industry ||
@@ -727,6 +835,12 @@ app.post("/api/auth/signup", async (req, res) => {
           target_industry: targetIndustry || null,
           career_experience_level: experienceLevel || null,
           target_roles: rolesTargeted,
+          phone: phone || null,
+          location: location || null,
+          referral_source: referralSource || null,
+          linkedin_url: linkedinUrl || null,
+          age_bracket: ageBracket || null,
+          gender: gender || null,
         },
         { onConflict: "user_id" }
       );
@@ -798,6 +912,7 @@ app.post("/api/auth/signup", async (req, res) => {
     }
 
     logAudit(userId, "sign_up", { desc: "User account created", req });
+    sendWelcomeEmail(email, firstName);
 
     return res.status(201).json({
       success: true,
@@ -843,6 +958,20 @@ app.post("/api/auth/logout", async (req, res) => {
       loggingOutUserId = userData?.user?.id || null;
     } catch (_) {
       // Non-fatal — logout still proceeds even if we can't identify the user.
+    }
+
+    // Close out the open user_sessions row this login created, so the
+    // admin dashboard can compute how long the session actually lasted.
+    if (loggingOutUserId) {
+      try {
+        await databaseClient
+          .from("user_sessions")
+          .update({ ended_at: new Date().toISOString() })
+          .eq("user_id", loggingOutUserId)
+          .is("ended_at", null);
+      } catch (sessionError) {
+        console.warn("Could not close login session:", sessionError.message);
+      }
     }
 
     if (!supabaseAdmin) {
@@ -962,10 +1091,24 @@ app.get(
           ?.split("@")[0] ||
         "User";
 
+      let role = "user";
+      try {
+        const { data: roleRow } = await databaseClient
+          .from("users")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle();
+        role = roleRow?.role || "user";
+      } catch (roleError) {
+        console.warn("Could not resolve role for /api/auth/me:", roleError.message);
+      }
+
       return res.status(200).json({
         id: user.id,
         firstName,
         email: user.email,
+        role,
+        isAdmin: role === "admin",
       });
 
     } catch (error) {
@@ -981,6 +1124,36 @@ app.get(
     }
   }
 );
+
+/* =========================================================
+   ACTIVITY HEARTBEAT
+   Pinged periodically by every logged-in page (see client/js/auth.js)
+   to keep last_seen_at fresh. This is what "online now" and session
+   length are built on in the admin dashboard.
+========================================================= */
+
+app.post("/api/activity/heartbeat", requireAuth, async (req, res) => {
+  const now = new Date().toISOString();
+
+  try {
+    await databaseClient
+      .from("users")
+      .update({ last_seen_at: now })
+      .eq("id", req.userId);
+
+    await databaseClient
+      .from("user_sessions")
+      .update({ last_seen_at: now })
+      .eq("user_id", req.userId)
+      .is("ended_at", null);
+
+    res.status(200).json({ ok: true });
+  } catch (error) {
+    // Heartbeats are fire-and-forget from the client — never worth a
+    // console.error flood, just quietly report failure.
+    res.status(200).json({ ok: false });
+  }
+});
 
 /* =========================================================
    AUTH: FORGOT PASSWORD
@@ -1210,6 +1383,19 @@ async function requirePremium(req, res, next) {
   }
 
   next();
+}
+
+/* =========================================================
+   SCORE SCALING HELPER
+   The interview AI evaluates on a 1-10 scale; every other score in the
+   schema (CV scores, skill-gap readiness) is 0-100. Converts the former
+   to the latter for storage so cross-feature aggregates stay meaningful.
+========================================================= */
+
+function toHundredScale(scoreOutOfTen) {
+  const n = Number(scoreOutOfTen);
+  if (!Number.isFinite(n)) return null;
+  return Math.min(100, Math.max(0, Math.round(n * 10)));
 }
 
 /* =========================================================
@@ -1452,6 +1638,60 @@ app.get('/api/billing/data', requireAuth, async (req, res) => {
     return res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
+
+/* =========================================================
+   JOB ROLE RESOLUTION HELPER
+   Shared by the interview simulator, CV analyzer, and skill gap
+   endpoints. The frontend only ever sends a free-text role title
+   (e.g. "Backend Developer", or "any"/null for no preference) — this
+   finds or creates the matching row in job_roles so that data across
+   features (interviews taken, CVs analysed, skill gaps run) can all
+   be joined back to the same role instead of living as disconnected
+   text strings.
+========================================================= */
+
+async function getOrCreateJobRoleId(roleTitle) {
+  const cleanTitle =
+    typeof roleTitle === "string" ? roleTitle.trim() : "";
+
+  if (!cleanTitle || cleanTitle.toLowerCase() === "any") {
+    return null;
+  }
+
+  try {
+    const { data: existing, error: selectError } = await databaseClient
+      .from("job_roles")
+      .select("job_role_id")
+      .ilike("title", cleanTitle)
+      .limit(1)
+      .maybeSingle();
+
+    if (selectError) {
+      console.warn("getOrCreateJobRoleId select skipped:", selectError.message);
+      return null;
+    }
+
+    if (existing) {
+      return existing.job_role_id;
+    }
+
+    const { data: created, error: insertError } = await databaseClient
+      .from("job_roles")
+      .insert({ title: cleanTitle })
+      .select("job_role_id")
+      .single();
+
+    if (insertError) {
+      console.warn("getOrCreateJobRoleId insert skipped:", insertError.message);
+      return null;
+    }
+
+    return created?.job_role_id || null;
+  } catch (error) {
+    console.warn("getOrCreateJobRoleId failed:", error.message);
+    return null;
+  }
+}
 
 /* =========================================================
    SKILL CATEGORY HELPER (shared with signup logic)
@@ -1859,7 +2099,7 @@ app.post("/api/skillgap", async (req, res) => {
       details: error.message,
     });
   }
-});;
+});
 
 // GET /api/roadmap?skills=skill1,skill2,skill3
 
@@ -2057,6 +2297,10 @@ app.post(
       });
     }
 
+    logFeatureEvent(user_id, "career_discovery", "completed", {
+      metadata: { scores: scores || {} },
+    });
+
     /*
       Scores can be saved to Supabase here later.
     */
@@ -2145,10 +2389,6 @@ function clampTargetQuestionCount(count) {
    QUESTION GENERATION (shared by start + on-demand top-up)
 ========================================================= */
 
-// Question objects now carry richer metadata so the frontend can:
-//  - show a suggested time budget (quant/engineering questions get longer)
-//  - render a plain-text diagram / given-data block for problems that need one
-//  - show a "final numeric answer" field when a specific number is expected
 function buildQuestionBatchPrompt(persona, job_role_id, question_type, { count, isOpening }) {
   const base = buildPersonaPrompt(persona, job_role_id, question_type);
 
@@ -2197,7 +2437,7 @@ For EACH question object, include:
 - "diagram": when the question involves given data, measurements, forces,
   a dataset, or a scenario that benefits from a simple visual, provide a
   plain-text/ASCII diagram or a clearly labeled list of given values (e.g.
-  "Beam length: 4m\\nLoad: 500N at midpoint\\nSupports: pinned at both ends").
+  "Beam length: 4m\nLoad: 500N at midpoint\nSupports: pinned at both ends").
   Otherwise set this to null. Never reference or describe an actual image
   file — plain text only.
 
@@ -2241,8 +2481,6 @@ async function generateQuestionBatch(persona, job_role_id, question_type, { coun
   return null;
 }
 
-// Internal safety cap — prevents runaway generation even for "no limit"
-// sessions if a client keeps requesting new questions indefinitely.
 const MAX_QUESTIONS_PER_SESSION = 200;
 
 /* =========================================================
@@ -2261,12 +2499,6 @@ app.post(
       question_count,
     } = req.body;
 
-    // The authenticated user is the source of truth for user_id — not
-    // whatever the client sends. Previously this came from a
-    // localStorage key ("skillforge_user_id") that was never actually
-    // set anywhere in the frontend, so every session was silently being
-    // attributed to the literal string "guest_user", which isn't a
-    // valid UUID and would fail the FK constraint on insert.
     const user_id = req.userId;
 
     if (
@@ -2306,10 +2538,6 @@ app.post(
         diagram: typeof q.diagram === "string" && q.diagram.trim() ? q.diagram : null,
       }));
 
-      // A real UUID now, not a human-readable "sess_..." string — the
-      // interview_sessions.id column is typed uuid, and the mismatch
-      // between the two was the exact cause of the
-      // "invalid input syntax for type uuid" errors.
       const sessionId = crypto.randomUUID();
 
       sessions.set(
@@ -2344,10 +2572,6 @@ app.post(
         }
       );
 
-      /*
-        Save the session to Supabase.
-        Failure does not stop the interview.
-      */
       try {
         const {
           error: insertError,
@@ -2397,6 +2621,14 @@ app.post(
         entityId: sessionId,
         desc: `Started a ${question_type || "hr"} interview`,
         req,
+      });
+
+      logFeatureEvent(user_id, "interview_simulator", "started", {
+        metadata: {
+          questionType: question_type || "hr",
+          personaId: persona.id || persona.name,
+          durationMinutes,
+        },
       });
 
       return res.status(200).json({
@@ -2450,8 +2682,6 @@ app.post(
     }
 
     if (session.questions.length >= MAX_QUESTIONS_PER_SESSION) {
-      // Extremely unlikely in practice at 5-30 min, but guards against a
-      // stuck client hammering this endpoint indefinitely.
       return res.status(200).json({
         question: session.questions[session.questions.length - 1],
       });
@@ -2659,10 +2889,6 @@ Every score must be a whole number from 1 to 10.
         evaluation,
       });
 
-      // Persist this Q&A to interview_responses — previously this data was
-      // generated, shown to the candidate once, and then thrown away
-      // entirely. Scores are stored on a 0-100 scale (score * 10) to match
-      // every other score column in the schema.
       try {
         const { error: responseInsertError } = await databaseClient
           .from("interview_responses")
@@ -2903,10 +3129,6 @@ Return only a valid JSON array of strings.
         })
       );
 
-    /*
-      Update the database session.
-      Failure does not block the final result.
-    */
     try {
       const {
         error: updateError,
@@ -2928,10 +3150,6 @@ Return only a valid JSON array of strings.
               new Date()
                 .toISOString(),
 
-            // Scaled to 0-100 — see toHundredScale. This UPDATE is what
-            // fires trg_snapshot_on_interview, which copies avg_score into
-            // progress_snapshots alongside cv_score/readiness_score, all
-            // on the same 0-100 scale.
             avg_score: toHundredScale(overallScore),
 
             overall_score: toHundredScale(overallScore),
@@ -2952,6 +3170,19 @@ Return only a valid JSON array of strings.
           entityId: session_id,
           desc: `Completed interview, overall score ${overallScore}/10`,
           req,
+        });
+
+        const elapsedSeconds = Math.round(
+          (Date.now() - new Date(session.started_at).getTime()) / 1000
+        );
+
+        logFeatureEvent(session.user_id, "interview_simulator", "completed", {
+          durationSeconds: elapsedSeconds > 0 ? elapsedSeconds : null,
+          metadata: {
+            overallScore,
+            questionsAnswered: answered.length,
+            questionType: session.question_type,
+          },
         });
       }
 
@@ -3034,93 +3265,3 @@ app.listen(
     );
   }
 );
-/* =========================================================
-   AUTH: DELETE ACCOUNT
-========================================================= */
-
-app.post("/api/delete-account", async (req, res) => {
-  console.log("DELETE ACCOUNT HIT");
-
-  try {
-    if (!supabaseAdmin) {
-      return res.status(500).json({
-        error: "Server not configured for account deletion",
-      });
-    }
-
-    const authHeader = req.headers.authorization;
-
-    if (
-      typeof authHeader !== "string" ||
-      !authHeader.startsWith("Bearer ")
-    ) {
-      return res.status(401).json({
-        error: "Authorization token missing",
-      });
-    }
-
-    const token = authHeader.slice("Bearer ".length).trim();
-
-    if (!token) {
-      return res.status(401).json({
-        error: "Authorization token missing",
-      });
-    }
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabaseAdmin.auth.getUser(token);
-
-    if (userError || !user) {
-      console.error("Token verification failed:", userError);
-
-      return res.status(401).json({
-        error: "Invalid or expired token",
-      });
-    }
-
-    const userId = user.id;
-    // Delete user via admin client
-    const { error: deleteError } =
-      await supabaseAdmin.auth.admin.deleteUser(userId);
-
-    if (deleteError) {
-      console.error("Supabase delete error:", deleteError);
-
-      return res.status(500).json({
-        error: "Failed to delete account",
-      });
-    }
-
-    return res.json({
-      ok: true,
-      message: "Account deleted successfully",
-    });
-  } catch (err) {
-    console.error("Delete account error:", err);
-
-    return res.status(500).json({
-      error: "Internal server error",
-    });
-  }
-});
-
-
-app.get("/api/esco/occupations", async (req, res) => {
-  try {
-    const q =
-      typeof req.query.q === "string" && req.query.q.trim()
-        ? req.query.q.trim()
-        : "software developer";
-
-    const occupations = await searchEscoOccupations(q);
-
-    return res.json({ occupations });
-  } catch (error) {
-    console.error("❌ ESCO occupation search error:", error);
-    return res.status(500).json({
-      error: "Could not search ESCO occupations",
-    });
-  }
-});

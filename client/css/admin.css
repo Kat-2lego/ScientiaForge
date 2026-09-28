@@ -1,0 +1,1067 @@
+/* =========================================================
+   ADMIN.CSS
+   Companion stylesheet for the admin pages. Always loaded AFTER
+   dashboard.css, which is where --primary, --cyan, --orange, --text-*,
+   --border, --shadow-*, and --radius-* are defined — this file reuses
+   those tokens rather than redeclaring them, so the admin panel and the
+   user dashboard always stay visually in sync.
+========================================================= */
+
+:root {
+  --admin-green: #16a34a;
+  --admin-green-light: #ecfdf5;
+  --admin-red: #dc2626;
+  --admin-red-light: #fef2f2;
+  --admin-purple: #7c3aed;
+  --admin-purple-light: #f5f3ff;
+}
+
+/* Hides page content until adminGuard.js confirms this is an admin
+   account, so a non-admin never sees a flash of admin data before the
+   redirect fires. */
+body.admin-auth-pending .main {
+  visibility: hidden;
+}
+
+/* =========================================================
+   DATE RANGE BAR (controls every date-aware chart at once)
+========================================================= */
+
+.date-range-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.date-range-presets {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-main);
+  border-radius: 999px;
+  padding: 3px;
+}
+
+.date-range-presets button {
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.date-range-presets button.active {
+  background: #fff;
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.date-range-custom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.date-range-custom span {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.date-range-custom input[type="date"] {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 7px 10px;
+  font-size: 0.82rem;
+  color: var(--text-main);
+  background: #fff;
+  font-family: inherit;
+}
+
+.date-range-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* =========================================================
+   PAGE HEADER
+========================================================= */
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.admin-header h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+  font-weight: 800;
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-header p {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.admin-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--admin-purple), #a78bfa);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.admin-pill i {
+  width: 12px;
+  height: 12px;
+}
+
+/* =========================================================
+   TABS (Dashboard / Users / Settings) — available if you ever
+   want a secondary in-page tab strip; not used by default since
+   the sidebar already covers navigation between the 3 pages.
+========================================================= */
+
+.admin-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.admin-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text-main);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.2s ease;
+}
+
+.admin-tab i {
+  width: 15px;
+  height: 15px;
+}
+
+.admin-tab:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.admin-tab.active {
+  background: linear-gradient(135deg, var(--primary), #1d4ed8);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: var(--shadow-blue);
+}
+
+/* =========================================================
+   KPI CARDS
+   Built on .stat-card from dashboard.css — these classes only add
+   what's new (live pulse, delta pills, skeleton state).
+========================================================= */
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.kpi-grid.secondary {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.kpi-grid.secondary .stat-value {
+  font-size: clamp(1.5rem, 2.1vw, 2.1rem);
+}
+
+.kpi-grid.secondary .stat-card.kpi-card {
+  min-height: 108px;
+}
+
+.stat-card.kpi-card {
+  min-height: 130px;
+  animation: fadeSlideIn 0.4s ease both;
+}
+
+.kpi-live-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--admin-green);
+  flex-shrink: 0;
+  box-shadow: 0 0 0 rgba(22, 163, 74, 0.5);
+  animation: pulseDot 2s infinite;
+}
+
+.stat-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.stat-delta.positive {
+  color: var(--admin-green);
+  background: var(--admin-green-light);
+}
+
+.stat-delta.negative {
+  color: var(--admin-red);
+  background: var(--admin-red-light);
+}
+
+.stat-delta.neutral {
+  color: var(--text-muted);
+  background: var(--border-light);
+}
+
+.kpi-card .stat-value {
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================
+   CHART PANELS
+========================================================= */
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.chart-grid.thirds {
+  grid-template-columns: 1fr 1fr;
+}
+
+.chart-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+  transition: 0.25s ease;
+  animation: fadeSlideIn 0.4s ease both;
+}
+
+.chart-panel:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.chart-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.chart-panel-head h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.chart-panel-head span {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.chart-canvas-wrap {
+  position: relative;
+  height: 240px;
+}
+
+.chart-canvas-wrap.short {
+  height: 190px;
+}
+
+.chart-range-toggle {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-main);
+  border-radius: 999px;
+  padding: 3px;
+}
+
+.chart-range-toggle button {
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.chart-range-toggle button.active {
+  background: #fff;
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* =========================================================
+   DATA TABLE (users list, audit log)
+========================================================= */
+
+.table-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+}
+
+.table-toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.table-search {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0 14px;
+  height: 42px;
+}
+
+.table-search i {
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.table-search input {
+  border: 0;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.table-filter-select {
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text-main);
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.data-table th {
+  text-align: left;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+.data-table tbody tr {
+  transition: 0.15s ease;
+}
+
+.data-table tbody tr:hover {
+  background: var(--bg-card-hover);
+}
+
+.cell-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cell-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8db1ff, #a9c5ff);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.cell-user-name {
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.cell-user-email {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.role-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.role-pill.admin {
+  background: var(--admin-purple-light);
+  color: var(--admin-purple);
+}
+
+.role-pill.user {
+  background: var(--bg-main);
+  color: var(--text-muted);
+}
+
+.online-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.online-status .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.online-status.online .dot {
+  background: var(--admin-green);
+  animation: pulseDot 2s infinite;
+}
+
+.online-status.online {
+  color: var(--admin-green);
+  font-weight: 700;
+}
+
+.row-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.btn-chip {
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text-main);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-chip.promote {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.btn-chip.promote:hover {
+  background: var(--primary-light);
+}
+
+.btn-chip.demote {
+  border-color: var(--admin-red);
+  color: var(--admin-red);
+}
+
+.btn-chip.demote:hover {
+  background: var(--admin-red-light);
+}
+
+.btn-chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.table-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.pagination-info {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.pagination-controls button {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text-main);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: 0.2s ease;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.pagination-controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   ACTIVITY FEED
+========================================================= */
+
+.activity-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--border-light);
+  animation: fadeSlideIn 0.3s ease both;
+}
+
+.activity-item:last-child {
+  border-bottom: 0;
+}
+
+.activity-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+.activity-icon i {
+  width: 15px;
+  height: 15px;
+}
+
+.activity-icon.blue { background: linear-gradient(135deg, #8db1ff, #a9c5ff); }
+.activity-icon.green { background: linear-gradient(135deg, #6ee7b7, #34d399); }
+.activity-icon.orange { background: linear-gradient(135deg, #f4b24f, #f7c56f); }
+.activity-icon.purple { background: linear-gradient(135deg, #c4b5fd, #a78bfa); }
+.activity-icon.red { background: linear-gradient(135deg, #fca5a5, #f87171); }
+
+.activity-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-text .primary {
+  font-size: 0.86rem;
+  color: var(--text-dark);
+  font-weight: 600;
+}
+
+.activity-text .secondary {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.activity-time {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   SETTINGS PAGE — reuses Settings.css's exact toggle-switch
+   markup/classes so it's pixel-identical to the user Settings page.
+========================================================= */
+
+.settings-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+}
+
+.settings-card + .settings-card {
+  margin-top: 14px;
+}
+
+.settings-card.border-danger {
+  border-color: var(--admin-red);
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.02), rgba(220, 38, 38, 0.05));
+}
+
+.settings-card h2 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  color: var(--text-dark);
+}
+
+.settings-card > p.card-sub {
+  margin: 0 0 14px;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+}
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0;
+}
+
+.setting-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.setting-icon i {
+  color: var(--primary);
+  width: 20px;
+  height: 20px;
+}
+
+.setting-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.setting-info h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 4px;
+}
+
+.setting-info p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.setting-row .divider,
+.settings-card .divider {
+  height: 1px;
+  background: var(--border-light);
+  margin: 0;
+}
+
+.switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch .slider {
+  position: absolute;
+  inset: 0;
+  background: var(--border);
+  border-radius: 24px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.switch .slider:before {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  bottom: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.switch input:checked + .slider {
+  background: var(--primary);
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+.kv-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  font-size: 0.88rem;
+}
+
+.kv-label {
+  color: var(--text-muted);
+}
+
+.kv-value {
+  color: var(--text-dark);
+  font-weight: 600;
+  text-align: right;
+}
+
+.admin-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.admin-list-row:last-child {
+  border-bottom: 0;
+}
+
+/* .list-card (from dashboard.css) has no color/text-decoration reset,
+   since the user dashboard only ever puts it on a <div>. The admin
+   dashboard's Quick Links panel uses real <a> tags for it instead. */
+a.list-card {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* =========================================================
+   MODAL (confirm promote / demote)
+========================================================= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+  animation: fadeIn 0.2s ease both;
+}
+
+.modal-overlay[hidden] {
+  display: none;
+}
+
+.modal-box {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  animation: modalPop 0.25s ease both;
+}
+
+.modal-box h2 {
+  margin: 0 0 10px;
+  font-size: 1.15rem;
+  color: var(--text-dark);
+}
+
+.modal-box p {
+  margin: 0 0 20px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-actions button {
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.modal-btn-cancel {
+  background: var(--bg-main);
+  color: var(--text-main);
+}
+
+.modal-btn-cancel:hover {
+  background: var(--border);
+}
+
+.modal-btn-confirm {
+  background: linear-gradient(135deg, var(--primary), #1d4ed8);
+  color: #fff;
+}
+
+.modal-btn-confirm.danger {
+  background: linear-gradient(135deg, var(--admin-red), #b91c1c);
+}
+
+.modal-btn-confirm:hover {
+  transform: translateY(-1px);
+}
+
+.modal-btn-confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =========================================================
+   TOASTS
+========================================================= */
+
+#toastHost {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 200;
+}
+
+.toast {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: var(--shadow-lg);
+  font-size: 0.86rem;
+  color: var(--text-main);
+  max-width: 340px;
+  animation: toastIn 0.25s ease both;
+}
+
+.toast.success { border-left-color: var(--admin-green); }
+.toast.error { border-left-color: var(--admin-red); }
+
+/* =========================================================
+   SKELETON LOADING STATE
+========================================================= */
+
+.skeleton {
+  background: linear-gradient(90deg, var(--border-light) 25%, var(--border) 37%, var(--border-light) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: 8px;
+  color: transparent !important;
+}
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes pulseDot {
+  0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.45); }
+  70% { box-shadow: 0 0 0 7px rgba(22, 163, 74, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(0.94) translateY(6px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+/* Stagger KPI/chart card entrances slightly for a "loading in" feel */
+.kpi-grid .kpi-card:nth-child(1) { animation-delay: 0.02s; }
+.kpi-grid .kpi-card:nth-child(2) { animation-delay: 0.07s; }
+.kpi-grid .kpi-card:nth-child(3) { animation-delay: 0.12s; }
+.kpi-grid .kpi-card:nth-child(4) { animation-delay: 0.17s; }
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+  .kpi-grid,
+  .kpi-grid.secondary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .chart-grid,
+  .chart-grid.thirds {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .kpi-grid,
+  .kpi-grid.secondary {
+    grid-template-columns: 1fr;
+  }
+
+  .table-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .row-actions {
+    justify-content: flex-start;
+  }
+
+  .admin-header {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-canvas-wrap {
+    height: 200px;
+  }
+}

@@ -274,6 +274,14 @@ async function handleSignUp() {
     const skillsInterests = Array.from(selectedSkillsTags);
     let rolesTargeted = [];
 
+    // 2b. Optional extra profile fields (Step 3) — never block signup if left blank
+    const phone = document.getElementById('sf-phone')?.value.trim() || "";
+    const location = document.getElementById('sf-location')?.value.trim() || "";
+    const referralSource = document.getElementById('sf-referral')?.value || "";
+    const linkedinUrl = document.getElementById('sf-linkedin')?.value.trim() || "";
+    const ageBracket = document.getElementById('sf-age-bracket')?.value || "";
+    const gender = document.getElementById('sf-gender')?.value || "";
+
     if (industry === 'Other') {
         const customIndustrySpecified = document.getElementById('sf-custom-industry').value.trim();
         const targetCustomRoleField = document.getElementById('sf-custom-role');
@@ -319,7 +327,13 @@ async function handleSignUp() {
             industry,
             experienceLevel,
             rolesTargeted,
-            skillsInterests
+            skillsInterests,
+            phone,
+            location,
+            referralSource,
+            linkedinUrl,
+            ageBracket,
+            gender
             }),
         });
 

@@ -7,6 +7,7 @@ import { normalizeCvAnalysis } from "../services/scoreService.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { enforceQuota, getUserPlanAndUsage } from "../services/quotaService.js";
 import { supabaseAdmin } from "../services/supabaseClient.js";
+import { logFeatureEvent } from "../../services/featureEvents.js";
 
 const router = express.Router();
 
@@ -56,6 +57,7 @@ function buildAnalysisFromRows(doc, row, feedbackItems = []) {
 router.post("/upload", requireAuth, upload.single("file"), async (req, res) => {
   const userId = req.user.id;
   let newCvId = null; // used to roll back if a later step fails
+  const requestStartedAt = Date.now();
 
   try {
     if (!req.file) {
@@ -179,6 +181,10 @@ router.post("/upload", requireAuth, upload.single("file"), async (req, res) => {
     }
 
     newCvId = null; // everything saved, nothing to roll back
+    logFeatureEvent(req.user.id, "cv_analyzer", "completed", {
+      durationSeconds: Math.round((Date.now() - requestStartedAt) / 1000),
+      metadata: { targetRole: targetRole || null, overallScore: analysis.score },
+    });
 
     return res.status(200).json({
       ...analysis,
