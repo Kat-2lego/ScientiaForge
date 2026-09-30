@@ -1,0 +1,10 @@
+[33mcommit 77aec8b3e86cf9a249f55e7e2cacca91e2462e56[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: Kat-2lego <katlegomlekalakala@gmail.com>
+Date:   Thu Sep 3 21:58:42 2026 +0200
+
+    Fix missing logAudit function
+
+ server/package-lock.json | 9 [32m++++[m[31m-----[m
+ server/package.json      | 2 [32m+[m[31m-[m
+ server/server.mjs        | 9 [32m++++++[m[31m---[m
+ 3 files changed, 11 insertions(+), 9 deletions(-)

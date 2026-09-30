@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkillForge Admin — Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/admin.css" />
+</head>
+<body class="admin-auth-pending">
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div>
+        <div class="logo">
+          <span class="logo-dark">Skill</span><span class="logo-blue">Forge</span>
+        </div>
+
+        <nav class="nav">
+          <a class="nav-item" href="Admin.html" data-label="Dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+
+          <a class="nav-item" href="AdminUsers.html" data-label="Users">
+            <i data-lucide="users"></i>
+            <span>Users</span>
+          </a>
+
+          <a class="nav-item active" href="AdminSettings.html" data-label="Settings">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+          </a>
+
+          <a class="nav-item" href="Dashboard.html" data-label="Back to App">
+            <i data-lucide="arrow-left-circle"></i>
+            <span>Back to App</span>
+          </a>
+
+          <a class="nav-item" href="" data-label="Log Out">
+            <i data-lucide="log-out"></i>
+            <span>Logout</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="download-card">
+        <div class="download-icon"><i data-lucide="shield"></i></div>
+        <h3>You're in Admin Mode</h3>
+        <p>Actions here affect real user accounts.</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+            <i data-lucide="menu"></i>
+          </button>
+          <div class="admin-pill"><i data-lucide="shield-check"></i>Admin Panel</div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="profile">
+            <div class="avatar"></div>
+            <div>
+              <div class="profile-name" data-admin-name>&hellip;</div>
+              <div class="profile-email" data-admin-email>&hellip;</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="admin-header">
+        <div>
+          <h1><i data-lucide="settings"></i> Admin Settings</h1>
+          <p>Manage who has admin access, site-wide toggles, and the audit trail.</p>
+        </div>
+      </section>
+
+      <!-- ===================== MANAGE ADMINS ===================== -->
+      <div class="settings-card">
+        <h2>Manage Admins</h2>
+        <p class="card-sub">Anyone here can promote or revoke other admins. You can't remove the very last admin.</p>
+        <div id="adminsList">
+          <div class="table-empty">Loading&hellip;</div>
+        </div>
+      </div>
+
+      <!-- ===================== SITE SETTINGS ===================== -->
+      <div class="settings-card">
+        <h2>Site Settings</h2>
+        <p class="card-sub">These take effect immediately for every user.</p>
+
+        <div class="setting-row">
+          <div class="setting-icon"><i data-lucide="wrench"></i></div>
+          <div class="setting-info">
+            <h4>Maintenance Mode</h4>
+            <p>Blocks sign-in for everyone except admins. Use this while you're making changes.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="maintenanceModeToggle" />
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="setting-row">
+          <div class="setting-icon"><i data-lucide="user-plus"></i></div>
+          <div class="setting-info">
+            <h4>Allow New Sign-ups</h4>
+            <p>Turn off to temporarily stop new accounts from being created.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="allowSignupsToggle" />
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- ===================== AUDIT LOG ===================== -->
+      <div class="settings-card" id="audit-log">
+        <h2>Audit Log</h2>
+        <p class="card-sub">A record of sign-ins, feature use, and admin actions across SkillForge.</p>
+
+        <div class="table-toolbar">
+          <select class="table-filter-select" id="auditActionFilter">
+            <option value="">All actions</option>
+            <option value="sign_up">Sign-ups</option>
+            <option value="sign_in">Sign-ins</option>
+            <option value="sign_out">Sign-outs</option>
+            <option value="interview_started">Interviews started</option>
+            <option value="interview_completed">Interviews completed</option>
+            <option value="skillgap_run">Skill-gap runs</option>
+            <option value="admin_promote">Admin promotions</option>
+            <option value="admin_demote">Admin revocations</option>
+            <option value="admin_settings_update">Settings changes</option>
+          </select>
+        </div>
+
+        <div class="activity-feed" id="auditLogList">
+          <div class="table-empty">Loading&hellip;</div>
+        </div>
+
+        <div class="pagination">
+          <span class="pagination-info" id="auditPaginationInfo"></span>
+          <div class="pagination-controls">
+            <button id="auditPrevBtn" disabled aria-label="Previous page"><i data-lucide="chevron-left"></i></button>
+            <button id="auditNextBtn" disabled aria-label="Next page"><i data-lucide="chevron-right"></i></button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ===================== REVOKE-ADMIN CONFIRM MODAL ===================== -->
+  <div class="modal-overlay" id="confirmModal" hidden>
+    <div class="modal-box">
+      <h2 id="confirmModalTitle">Are you sure?</h2>
+      <p id="confirmModalBody"></p>
+      <div class="modal-actions">
+        <button class="modal-btn-cancel" id="confirmModalCancel">Cancel</button>
+        <button class="modal-btn-confirm" id="confirmModalConfirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastHost"></div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../js/adminGuard.js"></script>
+  <script src="../js/adminSettings.js"></script>
+  <script src="../js/auth.js"></script>
+</body>
+</html>

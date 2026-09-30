@@ -1,0 +1,36 @@
+warning: in the working copy of 'server/server.mjs', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/server/server.mjs b/server/server.mjs[m
+[1mindex ff23c8c..7a91000 100644[m
+[1m--- a/server/server.mjs[m
+[1m+++ b/server/server.mjs[m
+[36m@@ -14,9 +14,27 @@[m [mimport careerPathfinderRoutes from "./routes/careerPathfinder.js";[m
+ import studyHubRoutes from "./routes/studyHub.js";[m
+ [m
+ [m
+[31m-// Temporary stub — replace with real audit logging later[m
+[31m-function logAudit(userId, action, meta = {}) {[m
+[31m-  console.log(`[audit] ${action}`, { userId, ...meta });[m
+[32m+[m[32masync function logAudit(userId, action, { entity = null, entityId = null, desc = null, req = null } = {}) {[m
+[32m+[m[32m  try {[m
+[32m+[m[32m    const ip = req?.ip || req?.headers?.["x-forwarded-for"] || null;[m
+[32m+[m[32m    const ua = req?.headers?.["user-agent"] || null;[m
+[32m+[m
+[32m+[m[32m    const { error } = await databaseClient.rpc("insert_audit_log", {[m
+[32m+[m[32m      p_user_id: userId,[m
+[32m+[m[32m      p_action: action,[m
+[32m+[m[32m      p_entity: entity,[m
+[32m+[m[32m      p_entity_id: entityId,[m
+[32m+[m[32m      p_desc: desc,[m
+[32m+[m[32m      p_ip: ip,[m
+[32m+[m[32m      p_ua: ua,[m
+[32m+[m[32m    });[m
+[32m+[m
+[32m+[m[32m    if (error) {[m
+[32m+[m[32m      console.warn("Audit log skipped:", error.message);[m
+[32m+[m[32m    }[m
+[32m+[m[32m  } catch (error) {[m
+[32m+[m[32m    console.warn("Audit log skipped:", error.message);[m
+[32m+[m[32m  }[m
+ }[m
+ [m
+ /* =========================================================[m
