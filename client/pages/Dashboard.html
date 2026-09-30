@@ -14,70 +14,72 @@
 </head>
 <body>
   <div class="layout">
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+ 
     <aside class="sidebar" id="sidebar">
       <div>
         <div class="logo">
           <span class="logo-dark">Skill</span><span class="logo-blue">Forge</span>
         </div>
-
+ 
         <nav class="nav">
           <a class="nav-item active" href="dashboard.html" data-label="Dashboard">
             <i data-lucide="layout-dashboard"></i>
             <span>Dashboard</span>
           </a>
-
+ 
           <a class="nav-item" href="CareerDiscovery.html" data-label="Career Discovery">
             <i data-lucide="compass"></i>
             <span>Career Discovery</span>
           </a>
-
+ 
           <a class="nav-item" href="cvDashboard.html" data-label="CV Analyzer">
             <i data-lucide="file-search"></i>
             <span>CV Analyzer</span>
           </a>
-
+ 
           <a class="nav-item" href="InterviewSimulator.html" data-label="Interview Simulator">
             <i data-lucide="mic"></i>
             <span>Interview Simulator</span>
           </a>
-
+ 
           <a class="nav-item" href="SkillGapAnalysis.html" data-label="Skill Gap Analysis">
             <i data-lucide="bar-chart-3"></i>
             <span>Skill Gap Analysis</span>
           </a>
-
-            <a class="nav-item" href="CareerPathfinder.html" data-label="Career Pathfinder">
-              <i data-lucide="graduation-cap"></i>
-              <span>Career Pathfinder</span>
-            </a>
-
+ 
+          <a class="nav-item" href="CareerPathfinder.html" data-label="Career Pathfinder">
+            <i data-lucide="graduation-cap"></i>
+            <span>Career Pathfinder</span>
+          </a>
+ 
           <a class="nav-item" href="StudyHub.html" data-label="Study Hub">
             <i data-lucide="book-open"></i>
             <span>Study Hub</span>
           </a>
-
+ 
           <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
             <i data-lucide="activity"></i>
             <span>Progress Tracker</span>
           </a>
-
+ 
           <a class="nav-item" href="Settings.html" data-label="Settings">
             <i data-lucide="settings"></i>
             <span>Settings</span>
           </a>
-
+ 
           <a class="nav-item" href="Support.html" data-label="Help & Support">
             <i data-lucide="life-buoy"></i>
             <span>Help/Support</span>
           </a>
-
+ 
           <a class="nav-item" href="" data-label="Log Out">
             <i data-lucide="log-out"></i>
             <span>Logout</span>
           </a>
         </nav>
       </div>
-
+ 
       <div class="download-card">
         <div class="download-icon">
           <i data-lucide="smartphone"></i>
@@ -87,14 +89,14 @@
         <button class="download-btn">Download</button>
       </div>
     </aside>
-
+ 
     <main class="main">
       <header class="topbar">
         <div class="topbar-left">
-          <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+          <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="sidebar">
             <i data-lucide="menu"></i>
           </button>
-
+ 
           <label class="searchbar">
             <i data-lucide="search"></i>
             <input
@@ -105,11 +107,11 @@
             />
           </label>
         </div>
-
+ 
         <div class="topbar-right">
           <button class="icon-btn"><i data-lucide="bell"></i></button>
           <button class="icon-btn"><i data-lucide="mail"></i></button>
-
+ 
           <div class="profile">
             <div class="avatar"></div>
             <div>
@@ -119,19 +121,19 @@
           </div>
         </div>
       </header>
-
+ 
       <section class="hero">
         <div>
           <h1>Welcome, <span id="greeting-name">...</span></h1>
           <p>Let's boost your career readiness</p>
         </div>
-
+ 
         <div class="hero-actions">
           <button class="btn btn-primary">+ Add Goal</button>
           <button class="btn btn-secondary">Import Data</button>
         </div>
       </section>
-
+ 
       <section class="stats-grid searchable">
         <article class="stat-card blue-card" data-search="cv score ats cv analyzer">
           <div class="stat-head">
@@ -147,7 +149,7 @@
             <span></span><span></span><span></span><span></span><span></span>
           </div>
         </article>
-
+ 
         <article class="stat-card searchable" data-search="interview score readiness practice interview">
           <div class="stat-head">
             <div class="stat-icon orange"><i data-lucide="mic"></i></div>
@@ -162,7 +164,7 @@
             <span></span><span></span><span></span><span></span><span></span>
           </div>
         </article>
-
+ 
         <article class="stat-card searchable" data-search="skill readiness progress skills">
           <div class="stat-head">
             <div class="stat-icon green"><i data-lucide="target"></i></div>
@@ -177,7 +179,7 @@
             <span></span><span></span><span></span><span></span><span></span>
           </div>
         </article>
-
+ 
         <article class="stat-card searchable" data-search="sent applications jobs submitted">
           <div class="stat-head">
             <div class="stat-icon soft-green"><i data-lucide="send"></i></div>
@@ -192,12 +194,12 @@
           </div>
         </article>
       </section>
-
+ 
       <section class="content-grid">
         <article class="panel insights searchable" data-search="insights marketing manager optimize cv gain employer skills apply jobs">
           <h2>Insights</h2>
           <div class="muted-line">Job Match <span class="accent">699 ○</span></div>
-
+ 
           <div class="job-box">
             <div class="job-left">
               <div class="job-icon"><i data-lucide="briefcase"></i></div>
@@ -208,25 +210,25 @@
             </div>
             <i data-lucide="chevron-right"></i>
           </div>
-
+ 
           <h3 class="subheading">Recommended Next Steps</h3>
-
+ 
           <div class="list-card">
             <div class="list-left"><i data-lucide="pencil-line"></i> Optimize Your CV</div>
             <i data-lucide="chevron-right"></i>
           </div>
-
+ 
           <div class="list-card">
             <div class="list-left"><i data-lucide="badge-check"></i> Gain Employer Skills</div>
             <i data-lucide="chevron-right"></i>
           </div>
-
+ 
           <div class="list-card">
             <div class="list-left"><i data-lucide="briefcase-business"></i> Apply for Entry-Level Jobs</div>
             <i data-lucide="chevron-right"></i>
           </div>
         </article>
-
+ 
         <article class="panel searchable" data-search="upcoming mock interview alan smith start practice">
           <h2>Upcoming</h2>
           <div class="upcoming-box">
@@ -241,26 +243,26 @@
             <button class="btn btn-primary full">Start Practice</button>
           </div>
         </article>
-
+ 
         <article class="panel searchable" data-search="continue development upload cv start interview explore careers">
           <h2>Continue Your Development</h2>
-
+ 
           <button class="action-row">
             <span><i data-lucide="file-up"></i> Upload CV</span>
             <i data-lucide="chevron-right"></i>
           </button>
-
+ 
           <button class="action-row featured">
             <span><i data-lucide="mic"></i> Start Interview</span>
             <i data-lucide="chevron-right"></i>
           </button>
-
+ 
           <button class="action-row">
             <span><i data-lucide="compass"></i> Explore Careers</span>
             <i data-lucide="chevron-right"></i>
           </button>
         </article>
-
+ 
         <article class="panel searchable" data-search="goal completion progress completed 45">
           <div class="progress-wrap">
             <div>
@@ -268,7 +270,7 @@
               <div class="job-sub">Goal Completion</div>
               <div class="progress-bold">2 of Career Goals</div>
             </div>
-
+ 
             <div class="gauge">
               <div class="gauge-ring"></div>
               <div class="gauge-center">
@@ -278,7 +280,7 @@
             </div>
           </div>
         </article>
-
+        
         <article class="panel searchable" data-search="jobs interviews jobs sent applications">
           <div class="metrics-row">
             <div class="metric">
@@ -288,9 +290,9 @@
                 <div class="job-sub">Jobs Interviews</div>
               </div>
             </div>
-
+ 
             <div class="divider"></div>
-
+ 
             <div class="metric">
               <div class="metric-icon"><i data-lucide="send"></i></div>
               <div>
@@ -301,15 +303,16 @@
           </div>
         </article>
       </section>
-
+ 
       <div class="search-empty hidden" id="emptyState">
         No matching sections found.
       </div>
     </main>
   </div>
-
+ 
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="../js/dashboard.js"></script>
   <script src="../js/auth.js"></script>
 </body>
 </html>
+ 

@@ -12,6 +12,9 @@ import { dirname, join } from 'path';
 import Stripe from 'stripe';
 import careerPathfinderRoutes from "./routes/careerPathfinder.js";
 import studyHubRoutes from "./routes/studyHub.js";
+import createNscRouter from "./routes/nscPapers.cjs";
+import createVideoDiscoveryRouter from "./routes/videoDiscovery.cjs";
+import { createProxyMiddleware } from "http-proxy-middleware";
 
 
 async function logAudit(userId, action, { entity = null, entityId = null, desc = null, req = null } = {}) {
@@ -88,6 +91,10 @@ console.log(
 
 const app = express();
 
+app.use("/api/discovery", createProxyMiddleware({
+  target: "http://127.0.0.1:8000",
+  changeOrigin: true,
+}));
 /*
   Main SkillForge server: port 5000
   CV Analyzer server: port 5001
@@ -379,6 +386,18 @@ app.use("/api/cv", cvRoutes);
 app.use("/api/career-pathfinder", careerPathfinderRoutes);
 app.use("/api/study-hub", studyHubRoutes);
 
+
+const requireAuthWithUser = (req, res, next) =>
+  Promise.resolve(requireAuth(req, res, () => { req.user = { id: req.userId }; next(); })).catch(next);
+
+if (supabaseAdmin) {
+  app.use("/api/study-hub/nsc", createNscRouter({ supabase: supabaseAdmin, requireAuth: requireAuthWithUser,
+    storageBucket: process.env.NSC_STORAGE_BUCKET || "past-papers" }));
+  app.use("/api/video-discovery", createVideoDiscoveryRouter({ supabase: supabaseAdmin, requireAuth: requireAuthWithUser,
+    youtubeApiKey: process.env.YOUTUBE_API_KEY }));
+} else {
+  console.warn("⚠️ SUPABASE_SERVICE_ROLE_KEY is not set: NSC past papers, Active Recall and Study videos are off.");
+}
 /* =========================================================
    MAIN PAGE
 ========================================================= */

@@ -24,6 +24,11 @@ async function handleLogout(event) {
   }
 }
 
+window.getAuthHeaders = function getAuthHeaders() {
+  const token = localStorage.getItem("sb-access-token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll('[data-label="Log Out"]').forEach((link) => {
     link.addEventListener("click", handleLogout);

@@ -1,0 +1,7 @@
+# NSC past-paper collector (Python 3.10+)
+pymupdf>=1.24
+beautifulsoup4>=4.12
+requests>=2.31
+python-dotenv>=1.0
+# tests only
+pytest>=8.0

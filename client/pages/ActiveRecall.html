@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Active Recall | SkillForge Study Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/StudyHub.css" />
+  <link rel="stylesheet" href="../css/ActiveRecall.css" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="nsc-focus">
+  <a class="nsc-skip" href="#main">Skip to content</a>
+
+  <header class="nsc-topbar ar-topbar">
+    <a class="nsc-back" id="arBack" href="StudyHub.html"><i data-lucide="arrow-left"></i><span>Back to paper</span></a>
+    <div class="ar-topbar-title">
+      <span id="arTitle">Active Recall</span>
+      <span class="ar-saved"><i data-lucide="cloud-check"></i>Saved after every answer</span>
+    </div>
+  </header>
+
+  <main id="main" class="nsc-page ar-page" tabindex="-1">
+    <div class="ar-progress" id="arProgressWrap" hidden>
+      <div class="ar-progress-label"><span id="arCounter"></span><span id="arTally"></span></div>
+      <ol class="ar-segments" id="arSegments" aria-label="Questions in this session"></ol>
+    </div>
+    <div id="arRoot">
+      <div class="nsc-skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
+      <p class="sr-only" role="status">Preparing your session</p>
+    </div>
+  </main>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/nscCommon.js"></script>
+  <script src="../js/ActiveRecall.js"></script>
+</body>
+</html>

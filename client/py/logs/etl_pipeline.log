@@ -1,0 +1,34 @@
+2026-05-19 14:12:50,268 - INFO - ETL PIPELINE STARTED
+2026-05-19 14:30:14,521 - INFO - ETL PIPELINE STARTED
+2026-05-19 14:30:18,781 - INFO - skills - DUPLICATES REMOVED | Before=31290 | After=31290 | Reduction=0.0%
+2026-05-19 14:30:18,827 - INFO - abilities - DUPLICATES REMOVED | Before=46488 | After=46488 | Reduction=0.0%
+2026-05-19 14:30:18,860 - INFO - knowledge - DUPLICATES REMOVED | Before=29502 | After=29502 | Reduction=0.0%
+2026-05-19 14:30:18,897 - INFO - work_activities - DUPLICATES REMOVED | Before=36654 | After=36654 | Reduction=0.0%
+2026-05-19 14:30:18,900 - INFO - work_styles - DUPLICATES REMOVED | Before=0 | After=0 | Reduction=0%
+2026-05-19 14:30:18,906 - INFO - interests - DUPLICATES REMOVED | Before=5538 | After=5538 | Reduction=0.0%
+2026-05-19 14:30:18,928 - INFO - skills | Before=31290 | After=12754 | Reduction=59.24%
+2026-05-19 14:30:18,962 - INFO - abilities | Before=46488 | After=16806 | Reduction=63.85%
+2026-05-19 14:30:18,979 - INFO - knowledge | Before=29502 | After=6794 | Reduction=76.97%
+2026-05-19 14:30:19,009 - INFO - work_activities | Before=36654 | After=14132 | Reduction=61.44%
+2026-05-19 14:30:19,015 - INFO - work_styles | Before=0 | After=0 | Reduction=0%
+2026-05-19 14:30:19,019 - INFO - interests | Before=5538 | After=3312 | Reduction=40.2%
+2026-05-19 14:30:19,033 - INFO - technology_skills | Before=32773 | After=11058 | Reduction=66.26%
+2026-05-19 14:30:19,042 - INFO - occupation_data | Before=1016 | After=923 | Reduction=9.15%
+2026-05-19 14:30:19,177 - INFO - career_features generic reduction | Before=53798 | After=50050 | Reduction=6.97%
+2026-05-19 14:30:38,012 - INFO - ETL PIPELINE COMPLETED
+2026-05-19 14:43:47,404 - INFO - ETL PIPELINE STARTED
+2026-05-19 14:43:52,302 - INFO - skills - DUPLICATES REMOVED | Before=31290 | After=31290 | Reduction=0.0%
+2026-05-19 14:43:52,343 - INFO - abilities - DUPLICATES REMOVED | Before=46488 | After=46488 | Reduction=0.0%
+2026-05-19 14:43:52,374 - INFO - knowledge - DUPLICATES REMOVED | Before=29502 | After=29502 | Reduction=0.0%
+2026-05-19 14:43:52,410 - INFO - work_activities - DUPLICATES REMOVED | Before=36654 | After=36654 | Reduction=0.0%
+2026-05-19 14:43:52,413 - INFO - work_styles - DUPLICATES REMOVED | Before=0 | After=0 | Reduction=0%
+2026-05-19 14:43:52,417 - INFO - interests - DUPLICATES REMOVED | Before=5538 | After=5538 | Reduction=0.0%
+2026-05-19 14:43:52,442 - INFO - skills | Before=31290 | After=12754 | Reduction=59.24%
+2026-05-19 14:43:52,477 - INFO - abilities | Before=46488 | After=16806 | Reduction=63.85%
+2026-05-19 14:43:52,498 - INFO - knowledge | Before=29502 | After=6794 | Reduction=76.97%
+2026-05-19 14:43:52,526 - INFO - work_activities | Before=36654 | After=14132 | Reduction=61.44%
+2026-05-19 14:43:52,532 - INFO - work_styles | Before=0 | After=0 | Reduction=0%
+2026-05-19 14:43:52,592 - INFO - interests | Before=5538 | After=3312 | Reduction=40.2%
+2026-05-19 14:43:52,633 - INFO - technology_skills | Before=32773 | After=11058 | Reduction=66.26%
+2026-05-19 14:43:52,642 - INFO - occupation_data | Before=1016 | After=923 | Reduction=9.15%
+2026-05-19 14:43:52,786 - INFO - career_features generic reduction | Before=53798 | After=50050 | Reduction=6.97%

@@ -36,7 +36,7 @@
 
 .progress-bar label {
   font-size: 0.9rem;
-  color: var(--muted);
+  color: var(--text-muted);
 }
 
 .bar {

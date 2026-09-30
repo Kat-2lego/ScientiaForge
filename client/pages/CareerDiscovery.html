@@ -26,70 +26,72 @@
   <div id="sfNotice" class="sf-notice" hidden></div>
 
   <div class="layout">
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+ 
     <aside class="sidebar" id="sidebar">
       <div>
         <div class="logo">
           <span class="logo-dark">Skill</span><span class="logo-blue">Forge</span>
         </div>
-
+ 
         <nav class="nav">
-          <a class="nav-item" href="Dashboard.html" data-label="Dashboard">
+          <a class="nav-item" href="dashboard.html" data-label="Dashboard">
             <i data-lucide="layout-dashboard"></i>
             <span>Dashboard</span>
           </a>
-
+ 
           <a class="nav-item active" href="CareerDiscovery.html" data-label="Career Discovery">
             <i data-lucide="compass"></i>
             <span>Career Discovery</span>
           </a>
-
+ 
           <a class="nav-item" href="cvDashboard.html" data-label="CV Analyzer">
             <i data-lucide="file-search"></i>
             <span>CV Analyzer</span>
           </a>
-
+ 
           <a class="nav-item" href="InterviewSimulator.html" data-label="Interview Simulator">
             <i data-lucide="mic"></i>
             <span>Interview Simulator</span>
           </a>
-
+ 
           <a class="nav-item" href="SkillGapAnalysis.html" data-label="Skill Gap Analysis">
             <i data-lucide="bar-chart-3"></i>
             <span>Skill Gap Analysis</span>
           </a>
-
+ 
           <a class="nav-item" href="CareerPathfinder.html" data-label="Career Pathfinder">
             <i data-lucide="graduation-cap"></i>
             <span>Career Pathfinder</span>
           </a>
-
+ 
           <a class="nav-item" href="StudyHub.html" data-label="Study Hub">
             <i data-lucide="book-open"></i>
             <span>Study Hub</span>
           </a>
-
+ 
           <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
             <i data-lucide="activity"></i>
             <span>Progress Tracker</span>
           </a>
-
+ 
           <a class="nav-item" href="Settings.html" data-label="Settings">
             <i data-lucide="settings"></i>
             <span>Settings</span>
           </a>
-
+ 
           <a class="nav-item" href="Support.html" data-label="Help & Support">
             <i data-lucide="life-buoy"></i>
             <span>Help/Support</span>
           </a>
-
-          <a class="nav-item" href="#" data-label="Log Out">
+ 
+          <a class="nav-item" href="" data-label="Log Out">
             <i data-lucide="log-out"></i>
             <span>Logout</span>
           </a>
         </nav>
       </div>
-
+ 
       <div class="download-card">
         <div class="download-icon">
           <i data-lucide="smartphone"></i>
@@ -99,11 +101,11 @@
         <button class="download-btn">Download</button>
       </div>
     </aside>
-
-    <main class="main main-content">
+ 
+    <main class="main">
       <header class="topbar">
         <div class="topbar-left">
-          <button class="menu-btn" id="menuBtn" type="button" aria-label="Open menu">
+          <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="sidebar">
             <i data-lucide="menu"></i>
           </button>
 
@@ -405,7 +407,7 @@
 
   <script>
     // Point the frontend at your API. Change this for deployment.
-    window.SKILLFORGE_API_BASE = "http://127.0.0.1:8000";
+    window.SKILLFORGE_API_BASE = "";
   </script>
   <script src="../js/CareerDiscovery.js"></script>
   <script>

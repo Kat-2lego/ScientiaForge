@@ -2,25 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-
+ 
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
   />
-
+ 
   <title>SkillForge | CV Analyzer</title>
-
+ 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
+ 
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
     rel="stylesheet"
   />
-
+ 
   <link rel="stylesheet" href="../css/dashboard.css" />
   <link rel="stylesheet" href="../css/cvDashboard.css" />
-
+ 
   <style>
     .modal-overlay {
       position: fixed;
@@ -61,11 +61,103 @@
       background: #1a3c8f;
       color: #fff;
     }
+ 
+    /* =========================================================
+       RESPONSIVE — CV Analyzer page content
+       (sidebar/hamburger behavior lives in dashboard.css/js;
+       these rules only cover this page's own components since
+       cvDashboard.css wasn't shared to edit directly)
+       ========================================================= */
+ 
+    /* score summary row: overall score + job match */
+    .top-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+ 
+    .cv-score-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+ 
+    @media (max-width: 900px) {
+      .top-summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+ 
+    @media (max-width: 768px) {
+      .cv-score-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+ 
+      .cv-score-circle {
+        align-self: center;
+      }
+ 
+      .target-role-field {
+        width: 100%;
+      }
+ 
+      .target-role-field input {
+        width: 100%;
+      }
+ 
+      .progress-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+ 
+      .bottom-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+      }
+ 
+      .action-wrap {
+        flex-direction: column;
+      }
+ 
+      .action-wrap .btn {
+        width: 100%;
+      }
+ 
+      .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+ 
+      .hero-actions .btn {
+        width: 100%;
+      }
+    }
+ 
+    @media (max-width: 480px) {
+      .cv-score-value,
+      .cv-score-inner {
+        font-size: 1.6rem;
+      }
+ 
+      .job-match-percent {
+        font-size: 1.1rem;
+      }
+ 
+      .modal-box {
+        max-width: 90vw;
+        padding: 20px;
+      }
+    }
   </style>
 </head>
-
+ 
 <body>
-
+ 
   <!-- CUSTOM MODAL (moved to top of body so it's always ready before scripts run) -->
   <div id="customModalOverlay" class="modal-overlay" style="display:none;">
     <div class="modal-box">
@@ -73,74 +165,75 @@
       <button id="customModalOkBtn">OK</button>
     </div>
   </div>
-
+ 
   <div class="layout">
-
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+ 
     <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
       <div>
         <div class="logo">
           <span class="logo-dark">Skill</span><span class="logo-blue">Forge</span>
         </div>
-
+ 
         <nav class="nav">
-          <a class="nav-item" href="../pages/dashboard.html">
+          <a class="nav-item" href="dashboard.html" data-label="Dashboard">
             <i data-lucide="layout-dashboard"></i>
             <span>Dashboard</span>
           </a>
-
-          <a class="nav-item" href="../pages/careerDiscovery.html">
+ 
+          <a class="nav-item" href="CareerDiscovery.html" data-label="Career Discovery">
             <i data-lucide="compass"></i>
             <span>Career Discovery</span>
           </a>
-
-          <a class="nav-item active" href="../pages/CvDashboard.html">
+ 
+          <a class="nav-item active" href="cvDashboard.html" data-label="CV Analyzer">
             <i data-lucide="file-search"></i>
             <span>CV Analyzer</span>
           </a>
-
-          <a class="nav-item" href="../pages/InterviewSimulator.html">
+ 
+          <a class="nav-item" href="InterviewSimulator.html" data-label="Interview Simulator">
             <i data-lucide="mic"></i>
             <span>Interview Simulator</span>
           </a>
-
-          <a class="nav-item" href="../pages/skillGapAnalysis.html">
-            <i data-lucide="chart-column"></i>
+ 
+          <a class="nav-item" href="SkillGapAnalysis.html" data-label="Skill Gap Analysis">
+            <i data-lucide="bar-chart-3"></i>
             <span>Skill Gap Analysis</span>
           </a>
-
+ 
           <a class="nav-item" href="CareerPathfinder.html" data-label="Career Pathfinder">
             <i data-lucide="graduation-cap"></i>
             <span>Career Pathfinder</span>
           </a>
-
+ 
           <a class="nav-item" href="StudyHub.html" data-label="Study Hub">
             <i data-lucide="book-open"></i>
             <span>Study Hub</span>
           </a>
-
-          <a class="nav-item" href="../pages/progressTracker.html">
-            <i data-lucide="trending-up"></i>
+ 
+          <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
+            <i data-lucide="activity"></i>
             <span>Progress Tracker</span>
           </a>
-
-          <a class="nav-item" href="../pages/settings.html">
+ 
+          <a class="nav-item" href="Settings.html" data-label="Settings">
             <i data-lucide="settings"></i>
             <span>Settings</span>
           </a>
-
-          <a class="nav-item" href="../pages/Support.html">
-            <i data-lucide="help-circle"></i>
-            <span>Help/support</span>
+ 
+          <a class="nav-item" href="Support.html" data-label="Help & Support">
+            <i data-lucide="life-buoy"></i>
+            <span>Help/Support</span>
           </a>
-
-          <a class="nav-item" href="#" data-label="Log Out">
+ 
+          <a class="nav-item" href="" data-label="Log Out">
             <i data-lucide="log-out"></i>
             <span>Logout</span>
           </a>
         </nav>
       </div>
-      
+ 
       <div class="download-card">
         <div class="download-icon">
           <i data-lucide="smartphone"></i>
@@ -150,10 +243,10 @@
         <button class="download-btn">Download</button>
       </div>
     </aside>
-
+ 
     <!-- MAIN CONTENT -->
     <main class="main">
-
+ 
       <!-- TOP BAR -->
       <header class="topbar">
         <div class="topbar-left">
@@ -161,14 +254,16 @@
             class="menu-btn"
             id="menuBtn"
             type="button"
-            aria-label="Open navigation menu"
+            aria-label="Open menu"
+            aria-expanded="false"
+            aria-controls="sidebar"
           >
-            ☰
+            <i data-lucide="menu"></i>
           </button>
-
+ 
           <div class="searchbar">
             <i data-lucide="search"></i>
-
+ 
             <input
               type="text"
               id="searchInput"
@@ -176,11 +271,11 @@
             />
           </div>
         </div>
-
+ 
         <div class="topbar-right">
           <button class="icon-btn"><i data-lucide="bell"></i></button>
           <button class="icon-btn"><i data-lucide="mail"></i></button>
-
+ 
           <div class="profile">
             <div class="avatar"></div>
             <div>
@@ -190,18 +285,18 @@
           </div>
         </div>
       </header>
-
+ 
       <!-- HERO -->
       <section class="hero">
         <div>
           <h1>CV Analyzer</h1>
-
+ 
           <p>
             Review your CV score, job match and improvement
             areas at a glance.
           </p>
         </div>
-
+ 
         <div class="hero-actions">
           <button
             class="btn btn-primary upload-button"
@@ -211,7 +306,7 @@
             <i data-lucide="upload"></i>
             Upload New CV
           </button>
-
+ 
           <button
             class="btn btn-secondary download-button"
             id="downloadBtn"
@@ -222,7 +317,7 @@
           </button>
         </div>
       </section>
-
+ 
       <!-- HIDDEN FILE INPUT -->
       <input
         type="file"
@@ -230,7 +325,7 @@
         accept=".pdf,.doc,.docx,.txt"
         hidden
       />
-
+ 
       <!-- TARGET ROLE INPUT (NEW) -->
       <div class="target-role-field">
         <label for="targetRoleInput">Target Role (required)</label>
@@ -240,31 +335,31 @@
           placeholder="e.g. Frontend Developer"
         />
       </div>
-
+ 
       <!-- TOP SUMMARY -->
       <section class="stats-grid top-summary-grid">
-
+ 
         <!-- OVERALL SCORE -->
         <article class="stat-card cv-score-panel searchable">
           <div class="cv-score-header">
-
+ 
             <div class="score-information">
               <div class="muted-line">
                 Overall CV Score
               </div>
-
+ 
               <div
                 class="cv-score-value"
                 id="overallScoreText"
               >
                 0%
               </div>
-
+ 
               <p class="score-description">
                 Your overall CV quality score.
               </p>
             </div>
-
+ 
             <div
               class="cv-score-circle"
               id="scoreCircle"
@@ -278,33 +373,33 @@
                 >
                   0%
                 </strong>
-
+ 
                 <span>out of 100</span>
               </div>
             </div>
-
+ 
           </div>
         </article>
-
+ 
         <!-- JOB MATCH -->
         <article class="stat-card job-match-card searchable">
           <div class="job-match-content">
             <h3>Job Match</h3>
-
+ 
             <div
               class="job-target"
               id="targetRoleText"
             >
               Target Role: Not analyzed yet
             </div>
-
+ 
             <div
               class="job-match-percent"
               id="matchScoreText"
             >
               Match 0%
             </div>
-
+ 
             <div
               class="job-match-missing"
               id="missingSkillsText"
@@ -313,21 +408,21 @@
             </div>
           </div>
         </article>
-
+ 
       </section>
-
+ 
       <!-- MAIN ANALYSIS CONTENT -->
       <section class="content-grid">
-
+ 
         <!-- CV BREAKDOWN -->
         <article class="panel searchable">
           <h2>CV Breakdown</h2>
-
+ 
           <!-- ATS SCORE -->
           <div class="breakdown-item">
             <div class="breakdown-top">
               <span>ATS Compatibility</span>
-
+ 
               <strong
                 class="ats-score"
                 id="atsScoreText"
@@ -335,7 +430,7 @@
                 0%
               </strong>
             </div>
-
+ 
             <div class="progress-bar">
               <div
                 class="progress-fill ats-bar"
@@ -343,12 +438,12 @@
               ></div>
             </div>
           </div>
-
+ 
           <!-- CONTENT SCORE -->
           <div class="breakdown-item">
             <div class="breakdown-top">
               <span>Content Quality</span>
-
+ 
               <strong
                 class="content-score"
                 id="contentScoreText"
@@ -356,7 +451,7 @@
                 0%
               </strong>
             </div>
-
+ 
             <div class="progress-bar">
               <div
                 class="progress-fill content-bar"
@@ -364,12 +459,12 @@
               ></div>
             </div>
           </div>
-
+ 
           <!-- FORMATTING SCORE -->
           <div class="breakdown-item">
             <div class="breakdown-top">
               <span>Formatting</span>
-
+ 
               <strong
                 class="format-score"
                 id="formatScoreText"
@@ -377,7 +472,7 @@
                 0%
               </strong>
             </div>
-
+ 
             <div class="progress-bar">
               <div
                 class="progress-fill format-bar"
@@ -386,28 +481,28 @@
             </div>
           </div>
         </article>
-
+ 
         <!-- AI FEEDBACK -->
         <article class="panel searchable">
           <h2>AI Feedback</h2>
-
+ 
           <p
             class="analysis-summary"
             id="analysisSummary"
           >
             Upload your CV to receive AI-generated feedback.
           </p>
-
+ 
           <ul
             class="feedback-list"
             id="feedbackList"
           ></ul>
         </article>
-
+ 
         <!-- QUICK FIXES -->
         <article class="panel searchable">
           <h2>Quick Fixes</h2>
-
+ 
           <ul
             class="quick-fixes-list"
             id="quickFixesList"
@@ -417,33 +512,33 @@
             </li>
           </ul>
         </article>
-
+ 
         <!-- PROGRESS TRACKER -->
         <article class="panel progress-card searchable">
           <div class="progress-card-header">
             <div>
               <h2>Progress Tracker</h2>
-
+ 
               <p>
                 Compare your previous CV score with your current score.
               </p>
             </div>
-
+ 
             <i data-lucide="trending-up"></i>
           </div>
-
+ 
           <div class="progress-comparison">
-
+ 
             <!-- PREVIOUS SCORE -->
             <div class="progress-entry">
               <div class="progress-label">
                 <span>Previous CV</span>
-
+ 
                 <strong id="previousScoreText">
                   0%
                 </strong>
               </div>
-
+ 
               <div class="progress-bar">
                 <div
                   class="progress-fill previous"
@@ -451,17 +546,17 @@
                 ></div>
               </div>
             </div>
-
+ 
             <!-- CURRENT SCORE -->
             <div class="progress-entry">
               <div class="progress-label">
                 <span>Current CV</span>
-
+ 
                 <strong id="currentScoreText">
                   0%
                 </strong>
               </div>
-
+ 
               <div class="progress-bar">
                 <div
                   class="progress-fill current"
@@ -469,22 +564,22 @@
                 ></div>
               </div>
             </div>
-
+ 
           </div>
         </article>
-
+ 
       </section>
-
+ 
       <!-- BOTTOM ACTIONS -->
       <section class="panel bottom-actions">
         <div>
           <h2>Ready to improve your CV?</h2>
-
+ 
           <p>
             Upload an updated version and compare your new score.
           </p>
         </div>
-
+ 
         <div class="action-wrap">
           <button
             class="btn btn-primary upload-button"
@@ -494,7 +589,7 @@
             <i data-lucide="upload"></i>
             Upload New CV
           </button>
-
+ 
           <button
             class="btn btn-secondary download-button"
             id="downloadBtn2"
@@ -505,171 +600,217 @@
           </button>
         </div>
       </section>
-
+ 
     </main>
   </div>
-
+ 
   <script src="https://unpkg.com/lucide@latest"></script>
-
+ 
   <script>
     "use strict";
-
+ 
     lucide.createIcons();
-
+ 
     const API_URL = "http://localhost:5001/api/cv/upload";
     const HISTORY_URL = "http://localhost:5001/api/cv/history";
     const QUOTA_URL = "http://localhost:5001/api/cv/quota";
-
+ 
     const appState = {
       analysis: null
     };
-
+ 
     // ---- CUSTOM MODAL (replaces native alert()) ----
     function showModal(message) {
       document.getElementById('customModalMessage').textContent = message;
       document.getElementById('customModalOverlay').style.display = 'flex';
     }
-
+ 
     document.getElementById('customModalOkBtn').addEventListener('click', () => {
       document.getElementById('customModalOverlay').style.display = 'none';
     });
-
+ 
     // Optional: close modal when clicking outside the box
     document.getElementById('customModalOverlay').addEventListener('click', (event) => {
       if (event.target.id === 'customModalOverlay') {
         document.getElementById('customModalOverlay').style.display = 'none';
       }
     });
-
+ 
     const elements = {
       sidebar: document.getElementById("sidebar"),
       menuBtn: document.getElementById("menuBtn"),
+      overlay: document.getElementById("sidebarOverlay"),
+ 
       searchInput: document.getElementById("searchInput"),
       fileInput: document.getElementById("cvFileInput"),
       targetRoleInput: document.getElementById("targetRoleInput"),
-
+ 
       analyzeBtn: document.getElementById("analyzeBtn"),
       analyzeBtn2: document.getElementById("analyzeBtn2"),
-
+ 
       downloadBtn: document.getElementById("downloadBtn"),
       downloadBtn2: document.getElementById("downloadBtn2"),
-
+ 
       overallScoreText:
         document.getElementById("overallScoreText"),
-
+ 
       circleScoreText:
         document.getElementById("circleScoreText"),
-
+ 
       scoreCircle:
         document.getElementById("scoreCircle"),
-
+ 
       targetRoleText:
         document.getElementById("targetRoleText"),
-
+ 
       matchScoreText:
         document.getElementById("matchScoreText"),
-
+ 
       missingSkillsText:
         document.getElementById("missingSkillsText"),
-
+ 
       atsScoreText:
         document.getElementById("atsScoreText"),
-
+ 
       contentScoreText:
         document.getElementById("contentScoreText"),
-
+ 
       formatScoreText:
         document.getElementById("formatScoreText"),
-
+ 
       atsBar:
         document.getElementById("atsBar"),
-
+ 
       contentBar:
         document.getElementById("contentBar"),
-
+ 
       formatBar:
         document.getElementById("formatBar"),
-
+ 
       analysisSummary:
         document.getElementById("analysisSummary"),
-
+ 
       feedbackList:
         document.getElementById("feedbackList"),
-
+ 
       quickFixesList:
         document.getElementById("quickFixesList"),
-
+ 
       previousScoreText:
         document.getElementById("previousScoreText"),
-
+ 
       currentScoreText:
         document.getElementById("currentScoreText"),
-
+ 
       previousBar:
         document.getElementById("previousBar"),
-
+ 
       currentBar:
         document.getElementById("currentBar")
     };
-
+ 
+    /* ================= SIDEBAR ================= */
+ 
+    function openSidebar() {
+      elements.sidebar.classList.add("open");
+      elements.overlay?.classList.add("visible");
+      elements.menuBtn.setAttribute("aria-expanded", "true");
+      document.body.classList.add("no-scroll");
+    }
+ 
+    function closeSidebar() {
+      elements.sidebar.classList.remove("open");
+      elements.overlay?.classList.remove("visible");
+      elements.menuBtn.setAttribute("aria-expanded", "false");
+      document.body.classList.remove("no-scroll");
+    }
+ 
+    if (elements.menuBtn && elements.sidebar) {
+ 
+      elements.menuBtn.addEventListener("click", () => {
+        elements.sidebar.classList.contains("open") ? closeSidebar() : openSidebar();
+      });
+ 
+      elements.overlay?.addEventListener("click", closeSidebar);
+ 
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && elements.sidebar.classList.contains("open")) {
+          closeSidebar();
+        }
+      });
+ 
+      // close the drawer when a nav link is tapped on mobile
+      elements.sidebar.querySelectorAll(".nav-item").forEach(link => {
+        link.addEventListener("click", () => {
+          if (window.innerWidth <= 768) closeSidebar();
+        });
+      });
+ 
+      // if the viewport grows back to desktop, reset state
+      window.addEventListener("resize", () => {
+        if (window.innerWidth > 768) closeSidebar();
+      });
+ 
+    }
+ 
     function getAuthToken() {
       return localStorage.getItem("sb-access-token");
     }
-
+ 
     function clampScore(value) {
       const score = Number(value);
-
+ 
       if (!Number.isFinite(score)) {
         return 0;
       }
-
+ 
       return Math.max(
         0,
         Math.min(100, Math.round(score))
       );
     }
-
+ 
     function getStringArray(value) {
       if (!Array.isArray(value)) {
         return [];
       }
-
+ 
       return value
         .map((item) => String(item).trim())
         .filter(Boolean);
     }
-
+ 
     function openFilePicker() {
       const token = getAuthToken();
-
+ 
       if (!token) {
         showModal("Please log in to upload a CV.");
         window.location.href = "LogIn.html";
         return;
       }
-
+ 
       const targetRole =
         elements.targetRoleInput?.value?.trim() || "";
-
+ 
       if (!targetRole) {
         showModal("Please enter a target role before uploading your CV.");
         elements.targetRoleInput?.focus();
         return;
       }
-
+ 
       elements.fileInput.value = "";
       elements.fileInput.click();
     }
-
+ 
     function setLoading(isLoading) {
       const uploadButtons = [
         elements.analyzeBtn,
         elements.analyzeBtn2
       ];
-
+ 
       uploadButtons.forEach((button) => {
         button.disabled = isLoading;
-
+ 
         button.innerHTML = isLoading
           ? `
               <span class="button-spinner"></span>
@@ -680,52 +821,52 @@
               Upload New CV
             `;
       });
-
+ 
       if (isLoading) {
         elements.overallScoreText.textContent =
           "Analyzing...";
-
+ 
         elements.circleScoreText.textContent =
           "...";
       }
-
+ 
       lucide.createIcons();
     }
-
+ 
     function renderOverallScore(score) {
       const safeScore = clampScore(score);
       const scoreAngle = safeScore * 3.6;
-
+ 
       elements.overallScoreText.textContent =
         `${safeScore}%`;
-
+ 
       elements.circleScoreText.textContent =
         `${safeScore}%`;
-
+ 
       elements.scoreCircle.style.setProperty(
         "--score-angle",
         `${scoreAngle}deg`
       );
-
+ 
       elements.scoreCircle.setAttribute(
         "aria-label",
         `Overall CV score ${safeScore} out of 100`
       );
     }
-
+ 
     function renderJobMatch(data, score) {
       const match = Number.isFinite(Number(data.match))
         ? clampScore(data.match)
         : score;
-
+ 
       const detectedSkills =
         getStringArray(data.skills);
-
+ 
       const missingSkills =
         getStringArray(data.missingSkills);
-
+ 
       let missingCount;
-
+ 
       if (Array.isArray(data.missingSkills)) {
         missingCount = missingSkills.length;
       } else {
@@ -734,110 +875,110 @@
           10 - detectedSkills.length
         );
       }
-
+ 
       const targetRole =
         String(
           data.targetRole ||
           "General professional role"
         ).trim();
-
+ 
       elements.targetRoleText.textContent =
         `Target Role: ${targetRole}`;
-
+ 
       elements.matchScoreText.textContent =
         `Match ${match}%`;
-
+ 
       elements.missingSkillsText.textContent =
         `${missingCount} key skill${
           missingCount === 1 ? "" : "s"
         } missing`;
     }
-
+ 
     function updateScoreBar(
       textElement,
       barElement,
       score
     ) {
       const safeScore = clampScore(score);
-
+ 
       textElement.textContent =
         `${safeScore}%`;
-
+ 
       barElement.style.width =
         `${safeScore}%`;
-
+ 
       barElement.setAttribute(
         "aria-valuenow",
         String(safeScore)
       );
     }
-
+ 
     function renderBreakdown(data) {
       updateScoreBar(
         elements.atsScoreText,
         elements.atsBar,
         data.ats
       );
-
+ 
       updateScoreBar(
         elements.contentScoreText,
         elements.contentBar,
         data.content
       );
-
+ 
       updateScoreBar(
         elements.formatScoreText,
         elements.formatBar,
         data.formatting
       );
     }
-
+ 
     function createFeedbackItem(
       message,
       type
     ) {
       const listItem =
         document.createElement("li");
-
+ 
       listItem.className =
         `feedback-item ${type}`;
-
+ 
       const icon =
         document.createElement("span");
-
+ 
       icon.className = "feedback-icon";
-
+ 
       icon.textContent =
         type === "positive" ? "✅" : "❌";
-
+ 
       const text =
         document.createElement("span");
-
+ 
       text.textContent = message;
-
+ 
       listItem.append(icon, text);
-
+ 
       return listItem;
     }
-
+ 
     function renderFeedback(data) {
       elements.feedbackList.innerHTML = "";
-
+ 
       const good =
         getStringArray(data.feedback?.good);
-
+ 
       const bad =
         getStringArray(data.feedback?.bad);
-
+ 
       const summary =
         String(
           data.summary ||
           "Your CV analysis has been completed."
         ).trim();
-
+ 
       elements.analysisSummary.textContent =
         summary;
-
+ 
       good.forEach((message) => {
         elements.feedbackList.appendChild(
           createFeedbackItem(
@@ -846,7 +987,7 @@
           )
         );
       });
-
+ 
       bad.forEach((message) => {
         elements.feedbackList.appendChild(
           createFeedbackItem(
@@ -855,119 +996,119 @@
           )
         );
       });
-
+ 
       if (good.length === 0 && bad.length === 0) {
         const listItem =
           document.createElement("li");
-
+ 
         listItem.textContent =
           "No detailed feedback was generated.";
-
+ 
         elements.feedbackList.appendChild(
           listItem
         );
       }
     }
-
+ 
     function renderQuickFixes(data) {
       elements.quickFixesList.innerHTML = "";
-
+ 
       const fixes =
         getStringArray(
           data.feedback?.quickFixes
         );
-
+ 
       if (fixes.length === 0) {
         const listItem =
           document.createElement("li");
-
+ 
         listItem.textContent =
           "No quick fixes were generated.";
-
+ 
         elements.quickFixesList.appendChild(
           listItem
         );
-
+ 
         return;
       }
-
+ 
       fixes.forEach((message) => {
         const listItem =
           document.createElement("li");
-
+ 
         const icon =
           document.createElement("span");
-
+ 
         icon.className = "quick-fix-icon";
         icon.textContent = "💡";
-
+ 
         const text =
           document.createElement("span");
-
+ 
         text.textContent = message;
-
+ 
         listItem.append(icon, text);
-
+ 
         elements.quickFixesList.appendChild(
           listItem
         );
       });
     }
-
+ 
     function renderProgress(
       previousScore,
       currentScore
     ) {
       const previous =
         clampScore(previousScore);
-
+ 
       const current =
         clampScore(currentScore);
-
+ 
       elements.previousScoreText.textContent =
         `${previous}%`;
-
+ 
       elements.currentScoreText.textContent =
         `${current}%`;
-
+ 
       elements.previousBar.style.width =
         `${previous}%`;
-
+ 
       elements.currentBar.style.width =
         `${current}%`;
     }
-
+ 
     async function loadHistory() {
       const token = getAuthToken();
-
+ 
       if (!token) {
         return;
       }
-
+ 
       try {
         const response = await fetch(HISTORY_URL, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
-
+ 
         if (!response.ok) {
           return;
         }
-
+ 
         const data = await response.json();
         const history = data.history || [];
-
+ 
         if (history.length === 0) {
           renderProgress(0, 0);
           return;
         }
-
+ 
         const current = history[0]?.overall_score || 0;
         const previous = history[1]?.overall_score || 0;
-
+ 
         renderProgress(previous, current);
-
+ 
       } catch (error) {
         console.error(
           "Failed to load CV history:",
@@ -975,78 +1116,78 @@
         );
       }
     }
-
+ 
     function validateFile(file) {
       const maximumSize =
         5 * 1024 * 1024;
-
+ 
       const allowedExtensions = [
         "pdf",
         "doc",
         "docx",
         "txt"
       ];
-
+ 
       const extension =
         file.name
           .split(".")
           .pop()
           .toLowerCase();
-
+ 
       if (!allowedExtensions.includes(extension)) {
         throw new Error(
           "Please upload a PDF, DOC, DOCX or TXT file."
         );
       }
-
+ 
       if (file.size > maximumSize) {
         throw new Error(
           "The selected file is larger than 5 MB."
         );
       }
     }
-
+ 
     function normalizeAnalysis(data) {
       const score =
         clampScore(data.score);
-
+ 
       return {
         ...data,
         score,
         match: Number.isFinite(Number(data.match))
           ? clampScore(data.match)
           : score,
-
+ 
         ats: clampScore(data.ats),
         content: clampScore(data.content),
         formatting: clampScore(data.formatting),
-
+ 
         skills:
           getStringArray(data.skills),
-
+ 
         missingSkills:
           getStringArray(data.missingSkills),
-
+ 
         targetRole:
           String(
             data.targetRole ||
             "General professional role"
           ).trim(),
-
+ 
         summary:
           String(data.summary || "").trim(),
-
+ 
         feedback: {
           good:
             getStringArray(
               data.feedback?.good
             ),
-
+ 
           bad:
             getStringArray(
               data.feedback?.bad
             ),
-
+ 
           quickFixes:
             getStringArray(
               data.feedback?.quickFixes
@@ -1054,45 +1195,45 @@
         }
       };
     }
-
+ 
     function renderAnalysis(analysis) {
       renderOverallScore(analysis.score);
-
+ 
       renderJobMatch(
         analysis,
         analysis.score
       );
-
+ 
       renderBreakdown(analysis);
       renderFeedback(analysis);
       renderQuickFixes(analysis);
     }
-
+ 
     async function analyzeSelectedFile(file) {
       validateFile(file);
-
+ 
       const token = getAuthToken();
-
+ 
       if (!token) {
         showModal("Your session has expired. Please log in again.");
         window.location.href = "LogIn.html";
         return;
       }
-
+ 
       const formData =
         new FormData();
-
+ 
       formData.append("file", file);
-
+ 
       const targetRole =
         elements.targetRoleInput?.value?.trim() || "";
-
+ 
       if (targetRole) {
         formData.append("targetRole", targetRole);
       }
-
+ 
       setLoading(true);
-
+ 
       try {
         const response = await fetch(
           API_URL,
@@ -1104,9 +1245,9 @@
             body: formData
           }
         );
-
+ 
         let data;
-
+ 
         try {
           data = await response.json();
         } catch {
@@ -1114,71 +1255,71 @@
             "The server returned an invalid response."
           );
         }
-
+ 
         console.log(
           "CV ANALYZER RESPONSE:",
           data
         );
-
+ 
         if (!response.ok) {
           if (data.code === "UPLOAD_LIMIT_REACHED") {
             throw new Error(data.error);
           }
-
+ 
           throw new Error(
             data.error ||
             data.message ||
             "The CV could not be analyzed."
           );
         }
-
+ 
         const analysis =
           normalizeAnalysis(data);
-
+ 
         appState.analysis = {
           ...analysis,
           fileName: file.name,
           analyzedAt:
             new Date().toISOString()
         };
-
+ 
         renderAnalysis(analysis);
         await loadHistory();
-
+ 
         const usageNote =
           data.uploadsLimit === -1
             ? ""
             : ` (${data.uploadsUsed}/${data.uploadsLimit} analyses used on your ${data.plan} plan)`;
-
+ 
         showModal(
           `✅ CV analyzed successfully.${usageNote}`
         );
-
+ 
       } catch (error) {
         console.error(
           "CV ANALYZER ERROR:",
           error
         );
-
+ 
         showModal(
           `❌ ${error.message}`
         );
-
+ 
       } finally {
         setLoading(false);
       }
     }
-
+ 
     function createReportText() {
       const analysis =
         appState.analysis;
-
+ 
       if (!analysis) {
         throw new Error(
           "Analyze a CV before downloading the report."
         );
       }
-
+ 
       const good =
         analysis.feedback.good.length
           ? analysis.feedback.good
@@ -1188,7 +1329,7 @@
               )
               .join("\n")
           : "No strengths were generated.";
-
+ 
       const bad =
         analysis.feedback.bad.length
           ? analysis.feedback.bad
@@ -1198,7 +1339,7 @@
               )
               .join("\n")
           : "No weaknesses were generated.";
-
+ 
       const fixes =
         analysis.feedback.quickFixes.length
           ? analysis.feedback.quickFixes
@@ -1208,75 +1349,75 @@
               )
               .join("\n")
           : "No quick fixes were generated.";
-
+ 
       const detectedSkills =
         analysis.skills.length
           ? analysis.skills.join(", ")
           : "No skills detected.";
-
+ 
       const missingSkills =
         analysis.missingSkills.length
           ? analysis.missingSkills.join(", ")
           : "No missing skills identified.";
-
+ 
       return `
 SKILLFORGE CV ANALYSIS REPORT
 ========================================
-
+ 
 File:
 ${analysis.fileName}
-
+ 
 Generated:
 ${new Date(
   analysis.analyzedAt
 ).toLocaleString()}
-
+ 
 OVERALL RESULTS
 ----------------------------------------
 Overall CV Score: ${analysis.score}%
 Job Match: ${analysis.match}%
 Target Role: ${analysis.targetRole}
-
+ 
 CV BREAKDOWN
 ----------------------------------------
 ATS Compatibility: ${analysis.ats}%
 Content Quality: ${analysis.content}%
 Formatting: ${analysis.formatting}%
-
+ 
 AI SUMMARY
 ----------------------------------------
 ${analysis.summary || "No summary generated."}
-
+ 
 DETECTED SKILLS
 ----------------------------------------
 ${detectedSkills}
-
+ 
 MISSING SKILLS
 ----------------------------------------
 ${missingSkills}
-
+ 
 STRENGTHS
 ----------------------------------------
 ${good}
-
+ 
 AREAS FOR IMPROVEMENT
 ----------------------------------------
 ${bad}
-
+ 
 QUICK FIXES
 ----------------------------------------
 ${fixes}
-
+ 
 ========================================
 Generated by SkillForge CV Analyzer
       `.trim();
     }
-
+ 
     function downloadReport() {
       try {
         const report =
           createReportText();
-
+ 
         const blob =
           new Blob(
             [report],
@@ -1284,43 +1425,43 @@ Generated by SkillForge CV Analyzer
               type: "text/plain;charset=utf-8"
             }
           );
-
+ 
         const downloadUrl =
           URL.createObjectURL(blob);
-
+ 
         const link =
           document.createElement("a");
-
+ 
         link.href = downloadUrl;
         link.download =
           "SkillForge-CV-Analysis-Report.txt";
-
+ 
         document.body.appendChild(link);
         link.click();
         link.remove();
-
+ 
         URL.revokeObjectURL(downloadUrl);
-
+ 
       } catch (error) {
         showModal(`⚠️ ${error.message}`);
       }
     }
-
+ 
     function filterAnalysisCards() {
       const searchValue =
         elements.searchInput.value
           .trim()
           .toLowerCase();
-
+ 
       const cards =
         document.querySelectorAll(
           ".searchable"
         );
-
+ 
       cards.forEach((card) => {
         const cardText =
           card.textContent.toLowerCase();
-
+ 
         card.classList.toggle(
           "hidden",
           searchValue &&
@@ -1328,86 +1469,50 @@ Generated by SkillForge CV Analyzer
         );
       });
     }
-
+ 
     elements.analyzeBtn.addEventListener(
       "click",
       openFilePicker
     );
-
+ 
     elements.analyzeBtn2.addEventListener(
       "click",
       openFilePicker
     );
-
+ 
     elements.downloadBtn.addEventListener(
       "click",
       downloadReport
     );
-
+ 
     elements.downloadBtn2.addEventListener(
       "click",
       downloadReport
     );
-
+ 
     elements.fileInput.addEventListener(
       "change",
       async (event) => {
         const file =
           event.target.files[0];
-
+ 
         if (!file) {
           return;
         }
-
+ 
         await analyzeSelectedFile(file);
       }
     );
-
+ 
     elements.searchInput.addEventListener(
       "input",
       filterAnalysisCards
     );
-
-    elements.menuBtn.addEventListener(
-      "click",
-      () => {
-        elements.sidebar.classList.toggle(
-          "open"
-        );
-      }
-    );
-
-    document.addEventListener(
-      "click",
-      (event) => {
-        const isSmallScreen =
-          window.innerWidth <= 768;
-
-        const clickedSidebar =
-          elements.sidebar.contains(
-            event.target
-          );
-
-        const clickedMenu =
-          elements.menuBtn.contains(
-            event.target
-          );
-
-        if (
-          isSmallScreen &&
-          !clickedSidebar &&
-          !clickedMenu
-        ) {
-          elements.sidebar.classList.remove(
-            "open"
-          );
-        }
-      }
-    );
-
+ 
     loadHistory();
   </script>
   <script src="../js/auth.js"></script>
 </body>
-
+ 
 </html>
+ 

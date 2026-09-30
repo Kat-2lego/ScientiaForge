@@ -1,0 +1,231 @@
+{
+ "paper": {
+  "subject": "Mathematics",
+  "year": 2023,
+  "exam_session": "November",
+  "grade": 12,
+  "paper_number": 1,
+  "language": "English",
+  "total_marks": 30
+ },
+ "questions": [
+  {
+   "question_number": "1.1.1",
+   "sort_key": [
+    1,
+    1,
+    1
+   ],
+   "top_question": 1,
+   "section": null,
+   "context_text": "Solve for x:",
+   "question_text": "2x + 5 = 15",
+   "question_type": "calculation",
+   "options": null,
+   "marks": 2,
+   "page_number": 3,
+   "has_figure": false,
+   "is_auto_markable": true,
+   "is_recall_suitable": true,
+   "memo": {
+    "answer_text": "2x = 10\nx = 5",
+    "accepted_answer": "x = 5",
+    "accepted_alternatives": [],
+    "keywords": [],
+    "answer_format": "number",
+    "marks": 2,
+    "memo_page_number": 3
+   }
+  },
+  {
+   "question_number": "1.1.2",
+   "sort_key": [
+    1,
+    1,
+    2
+   ],
+   "top_question": 1,
+   "section": null,
+   "context_text": "Solve for x:",
+   "question_text": "x² + 5x + 6 = 0",
+   "question_type": "calculation",
+   "options": null,
+   "marks": 3,
+   "page_number": 3,
+   "has_figure": false,
+   "is_auto_markable": true,
+   "is_recall_suitable": true,
+   "memo": {
+    "answer_text": "(x + 2)(x + 3) = 0\nx = −2 or x = −3",
+    "accepted_answer": "x = −2 or x = −3",
+    "accepted_alternatives": [],
+    "keywords": [],
+    "answer_format": "number",
+    "marks": 3,
+    "memo_page_number": 3
+   }
+  },
+  {
+   "question_number": "1.2",
+   "sort_key": [
+    1,
+    2
+   ],
+   "top_question": 1,
+   "section": null,
+   "context_text": null,
+   "question_text": "Factorise fully: x² − 9",
+   "question_type": "calculation",
+   "options": null,
+   "marks": 2,
+   "page_number": 3,
+   "has_figure": false,
+   "is_auto_markable": true,
+   "is_recall_suitable": true,
+   "memo": {
+    "answer_text": "(x − 3)(x + 3)",
+    "accepted_answer": "(x − 3)(x + 3)",
+    "accepted_alternatives": [],
+    "keywords": [],
+    "answer_format": "expression",
+    "marks": 2,
+    "memo_page_number": 3
+   }
+  },
+  {
+   "question_number": "1.3",
+   "sort_key": [
+    1,
+    3
+   ],
+   "top_question": 1,
+   "section": null,
+   "context_text": null,
+   "question_text": "Calculate the value of 25 × 4.",
+   "question_type": "numerical",
+   "options": null,
+   "marks": 1,
+   "page_number": 3,
+   "has_figure": false,
+   "is_auto_markable": true,
+   "is_recall_suitable": true,
+   "memo": {
+    "answer_text": "100",
+    "accepted_answer": "100",
+    "accepted_alternatives": [],
+    "keywords": [],
+    "answer_format": "number",
+    "marks": 1,
+    "memo_page_number": 3
+   }
+  },
+  {
+   "question_number": "2.1",
+   "sort_key": [
+    2,
+    1
+   ],
+   "top_question": 2,
+   "section": null,
+   "context_text": "Given the arithmetic sequence: 3 ; 7 ; 11 ; …",
+   "question_text": "Write down the next term of the sequence.",
+   "question_type": "numerical",
+   "options": null,
+   "marks": 1,
+   "page_number": 3,
+   "has_figure": false,
+   "is_auto_markable": true,
+   "is_recall_suitable": true,
+   "memo": {
+    "answer_text": "15",
+    "accepted_answer": "15",
+    "accepted_alternatives": [],
+    "keywords": [],
+    "answer_format": "number",
+    "marks": 1,
+    "memo_page_number": 3
+   }
+  },
+  {
+   "question_number": "2.2",
+   "sort_key": [
+    2,
+    2
+   ],
+   "top_question": 2,
+   "section": null,
+   "context_text": "Given the arithmetic sequence: 3 ; 7 ; 11 ; …",
+   "question_text": "Determine the general term, Tn.",
+   "question_type": "calculation",
+   "options": null,
+   "marks": 2,
+   "page_number": 3,
+   "has_figure": false,
+   "is_auto_markable": false,
+   "is_recall_suitable": true,
+   "memo": {
+    "answer_text": "Tn = 4n − 1",
+    "accepted_answer": null,
+    "accepted_alternatives": [],
+    "keywords": [],
+    "answer_format": "text",
+    "marks": 2,
+    "memo_page_number": 3
+   }
+  },
+  {
+   "question_number": "2.3",
+   "sort_key": [
+    2,
+    3
+   ],
+   "top_question": 2,
+   "section": null,
+   "context_text": "Given the arithmetic sequence: 3 ; 7 ; 11 ; …",
+   "question_text": "Calculate the sum of the first 20 terms.",
+   "question_type": "calculation",
+   "options": null,
+   "marks": 3,
+   "page_number": 3,
+   "has_figure": false,
+   "is_auto_markable": true,
+   "is_recall_suitable": true,
+   "memo": {
+    "answer_text": "S20 = 20/2 [2(3) + (20 − 1)(4)]\n= 820",
+    "accepted_answer": "= 820",
+    "accepted_alternatives": [],
+    "keywords": [],
+    "answer_format": "number",
+    "marks": 3,
+    "memo_page_number": 3
+   }
+  },
+  {
+   "question_number": "2.4",
+   "sort_key": [
+    2,
+    4
+   ],
+   "top_question": 2,
+   "section": null,
+   "context_text": "Given the arithmetic sequence: 3 ; 7 ; 11 ; …",
+   "question_text": "A ball rolls 2.5 m down the incline in the first second.\n2.5 m  is the distance covered in that first second.\nDetermine the distance covered in the third second.",
+   "question_type": "calculation",
+   "options": null,
+   "marks": 3,
+   "page_number": 3,
+   "has_figure": false,
+   "is_auto_markable": true,
+   "is_recall_suitable": true,
+   "memo": {
+    "answer_text": "T3 = 2.5 × 5 = 12.5 m\n= 12.5 m",
+    "accepted_answer": "= 12.5 m",
+    "accepted_alternatives": [],
+    "keywords": [],
+    "answer_format": "number",
+    "marks": 3,
+    "memo_page_number": 3
+   }
+  }
+ ]
+}
