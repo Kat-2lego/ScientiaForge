@@ -5,7 +5,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const express = require("express");
 const { createClient } = require("@supabase/supabase-js");
-const createNscRouter = require("../routes/nscPapers");
+const createNscRouter = require("../routes/nscPapers.cjs");
 const { createFakePostgrest, makeTables, ingest, listen } = require("./fakePostgrest");
 
 const FIXTURES = ["collector_ls_p1.json", "collector_maths_p1.json"].map((f) => require(`./fixtures/${f}`));

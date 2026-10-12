@@ -1,0 +1,99 @@
+=== Life Sciences Paper 1, November 2024 ===
+status: ready   total marks: 150   pages: 18
+67 questions found: 29 used for Active Recall (19 marked for the student, 10 self-marked), 38 left out
+notes: 67 questions extracted; 67 matched to memo answers; 29 suitable for Active Recall (19 auto-marked)
+
+why questions were left out:
+   38  depends on a figure, table or source
+    3  text extraction looks garbled
+    1  options could not be extracted
+    1  options missing
+
+--- what students get (first 29 of 29) ---
+format:  number [type, marks, marking]  Q: question   =>   MEMO: accepted answer
+1.1.1   [multiple_choice, 2m, auto]  Q: The hormone responsible for the regulation of salt content in the human body is …  (4 options)   =>   MEMO: B
+1.1.2   [multiple_choice, 2m, auto]  Q: Which ONE of the following is a stage in human embryonic development?  (4 options)   =>   MEMO: C
+1.1.3   [multiple_choice, 2m, auto]  Q: When the carbon dioxide level in the blood increases above normal, the …  (4 options)   =>   MEMO: D
+1.1.4   [multiple_choice, 2m, auto]  Q: Which ONE of the following changes occurs under the influence of adrenalin?  (4 options)   =>   MEMO: A
+1.1.5   [multiple_choice, 2m, auto]  Q: A girl is barefoot and steps onto a thorn, causing a reflex action. Which ONE of the following …  (4 options)   =>   MEMO: D
+1.1.7   [multiple_choice, 2m, auto]  Q: Which ONE of the following is involved in thermoregulation?  (4 options)   =>   MEMO: B
+1.1.8   [multiple_choice, 2m, auto]  Q: The following is a list of factors regarding a developing foetus: (i) Temperature regulation (i…  (4 options)   =>   MEMO: A
+1.2.1   [short_answer, 1m, auto]  Q: The structure that connects the foetus to the placenta   =>   MEMO: Umbilical cord
+           context: Give the correct biological term for EACH of the following descriptions.
+1.2.2   [short_answer, 1m, auto]  Q: The part of the nervous system that consists of sympathetic and parasympathetic sections   =>   MEMO: Autonomic nervous system
+           context: Give the correct biological term for EACH of the following descriptions.
+1.2.3   [short_answer, 1m, auto]  Q: Receptors in the ear that detect changes in speed and direction of movement of the head   =>   MEMO: Cristae
+           context: Give the correct biological term for EACH of the following descriptions.
+1.2.4   [short_answer, 1m, auto]  Q: The ossicle that transfers vibrations to the oval window   =>   MEMO: Stirrup  (also: stapes)
+           context: Give the correct biological term for EACH of the following descriptions.
+1.2.5   [short_answer, 1m, auto]  Q: The growth reaction of a plant in response to gravity   =>   MEMO: Geotropism  (also: gravitropism)
+           context: Give the correct biological term for EACH of the following descriptions.
+1.2.6   [short_answer, 1m, auto]  Q: The part in the inner ear where the organ of Corti is located   =>   MEMO: Cochlea
+           context: Give the correct biological term for EACH of the following descriptions.
+1.2.7   [short_answer, 1m, auto]  Q: A plant hormone that stimulates the germination of seeds   =>   MEMO: Gibberellins
+           context: Give the correct biological term for EACH of the following descriptions.
+1.2.8   [short_answer, 1m, auto]  Q: A structure in the head of a sperm cell that contains enzymes   =>   MEMO: Acrosome
+           context: Give the correct biological term for EACH of the following descriptions.
+1.3.1   [multiple_choice, 2m, auto]  Q: Acts as a micro-filter for the developing foetus A: Placenta B: Cervix  (4 options)   =>   MEMO: A only
+           context: Indicate whether each of the descriptions in COLUMN I apply to A ONLY, B ONLY, BOTH A AND B or NONE…
+1.3.2   [multiple_choice, 2m, auto]  Q: The part of the brain that controls heart rate A: Corpus callosum B: Medulla oblongata  (4 options)   =>   MEMO: B only
+           context: Indicate whether each of the descriptions in COLUMN I apply to A ONLY, B ONLY, BOTH A AND B or NONE…
+1.3.3   [multiple_choice, 2m, auto]  Q: The area on the retina where there are no rods or cones A: Blind spot B: Cornea  (4 options)   =>   MEMO: A only
+           context: Indicate whether each of the descriptions in COLUMN I apply to A ONLY, B ONLY, BOTH A AND B or NONE…
+2.4.1   [other, 3m, self]  Q: The structure of his eyeball affects his vision when he reads a book without glasses   =>   MEMO: - The eyeball is too short - The image forms behind the retina - caus…
+           context: A man is long-sighted. Explain how:
+2.4.2   [other, 2m, self]  Q: Wearing glasses with convex lenses will improve his vision when he reads a book   =>   MEMO: - The light rays will be refracted more causing the image to fall - o…
+           context: A man is long-sighted. Explain how:
+2.5.5   [short_answer, 1m, auto]  Q: Name the disorder associated with degeneration of the myelin sheaths of neurons.   =>   MEMO: Multiple sclerosis
+3.1.2   [other, 2m, self]  Q: Fertilisation in vultures takes place internally. State TWO advantages of internal fertilisatio…   =>   MEMO: - It increases the chances of fertilisation/gametes are in close cont…
+           context: Vultures are birds of prey that feed on the flesh of dead animals. A female vulture lays only one t…
+3.1.3   [short_answer, 2m, self]  Q: State TWO characteristics of chicks that display altricial development.   =>   MEMO: - Eyes are closed when they hatch - Bodies do not have (down) feather…
+           context: Vultures are birds of prey that feed on the flesh of dead animals. A female vulture lays only one t…
+3.1.4   [other, 2m, self]  Q: Explain why birds with altricial development would have short incubation periods.   =>   MEMO: - The chicks are not fully developed when hatched since - the eggs ha…
+           context: Vultures are birds of prey that feed on the flesh of dead animals. A female vulture lays only one t…
+3.2.2   [other, 3m, self]  Q: Explain why the pupillary mechanism is considered to be a reflex action.   =>   MEMO: - It is a rapid - involuntary response - to light
+3.2.3   [short_answer, 2m, self]  Q: Name the TWO effector muscles that are involved in the pupillary mechanism.   =>   MEMO: - Radial muscles - Circular muscles (Mark first TWO only)
+3.3.2   [other, 4m, self]  Q: Describe TWO ways in which insulin decreases blood glucose levels.   =>   MEMO: - It stimulates the absorption of glucose from the blood into the cel…
+           context: An investigation was conducted to determine the effect of insulin on blood glucose levels. The proc…
+3.4.2   [short_answer, 1m, self]  Q: State ONE function of thyroxin.   =>   MEMO: - It regulates the metabolic rate - It affects the growth and functio…
+3.4.4   [other, 2m, self]  Q: Explain why a continuous undersecretion of thyroxin may lead to an increase in body mass.   =>   MEMO: - A lower metabolic rate - causes decreased usage of nutrients and - …
+
+--- questions left out (all of 38) ---
+1.1.6   Q: The diagram below represents a part of the human eye. X Z Y A spectat…   because: depends on a figure, table or source; text extraction looks…
+1.1.9   Q: The diagram below shows a part of the human ear. A B C Which ONE of t…   because: depends on a figure, table or source; text extraction looks…
+1.1.10  Q: The diagrams below represent the transmission of impulses from a stru…   because: depends on a figure, table or source; text extraction looks…
+1.4.1   Q: Give the LETTER and NAME of the structure that: (a) Forms part of bot…   because: depends on a figure, table or source
+1.4.2   Q: Identify: (a) Part A (b) The type of gametogenesis that takes place i…   because: depends on a figure, table or source
+1.5.1   Q: Write the LETTERS of the parts that serve as endocrine glands only.   because: options could not be extracted; depends on a figure, table …
+1.5.2   Q: Give the LETTERS and NAMES of the parts responsible for the regulatio…   because: depends on a figure, table or source
+1.5.3   Q: Name the following with regard to the regulation of water content in …   because: depends on a figure, table or source
+2.1.1   Q: Identify part: (a) A (b) B   because: depends on a figure, table or source
+2.1.2   Q: Give TWO: (a) Characteristics of the endometrium that make it suitabl…   because: depends on a figure, table or source
+2.1.3   Q: Identify and describe the type of gametogenesis that leads to the for…   because: depends on a figure, table or source
+2.1.4   Q: In an ectopic pregnancy, the fertilised ovum can become implanted in …   because: depends on a figure, table or source
+2.2.1   Q: On which day of this menstrual cycle is the level of progesterone the…   because: depends on a figure, table or source
+2.2.2   Q: Name the reproductive hormone that will begin to increase from day 24…   because: depends on a figure, table or source
+2.2.3   Q: Use data from the table to explain your answer to QUESTION 2.2.2.   because: depends on a figure, table or source
+2.2.4   Q: Calculate the percentage increase in the oestrogen level from day 8 t…   because: depends on a figure, table or source
+2.2.5   Q: How would the progesterone level differ after day 20 if this female w…   because: depends on a figure, table or source
+2.2.6   Q: Explain what causes the change in the progesterone level stated in QU…   because: depends on a figure, table or source
+2.3.1   Q: According to the passage, which type of cataract is associated with a…   because: depends on a figure, table or source
+2.3.2   Q: Use information in the passage to explain why cataracts cause vision …   because: depends on a figure, table or source
+2.5.1   Q: Identify the type of neuron shown in the diagrams.   because: depends on a figure, table or source
+2.5.2   Q: Give ONE visible reason for your answer to QUESTION 2.5.1.   because: depends on a figure, table or source
+2.5.3   Q: Describe the function of the type of neuron identified in QUESTION 2.…   because: depends on a figure, table or source
+2.5.4   Q: Use the letters A, B and C to indicate the direction in which an impu…   because: depends on a figure, table or source
+2.6.1   Q: Give the axon diameter (in µm) at which an impulse moves at 20 m/s in…   because: depends on a figure, table or source
+2.6.2   Q: Use the graphs to describe the following: (a) Difference in impulse s…   because: depends on a figure, table or source
+3.1.1   Q: Give ONE reason from the passage why vultures: (a) Are considered as …   because: depends on a figure, table or source
+3.2.1   Q: Identify part: (a) X (b) Y   because: depends on a figure, table or source
+3.2.4   Q: Explain the significance of the change in the diameter of part X from…   because: depends on a figure, table or source
+3.3.1   Q: State the purpose of the control group in this investigation.   because: depends on a figure, table or source
+3.3.3   Q: Which group (X or Y) consists of healthy individuals?   because: depends on a figure, table or source
+3.3.4   Q: Use data in the table to explain your answer to QUESTION 3.3.3.   because: depends on a figure, table or source
+3.4.1   Q: Identify: (a) The type of interaction represented by the diagram (b) …   because: depends on a figure, table or source
+3.4.3   Q: Describe the role of the pituitary gland in correcting the level of t…   because: depends on a figure, table or source
+3.5.1   Q: For this investigation give: (a) The independent variable (b) TWO var…   because: depends on a figure, table or source
+3.5.2   Q: Give the expected results of the plants in: (a) Group A (b) Group C   because: depends on a figure, table or source
+3.5.3   Q: How was the reliability of this investigation ensured?   because: depends on a figure, table or source
+3.5.4   Q: After 72 hours, the stems of the plants in group B bent towards the r…   because: depends on a figure, table or source

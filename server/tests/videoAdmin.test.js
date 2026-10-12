@@ -1,7 +1,7 @@
 "use strict";
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { run, parseVideoId, parseArgs } = require("../dev/videoAdmin");
+const { run, parseVideoId, parseArgs } = require("../scripts/videoAdmin");
 const { loadVideoConfig } = require("../services/video/config");
 const { createYouTubeProvider } = require("../services/video/youtubeProvider");
 const { createVideoDiscovery } = require("../services/video/discovery");

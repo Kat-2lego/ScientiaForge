@@ -5,7 +5,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const crypto = require("node:crypto");
 const express = require("express");
-const createNscRouter = require("../routes/nscPapers");
+const createNscRouter = require("../routes/nscPapers.cjs");
 const { makeRepo } = require("./fakeRepo");
 
 async function startServer() {
@@ -129,7 +129,7 @@ test("second session prefers questions not seen yet", async (t) => {
 });
 
 test("download-only papers say why Active Recall is unavailable", () => {
-  const { recallUnavailableReason } = require("../routes/nscPapers");
+  const { recallUnavailableReason } = require("../routes/nscPapers.cjs");
   const base = { processing_status: "partial", recall_question_count: 0, memorandum_storage_path: "m.pdf" };
   assert.equal(recallUnavailableReason({ ...base, processing_notes: "no questions extracted: the PDF has almost no text (0 characters on 10 pages): it looks like a scan" }), "scanned");
   assert.equal(recallUnavailableReason({ ...base, memorandum_storage_path: null, processing_notes: "memo not usable: The memo link returns the question paper itself" }), "no_memo");

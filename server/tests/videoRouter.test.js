@@ -2,7 +2,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const express = require("express");
-const createVideoDiscoveryRouter = require("../routes/videoDiscovery");
+const createVideoDiscoveryRouter = require("../routes/videoDiscovery.cjs");
 const { loadVideoConfig } = require("../services/video/config");
 const { createYouTubeProvider } = require("../services/video/youtubeProvider");
 const { createMemoryVideoRepo } = require("./fakeVideoRepo");

@@ -1,7 +1,7 @@
 "use strict";
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { selectQuestions, dropNearDuplicates } = require("../services/nscSelection");
+const { selectQuestions, dropNearDuplicates } = require("../services/nscSelection.cjs");
 
 let id = 0;
 const q = (top, sub, extra = {}) => ({

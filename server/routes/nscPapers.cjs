@@ -21,9 +21,9 @@
 "use strict";
 
 const express = require("express");
-const { createNscRepo } = require("../services/nscRepo");
-const { markAnswer, answerInputFor } = require("../services/nscMarking");
-const { selectQuestions, compareSortKey } = require("../services/nscSelection");
+const { createNscRepo } = require("../services/nscRepo.cjs");
+const { markAnswer, answerInputFor } = require("../services/nscMarking.cjs");
+const { selectQuestions, compareSortKey } = require("../services/nscSelection.cjs");
 
 const SESSIONS = ["November", "May/June", "Feb/March"];
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

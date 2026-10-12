@@ -5,10 +5,16 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
-try:  # optional: load collector/.env when python-dotenv is installed
+# Load the shared SkillForge/.env first, then an optional collector/.env
+# that can override individual values. Requires python-dotenv.
+_COLLECTOR_DIR = Path(__file__).resolve().parent.parent   # SkillForge/collector
+_PROJECT_ROOT = _COLLECTOR_DIR.parent                      # SkillForge
+
+try:
     from dotenv import load_dotenv
 
-    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+    load_dotenv(_PROJECT_ROOT / ".env")
+    load_dotenv(_COLLECTOR_DIR / ".env", override=True)
 except ImportError:  # pragma: no cover
     pass
 

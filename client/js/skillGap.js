@@ -324,20 +324,20 @@ function renderRoadmap(roadmap) {
 
     const menuBtn = document.getElementById("menuBtn");
   const sidebar = document.getElementById("sidebar");
-  const overlay = document.getElementById("sidebarOverlay");
+  const overlayy = document.getElementById("sidebarOverlay");
  
   /* ================= SIDEBAR ================= */
  
   function openSidebar() {
     sidebar.classList.add("open");
-    overlay?.classList.add("visible");
+    overlayy?.classList.add("visible");
     menuBtn.setAttribute("aria-expanded", "true");
     document.body.classList.add("no-scroll");
   }
  
   function closeSidebar() {
     sidebar.classList.remove("open");
-    overlay?.classList.remove("visible");
+    overlayy?.classList.remove("visible");
     menuBtn.setAttribute("aria-expanded", "false");
     document.body.classList.remove("no-scroll");
   }
@@ -348,7 +348,7 @@ function renderRoadmap(roadmap) {
       sidebar.classList.contains("open") ? closeSidebar() : openSidebar();
     });
  
-    overlay?.addEventListener("click", closeSidebar);
+    overlayy?.addEventListener("click", closeSidebar);
  
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && sidebar.classList.contains("open")) {
@@ -369,6 +369,19 @@ function renderRoadmap(roadmap) {
     });
  
   }
+  
+
+
+
+
+
+
+
+
+
+
+
+  
 
   function renderModalSkills() {
     modalList.innerHTML = "";

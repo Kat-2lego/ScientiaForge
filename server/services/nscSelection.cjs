@@ -13,7 +13,7 @@
  */
 "use strict";
 
-const { normalizeText } = require("./nscMarking");
+const { normalizeText } = require("./nscMarking.cjs");
 
 const MAX_SESSION_QUESTIONS = 20;
 

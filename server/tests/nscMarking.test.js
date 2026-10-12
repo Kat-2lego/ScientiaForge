@@ -1,7 +1,7 @@
 "use strict";
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { markAnswer, extractValues, answerInputFor } = require("../services/nscMarking");
+const { markAnswer, extractValues, answerInputFor } = require("../services/nscMarking.cjs");
 
 const v = (answer, memo) => markAnswer(answer, memo).verdict;
 

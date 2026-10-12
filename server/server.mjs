@@ -3272,15 +3272,19 @@ app.use(
    START SERVER
 ========================================================= */
 
-app.listen(
-  PORT,
-  () => {
-    console.log(
-      `✅ Main SkillForge server running on ${APP_URL}`
-    );
-
-    console.log(
-      `🔐 Login page: ${APP_URL}/pages/LogIn.html`
-    );
+const server = app.listen(PORT, (err) => {
+  if (err) {
+    console.error(`❌ Could not start server on port ${PORT}: ${err.code || ""} ${err.message}`);
+    if (err.code === "EADDRINUSE") {
+      console.error(`   Port ${PORT} is already in use. Stop the other process or set a different PORT in .env.`);
+    }
+    process.exit(1);
   }
-);
+
+  console.log(`✅ Main SkillForge server running on ${APP_URL}`);
+  console.log(`🔐 Login page: ${APP_URL}/pages/LogIn.html`);
+});
+
+server.on("close", () => {
+  console.log("⚠️ HTTP server closed");
+});
