@@ -11,6 +11,9 @@ import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 import cvRoutes from "./cv-analyzer/routes/cvRoutes.js";
 import careerPathfinderRoutes from "./routes/careerPathfinder.js";
 import studyHubRoutes from "./routes/studyHub.js";
+import createNscRouter from "./routes/nscPapers.cjs";
+import createVideoDiscoveryRouter from "./routes/videoDiscovery.cjs";
+import { createProxyMiddleware } from "http-proxy-middleware";
 import adminRoutes from "./routes/admin.js";
 
 import { getOccupationSkills } from "./escoClient.mjs";
@@ -103,6 +106,10 @@ console.log(
 
 const app = express();
 
+app.use("/api/discovery", createProxyMiddleware({
+  target: "http://127.0.0.1:8000",
+  changeOrigin: true,
+}));
 /*
   Main SkillForge server: port 5000
   CV Analyzer server: port 5001
@@ -420,6 +427,18 @@ app.use("/api/career-pathfinder", careerPathfinderRoutes);
 app.use("/api/study-hub", studyHubRoutes);
 app.use("/api/admin", adminRoutes);
 
+
+const requireAuthWithUser = (req, res, next) =>
+  Promise.resolve(requireAuth(req, res, () => { req.user = { id: req.userId }; next(); })).catch(next);
+
+if (supabaseAdmin) {
+  app.use("/api/study-hub/nsc", createNscRouter({ supabase: supabaseAdmin, requireAuth: requireAuthWithUser,
+    storageBucket: process.env.NSC_STORAGE_BUCKET || "past-papers" }));
+  app.use("/api/video-discovery", createVideoDiscoveryRouter({ supabase: supabaseAdmin, requireAuth: requireAuthWithUser,
+    youtubeApiKey: process.env.YOUTUBE_API_KEY }));
+} else {
+  console.warn("⚠️ SUPABASE_SERVICE_ROLE_KEY is not set: NSC past papers, Active Recall and Study videos are off.");
+}
 /* =========================================================
    MAIN PAGE
 ========================================================= */
@@ -3253,15 +3272,19 @@ app.use(
    START SERVER
 ========================================================= */
 
-app.listen(
-  PORT,
-  () => {
-    console.log(
-      `✅ Main SkillForge server running on ${APP_URL}`
-    );
-
-    console.log(
-      `🔐 Login page: ${APP_URL}/pages/LogIn.html`
-    );
+const server = app.listen(PORT, (err) => {
+  if (err) {
+    console.error(`❌ Could not start server on port ${PORT}: ${err.code || ""} ${err.message}`);
+    if (err.code === "EADDRINUSE") {
+      console.error(`   Port ${PORT} is already in use. Stop the other process or set a different PORT in .env.`);
+    }
+    process.exit(1);
   }
-);
+
+  console.log(`✅ Main SkillForge server running on ${APP_URL}`);
+  console.log(`🔐 Login page: ${APP_URL}/pages/LogIn.html`);
+});
+
+server.on("close", () => {
+  console.log("⚠️ HTTP server closed");
+});

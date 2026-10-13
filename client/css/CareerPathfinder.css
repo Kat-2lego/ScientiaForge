@@ -1,3 +1,4 @@
+/*CareerPathfinder.css*/
 .cp-wrap {
   display: flex;
   flex-direction: column;
@@ -519,10 +520,70 @@
   text-decoration: none;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 900px) {
+  .cp-card {
+    padding: 18px;
+  }
+
+  .filter-group {
+    min-width: 140px;
+  }
+}
+
+@media (max-width: 768px) {
   .subject-row,
   .cp-filters {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .filter-group {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .cp-tabs {
+    flex-wrap: wrap;
+  }
+
+  .cp-tab {
+    flex: 1 1 45%;
+  }
+
+  .bursary-detail-row {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .bursary-detail-row strong {
+    min-width: 0;
+  }
+
+  .programme-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .cp-card {
+    padding: 16px;
+  }
+
+  .cp-tab {
+    flex: 1 1 100%;
+  }
+
+  .programme-card {
+    padding: 16px;
+  }
+
+  .status-badge {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+
+  .bursary-summary {
+    padding: 14px;
   }
 }

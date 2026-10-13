@@ -1,130 +1,64 @@
-import { GoogleGenAI } from "@google/genai";
+import * as genai from "@google/genai";
 
-const ai = new GoogleGenAI({
+const ai = new genai.GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-const GEMINI_MODELS = [
-  "gemini-3.5-flash",
-  "gemini-3.1-flash-lite",
-];
+// Primary model first, faster "lite" model as the fallback
+const GEMINI_MODELS = ["gemini-3.5-flash", "gemini-3.1-flash-lite"];
 
-const MAX_RETRIES_PER_MODEL = 3;
+// ------------------------------------------------------------
+// Speed settings
+// ------------------------------------------------------------
+const MAX_RETRIES_PER_MODEL = 2; // was 3 - fall back to the lite model sooner
+const BASE_RETRY_DELAY_MS = 800; // was 1500
+const ANALYSIS_TIMEOUT_MS = 30_000; // max time for one analysis attempt
+const IMPROVE_TIMEOUT_MS = 45_000; // rewriting a CV produces more text
+const TOTAL_DEADLINE_MS = 60_000; // never keep the user waiting longer than this
+const MIN_ATTEMPT_TIME_MS = 5_000; // don't start an attempt with less time than this left
+const MAX_CV_CHARS = 20_000; // very long CVs are trimmed so the prompt stays small
+
+// Low thinking = much faster for structured scoring tasks.
+// If a model rejects this setting, the retry loop drops it automatically.
+const THINKING_CONFIG = {
+  thinkingLevel: genai.ThinkingLevel?.LOW ?? "LOW",
+};
+
+// ------------------------------------------------------------
+// Schemas (maxItems keeps responses short = faster generation)
+// ------------------------------------------------------------
+const stringList = (description, maxItems) => ({
+  type: "array",
+  items: { type: "string" },
+  maxItems,
+  description,
+});
 
 const cvAnalysisSchema = {
   type: "object",
-
   properties: {
-    score: {
-      type: "number",
-      description:
-        "Overall CV quality score from 0 to 100",
-    },
-
-    match: {
-      type: "number",
-      description:
-        "Target-role match percentage from 0 to 100",
-    },
-
-    ats: {
-      type: "number",
-      description:
-        "ATS compatibility score from 0 to 100",
-    },
-
-    content: {
-      type: "number",
-      description:
-        "CV content quality score from 0 to 100",
-    },
-
-    formatting: {
-      type: "number",
-      description:
-        "CV structure and formatting score from 0 to 100",
-    },
-
-    targetRole: {
-      type: "string",
-      description:
-        "The target job role used to evaluate the CV",
-    },
-
-    skills: {
-      type: "array",
-
-      items: {
-        type: "string",
-      },
-
-      description:
-        "Skills clearly and directly found in the CV",
-    },
-
-    missingSkills: {
-      type: "array",
-
-      items: {
-        type: "string",
-      },
-
-      description:
-        "Important relevant skills that are missing for the target role",
-    },
-
+    score: { type: "number", description: "Overall CV quality score from 0 to 100" },
+    match: { type: "number", description: "Target-role match percentage from 0 to 100" },
+    ats: { type: "number", description: "ATS compatibility score from 0 to 100" },
+    content: { type: "number", description: "CV content quality score from 0 to 100" },
+    formatting: { type: "number", description: "CV structure and formatting score from 0 to 100" },
+    targetRole: { type: "string", description: "The target job role used to evaluate the CV" },
+    skills: stringList("Skills clearly and directly found in the CV", 20),
+    missingSkills: stringList("Important relevant skills that are missing for the target role", 8),
     summary: {
       type: "string",
-      description:
-        "A concise professional summary of the CV analysis",
+      description: "A concise professional summary of the CV analysis, at most 3 sentences",
     },
-
     feedback: {
       type: "object",
-
       properties: {
-        good: {
-          type: "array",
-
-          items: {
-            type: "string",
-          },
-
-          description:
-            "Clear strengths found in the CV",
-        },
-
-        bad: {
-          type: "array",
-
-          items: {
-            type: "string",
-          },
-
-          description:
-            "Meaningful weaknesses found in the CV",
-        },
-
-        quickFixes: {
-          type: "array",
-
-          items: {
-            type: "string",
-          },
-
-          description:
-            "Practical actions the candidate can take",
-        },
+        good: stringList("Clear strengths found in the CV", 5),
+        bad: stringList("Meaningful weaknesses found in the CV", 5),
+        quickFixes: stringList("Practical actions the candidate can take", 5),
       },
-
-      required: [
-        "good",
-        "bad",
-        "quickFixes",
-      ],
+      required: ["good", "bad", "quickFixes"],
     },
   },
-
   required: [
     "score",
     "match",
@@ -141,84 +75,41 @@ const cvAnalysisSchema = {
 
 const improvedCvSchema = {
   type: "object",
-
   properties: {
     improvedCv: {
       type: "string",
-
-      description:
-        "The complete improved CV written as professional plain text",
+      description: "The complete improved CV written as professional plain text",
     },
-
-    changesMade: {
-      type: "array",
-
-      items: {
-        type: "string",
-      },
-
-      description:
-        "A concise list of the genuine improvements made",
-    },
-
-    placeholders: {
-      type: "array",
-
-      items: {
-        type: "string",
-      },
-
-      description:
-        "Missing information that the user should add manually",
-    },
+    changesMade: stringList("A concise list of the genuine improvements made", 8),
+    placeholders: stringList("Missing information that the user should add manually", 8),
   },
-
-  required: [
-    "improvedCv",
-    "changesMade",
-    "placeholders",
-  ],
+  required: ["improvedCv", "changesMade", "placeholders"],
 };
 
-const wait = (milliseconds) => {
-  return new Promise((resolve) => {
-    setTimeout(resolve, milliseconds);
-  });
-};
+// ------------------------------------------------------------
+// Helpers
+// ------------------------------------------------------------
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const getErrorStatus = (error) => {
-  const possibleStatus =
-    error?.status ??
-    error?.code ??
-    error?.error?.code;
-
-  const status = Number(possibleStatus);
-
-  return Number.isFinite(status)
-    ? status
-    : 0;
+  const status = Number(error?.status ?? error?.code ?? error?.error?.code);
+  return Number.isFinite(status) ? status : 0;
 };
 
-const getErrorMessage = (error) => {
-  if (typeof error?.message === "string") {
-    return error.message;
-  }
+const getErrorMessage = (error) =>
+  typeof error?.message === "string" ? error.message : String(error || "");
 
-  return String(error || "");
-};
+const isTimeoutError = (error) =>
+  error?.name === "TimeoutError" ||
+  error?.name === "AbortError" ||
+  getErrorMessage(error).toLowerCase().includes("timed out");
 
 const isRetryableGeminiError = (error) => {
   const status = getErrorStatus(error);
-
-  const message =
-    getErrorMessage(error).toLowerCase();
+  const message = getErrorMessage(error).toLowerCase();
 
   return (
-    status === 429 ||
-    status === 500 ||
-    status === 502 ||
-    status === 503 ||
-    status === 504 ||
+    [429, 500, 502, 503, 504].includes(status) ||
     message.includes("high demand") ||
     message.includes("overloaded") ||
     message.includes("unavailable") ||
@@ -228,219 +119,220 @@ const isRetryableGeminiError = (error) => {
 };
 
 const isModelUnavailableError = (error) => {
-  const status = getErrorStatus(error);
-
-  const message =
-    getErrorMessage(error).toLowerCase();
+  const message = getErrorMessage(error).toLowerCase();
 
   return (
-    status === 404 &&
-    (
-      message.includes("model") ||
+    getErrorStatus(error) === 404 &&
+    (message.includes("model") ||
       message.includes("not found") ||
-      message.includes("no longer available")
-    )
+      message.includes("no longer available"))
   );
 };
 
+// A model that doesn't support the thinking setting returns a 400 about it
+const isThinkingConfigError = (error) =>
+  getErrorStatus(error) === 400 &&
+  getErrorMessage(error).toLowerCase().includes("thinking");
+
+const cleanStringList = (value) =>
+  Array.isArray(value)
+    ? value
+        .filter((item) => typeof item === "string" && item.trim())
+        .map((item) => item.trim())
+    : [];
+
 const validateGeminiConfiguration = () => {
   if (!process.env.GEMINI_API_KEY) {
-    throw new Error(
-      "GEMINI_API_KEY is missing from the cv-analyzer/.env file."
-    );
+    throw new Error("GEMINI_API_KEY is missing from the cv-analyzer/.env file.");
   }
 };
 
-const validateCvText = (
-  cvText,
-  message =
-    "The extracted CV text is empty or too short."
-) => {
-  if (
-    typeof cvText !== "string" ||
-    cvText.trim().length < 100
-  ) {
-    throw new Error(message);
+const validateCvText = (cvText, message = "The extracted CV text is empty or too short.") => {
+  if (typeof cvText !== "string" || cvText.trim().length < 100) {
+    const err = new Error(message);
+    err.status = 400;
+    err.code = "CV_TEXT_TOO_SHORT";
+    throw err;
   }
 };
 
-const generateContentWithRetry = async ({
-  contents,
-  config,
-}) => {
+const prepareCvText = (cvText) =>
+  cvText.length > MAX_CV_CHARS
+    ? `${cvText.slice(0, MAX_CV_CHARS)}\n[CV truncated]`
+    : cvText;
+
+// ------------------------------------------------------------
+// One Gemini call with a hard timeout (works on any SDK version)
+// ------------------------------------------------------------
+const callModelWithTimeout = async ({ model, contents, config, timeoutMs }) => {
+  const controller = new AbortController();
+  let timer;
+
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      controller.abort();
+      const err = new Error(`Gemini request timed out after ${timeoutMs}ms`);
+      err.name = "TimeoutError";
+      reject(err);
+    }, timeoutMs);
+  });
+
+  try {
+    return await Promise.race([
+      ai.models.generateContent({
+        model,
+        contents,
+        config: { ...config, abortSignal: controller.signal },
+      }),
+      timeout,
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
+// ------------------------------------------------------------
+// Retry + fallback, inside an overall time budget
+// ------------------------------------------------------------
+const generateContentWithRetry = async ({ contents, config, timeoutMs }) => {
+  const startedAt = Date.now();
   let lastError = null;
 
-  for (const model of GEMINI_MODELS) {
-    console.log(
-      `🤖 Trying Gemini model: ${model}`
-    );
+  modelLoop: for (const model of GEMINI_MODELS) {
+    let useThinking = true;
 
-    for (
-      let attempt = 1;
-      attempt <= MAX_RETRIES_PER_MODEL;
-      attempt += 1
-    ) {
+    for (let attempt = 1; attempt <= MAX_RETRIES_PER_MODEL; attempt += 1) {
+      const remainingMs = TOTAL_DEADLINE_MS - (Date.now() - startedAt);
+
+      if (remainingMs < MIN_ATTEMPT_TIME_MS) {
+        console.warn("⚠️ Gemini time budget used up.");
+        break modelLoop;
+      }
+
+      const attemptConfig = useThinking
+        ? { ...config, thinkingConfig: THINKING_CONFIG }
+        : config;
+
+      const attemptStartedAt = Date.now();
+
       try {
-        console.log(
-          `🤖 ${model} request attempt ${attempt}/${MAX_RETRIES_PER_MODEL}`
-        );
-
-        const response =
-          await ai.models.generateContent({
-            model,
-            contents,
-            config,
-          });
+        const response = await callModelWithTimeout({
+          model,
+          contents,
+          config: attemptConfig,
+          timeoutMs: Math.min(timeoutMs, remainingMs),
+        });
 
         console.log(
-          `✅ Gemini request succeeded using ${model}`
+          `✅ Gemini ${model} responded in ${Date.now() - attemptStartedAt}ms (attempt ${attempt})`
         );
 
         return response;
-
       } catch (error) {
         lastError = error;
 
-        const status =
-          getErrorStatus(error);
-
         console.warn(
-          `⚠️ Gemini request failed. Model: ${model}, attempt: ${attempt}, status: ${status || "unknown"}`
+          `⚠️ Gemini ${model} attempt ${attempt} failed after ${Date.now() - attemptStartedAt}ms ` +
+            `(${getErrorStatus(error) || error?.name || "unknown"})`
         );
 
-        if (isModelUnavailableError(error)) {
-          console.warn(
-            `⚠️ ${model} is unavailable. Trying the fallback model.`
-          );
+        if (useThinking && isThinkingConfigError(error)) {
+          console.warn(`⚠️ ${model} rejected the thinking setting. Retrying without it.`);
+          useThinking = false;
+          attempt -= 1; // this retry doesn't count
+          continue;
+        }
 
-          break;
+        if (isTimeoutError(error)) {
+          console.warn(`⏱ ${model} was too slow. Switching to the fallback model.`);
+          continue modelLoop;
+        }
+
+        if (isModelUnavailableError(error)) {
+          console.warn(`⚠️ ${model} is unavailable. Trying the fallback model.`);
+          continue modelLoop;
         }
 
         if (!isRetryableGeminiError(error)) {
           throw error;
         }
 
-        if (
-          attempt ===
-          MAX_RETRIES_PER_MODEL
-        ) {
-          console.warn(
-            `⚠️ ${model} remained unavailable after ${MAX_RETRIES_PER_MODEL} attempts.`
-          );
-
-          break;
+        if (attempt === MAX_RETRIES_PER_MODEL) {
+          continue modelLoop;
         }
 
-        const baseDelay =
-          1500 *
-          Math.pow(
-            2,
-            attempt - 1
-          );
-
-        const randomDelay =
-          Math.floor(
-            Math.random() * 500
-          );
-
         const delay =
-          baseDelay + randomDelay;
+          BASE_RETRY_DELAY_MS * 2 ** (attempt - 1) + Math.floor(Math.random() * 300);
 
-        console.warn(
-          `⏳ Gemini is temporarily busy. Retrying in ${delay}ms...`
-        );
-
+        console.warn(`⏳ Gemini is busy. Retrying in ${delay}ms...`);
         await wait(delay);
       }
     }
   }
 
-  console.error(
-    "❌ All Gemini model attempts failed:",
-    lastError
+  console.error("❌ All Gemini attempts failed:", lastError);
+
+  const serviceError = new Error(
+    isTimeoutError(lastError)
+      ? "The CV analysis is taking longer than usual. Please try again in a moment."
+      : "Gemini is temporarily experiencing high demand. Please wait a moment and try again."
   );
 
-  const serviceError =
-    new Error(
-      "Gemini is temporarily experiencing high demand. Please wait a moment and try again."
-    );
-
   serviceError.status = 503;
+  serviceError.code = "AI_UNAVAILABLE";
   serviceError.cause = lastError;
 
   throw serviceError;
 };
 
+// ------------------------------------------------------------
+// Response parsing
+// ------------------------------------------------------------
 const getResponseText = async (response) => {
-  if (!response) {
-    return "";
+  if (!response) return "";
+
+  if (typeof response.text === "function") {
+    const value = await response.text();
+    return typeof value === "string" ? value.trim() : "";
   }
 
-  if (
-    typeof response.text ===
-    "function"
-  ) {
-    const value =
-      await response.text();
-
-    return typeof value === "string"
-      ? value.trim()
-      : "";
-  }
-
-  if (
-    typeof response.text ===
-    "string"
-  ) {
+  if (typeof response.text === "string") {
     return response.text.trim();
   }
 
   return "";
 };
 
-const parseGeminiJsonResponse = async (
-  response,
-  invalidJsonMessage
-) => {
-  const responseText =
-    await getResponseText(response);
+const parseGeminiJsonResponse = async (response, invalidJsonMessage) => {
+  const responseText = await getResponseText(response);
 
   if (!responseText) {
-    throw new Error(
-      "Gemini returned an empty response."
-    );
+    throw new Error("Gemini returned an empty response.");
   }
 
-  try {
-    return JSON.parse(responseText);
+  const cleaned = responseText.replace(/^```(?:json)?\s*|\s*```$/g, "").trim();
 
+  try {
+    return JSON.parse(cleaned);
   } catch (error) {
+    const finishReason = response?.candidates?.[0]?.finishReason;
     console.error(
-      "❌ Invalid Gemini JSON response:",
+      `❌ Invalid Gemini JSON response (finishReason: ${finishReason || "unknown"}):`,
       responseText
     );
-
-    throw new Error(
-      invalidJsonMessage
-    );
+    throw new Error(invalidJsonMessage);
   }
 };
 
-export const analyzeCvWithGemini = async (
-  cvText,
-  targetRole =
-    "General professional role"
-) => {
+// ------------------------------------------------------------
+// CV analysis
+// ------------------------------------------------------------
+export const analyzeCvWithGemini = async (cvText, targetRole = "General professional role") => {
   validateGeminiConfiguration();
-
-  validateCvText(
-    cvText,
-    "The extracted CV text is empty or too short."
-  );
+  validateCvText(cvText, "The extracted CV text is empty or too short.");
 
   const cleanTargetRole =
-    typeof targetRole === "string" &&
-    targetRole.trim()
+    typeof targetRole === "string" && targetRole.trim()
       ? targetRole.trim()
       : "General professional role";
 
@@ -466,118 +358,60 @@ ANALYSIS RULES:
 10. The overall score must reasonably reflect ATS compatibility, content quality, formatting and target-role match.
 11. When the target role is "General professional role", do not assume that specialised technical skills are required.
 12. Evaluate only the information contained in the CV.
-13. Return only the required JSON structure.
-14. Do not include Markdown or explanations outside the JSON response.
+13. Keep every feedback item to one short sentence (under 25 words).
+14. List at most 5 items in each feedback list, at most 8 missing skills and at most 20 skills.
+15. Return only the required JSON structure.
+16. Do not include Markdown or explanations outside the JSON response.
 
 CV CONTENT START
 ----------------
-${cvText}
+${prepareCvText(cvText)}
 ----------------
 CV CONTENT END
 `;
 
-  const response =
-    await generateContentWithRetry({
-      contents: prompt,
+  const response = await generateContentWithRetry({
+    contents: prompt,
+    timeoutMs: ANALYSIS_TIMEOUT_MS,
+    config: {
+      temperature: 0.2,
+      maxOutputTokens: 8192,
+      responseMimeType: "application/json",
+      responseSchema: cvAnalysisSchema,
+    },
+  });
 
-      config: {
-        temperature: 0.2,
-
-        responseMimeType:
-          "application/json",
-
-        responseSchema:
-          cvAnalysisSchema,
-      },
-    });
-
-  return parseGeminiJsonResponse(
-    response,
-    "Gemini returned invalid CV analysis JSON."
-  );
+  return parseGeminiJsonResponse(response, "Gemini returned invalid CV analysis JSON.");
 };
 
-export const generateImprovedCvWithGemini =
-  async (
-    cvText,
-    analysis
-  ) => {
-    validateGeminiConfiguration();
+// ------------------------------------------------------------
+// Improved CV
+// ------------------------------------------------------------
+export const generateImprovedCvWithGemini = async (cvText, analysis) => {
+  validateGeminiConfiguration();
+  validateCvText(cvText, "The original CV text is missing or too short.");
 
-    validateCvText(
-      cvText,
-      "The original CV text is missing or too short."
-    );
+  if (!analysis || typeof analysis !== "object") {
+    throw new Error("The original CV analysis is missing or invalid.");
+  }
 
-    if (
-      !analysis ||
-      typeof analysis !== "object"
-    ) {
-      throw new Error(
-        "The original CV analysis is missing or invalid."
-      );
-    }
+  const analysisSummary = {
+    score: analysis.score,
+    match: analysis.match,
+    ats: analysis.ats,
+    content: analysis.content,
+    formatting: analysis.formatting,
+    targetRole: analysis.targetRole,
+    skills: cleanStringList(analysis.skills),
+    missingSkills: cleanStringList(analysis.missingSkills),
+    feedback: {
+      good: cleanStringList(analysis.feedback?.good),
+      bad: cleanStringList(analysis.feedback?.bad),
+      quickFixes: cleanStringList(analysis.feedback?.quickFixes),
+    },
+  };
 
-    const analysisSummary = {
-      score:
-        analysis.score,
-
-      match:
-        analysis.match,
-
-      ats:
-        analysis.ats,
-
-      content:
-        analysis.content,
-
-      formatting:
-        analysis.formatting,
-
-      targetRole:
-        analysis.targetRole,
-
-      skills:
-        Array.isArray(
-          analysis.skills
-        )
-          ? analysis.skills
-          : [],
-
-      missingSkills:
-        Array.isArray(
-          analysis.missingSkills
-        )
-          ? analysis.missingSkills
-          : [],
-
-      feedback: {
-        good:
-          Array.isArray(
-            analysis.feedback?.good
-          )
-            ? analysis.feedback.good
-            : [],
-
-        bad:
-          Array.isArray(
-            analysis.feedback?.bad
-          )
-            ? analysis.feedback.bad
-            : [],
-
-        quickFixes:
-          Array.isArray(
-            analysis.feedback
-              ?.quickFixes
-          )
-            ? analysis.feedback
-                .quickFixes
-            : [],
-      },
-    };
-
-    const prompt = `
+  const prompt = `
 You are an expert professional CV writer and ATS specialist.
 
 Rewrite the original CV into a stronger, clearer and more ATS-friendly CV.
@@ -604,98 +438,43 @@ CRITICAL ACCURACY RULES:
     SKILLS
 13. Leave out completely empty sections unless a useful placeholder is needed.
 14. Do not alter the candidate's identity or contact details.
-15. Return only the required JSON structure.
-16. Do not include Markdown code fences or explanations outside the JSON response.
+15. Keep "changesMade" and "placeholders" to short one-line items.
+16. Return only the required JSON structure.
+17. Do not include Markdown code fences or explanations outside the JSON response.
 
 ORIGINAL ANALYSIS:
-${JSON.stringify(
-  analysisSummary,
-  null,
-  2
-)}
+${JSON.stringify(analysisSummary, null, 2)}
 
 ORIGINAL CV START
 -----------------
-${cvText}
+${prepareCvText(cvText)}
 -----------------
 ORIGINAL CV END
 `;
 
-    const response =
-      await generateContentWithRetry({
-        contents: prompt,
+  const response = await generateContentWithRetry({
+    contents: prompt,
+    timeoutMs: IMPROVE_TIMEOUT_MS,
+    config: {
+      temperature: 0.15,
+      maxOutputTokens: 16384,
+      responseMimeType: "application/json",
+      responseSchema: improvedCvSchema,
+    },
+  });
 
-        config: {
-          temperature: 0.15,
+  const improvedResult = await parseGeminiJsonResponse(
+    response,
+    "Gemini returned invalid improved CV JSON."
+  );
 
-          responseMimeType:
-            "application/json",
+  if (typeof improvedResult?.improvedCv !== "string" || !improvedResult.improvedCv.trim()) {
+    throw new Error("Gemini returned an empty improved CV.");
+  }
 
-          responseSchema:
-            improvedCvSchema,
-        },
-      });
-
-    const improvedResult =
-      await parseGeminiJsonResponse(
-        response,
-        "Gemini returned invalid improved CV JSON."
-      );
-
-    if (
-      typeof improvedResult
-        ?.improvedCv !== "string" ||
-      !improvedResult
-        .improvedCv
-        .trim()
-    ) {
-      throw new Error(
-        "Gemini returned an empty improved CV."
-      );
-    }
-
-    return {
-      improvedCv:
-        improvedResult
-          .improvedCv
-          .trim(),
-
-      changesMade:
-        Array.isArray(
-          improvedResult
-            .changesMade
-        )
-          ? improvedResult
-              .changesMade
-              .filter(
-                (item) =>
-                  typeof item ===
-                    "string" &&
-                  item.trim()
-              )
-              .map(
-                (item) =>
-                  item.trim()
-              )
-          : [],
-
-      placeholders:
-        Array.isArray(
-          improvedResult
-            .placeholders
-        )
-          ? improvedResult
-              .placeholders
-              .filter(
-                (item) =>
-                  typeof item ===
-                    "string" &&
-                  item.trim()
-              )
-              .map(
-                (item) =>
-                  item.trim()
-              )
-          : [],
-    };
+  return {
+    improvedCv: improvedResult.improvedCv.trim(),
+    changesMade: cleanStringList(improvedResult.changesMade),
+    placeholders: cleanStringList(improvedResult.placeholders),
   };
+};

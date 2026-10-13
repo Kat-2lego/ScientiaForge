@@ -1,0 +1,521 @@
+{
+ "paper": {
+  "subject": "Life Sciences",
+  "year": 2023,
+  "exam_session": "November",
+  "grade": 12,
+  "paper_number": 1,
+  "language": "English",
+  "total_marks": 50
+ },
+ "questions": [
+  {
+   "question_number": "1.1.1",
+   "sort_key": [
+    1,
+    1,
+    1
+   ],
+   "top_question": 1,
+   "section": "Section A",
+   "context_text": null,
+   "question_text": "Which ONE of the following parts controls the amount of light entering the eye by influencing the size of the pupil?",
+   "question_type": "multiple_choice",
+   "options": [
+    {
+     "label": "A",
+     "text": "Sclera"
+    },
+    {
+     "label": "B",
+     "text": "Cornea"
+    },
+    {
+     "label": "C",
+     "text": "Retina"
+    },
+    {
+     "label": "D",
+     "text": "Iris"
+    }
+   ],
+   "marks": 2,
+   "page_number": 3,
+   "has_figure": false,
+   "is_auto_markable": true,
+   "is_recall_suitable": true,
+   "memo": {
+    "answer_text": "D",
+    "accepted_answer": "D",
+    "accepted_alternatives": [],
+    "keywords": [],
+    "answer_format": "letter",
+    "marks": 2,
+    "memo_page_number": 3
+   }
+  },
+  {
+   "question_number": "1.1.2",
+   "sort_key": [
+    1,
+    1,
+    2
+   ],
+   "top_question": 1,
+   "section": "Section A",
+   "context_text": null,
+   "question_text": "The function of the umbilical vein is to transport …",
+   "question_type": "multiple_choice",
+   "options": [
+    {
+     "label": "A",
+     "text": "carbon dioxide from the foetus to the mother."
+    },
+    {
+     "label": "B",
+     "text": "nutrients from the mother to the foetus, via the placenta and umbilical cord."
+    },
+    {
+     "label": "C",
+     "text": "carbon dioxide from the mother to the foetus."
+    },
+    {
+     "label": "D",
+     "text": "nutrients from the foetus to the mother."
+    }
+   ],
+   "marks": 2,
+   "page_number": 3,
+   "has_figure": false,
+   "is_auto_markable": true,
+   "is_recall_suitable": true,
+   "memo": {
+    "answer_text": "B",
+    "accepted_answer": "B",
+    "accepted_alternatives": [],
+    "keywords": [],
+    "answer_format": "letter",
+    "marks": 2,
+    "memo_page_number": 3
+   }
+  },
+  {
+   "question_number": "1.1.3",
+   "sort_key": [
+    1,
+    1,
+    3
+   ],
+   "top_question": 1,
+   "section": "Section A",
+   "context_text": null,
+   "question_text": "The diagram below represents part of the human ear.\nA  B\nWhich ONE of the following is the part labelled B?",
+   "question_type": "multiple_choice",
+   "options": [
+    {
+     "label": "A",
+     "text": "Cochlea"
+    },
+    {
+     "label": "B",
+     "text": "Pinna"
+    },
+    {
+     "label": "C",
+     "text": "Ossicles"
+    },
+    {
+     "label": "D",
+     "text": "Eustachian tube"
+    }
+   ],
+   "marks": 2,
+   "page_number": 3,
+   "has_figure": true,
+   "is_auto_markable": true,
+   "is_recall_suitable": false,
+   "memo": {
+    "answer_text": "C",
+    "accepted_answer": "C",
+    "accepted_alternatives": [],
+    "keywords": [],
+    "answer_format": "letter",
+    "marks": 2,
+    "memo_page_number": 3
+   }
+  },
+  {
+   "question_number": "1.1.4",
+   "sort_key": [
+    1,
+    1,
+    4
+   ],
+   "top_question": 1,
+   "section": "Section A",
+   "context_text": null,
+   "question_text": "In a person suffering from long-sightedness, …",
+   "question_type": "multiple_choice",
+   "options": [
+    {
+     "label": "A",
+     "text": "the eyeball is longer than normal."
+    },
+    {
+     "label": "B",
+     "text": "distant objects appear blurred."
+    },
+    {
+     "label": "C",
+     "text": "light rays fall behind the retina."
+    },
+    {
+     "label": "D",
+     "text": "light rays are refracted more by the lens."
+    }
+   ],
+   "marks": 2,
+   "page_number": 3,
+   "has_figure": false,
+   "is_auto_markable": true,
+   "is_recall_suitable": true,
+   "memo": {
+    "answer_text": "C",
+    "accepted_answer": "C",
+    "accepted_alternatives": [],
+    "keywords": [],
+    "answer_format": "letter",
+    "marks": 2,
+    "memo_page_number": 3
+   }
+  },
+  {
+   "question_number": "1.2.1",
+   "sort_key": [
+    1,
+    2,
+    1
+   ],
+   "top_question": 1,
+   "section": "Section A",
+   "context_text": "Give the correct biological term for each of the following descriptions.",
+   "question_text": "A reproductive strategy where the young receives nutrients through the placenta",
+   "question_type": "short_answer",
+   "options": null,
+   "marks": 1,
+   "page_number": 4,
+   "has_figure": false,
+   "is_auto_markable": true,
+   "is_recall_suitable": true,
+   "memo": {
+    "answer_text": "Vivipary",
+    "accepted_answer": "Vivipary",
+    "accepted_alternatives": [],
+    "keywords": [
+     "vivipary"
+    ],
+    "answer_format": "term",
+    "marks": 1,
+    "memo_page_number": 3
+   }
+  },
+  {
+   "question_number": "1.2.2",
+   "sort_key": [
+    1,
+    2,
+    2
+   ],
+   "top_question": 1,
+   "section": "Section A",
+   "context_text": "Give the correct biological term for each of the following descriptions.",
+   "question_text": "The duct that transports semen and urine to the outside of the body",
+   "question_type": "short_answer",
+   "options": null,
+   "marks": 1,
+   "page_number": 4,
+   "has_figure": false,
+   "is_auto_markable": true,
+   "is_recall_suitable": true,
+   "memo": {
+    "answer_text": "Urethra",
+    "accepted_answer": "Urethra",
+    "accepted_alternatives": [],
+    "keywords": [
+     "urethra"
+    ],
+    "answer_format": "term",
+    "marks": 1,
+    "memo_page_number": 3
+   }
+  },
+  {
+   "question_number": "1.2.3",
+   "sort_key": [
+    1,
+    2,
+    3
+   ],
+   "top_question": 1,
+   "section": "Section A",
+   "context_text": "Give the correct biological term for each of the following descriptions.",
+   "question_text": "The hollow ball of cells formed after the morula stage",
+   "question_type": "short_answer",
+   "options": null,
+   "marks": 1,
+   "page_number": 4,
+   "has_figure": false,
+   "is_auto_markable": true,
+   "is_recall_suitable": true,
+   "memo": {
+    "answer_text": "Blastocyst/blastula",
+    "accepted_answer": "Blastocyst",
+    "accepted_alternatives": [
+     "blastula"
+    ],
+    "keywords": [
+     "blastocyst"
+    ],
+    "answer_format": "term",
+    "marks": 1,
+    "memo_page_number": 3
+   }
+  },
+  {
+   "question_number": "1.3.1",
+   "sort_key": [
+    1,
+    3,
+    1
+   ],
+   "top_question": 1,
+   "section": "Section A",
+   "context_text": "Indicate whether each of the descriptions in COLUMN I apply to A ONLY, B ONLY, BOTH A AND B or NONE of the items in COLUMN II.",
+   "question_text": "A process that produces four mature gametes from a single diploid cell\n\nA: Oogenesis\nB: Spermatogenesis",
+   "question_type": "multiple_choice",
+   "options": [
+    {
+     "label": "A only",
+     "text": "A only"
+    },
+    {
+     "label": "B only",
+     "text": "B only"
+    },
+    {
+     "label": "Both A and B",
+     "text": "Both A and B"
+    },
+    {
+     "label": "None",
+     "text": "None"
+    }
+   ],
+   "marks": 2,
+   "page_number": 4,
+   "has_figure": false,
+   "is_auto_markable": true,
+   "is_recall_suitable": true,
+   "memo": {
+    "answer_text": "B only",
+    "accepted_answer": "B only",
+    "accepted_alternatives": [],
+    "keywords": [],
+    "answer_format": "term",
+    "marks": 2,
+    "memo_page_number": 3
+   }
+  },
+  {
+   "question_number": "1.3.2",
+   "sort_key": [
+    1,
+    3,
+    2
+   ],
+   "top_question": 1,
+   "section": "Section A",
+   "context_text": "Indicate whether each of the descriptions in COLUMN I apply to A ONLY, B ONLY, BOTH A AND B or NONE of the items in COLUMN II.",
+   "question_text": "A defence mechanism that protects plants against herbivores\n\nA: Thorns\nB: Chemicals",
+   "question_type": "multiple_choice",
+   "options": [
+    {
+     "label": "A only",
+     "text": "A only"
+    },
+    {
+     "label": "B only",
+     "text": "B only"
+    },
+    {
+     "label": "Both A and B",
+     "text": "Both A and B"
+    },
+    {
+     "label": "None",
+     "text": "None"
+    }
+   ],
+   "marks": 2,
+   "page_number": 4,
+   "has_figure": false,
+   "is_auto_markable": true,
+   "is_recall_suitable": true,
+   "memo": {
+    "answer_text": "Both A and B",
+    "accepted_answer": "Both A and B",
+    "accepted_alternatives": [],
+    "keywords": [],
+    "answer_format": "term",
+    "marks": 2,
+    "memo_page_number": 3
+   }
+  },
+  {
+   "question_number": "2.1.1",
+   "sort_key": [
+    2,
+    1,
+    1
+   ],
+   "top_question": 2,
+   "section": "Section B",
+   "context_text": "Read the extract below.\nIn some frog species, during mating, the male climbs onto the back of the female. The female releases about 6 000 ova, while the male releases sperm onto them. This mating behaviour is called amplexus.",
+   "question_text": "Name the type of fertilisation that occurs during reproduction in frogs.",
+   "question_type": "short_answer",
+   "options": null,
+   "marks": 1,
+   "page_number": 5,
+   "has_figure": false,
+   "is_auto_markable": true,
+   "is_recall_suitable": true,
+   "memo": {
+    "answer_text": "External fertilisation",
+    "accepted_answer": "External fertilisation",
+    "accepted_alternatives": [],
+    "keywords": [
+     "external",
+     "fertilisation"
+    ],
+    "answer_format": "term",
+    "marks": 1,
+    "memo_page_number": 4
+   }
+  },
+  {
+   "question_number": "2.1.2",
+   "sort_key": [
+    2,
+    1,
+    2
+   ],
+   "top_question": 2,
+   "section": "Section B",
+   "context_text": "Read the extract below.\nIn some frog species, during mating, the male climbs onto the back of the female. The female releases about 6 000 ova, while the male releases sperm onto them. This mating behaviour is called amplexus.",
+   "question_text": "Explain why the fertilised eggs of these frogs do not survive on land.",
+   "question_type": "other",
+   "options": null,
+   "marks": 2,
+   "page_number": 5,
+   "has_figure": false,
+   "is_auto_markable": false,
+   "is_recall_suitable": true,
+   "memo": {
+    "answer_text": "- The eggs will dry out\n- because they have no shells/are not amniotic eggs",
+    "accepted_answer": null,
+    "accepted_alternatives": [],
+    "keywords": [
+     "eggs",
+     "because",
+     "shells",
+     "amniotic"
+    ],
+    "answer_format": "text",
+    "marks": 2,
+    "memo_page_number": 4
+   }
+  },
+  {
+   "question_number": "2.2.1",
+   "sort_key": [
+    2,
+    2,
+    1
+   ],
+   "top_question": 2,
+   "section": "Section B",
+   "context_text": "The diagram below represents the male reproductive system.\n2.3  B",
+   "question_text": "Name:\n(a)  Part A\n(b)  The hormone secreted by B",
+   "question_type": "short_answer",
+   "options": null,
+   "marks": 2,
+   "page_number": 5,
+   "has_figure": true,
+   "is_auto_markable": false,
+   "is_recall_suitable": false,
+   "memo": {
+    "answer_text": "(a) Seminal vesicle\n(b) Testosterone",
+    "accepted_answer": null,
+    "accepted_alternatives": [],
+    "keywords": [],
+    "answer_format": "text",
+    "marks": 2,
+    "memo_page_number": 4
+   }
+  },
+  {
+   "question_number": "2.3",
+   "sort_key": [
+    2,
+    3
+   ],
+   "top_question": 2,
+   "section": "Section B",
+   "context_text": null,
+   "question_text": "How many chromosomes are found in a human sperm cell?",
+   "question_type": "numerical",
+   "options": null,
+   "marks": 1,
+   "page_number": 5,
+   "has_figure": false,
+   "is_auto_markable": true,
+   "is_recall_suitable": true,
+   "memo": {
+    "answer_text": "23",
+    "accepted_answer": "23",
+    "accepted_alternatives": [],
+    "keywords": [],
+    "answer_format": "number",
+    "marks": 1,
+    "memo_page_number": 4
+   }
+  },
+  {
+   "question_number": "2.4",
+   "sort_key": [
+    2,
+    4
+   ],
+   "top_question": 2,
+   "section": "Section B",
+   "context_text": null,
+   "question_text": "A learner's pulse rate increased from 70 to 84 beats per minute after exercise. Calculate the percentage increase in the pulse rate.",
+   "question_type": "calculation",
+   "options": null,
+   "marks": 3,
+   "page_number": 5,
+   "has_figure": false,
+   "is_auto_markable": true,
+   "is_recall_suitable": true,
+   "memo": {
+    "answer_text": "(84 – 70) ÷ 70 × 100\n= 20%",
+    "accepted_answer": "= 20%",
+    "accepted_alternatives": [],
+    "keywords": [],
+    "answer_format": "number",
+    "marks": 3,
+    "memo_page_number": 4
+   }
+  }
+ ]
+}

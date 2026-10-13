@@ -3,13 +3,43 @@ import { supabaseAdmin } from "./supabaseClient.js";
 // ------------------------------------------------------------
 // Settings - match these to your database
 // ------------------------------------------------------------
-const PLANS_TABLE = "subscription_plans";   // table holding the plans
-const PLAN_NAME_COLUMN = "name";            // column with "freemium" / "premium"
+const PLANS_TABLE = "subscription_plans"; // table holding the plans
+const PLAN_NAME_COLUMN = "name"; // column with "freemium" / "premium"
 const PLAN_LIMIT_COLUMN = "cv_monthly_limit"; // -1 = unlimited
 
 // Used when a user has no active subscription and no freemium row/limit is set.
 const FREEMIUM_MONTHLY_LIMIT = 3;
 const FREEMIUM_PLAN_NAME = "Freemium";
+
+// Plans rarely change, so cache them in memory instead of querying every upload.
+const PLAN_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
+const PLAN_COLUMNS = `subscription_id, ${PLAN_NAME_COLUMN}, ${PLAN_LIMIT_COLUMN}`;
+
+// ------------------------------------------------------------
+// Small in-memory cache for plan rows
+// ------------------------------------------------------------
+const planCache = new Map(); // key -> { value, expiresAt }
+
+const getCached = async (key, loader) => {
+  const hit = planCache.get(key);
+
+  if (hit && hit.expiresAt > Date.now()) {
+    return hit.value;
+  }
+
+  const value = await loader();
+
+  // Only cache real rows, so a failed lookup is retried next time
+  if (value) {
+    planCache.set(key, { value, expiresAt: Date.now() + PLAN_CACHE_TTL_MS });
+  }
+
+  return value;
+};
+
+/** Call this after editing plans in an admin screen, if you have one. */
+export const clearPlanCache = () => planCache.clear();
 
 /**
  * Start of the current calendar month in South African time (UTC+2),
@@ -31,8 +61,6 @@ const getMonthWindow = () => {
   };
 };
 
-const PLAN_COLUMNS = `subscription_id, ${PLAN_NAME_COLUMN}, ${PLAN_LIMIT_COLUMN}`;
-
 /**
  * Turn a plan row into { planName, limit, subscriptionId }.
  */
@@ -47,23 +75,43 @@ const readPlan = (plan) => {
 };
 
 /**
- * Look up the Freemium plan row (also accepts a plan named "free").
+ * Look up the Freemium plan row (also accepts a plan named "free"). Cached.
  */
-const getFreemiumPlan = async () => {
-  const { data, error } = await supabaseAdmin
-    .from(PLANS_TABLE)
-    .select(PLAN_COLUMNS)
-    .or(`${PLAN_NAME_COLUMN}.ilike.freemium,${PLAN_NAME_COLUMN}.ilike.free`)
-    .limit(1)
-    .maybeSingle();
+const getFreemiumPlan = () =>
+  getCached("freemium", async () => {
+    const { data, error } = await supabaseAdmin
+      .from(PLANS_TABLE)
+      .select(PLAN_COLUMNS)
+      .or(`${PLAN_NAME_COLUMN}.ilike.freemium,${PLAN_NAME_COLUMN}.ilike.free`)
+      .limit(1)
+      .maybeSingle();
 
-  if (error) {
-    console.error("Freemium plan lookup error:", error.message);
-    return null;
-  }
+    if (error) {
+      console.error("Freemium plan lookup error:", error.message);
+      return null;
+    }
 
-  return data;
-};
+    return data;
+  });
+
+/**
+ * Look up a plan row by its subscription_id. Cached.
+ */
+const getPlanById = (subscriptionId) =>
+  getCached(`plan:${subscriptionId}`, async () => {
+    const { data, error } = await supabaseAdmin
+      .from(PLANS_TABLE)
+      .select(PLAN_COLUMNS)
+      .eq("subscription_id", subscriptionId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Plan query error:", error.message);
+      throw new Error("Could not retrieve the subscription plan.");
+    }
+
+    return data;
+  });
 
 /**
  * Get the user's plan and CV usage for the current month.
@@ -74,37 +122,42 @@ export const getUserPlanAndUsage = async (userId) => {
     throw new Error("User ID is required.");
   }
 
-  // 1. The user's active subscription (newest if several)
-  const { data: userSubscription, error: subError } = await supabaseAdmin
-    .from("user_subscriptions")
-    .select("user_subscription_id, subscription_id, status, created_at")
-    .eq("user_id", userId)
-    .eq("status", "active")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const { monthStart, resetsAt } = getMonthWindow();
 
-  if (subError) {
-    console.error("Subscription query error:", subError.message);
+  // 1. Subscription lookup and this month's usage count don't depend on
+  //    each other, so run them at the same time.
+  const [subResult, countResult] = await Promise.all([
+    supabaseAdmin
+      .from("user_subscriptions")
+      .select("user_subscription_id, subscription_id, status, created_at")
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+
+    supabaseAdmin
+      .from("cv_documents")
+      .select("cv_id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .gte("uploaded_at", monthStart),
+  ]);
+
+  if (subResult.error) {
+    console.error("Subscription query error:", subResult.error.message);
     throw new Error("Could not check the user's subscription.");
   }
 
-  // 2. Which plan applies
+  if (countResult.error) {
+    console.error("CV usage query error:", countResult.error.message);
+    throw new Error("Could not check CV analysis usage.");
+  }
+
+  // 2. Which plan applies (served from cache most of the time)
   let plan = null;
 
-  if (userSubscription) {
-    const { data, error: planError } = await supabaseAdmin
-      .from(PLANS_TABLE)
-      .select(PLAN_COLUMNS)
-      .eq("subscription_id", userSubscription.subscription_id)
-      .maybeSingle();
-
-    if (planError) {
-      console.error("Plan query error:", planError.message);
-      throw new Error("Could not retrieve the subscription plan.");
-    }
-
-    plan = data;
+  if (subResult.data) {
+    plan = await getPlanById(subResult.data.subscription_id);
   }
 
   // No active subscription (or its plan row is missing) -> Freemium
@@ -120,24 +173,10 @@ export const getUserPlanAndUsage = async (userId) => {
         subscriptionId: null,
       };
 
-  // 3. This month's CV analyses
-  const { monthStart, resetsAt } = getMonthWindow();
-
-  const { count, error: countError } = await supabaseAdmin
-    .from("cv_documents")
-    .select("cv_id", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .gte("uploaded_at", monthStart);
-
-  if (countError) {
-    console.error("CV usage query error:", countError.message);
-    throw new Error("Could not check CV analysis usage.");
-  }
-
   return {
     planName,
     limit,
-    used: count ?? 0,
+    used: countResult.count ?? 0,
     unlimited: limit === -1,
     period: "month",
     resetsAt,

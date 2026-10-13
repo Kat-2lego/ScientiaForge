@@ -61,12 +61,17 @@
       background: #1a3c8f;
       color: #fff;
     }
+    .last-analyzed {
+      margin-top: 6px;
+      font-size: 13px;
+      color: #6b7280;
+    }
   </style>
 </head>
 
 <body>
 
-  <!-- CUSTOM MODAL (moved to top of body so it's always ready before scripts run) -->
+  <!-- CUSTOM MODAL -->
   <div id="customModalOverlay" class="modal-overlay" style="display:none;">
     <div class="modal-box">
       <p id="customModalMessage"></p>
@@ -75,6 +80,7 @@
   </div>
 
   <div class="layout">
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
@@ -84,28 +90,28 @@
         </div>
 
         <nav class="nav">
-          <a class="nav-item" href="../pages/dashboard.html">
+          <a class="nav-item" href="dashboard.html" data-label="Dashboard">
             <i data-lucide="layout-dashboard"></i>
             <span>Dashboard</span>
           </a>
 
-          <a class="nav-item" href="../pages/careerDiscovery.html">
+          <a class="nav-item" href="CareerDiscovery.html" data-label="Career Discovery">
             <i data-lucide="compass"></i>
             <span>Career Discovery</span>
           </a>
 
-          <a class="nav-item active" href="../pages/CvDashboard.html">
+          <a class="nav-item active" href="cvDashboard.html" data-label="CV Analyzer">
             <i data-lucide="file-search"></i>
             <span>CV Analyzer</span>
           </a>
 
-          <a class="nav-item" href="../pages/InterviewSimulator.html">
+          <a class="nav-item" href="InterviewSimulator.html" data-label="Interview Simulator">
             <i data-lucide="mic"></i>
             <span>Interview Simulator</span>
           </a>
 
-          <a class="nav-item" href="../pages/skillGapAnalysis.html">
-            <i data-lucide="chart-column"></i>
+          <a class="nav-item" href="SkillGapAnalysis.html" data-label="Skill Gap Analysis">
+            <i data-lucide="bar-chart-3"></i>
             <span>Skill Gap Analysis</span>
           </a>
 
@@ -119,28 +125,28 @@
             <span>Study Hub</span>
           </a>
 
-          <a class="nav-item" href="../pages/progressTracker.html">
-            <i data-lucide="trending-up"></i>
+          <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
+            <i data-lucide="activity"></i>
             <span>Progress Tracker</span>
           </a>
 
-          <a class="nav-item" href="../pages/settings.html">
+          <a class="nav-item" href="Settings.html" data-label="Settings">
             <i data-lucide="settings"></i>
             <span>Settings</span>
           </a>
 
-          <a class="nav-item" href="../pages/Support.html">
-            <i data-lucide="help-circle"></i>
-            <span>Help/support</span>
+          <a class="nav-item" href="Support.html" data-label="Help & Support">
+            <i data-lucide="life-buoy"></i>
+            <span>Help/Support</span>
           </a>
 
-          <a class="nav-item" href="#" data-label="Log Out">
+          <a class="nav-item" href="" data-label="Log Out">
             <i data-lucide="log-out"></i>
             <span>Logout</span>
           </a>
         </nav>
       </div>
-      
+
       <div class="download-card">
         <div class="download-icon">
           <i data-lucide="smartphone"></i>
@@ -161,9 +167,11 @@
             class="menu-btn"
             id="menuBtn"
             type="button"
-            aria-label="Open navigation menu"
+            aria-label="Open menu"
+            aria-expanded="false"
+            aria-controls="sidebar"
           >
-            ☰
+            <i data-lucide="menu"></i>
           </button>
 
           <div class="searchbar">
@@ -200,6 +208,8 @@
             Review your CV score, job match and improvement
             areas at a glance.
           </p>
+
+          <p class="last-analyzed" id="lastAnalyzedText"></p>
         </div>
 
         <div class="hero-actions">
@@ -227,11 +237,11 @@
       <input
         type="file"
         id="cvFileInput"
-        accept=".pdf,.doc,.docx,.txt"
+        accept=".pdf,.docx,.txt"
         hidden
       />
 
-      <!-- TARGET ROLE INPUT (NEW) -->
+      <!-- TARGET ROLE INPUT -->
       <div class="target-role-field">
         <label for="targetRoleInput">Target Role (required)</label>
         <input
@@ -511,42 +521,534 @@
 
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <!-- Background CV analysis (keeps running when you leave this page).
+       Built into this page so it always loads. -->
+  <script>
+/**
+ * SkillForge - background CV analysis tracker
+ *
+ * Add this to EVERY dashboard page (before the page's own script):
+ *   script tag with src="../js/cvAnalysisTracker.js"
+ *
+ * It checks for a running CV analysis on every page load, shows a small
+ * status card in the corner while it runs, and tells the user when the
+ * results are ready, whichever page they are on.
+ *
+ * The CV Analyzer page uses it like this:
+ *   await CvAnalysis.start(file, targetRole);        // returns immediately
+ *   CvAnalysis.onComplete((analysis) => renderAnalysis(analysis));
+ *   CvAnalysis.onFailed((message) => showError(message));
+ *   CvAnalysis.onProgress((job) => showAnalysingState(job));
+ */
+(() => {
+  // Already loaded on this page? Don't run twice.
+  if (window.CvAnalysis) return;
+
+  // ------------------------------------------------------------
+  // Settings - match these to your project
+  // ------------------------------------------------------------
+  const CONFIG = {
+    // Same base URL your CV page currently uses for /upload, /latest etc.
+    apiBase: window.SKILLFORGE_CV_API || "http://localhost:5001/api/cv",
+
+    // Where the "View results" link goes
+    cvPageUrl: window.SKILLFORGE_CV_PAGE || "../pages/CvDashboard.html",
+
+    pollMs: 3000, // how often to check the job
+    maxPollMs: 15000, // slowest polling when the network is struggling
+  };
+
+  /**
+   * Auth header for API calls.
+   * Default: reads the Supabase session that supabase-js keeps in localStorage.
+   * If your pages already have a helper for the token, call it here instead.
+   */
+  async function getAuthHeaders() {
+    if (typeof window.getSkillForgeAuthHeaders === "function") {
+      return window.getSkillForgeAuthHeaders();
+    }
+
+    try {
+      // SkillForge pages keep the token here (same as CvDashboard.html)
+      const savedToken = localStorage.getItem("sb-access-token");
+      if (savedToken) return { Authorization: `Bearer ${savedToken}` };
+
+      const key = Object.keys(localStorage).find((k) => /^sb-.*-auth-token$/.test(k));
+      if (!key) return {};
+
+      const session = JSON.parse(localStorage.getItem(key));
+      const token = session?.access_token || session?.currentSession?.access_token;
+
+      return token ? { Authorization: `Bearer ${token}` } : {};
+    } catch {
+      return {};
+    }
+  }
+
+  // ------------------------------------------------------------
+  // State
+  // ------------------------------------------------------------
+  const STORAGE_KEY = "skillforge:cvJob";
+
+  const listeners = {
+    complete: new Set(),
+    failed: new Set(),
+    progress: new Set(),
+  };
+
+  let activeJob = null;
+  let pollTimer = null;
+  let elapsedTimer = null;
+  let pendingResult = null; // finished result a page hasn't picked up yet
+  let pendingFailure = null;
+
+  const remember = (jobId) => {
+    try { localStorage.setItem(STORAGE_KEY, jobId); } catch { /* storage unavailable */ }
+  };
+  const forget = () => {
+    try { localStorage.removeItem(STORAGE_KEY); } catch { /* storage unavailable */ }
+  };
+  const remembered = () => {
+    try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
+  };
+
+  const safeCall = (callback, value) => {
+    try { callback(value); } catch (err) { console.error("CvAnalysis listener error:", err); }
+  };
+
+  // ------------------------------------------------------------
+  // API
+  // ------------------------------------------------------------
+  async function api(path, options = {}) {
+    const headers = { ...(await getAuthHeaders()), ...(options.headers || {}) };
+    const response = await fetch(`${CONFIG.apiBase}${path}`, { ...options, headers });
+
+    let body = null;
+    try { body = await response.json(); } catch { /* empty body */ }
+
+    if (!response.ok) {
+      const err = new Error(body?.error || `Request failed (${response.status})`);
+      err.status = response.status;
+      err.code = body?.code;
+      err.body = body;
+      throw err;
+    }
+
+    return body;
+  }
+
+  // ------------------------------------------------------------
+  // Status card
+  // ------------------------------------------------------------
+  let card = null;
+
+  function injectStyles() {
+    if (document.getElementById("sf-cvjob-styles")) return;
+
+    const style = document.createElement("style");
+    style.id = "sf-cvjob-styles";
+    style.textContent = `
+      .sf-cvjob {
+        --sf-cvjob-bg: #ffffff;
+        --sf-cvjob-text: #1f2933;
+        --sf-cvjob-muted: #5f6b7a;
+        --sf-cvjob-border: #d9dee5;
+        --sf-cvjob-accent: #1a3c8f;
+        --sf-cvjob-success: #15803d;
+        --sf-cvjob-danger: #b42318;
+
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 9999;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        width: min(340px, calc(100vw - 32px));
+        padding: 14px 16px;
+        background: var(--sf-cvjob-bg);
+        color: var(--sf-cvjob-text);
+        border: 1px solid var(--sf-cvjob-border);
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+        font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        font-size: 14px;
+        line-height: 1.4;
+      }
+      @media (max-width: 480px) {
+        .sf-cvjob { right: 16px; bottom: 16px; }
+      }
+      .sf-cvjob[hidden] { display: none; }
+      .sf-cvjob__icon {
+        flex: 0 0 18px;
+        width: 18px;
+        height: 18px;
+        margin-top: 1px;
+        border-radius: 50%;
+      }
+      .sf-cvjob--processing .sf-cvjob__icon {
+        border: 2px solid var(--sf-cvjob-border);
+        border-top-color: var(--sf-cvjob-accent);
+        animation: sf-cvjob-spin 0.9s linear infinite;
+      }
+      .sf-cvjob--done .sf-cvjob__icon { background: var(--sf-cvjob-success); }
+      .sf-cvjob--failed .sf-cvjob__icon { background: var(--sf-cvjob-danger); }
+      .sf-cvjob__body { flex: 1; min-width: 0; }
+      .sf-cvjob__title { margin: 0; font-weight: 600; }
+      .sf-cvjob__detail {
+        margin: 2px 0 0;
+        color: var(--sf-cvjob-muted);
+        overflow-wrap: anywhere;
+      }
+      .sf-cvjob__link {
+        display: inline-block;
+        margin-top: 8px;
+        color: var(--sf-cvjob-accent);
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .sf-cvjob__link:hover { text-decoration: underline; }
+      .sf-cvjob__close {
+        flex: 0 0 auto;
+        margin: -4px -6px 0 0;
+        padding: 2px 6px;
+        border: 0;
+        background: none;
+        color: var(--sf-cvjob-muted);
+        font-size: 18px;
+        line-height: 1;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+      .sf-cvjob__close:hover { color: var(--sf-cvjob-text); }
+      .sf-cvjob a:focus-visible,
+      .sf-cvjob button:focus-visible {
+        outline: 2px solid var(--sf-cvjob-accent);
+        outline-offset: 2px;
+      }
+      @keyframes sf-cvjob-spin { to { transform: rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) {
+        .sf-cvjob--processing .sf-cvjob__icon { animation-duration: 3s; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function ensureCard() {
+    if (card) return card;
+
+    injectStyles();
+
+    const root = document.createElement("div");
+    root.className = "sf-cvjob";
+    root.setAttribute("role", "status");
+    root.setAttribute("aria-live", "polite");
+    root.hidden = true;
+
+    const icon = document.createElement("span");
+    icon.className = "sf-cvjob__icon";
+    icon.setAttribute("aria-hidden", "true");
+
+    const body = document.createElement("div");
+    body.className = "sf-cvjob__body";
+
+    const title = document.createElement("p");
+    title.className = "sf-cvjob__title";
+
+    const detail = document.createElement("p");
+    detail.className = "sf-cvjob__detail";
+
+    const link = document.createElement("a");
+    link.className = "sf-cvjob__link";
+    link.href = CONFIG.cvPageUrl;
+    link.textContent = "View results";
+
+    const close = document.createElement("button");
+    close.type = "button";
+    close.className = "sf-cvjob__close";
+    close.setAttribute("aria-label", "Dismiss");
+    close.textContent = "×";
+    close.addEventListener("click", hideCard);
+
+    body.append(title, detail, link);
+    root.append(icon, body, close);
+    document.body.appendChild(root);
+
+    card = { root, title, detail, link, close };
+    return card;
+  }
+
+  let autoHideTimer = null;
+
+  function setCard({ state, title, detail, showLink = false, closable = true, autoHideMs = 0 }) {
+    const c = ensureCard();
+
+    clearTimeout(autoHideTimer);
+    c.root.className = `sf-cvjob sf-cvjob--${state}`;
+    c.title.textContent = title;
+    c.detail.textContent = detail || "";
+    c.detail.hidden = !detail;
+    c.link.hidden = !showLink;
+    c.close.hidden = !closable;
+    c.root.hidden = false;
+
+    if (autoHideMs) {
+      autoHideTimer = setTimeout(hideCard, autoHideMs);
+    }
+  }
+
+  function hideCard() {
+    clearTimeout(autoHideTimer);
+    if (card) card.root.hidden = true;
+  }
+
+  const formatElapsed = (startedAt) => {
+    const seconds = Math.max(0, Math.round((Date.now() - new Date(startedAt).getTime()) / 1000));
+    return seconds < 60 ? `${seconds}s` : `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
+  };
+
+  function showProcessing(job) {
+    const render = () =>
+      setCard({
+        state: "processing",
+        title: "Analysing your CV",
+        detail: `${job.fileName || "Your CV"}, ${formatElapsed(job.startedAt)} so far. You can keep using SkillForge.`,
+        closable: false,
+      });
+
+    render();
+    clearInterval(elapsedTimer);
+    elapsedTimer = setInterval(render, 1000);
+  }
+
+  // ------------------------------------------------------------
+  // Polling
+  // ------------------------------------------------------------
+  function stopPolling() {
+    clearTimeout(pollTimer);
+    clearInterval(elapsedTimer);
+    pollTimer = null;
+    elapsedTimer = null;
+  }
+
+  function startPolling(job) {
+    stopPolling();
+
+    activeJob = job;
+    remember(job.jobId);
+    showProcessing(job);
+    listeners.progress.forEach((cb) => safeCall(cb, job));
+
+    let delay = CONFIG.pollMs;
+
+    const tick = async () => {
+      try {
+        const result = await api(`/jobs/${encodeURIComponent(job.jobId)}`);
+        delay = CONFIG.pollMs;
+
+        if (result.status === "processing") {
+          pollTimer = setTimeout(tick, delay);
+          return;
+        }
+
+        handleFinished(result);
+      } catch (err) {
+        if (err.status === 404 || err.status === 401) {
+          // Job gone or user logged out: stop quietly
+          stopPolling();
+          activeJob = null;
+          forget();
+          hideCard();
+          return;
+        }
+
+        // Network hiccup: keep trying, a bit slower each time
+        delay = Math.min(delay * 2, CONFIG.maxPollMs);
+        pollTimer = setTimeout(tick, delay);
+      }
+    };
+
+    pollTimer = setTimeout(tick, delay);
+  }
+
+  function handleFinished(result) {
+    stopPolling();
+    activeJob = null;
+    forget();
+
+    if (result.status === "completed") {
+      const onCvPage = listeners.complete.size > 0;
+
+      if (onCvPage) {
+        listeners.complete.forEach((cb) => safeCall(cb, result.analysis));
+      } else {
+        pendingResult = result.analysis;
+      }
+
+      setCard({
+        state: "done",
+        title: "Your CV analysis is ready",
+        detail: result.fileName || "",
+        showLink: !onCvPage,
+        autoHideMs: onCvPage ? 5000 : 0,
+      });
+      return;
+    }
+
+    const message = result.error || "The CV analysis failed. Please upload your CV again.";
+
+    if (listeners.failed.size > 0) {
+      listeners.failed.forEach((cb) => safeCall(cb, message));
+    } else {
+      pendingFailure = message;
+    }
+
+    setCard({
+      state: "failed",
+      title: "CV analysis failed",
+      detail: message,
+    });
+  }
+
+  // ------------------------------------------------------------
+  // On every page load: pick up a running or just-finished job
+  // ------------------------------------------------------------
+  async function init() {
+    try {
+      const { job } = await api("/active");
+
+      if (job) {
+        startPolling(job);
+        return;
+      }
+
+      // Finished while the user was between pages? Show the result once.
+      const jobId = remembered();
+      if (!jobId) return;
+
+      const result = await api(`/jobs/${encodeURIComponent(jobId)}`);
+
+      if (result.status === "processing") {
+        startPolling(result);
+      } else {
+        handleFinished(result);
+      }
+    } catch (err) {
+      if (err.status === 404) forget();
+      // Not logged in or offline: nothing to show
+    }
+  }
+
+  // ------------------------------------------------------------
+  // Public API
+  // ------------------------------------------------------------
+  window.CvAnalysis = {
+    /**
+     * Upload a CV and start the analysis. Resolves as soon as the server
+     * has accepted it; the result arrives later through onComplete.
+     */
+    async start(file, targetRole) {
+      const form = new FormData();
+      form.append("file", file);
+      if (targetRole) form.append("targetRole", targetRole);
+
+      try {
+        const job = await api("/upload", { method: "POST", body: form });
+        startPolling(job);
+        return job;
+      } catch (err) {
+        // Already running: follow that job instead
+        if (err.code === "ANALYSIS_IN_PROGRESS" && err.body?.job) {
+          startPolling(err.body.job);
+        }
+        throw err;
+      }
+    },
+
+    /** Called with the full analysis object when a job completes. */
+    onComplete(callback) {
+      listeners.complete.add(callback);
+
+      if (pendingResult) {
+        const result = pendingResult;
+        pendingResult = null;
+        safeCall(callback, result);
+        if (card) card.link.hidden = true;
+      }
+
+      return () => listeners.complete.delete(callback);
+    },
+
+    /** Called with an error message when a job fails. */
+    onFailed(callback) {
+      listeners.failed.add(callback);
+
+      if (pendingFailure) {
+        const message = pendingFailure;
+        pendingFailure = null;
+        safeCall(callback, message);
+      }
+
+      return () => listeners.failed.delete(callback);
+    },
+
+    /** Called with the job while it is running (also on page load). */
+    onProgress(callback) {
+      listeners.progress.add(callback);
+      if (activeJob) safeCall(callback, activeJob);
+      return () => listeners.progress.delete(callback);
+    },
+
+    /** The running job, or null. */
+    getActiveJob: () => activeJob,
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+  </script>
+
   <script>
     "use strict";
 
     lucide.createIcons();
 
-    const API_URL = "http://localhost:5001/api/cv/upload";
-    const HISTORY_URL = "http://localhost:5001/api/cv/history";
-    const QUOTA_URL = "http://localhost:5001/api/cv/quota";
+    const API_BASE = "http://localhost:5001/api/cv";
+    const LATEST_URL = `${API_BASE}/latest`;
+    const QUOTA_URL = `${API_BASE}/quota`;
 
     const appState = {
       analysis: null
     };
 
-    // ---- CUSTOM MODAL (replaces native alert()) ----
+    // ---- CUSTOM MODAL ----
     function showModal(message) {
-      document.getElementById('customModalMessage').textContent = message;
-      document.getElementById('customModalOverlay').style.display = 'flex';
+      document.getElementById("customModalMessage").textContent = message;
+      document.getElementById("customModalOverlay").style.display = "flex";
     }
 
-    document.getElementById('customModalOkBtn').addEventListener('click', () => {
-      document.getElementById('customModalOverlay').style.display = 'none';
+    document.getElementById("customModalOkBtn").addEventListener("click", () => {
+      document.getElementById("customModalOverlay").style.display = "none";
     });
 
-    // Optional: close modal when clicking outside the box
-    document.getElementById('customModalOverlay').addEventListener('click', (event) => {
-      if (event.target.id === 'customModalOverlay') {
-        document.getElementById('customModalOverlay').style.display = 'none';
+    document.getElementById("customModalOverlay").addEventListener("click", (event) => {
+      if (event.target.id === "customModalOverlay") {
+        document.getElementById("customModalOverlay").style.display = "none";
       }
     });
 
     const elements = {
       sidebar: document.getElementById("sidebar"),
       menuBtn: document.getElementById("menuBtn"),
+      overlay: document.getElementById("sidebarOverlay"),
+
       searchInput: document.getElementById("searchInput"),
       fileInput: document.getElementById("cvFileInput"),
       targetRoleInput: document.getElementById("targetRoleInput"),
+      lastAnalyzedText: document.getElementById("lastAnalyzedText"),
 
       analyzeBtn: document.getElementById("analyzeBtn"),
       analyzeBtn2: document.getElementById("analyzeBtn2"),
@@ -554,63 +1056,75 @@
       downloadBtn: document.getElementById("downloadBtn"),
       downloadBtn2: document.getElementById("downloadBtn2"),
 
-      overallScoreText:
-        document.getElementById("overallScoreText"),
+      overallScoreText: document.getElementById("overallScoreText"),
+      circleScoreText: document.getElementById("circleScoreText"),
+      scoreCircle: document.getElementById("scoreCircle"),
 
-      circleScoreText:
-        document.getElementById("circleScoreText"),
+      targetRoleText: document.getElementById("targetRoleText"),
+      matchScoreText: document.getElementById("matchScoreText"),
+      missingSkillsText: document.getElementById("missingSkillsText"),
 
-      scoreCircle:
-        document.getElementById("scoreCircle"),
+      atsScoreText: document.getElementById("atsScoreText"),
+      contentScoreText: document.getElementById("contentScoreText"),
+      formatScoreText: document.getElementById("formatScoreText"),
 
-      targetRoleText:
-        document.getElementById("targetRoleText"),
+      atsBar: document.getElementById("atsBar"),
+      contentBar: document.getElementById("contentBar"),
+      formatBar: document.getElementById("formatBar"),
 
-      matchScoreText:
-        document.getElementById("matchScoreText"),
+      analysisSummary: document.getElementById("analysisSummary"),
+      feedbackList: document.getElementById("feedbackList"),
+      quickFixesList: document.getElementById("quickFixesList"),
 
-      missingSkillsText:
-        document.getElementById("missingSkillsText"),
-
-      atsScoreText:
-        document.getElementById("atsScoreText"),
-
-      contentScoreText:
-        document.getElementById("contentScoreText"),
-
-      formatScoreText:
-        document.getElementById("formatScoreText"),
-
-      atsBar:
-        document.getElementById("atsBar"),
-
-      contentBar:
-        document.getElementById("contentBar"),
-
-      formatBar:
-        document.getElementById("formatBar"),
-
-      analysisSummary:
-        document.getElementById("analysisSummary"),
-
-      feedbackList:
-        document.getElementById("feedbackList"),
-
-      quickFixesList:
-        document.getElementById("quickFixesList"),
-
-      previousScoreText:
-        document.getElementById("previousScoreText"),
-
-      currentScoreText:
-        document.getElementById("currentScoreText"),
-
-      previousBar:
-        document.getElementById("previousBar"),
-
-      currentBar:
-        document.getElementById("currentBar")
+      previousScoreText: document.getElementById("previousScoreText"),
+      currentScoreText: document.getElementById("currentScoreText"),
+      previousBar: document.getElementById("previousBar"),
+      currentBar: document.getElementById("currentBar")
     };
+
+    /* ================= SIDEBAR ================= */
+
+    function openSidebar() {
+      elements.sidebar.classList.add("open");
+      elements.overlay?.classList.add("visible");
+      elements.menuBtn.setAttribute("aria-expanded", "true");
+      document.body.classList.add("no-scroll");
+    }
+
+    function closeSidebar() {
+      elements.sidebar.classList.remove("open");
+      elements.overlay?.classList.remove("visible");
+      elements.menuBtn.setAttribute("aria-expanded", "false");
+      document.body.classList.remove("no-scroll");
+    }
+
+    if (elements.menuBtn && elements.sidebar) {
+
+      elements.menuBtn.addEventListener("click", () => {
+        elements.sidebar.classList.contains("open") ? closeSidebar() : openSidebar();
+      });
+
+      elements.overlay?.addEventListener("click", closeSidebar);
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && elements.sidebar.classList.contains("open")) {
+          closeSidebar();
+        }
+      });
+
+      // close the drawer when a nav link is tapped on mobile
+      elements.sidebar.querySelectorAll(".nav-item").forEach(link => {
+        link.addEventListener("click", () => {
+          if (window.innerWidth <= 768) closeSidebar();
+        });
+      });
+
+      // if the viewport grows back to desktop, reset state
+      window.addEventListener("resize", () => {
+        if (window.innerWidth > 768) closeSidebar();
+      });
+
+    }
 
     function getAuthToken() {
       return localStorage.getItem("sb-access-token");
@@ -623,10 +1137,7 @@
         return 0;
       }
 
-      return Math.max(
-        0,
-        Math.min(100, Math.round(score))
-      );
+      return Math.max(0, Math.min(100, Math.round(score)));
     }
 
     function getStringArray(value) {
@@ -648,8 +1159,7 @@
         return;
       }
 
-      const targetRole =
-        elements.targetRoleInput?.value?.trim() || "";
+      const targetRole = elements.targetRoleInput?.value?.trim() || "";
 
       if (!targetRole) {
         showModal("Please enter a target role before uploading your CV.");
@@ -662,10 +1172,7 @@
     }
 
     function setLoading(isLoading) {
-      const uploadButtons = [
-        elements.analyzeBtn,
-        elements.analyzeBtn2
-      ];
+      const uploadButtons = [elements.analyzeBtn, elements.analyzeBtn2];
 
       uploadButtons.forEach((button) => {
         button.disabled = isLoading;
@@ -682,11 +1189,8 @@
       });
 
       if (isLoading) {
-        elements.overallScoreText.textContent =
-          "Analyzing...";
-
-        elements.circleScoreText.textContent =
-          "...";
+        elements.overallScoreText.textContent = "Analyzing...";
+        elements.circleScoreText.textContent = "...";
       }
 
       lucide.createIcons();
@@ -696,16 +1200,10 @@
       const safeScore = clampScore(score);
       const scoreAngle = safeScore * 3.6;
 
-      elements.overallScoreText.textContent =
-        `${safeScore}%`;
+      elements.overallScoreText.textContent = `${safeScore}%`;
+      elements.circleScoreText.textContent = `${safeScore}%`;
 
-      elements.circleScoreText.textContent =
-        `${safeScore}%`;
-
-      elements.scoreCircle.style.setProperty(
-        "--score-angle",
-        `${scoreAngle}deg`
-      );
+      elements.scoreCircle.style.setProperty("--score-angle", `${scoreAngle}deg`);
 
       elements.scoreCircle.setAttribute(
         "aria-label",
@@ -718,226 +1216,134 @@
         ? clampScore(data.match)
         : score;
 
-      const detectedSkills =
-        getStringArray(data.skills);
-
-      const missingSkills =
-        getStringArray(data.missingSkills);
+      const detectedSkills = getStringArray(data.skills);
+      const missingSkills = getStringArray(data.missingSkills);
 
       let missingCount;
 
       if (Array.isArray(data.missingSkills)) {
         missingCount = missingSkills.length;
       } else {
-        missingCount = Math.max(
-          0,
-          10 - detectedSkills.length
-        );
+        missingCount = Math.max(0, 10 - detectedSkills.length);
       }
 
-      const targetRole =
-        String(
-          data.targetRole ||
-          "General professional role"
-        ).trim();
+      const targetRole = String(
+        data.targetRole || "General professional role"
+      ).trim();
 
-      elements.targetRoleText.textContent =
-        `Target Role: ${targetRole}`;
-
-      elements.matchScoreText.textContent =
-        `Match ${match}%`;
-
+      elements.targetRoleText.textContent = `Target Role: ${targetRole}`;
+      elements.matchScoreText.textContent = `Match ${match}%`;
       elements.missingSkillsText.textContent =
-        `${missingCount} key skill${
-          missingCount === 1 ? "" : "s"
-        } missing`;
+        `${missingCount} key skill${missingCount === 1 ? "" : "s"} missing`;
     }
 
-    function updateScoreBar(
-      textElement,
-      barElement,
-      score
-    ) {
+    function updateScoreBar(textElement, barElement, score) {
       const safeScore = clampScore(score);
 
-      textElement.textContent =
-        `${safeScore}%`;
-
-      barElement.style.width =
-        `${safeScore}%`;
-
-      barElement.setAttribute(
-        "aria-valuenow",
-        String(safeScore)
-      );
+      textElement.textContent = `${safeScore}%`;
+      barElement.style.width = `${safeScore}%`;
+      barElement.setAttribute("aria-valuenow", String(safeScore));
     }
 
     function renderBreakdown(data) {
-      updateScoreBar(
-        elements.atsScoreText,
-        elements.atsBar,
-        data.ats
-      );
-
-      updateScoreBar(
-        elements.contentScoreText,
-        elements.contentBar,
-        data.content
-      );
-
-      updateScoreBar(
-        elements.formatScoreText,
-        elements.formatBar,
-        data.formatting
-      );
+      updateScoreBar(elements.atsScoreText, elements.atsBar, data.ats);
+      updateScoreBar(elements.contentScoreText, elements.contentBar, data.content);
+      updateScoreBar(elements.formatScoreText, elements.formatBar, data.formatting);
     }
 
-    function createFeedbackItem(
-      message,
-      type
-    ) {
-      const listItem =
-        document.createElement("li");
+    function createFeedbackItem(message, type) {
+      const listItem = document.createElement("li");
+      listItem.className = `feedback-item ${type}`;
 
-      listItem.className =
-        `feedback-item ${type}`;
-
-      const icon =
-        document.createElement("span");
-
+      const icon = document.createElement("span");
       icon.className = "feedback-icon";
+      icon.textContent = type === "positive" ? "✅" : "❌";
 
-      icon.textContent =
-        type === "positive" ? "✅" : "❌";
-
-      const text =
-        document.createElement("span");
-
+      const text = document.createElement("span");
       text.textContent = message;
 
       listItem.append(icon, text);
-
       return listItem;
     }
 
     function renderFeedback(data) {
       elements.feedbackList.innerHTML = "";
 
-      const good =
-        getStringArray(data.feedback?.good);
+      const good = getStringArray(data.feedback?.good);
+      const bad = getStringArray(data.feedback?.bad);
 
-      const bad =
-        getStringArray(data.feedback?.bad);
+      const summary = String(
+        data.summary || "Your CV analysis has been completed."
+      ).trim();
 
-      const summary =
-        String(
-          data.summary ||
-          "Your CV analysis has been completed."
-        ).trim();
-
-      elements.analysisSummary.textContent =
-        summary;
+      elements.analysisSummary.textContent = summary;
 
       good.forEach((message) => {
-        elements.feedbackList.appendChild(
-          createFeedbackItem(
-            message,
-            "positive"
-          )
-        );
+        elements.feedbackList.appendChild(createFeedbackItem(message, "positive"));
       });
 
       bad.forEach((message) => {
-        elements.feedbackList.appendChild(
-          createFeedbackItem(
-            message,
-            "negative"
-          )
-        );
+        elements.feedbackList.appendChild(createFeedbackItem(message, "negative"));
       });
 
       if (good.length === 0 && bad.length === 0) {
-        const listItem =
-          document.createElement("li");
-
-        listItem.textContent =
-          "No detailed feedback was generated.";
-
-        elements.feedbackList.appendChild(
-          listItem
-        );
+        const listItem = document.createElement("li");
+        listItem.textContent = "No detailed feedback was generated.";
+        elements.feedbackList.appendChild(listItem);
       }
     }
 
     function renderQuickFixes(data) {
       elements.quickFixesList.innerHTML = "";
 
-      const fixes =
-        getStringArray(
-          data.feedback?.quickFixes
-        );
+      const fixes = getStringArray(data.feedback?.quickFixes);
 
       if (fixes.length === 0) {
-        const listItem =
-          document.createElement("li");
-
-        listItem.textContent =
-          "No quick fixes were generated.";
-
-        elements.quickFixesList.appendChild(
-          listItem
-        );
-
+        const listItem = document.createElement("li");
+        listItem.textContent = "No quick fixes were generated.";
+        elements.quickFixesList.appendChild(listItem);
         return;
       }
 
       fixes.forEach((message) => {
-        const listItem =
-          document.createElement("li");
+        const listItem = document.createElement("li");
 
-        const icon =
-          document.createElement("span");
-
+        const icon = document.createElement("span");
         icon.className = "quick-fix-icon";
         icon.textContent = "💡";
 
-        const text =
-          document.createElement("span");
-
+        const text = document.createElement("span");
         text.textContent = message;
 
         listItem.append(icon, text);
-
-        elements.quickFixesList.appendChild(
-          listItem
-        );
+        elements.quickFixesList.appendChild(listItem);
       });
     }
 
-    function renderProgress(
-      previousScore,
-      currentScore
-    ) {
-      const previous =
-        clampScore(previousScore);
+    function renderProgress(previousScore, currentScore) {
+      const previous = clampScore(previousScore);
+      const current = clampScore(currentScore);
 
-      const current =
-        clampScore(currentScore);
+      elements.previousScoreText.textContent = `${previous}%`;
+      elements.currentScoreText.textContent = `${current}%`;
 
-      elements.previousScoreText.textContent =
-        `${previous}%`;
-
-      elements.currentScoreText.textContent =
-        `${current}%`;
-
-      elements.previousBar.style.width =
-        `${previous}%`;
-
-      elements.currentBar.style.width =
-        `${current}%`;
+      elements.previousBar.style.width = `${previous}%`;
+      elements.currentBar.style.width = `${current}%`;
     }
 
-    async function loadHistory() {
+    function renderLastAnalyzed(fileName, analyzedAt) {
+      if (!analyzedAt) {
+        elements.lastAnalyzedText.textContent = "";
+        return;
+      }
+
+      const when = new Date(analyzedAt).toLocaleString();
+      elements.lastAnalyzedText.textContent =
+        `Showing your last analysis: ${fileName || "CV"}, ${when}`;
+    }
+
+    // Load the user's latest saved analysis from the database
+    async function loadLatestAnalysis() {
       const token = getAuthToken();
 
       if (!token) {
@@ -945,10 +1351,8 @@
       }
 
       try {
-        const response = await fetch(HISTORY_URL, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+        const response = await fetch(LATEST_URL, {
+          headers: { Authorization: `Bearer ${token}` }
         });
 
         if (!response.ok) {
@@ -956,59 +1360,55 @@
         }
 
         const data = await response.json();
-        const history = data.history || [];
 
-        if (history.length === 0) {
+        if (!data.analysis) {
           renderProgress(0, 0);
           return;
         }
 
-        const current = history[0]?.overall_score || 0;
-        const previous = history[1]?.overall_score || 0;
+        const analysis = normalizeAnalysis(data.analysis);
 
-        renderProgress(previous, current);
+        appState.analysis = {
+          ...analysis,
+          fileName: data.analysis.fileName || "CV",
+          analyzedAt: data.analysis.analyzedAt || new Date().toISOString()
+        };
 
+        renderAnalysis(analysis);
+        renderProgress(data.previousScore ?? 0, analysis.score);
+        renderLastAnalyzed(appState.analysis.fileName, appState.analysis.analyzedAt);
+
+        // Pre-fill the target role they used last time
+        if (!elements.targetRoleInput.value && analysis.targetRole) {
+          elements.targetRoleInput.value = analysis.targetRole;
+        }
+
+        // If an analysis is still running, keep showing "Analyzing..."
+        if (CvAnalysis.getActiveJob()) {
+          setLoading(true);
+        }
       } catch (error) {
-        console.error(
-          "Failed to load CV history:",
-          error
-        );
+        console.error("Failed to load latest CV analysis:", error);
       }
     }
 
     function validateFile(file) {
-      const maximumSize =
-        5 * 1024 * 1024;
+      const maximumSize = 5 * 1024 * 1024;
+      const allowedExtensions = ["pdf", "docx", "txt"];
 
-      const allowedExtensions = [
-        "pdf",
-        "doc",
-        "docx",
-        "txt"
-      ];
-
-      const extension =
-        file.name
-          .split(".")
-          .pop()
-          .toLowerCase();
+      const extension = file.name.split(".").pop().toLowerCase();
 
       if (!allowedExtensions.includes(extension)) {
-        throw new Error(
-          "Please upload a PDF, DOC, DOCX or TXT file."
-        );
+        throw new Error("Please upload a PDF, DOCX or TXT file.");
       }
 
       if (file.size > maximumSize) {
-        throw new Error(
-          "The selected file is larger than 5 MB."
-        );
+        throw new Error("The selected file is larger than 5 MB.");
       }
     }
 
     function normalizeAnalysis(data) {
-      const score =
-        clampScore(data.score);
+      const score = clampScore(data.score);
 
       return {
         ...data,
@@ -1021,203 +1421,95 @@
         content: clampScore(data.content),
         formatting: clampScore(data.formatting),
 
-        skills:
-          getStringArray(data.skills),
+        skills: getStringArray(data.skills),
+        missingSkills: getStringArray(data.missingSkills),
 
-        missingSkills:
-          getStringArray(data.missingSkills),
+        targetRole: String(
+          data.targetRole || "General professional role"
+        ).trim(),
 
-        targetRole:
-          String(
-            data.targetRole ||
-            "General professional role"
-          ).trim(),
-
-        summary:
-          String(data.summary || "").trim(),
+        summary: String(data.summary || "").trim(),
 
         feedback: {
-          good:
-            getStringArray(
-              data.feedback?.good
-            ),
-
-          bad:
-            getStringArray(
-              data.feedback?.bad
-            ),
-
-          quickFixes:
-            getStringArray(
-              data.feedback?.quickFixes
-            )
+          good: getStringArray(data.feedback?.good),
+          bad: getStringArray(data.feedback?.bad),
+          quickFixes: getStringArray(data.feedback?.quickFixes)
         }
       };
     }
 
     function renderAnalysis(analysis) {
       renderOverallScore(analysis.score);
-
-      renderJobMatch(
-        analysis,
-        analysis.score
-      );
-
+      renderJobMatch(analysis, analysis.score);
       renderBreakdown(analysis);
       renderFeedback(analysis);
       renderQuickFixes(analysis);
     }
 
     async function analyzeSelectedFile(file) {
-      validateFile(file);
+      try {
+        validateFile(file);
+      } catch (error) {
+        showModal(`❌ ${error.message}`);
+        return;
+      }
 
-      const token = getAuthToken();
-
-      if (!token) {
+      if (!getAuthToken()) {
         showModal("Your session has expired. Please log in again.");
         window.location.href = "LogIn.html";
         return;
       }
 
-      const formData =
-        new FormData();
-
-      formData.append("file", file);
-
-      const targetRole =
-        elements.targetRoleInput?.value?.trim() || "";
-
-      if (targetRole) {
-        formData.append("targetRole", targetRole);
-      }
+      const targetRole = elements.targetRoleInput?.value?.trim() || "";
 
       setLoading(true);
 
       try {
-        const response = await fetch(
-          API_URL,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`
-            },
-            body: formData
-          }
-        );
-
-        let data;
-
-        try {
-          data = await response.json();
-        } catch {
-          throw new Error(
-            "The server returned an invalid response."
-          );
-        }
-
-        console.log(
-          "CV ANALYZER RESPONSE:",
-          data
-        );
-
-        if (!response.ok) {
-          if (data.code === "UPLOAD_LIMIT_REACHED") {
-            throw new Error(data.error);
-          }
-
-          throw new Error(
-            data.error ||
-            data.message ||
-            "The CV could not be analyzed."
-          );
-        }
-
-        const analysis =
-          normalizeAnalysis(data);
-
-        appState.analysis = {
-          ...analysis,
-          fileName: file.name,
-          analyzedAt:
-            new Date().toISOString()
-        };
-
-        renderAnalysis(analysis);
-        await loadHistory();
-
-        const usageNote =
-          data.uploadsLimit === -1
-            ? ""
-            : ` (${data.uploadsUsed}/${data.uploadsLimit} analyses used on your ${data.plan} plan)`;
+        // Returns as soon as the server accepts the CV.
+        // The analysis keeps running even if the user leaves this page.
+        await CvAnalysis.start(file, targetRole);
 
         showModal(
-          `✅ CV analyzed successfully.${usageNote}`
+          "⏳ Your CV is being analysed.\nYou can stay here or move to another page. We'll let you know when it's ready."
         );
-
       } catch (error) {
-        console.error(
-          "CV ANALYZER ERROR:",
-          error
-        );
+        console.error("CV ANALYZER ERROR:", error);
 
-        showModal(
-          `❌ ${error.message}`
-        );
+        if (error.code === "ANALYSIS_IN_PROGRESS") {
+          // An earlier upload is still running, so keep showing progress
+          showModal(`⏳ ${error.message}`);
+          return;
+        }
 
-      } finally {
         setLoading(false);
+        renderOverallScore(appState.analysis ? appState.analysis.score : 0);
+        showModal(`❌ ${error.message}`);
       }
     }
 
     function createReportText() {
-      const analysis =
-        appState.analysis;
+      const analysis = appState.analysis;
 
       if (!analysis) {
-        throw new Error(
-          "Analyze a CV before downloading the report."
-        );
+        throw new Error("Analyze a CV before downloading the report.");
       }
 
-      const good =
-        analysis.feedback.good.length
-          ? analysis.feedback.good
-              .map(
-                (item, index) =>
-                  `${index + 1}. ${item}`
-              )
-              .join("\n")
-          : "No strengths were generated.";
+      const numbered = (items, emptyText) =>
+        items.length
+          ? items.map((item, index) => `${index + 1}. ${item}`).join("\n")
+          : emptyText;
 
-      const bad =
-        analysis.feedback.bad.length
-          ? analysis.feedback.bad
-              .map(
-                (item, index) =>
-                  `${index + 1}. ${item}`
-              )
-              .join("\n")
-          : "No weaknesses were generated.";
+      const good = numbered(analysis.feedback.good, "No strengths were generated.");
+      const bad = numbered(analysis.feedback.bad, "No weaknesses were generated.");
+      const fixes = numbered(analysis.feedback.quickFixes, "No quick fixes were generated.");
 
-      const fixes =
-        analysis.feedback.quickFixes.length
-          ? analysis.feedback.quickFixes
-              .map(
-                (item, index) =>
-                  `${index + 1}. ${item}`
-              )
-              .join("\n")
-          : "No quick fixes were generated.";
+      const detectedSkills = analysis.skills.length
+        ? analysis.skills.join(", ")
+        : "No skills detected.";
 
-      const detectedSkills =
-        analysis.skills.length
-          ? analysis.skills.join(", ")
-          : "No skills detected.";
-
-      const missingSkills =
-        analysis.missingSkills.length
-          ? analysis.missingSkills.join(", ")
-          : "No missing skills identified.";
+      const missingSkills = analysis.missingSkills.length
+        ? analysis.missingSkills.join(", ")
+        : "No missing skills identified.";
 
       return `
 SKILLFORGE CV ANALYSIS REPORT
@@ -1227,9 +1519,7 @@ File:
 ${analysis.fileName}
 
 Generated:
-${new Date(
-  analysis.analyzedAt
-).toLocaleString()}
+${new Date(analysis.analyzedAt).toLocaleString()}
 
 OVERALL RESULTS
 ----------------------------------------
@@ -1274,26 +1564,17 @@ Generated by SkillForge CV Analyzer
 
     function downloadReport() {
       try {
-        const report =
-          createReportText();
+        const report = createReportText();
 
-        const blob =
-          new Blob(
-            [report],
-            {
-              type: "text/plain;charset=utf-8"
-            }
-          );
+        const blob = new Blob([report], {
+          type: "text/plain;charset=utf-8"
+        });
 
-        const downloadUrl =
-          URL.createObjectURL(blob);
-
-        const link =
-          document.createElement("a");
+        const downloadUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
 
         link.href = downloadUrl;
-        link.download =
-          "SkillForge-CV-Analysis-Report.txt";
+        link.download = "SkillForge-CV-Analysis-Report.txt";
 
         document.body.appendChild(link);
         link.click();
@@ -1307,105 +1588,78 @@ Generated by SkillForge CV Analyzer
     }
 
     function filterAnalysisCards() {
-      const searchValue =
-        elements.searchInput.value
-          .trim()
-          .toLowerCase();
-
-      const cards =
-        document.querySelectorAll(
-          ".searchable"
-        );
+      const searchValue = elements.searchInput.value.trim().toLowerCase();
+      const cards = document.querySelectorAll(".searchable");
 
       cards.forEach((card) => {
-        const cardText =
-          card.textContent.toLowerCase();
+        const cardText = card.textContent.toLowerCase();
 
         card.classList.toggle(
           "hidden",
-          searchValue &&
-          !cardText.includes(searchValue)
+          searchValue && !cardText.includes(searchValue)
         );
       });
     }
 
-    elements.analyzeBtn.addEventListener(
-      "click",
-      openFilePicker
-    );
+    elements.analyzeBtn.addEventListener("click", openFilePicker);
+    elements.analyzeBtn2.addEventListener("click", openFilePicker);
 
-    elements.analyzeBtn2.addEventListener(
-      "click",
-      openFilePicker
-    );
+    elements.downloadBtn.addEventListener("click", downloadReport);
+    elements.downloadBtn2.addEventListener("click", downloadReport);
 
-    elements.downloadBtn.addEventListener(
-      "click",
-      downloadReport
-    );
+    elements.fileInput.addEventListener("change", async (event) => {
+      const file = event.target.files[0];
 
-    elements.downloadBtn2.addEventListener(
-      "click",
-      downloadReport
-    );
-
-    elements.fileInput.addEventListener(
-      "change",
-      async (event) => {
-        const file =
-          event.target.files[0];
-
-        if (!file) {
-          return;
-        }
-
-        await analyzeSelectedFile(file);
+      if (!file) {
+        return;
       }
-    );
 
-    elements.searchInput.addEventListener(
-      "input",
-      filterAnalysisCards
-    );
+      await analyzeSelectedFile(file);
+    });
 
-    elements.menuBtn.addEventListener(
-      "click",
-      () => {
-        elements.sidebar.classList.toggle(
-          "open"
-        );
+    elements.searchInput.addEventListener("input", filterAnalysisCards);
+
+    // Background analysis: react when it starts, finishes or fails,
+    // including when the user comes back to this page later
+    CvAnalysis.onProgress(() => setLoading(true));
+
+    CvAnalysis.onComplete((result) => {
+      setLoading(false);
+
+      if (!result) {
+        loadLatestAnalysis();
+        return;
       }
-    );
 
-    document.addEventListener(
-      "click",
-      (event) => {
-        const isSmallScreen =
-          window.innerWidth <= 768;
+      // Show the finished analysis straight from the job result
+      const analysis = normalizeAnalysis(result);
 
-        const clickedSidebar =
-          elements.sidebar.contains(
-            event.target
-          );
+      appState.analysis = {
+        ...analysis,
+        fileName: result.fileName || "CV",
+        analyzedAt: result.analyzedAt || new Date().toISOString()
+      };
 
-        const clickedMenu =
-          elements.menuBtn.contains(
-            event.target
-          );
+      renderAnalysis(analysis);
+      renderProgress(result.previousScore ?? 0, analysis.score);
+      renderLastAnalyzed(appState.analysis.fileName, appState.analysis.analyzedAt);
 
-        if (
-          isSmallScreen &&
-          !clickedSidebar &&
-          !clickedMenu
-        ) {
-          elements.sidebar.classList.remove(
-            "open"
-          );
-        }
-      }
-    );
+      const usageNote =
+        !result || result.uploadsLimit === undefined || result.uploadsLimit === -1
+          ? ""
+          : ` (${result.uploadsUsed}/${result.uploadsLimit} analyses used on your ${result.plan} plan)`;
 
-    loadHistory();
+      showModal(`✅ CV analyzed successfully.${usageNote}`);
+    });
+
+    CvAnalysis.onFailed((message) => {
+      setLoading(false);
+      renderOverallScore(appState.analysis ? appState.analysis.score : 0);
+      showModal(`❌ ${message}`);
+    });
+
+    // Load the saved analysis as soon as the page opens
+    loadLatestAnalysis();
   </script>
   <script src="../js/auth.js"></script>
 </body>
