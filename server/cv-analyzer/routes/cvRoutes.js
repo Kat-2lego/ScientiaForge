@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import express from "express";
 import multer from "multer";
 
@@ -7,7 +8,6 @@ import { normalizeCvAnalysis } from "../services/scoreService.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { enforceQuota, getUserPlanAndUsage } from "../services/quotaService.js";
 import { supabaseAdmin } from "../services/supabaseClient.js";
-import { logFeatureEvent } from "../../services/featureEvents.js";
 
 const router = express.Router();
 
@@ -15,6 +15,127 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
 });
+
+// ------------------------------------------------------------
+// Background jobs
+// ------------------------------------------------------------
+// Each upload becomes a job that runs on the server after the upload
+// request has already returned. The analysis keeps going even if the
+// user leaves the CV page. Jobs live in memory, so no database changes
+// are needed; the finished result is saved to the database as before.
+
+const STALE_JOB_MS = 3 * 60 * 1000; // a job running longer than this is treated as dead
+const FINISHED_JOB_TTL_MS = 30 * 60 * 1000; // keep finished jobs for 30 minutes
+
+const JOB_ERROR_FALLBACK =
+  "Something went wrong while analysing your CV. Please upload it again.";
+const JOB_STALE_MESSAGE =
+  "The analysis took too long and was stopped. Please upload your CV again.";
+
+const jobs = new Map(); // jobId -> job
+const runningJobByUser = new Map(); // userId -> jobId
+
+function createJob(userId, fileName, targetRole) {
+  const job = {
+    id: crypto.randomUUID(),
+    userId,
+    status: "processing",
+    fileName,
+    targetRole,
+    startedAt: new Date().toISOString(),
+    startedAtMs: Date.now(),
+    finishedAtMs: null,
+    result: null,
+    error: null,
+  };
+
+  jobs.set(job.id, job);
+  runningJobByUser.set(userId, job.id);
+
+  return job;
+}
+
+function finishJob(job, status, { result = null, error = null } = {}) {
+  job.status = status;
+  job.result = result;
+  job.error = error;
+  job.finishedAtMs = Date.now();
+
+  if (runningJobByUser.get(job.userId) === job.id) {
+    runningJobByUser.delete(job.userId);
+  }
+}
+
+function discardJob(job) {
+  jobs.delete(job.id);
+
+  if (runningJobByUser.get(job.userId) === job.id) {
+    runningJobByUser.delete(job.userId);
+  }
+}
+
+/** The user's running job, or null. Also catches jobs that got stuck. */
+function getRunningJob(userId) {
+  const jobId = runningJobByUser.get(userId);
+  const job = jobId ? jobs.get(jobId) : null;
+
+  if (!job || job.status !== "processing") {
+    runningJobByUser.delete(userId);
+    return null;
+  }
+
+  if (Date.now() - job.startedAtMs > STALE_JOB_MS) {
+    finishJob(job, "failed", { error: JOB_STALE_MESSAGE });
+    return null;
+  }
+
+  return job;
+}
+
+/** What the frontend sees while a job is running. */
+const publicJob = (job) => ({
+  jobId: job.id,
+  status: job.status,
+  fileName: job.fileName,
+  targetRole: job.targetRole,
+  startedAt: job.startedAt,
+});
+
+// Remove old finished jobs every 5 minutes so memory doesn't grow
+setInterval(() => {
+  const now = Date.now();
+
+  for (const [jobId, job] of jobs) {
+    if (job.finishedAtMs && now - job.finishedAtMs > FINISHED_JOB_TTL_MS) {
+      jobs.delete(jobId);
+    }
+  }
+}, 5 * 60 * 1000).unref();
+
+// ------------------------------------------------------------
+// Helpers
+// ------------------------------------------------------------
+
+/**
+ * Wraps multer so file errors (e.g. too large) return clean JSON.
+ * Multer errors never reach the route's try/catch, so they're handled here.
+ */
+const uploadSingleFile = (req, res, next) => {
+  upload.single("file")(req, res, (err) => {
+    if (!err) return next();
+
+    if (err instanceof multer.MulterError) {
+      return res.status(400).json({
+        error:
+          err.code === "LIMIT_FILE_SIZE"
+            ? "The uploaded file is larger than 5 MB."
+            : err.message,
+      });
+    }
+
+    return next(err);
+  });
+};
 
 /**
  * Rebuild the analysis object the frontend expects from DB rows.
@@ -54,32 +175,62 @@ function buildAnalysisFromRows(doc, row, feedbackItems = []) {
   });
 }
 
-router.post("/upload", requireAuth, upload.single("file"), async (req, res) => {
-  const userId = req.user.id;
+const buildFeedbackRows = (analysisId, analysis) => [
+  ...analysis.feedback.good.map((text) => ({
+    analysis_id: analysisId,
+    category: "structure",
+    severity: "low",
+    suggestion: text,
+  })),
+  ...analysis.feedback.bad.map((text) => ({
+    analysis_id: analysisId,
+    category: "wording",
+    severity: "high",
+    suggestion: text,
+  })),
+  ...analysis.feedback.quickFixes.map((text) => ({
+    analysis_id: analysisId,
+    category: "keywords",
+    severity: "medium",
+    suggestion: text,
+  })),
+];
+
+/** Score of the user's current latest CV (for the progress comparison). */
+async function getPreviousScore(userId) {
+  const { data, error } = await supabaseAdmin
+    .from("cv_documents")
+    .select("overall_score")
+    .eq("user_id", userId)
+    .eq("is_latest", true)
+    .order("analysed_at", { ascending: false, nullsFirst: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Previous score lookup error:", error.message);
+    return null;
+  }
+
+  return data ? data.overall_score : null;
+}
+
+// ------------------------------------------------------------
+// The background work: analyse with Gemini, then save
+// ------------------------------------------------------------
+async function runAnalysisJob(job, { cvText, fileSize, usage }) {
+  const userId = job.userId;
+  const targetRole = job.targetRole;
   let newCvId = null; // used to roll back if a later step fails
-  const requestStartedAt = Date.now();
 
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: "No CV file was uploaded." });
-    }
+    // Gemini and the previous-score lookup don't depend on each other
+    const [aiAnalysis, previousScore] = await Promise.all([
+      analyzeCvWithGemini(cvText, targetRole),
+      getPreviousScore(userId),
+    ]);
+    console.log(`⏱ [cv/job ${job.id}] gemini analysis: ${Date.now() - job.startedAtMs}ms`);
 
-    const usage = await enforceQuota(userId);
-
-    const targetRole =
-      (typeof req.body.targetRole === "string" && req.body.targetRole.trim()) ||
-      "General professional role";
-
-    const cvText = await extractTextFromFile(req.file.buffer, req.file.mimetype);
-
-    if (!cvText || !cvText.trim()) {
-      return res.status(400).json({
-        error:
-          "We couldn't read any text from this file. Please upload a text-based PDF, DOCX or TXT.",
-      });
-    }
-
-    const aiAnalysis = await analyzeCvWithGemini(cvText, targetRole);
     const analysis = { ...normalizeCvAnalysis(aiAnalysis), targetRole };
     const now = new Date().toISOString();
 
@@ -89,8 +240,8 @@ router.post("/upload", requireAuth, upload.single("file"), async (req, res) => {
       .insert({
         user_id: userId,
         file_url: "",
-        file_name: req.file.originalname,
-        file_size_kb: Math.round(req.file.size / 1024),
+        file_name: job.fileName,
+        file_size_kb: Math.round(fileSize / 1024),
         raw_text: cvText,
         target_role: targetRole,
         overall_score: analysis.score,
@@ -130,100 +281,191 @@ router.post("/upload", requireAuth, upload.single("file"), async (req, res) => {
 
     if (analysisError || !analysisRow) {
       throw new Error(
-        "Failed to save CV analysis: " +
-          (analysisError?.message || "unknown error")
+        "Failed to save CV analysis: " + (analysisError?.message || "unknown error")
       );
     }
 
-    // 3. Feedback items (kept for reporting/admin use)
-    const feedbackRows = [
-      ...analysis.feedback.good.map((text) => ({
-        analysis_id: analysisRow.analysis_id,
-        category: "structure",
-        severity: "low",
-        suggestion: text,
-      })),
-      ...analysis.feedback.bad.map((text) => ({
-        analysis_id: analysisRow.analysis_id,
-        category: "wording",
-        severity: "high",
-        suggestion: text,
-      })),
-      ...analysis.feedback.quickFixes.map((text) => ({
-        analysis_id: analysisRow.analysis_id,
-        category: "keywords",
-        severity: "medium",
-        suggestion: text,
-      })),
-    ];
+    // 3 + 4. Feedback items and un-flagging older CVs, at the same time
+    const feedbackRows = buildFeedbackRows(analysisRow.analysis_id, analysis);
 
-    if (feedbackRows.length > 0) {
-      const { error: feedbackError } = await supabaseAdmin
-        .from("cv_feedback_items")
-        .insert(feedbackRows);
+    const [{ error: feedbackError }, { error: flipError }] = await Promise.all([
+      feedbackRows.length > 0
+        ? supabaseAdmin.from("cv_feedback_items").insert(feedbackRows)
+        : Promise.resolve({ error: null }),
 
-      if (feedbackError) {
-        console.error("Feedback insert error:", feedbackError.message);
-      }
+      supabaseAdmin
+        .from("cv_documents")
+        .update({ is_latest: false })
+        .eq("user_id", userId)
+        .eq("is_latest", true)
+        .neq("cv_id", cvDoc.cv_id),
+    ]);
+
+    if (feedbackError) {
+      console.error("Feedback insert error:", feedbackError.message);
     }
-
-    // 4. Only now mark older CVs as not latest
-    //    (so a failed save never leaves the user with no latest CV)
-    const { error: flipError } = await supabaseAdmin
-      .from("cv_documents")
-      .update({ is_latest: false })
-      .eq("user_id", userId)
-      .eq("is_latest", true)
-      .neq("cv_id", cvDoc.cv_id);
 
     if (flipError) {
       console.error("is_latest update error:", flipError.message);
     }
 
     newCvId = null; // everything saved, nothing to roll back
-    logFeatureEvent(req.user.id, "cv_analyzer", "completed", {
-      durationSeconds: Math.round((Date.now() - requestStartedAt) / 1000),
-      metadata: { targetRole: targetRole || null, overallScore: analysis.score },
+
+    finishJob(job, "completed", {
+      result: {
+        ...analysis,
+        cvId: cvDoc.cv_id,
+        fileName: job.fileName,
+        analyzedAt: now,
+        previousScore,
+        plan: usage.planName,
+        uploadsUsed: usage.used + 1,
+        uploadsLimit: usage.unlimited ? -1 : usage.limit,
+      },
     });
 
-    return res.status(200).json({
-      ...analysis,
-      cvId: cvDoc.cv_id,
-      fileName: req.file.originalname,
-      analyzedAt: now,
-      plan: usage.planName,
-      uploadsUsed: usage.used + 1,
-      uploadsLimit: usage.unlimited ? -1 : usage.limit,
-    });
+    console.log(`✅ [cv/job ${job.id}] finished in ${Date.now() - job.startedAtMs}ms`);
   } catch (error) {
-    console.error("CV ANALYZER ERROR:", error);
+    console.error(`❌ [cv/job ${job.id}] failed after ${Date.now() - job.startedAtMs}ms:`, error);
 
     // Roll back a half-saved CV so it doesn't count against the quota
     if (newCvId) {
       await supabaseAdmin.from("cv_documents").delete().eq("cv_id", newCvId);
     }
 
-    if (error instanceof multer.MulterError) {
+    const message = ["AI_UNAVAILABLE", "CV_TEXT_TOO_SHORT"].includes(error.code)
+      ? error.message
+      : JOB_ERROR_FALLBACK;
+
+    finishJob(job, "failed", { error: message });
+  }
+}
+
+// ------------------------------------------------------------
+// Routes
+// ------------------------------------------------------------
+
+/**
+ * Start a CV analysis. Replies straight away (202) with a job;
+ * the analysis continues in the background.
+ */
+router.post("/upload", requireAuth, uploadSingleFile, async (req, res) => {
+  const userId = req.user.id;
+
+  if (!req.file) {
+    return res.status(400).json({ error: "No CV file was uploaded." });
+  }
+
+  // Only one analysis at a time per user
+  const running = getRunningJob(userId);
+
+  if (running) {
+    return res.status(409).json({
+      error: "Your previous CV is still being analysed. Please wait for it to finish.",
+      code: "ANALYSIS_IN_PROGRESS",
+      job: publicJob(running),
+    });
+  }
+
+  const targetRole =
+    (typeof req.body.targetRole === "string" && req.body.targetRole.trim()) ||
+    "General professional role";
+
+  // Reserve the slot immediately so a double-click can't start two jobs
+  const job = createJob(userId, req.file.originalname, targetRole);
+
+  try {
+    // Quota check and text extraction don't depend on each other - run together
+    const [usage, cvText] = await Promise.all([
+      enforceQuota(userId),
+      extractTextFromFile(req.file.buffer, req.file.mimetype),
+    ]);
+
+    if (!cvText || !cvText.trim()) {
+      discardJob(job);
       return res.status(400).json({
         error:
-          error.code === "LIMIT_FILE_SIZE"
-            ? "The uploaded file is larger than 5 MB."
-            : error.message,
+          "We couldn't read any text from this file. Please upload a text-based PDF, DOCX or TXT.",
       });
     }
 
-    if (error.status === 403) {
-      return res.status(403).json({
-        error: error.message,
-        code: error.code,
+    if (cvText.trim().length < 100) {
+      discardJob(job);
+      return res.status(400).json({
+        error: "This CV has too little text to analyse. Please check the file and try again.",
       });
+    }
+
+    // Not awaited on purpose: the analysis keeps running after we reply
+    runAnalysisJob(job, { cvText, fileSize: req.file.size, usage }).catch((err) => {
+      console.error("CV JOB CRASHED:", err);
+      finishJob(job, "failed", { error: JOB_ERROR_FALLBACK });
+    });
+
+    return res.status(202).json({
+      ...publicJob(job),
+      plan: usage.planName,
+      uploadsUsed: usage.used + 1,
+      uploadsLimit: usage.unlimited ? -1 : usage.limit,
+    });
+  } catch (error) {
+    discardJob(job);
+    console.error("CV UPLOAD ERROR:", error);
+
+    if (error.code === "UPLOAD_LIMIT_REACHED") {
+      return res.status(403).json({ error: error.message, code: error.code });
     }
 
     return res.status(500).json({
-      error: "CV analysis failed.",
+      error: "Could not start the CV analysis.",
       details: error.message,
     });
   }
+});
+
+/**
+ * The user's running analysis, if any. Every dashboard page calls this
+ * on load so it can show progress wherever the user is.
+ */
+router.get("/active", requireAuth, (req, res) => {
+  const job = getRunningJob(req.user.id);
+  return res.status(200).json({ job: job ? publicJob(job) : null });
+});
+
+/**
+ * Status of one analysis job. Includes the full analysis once completed.
+ */
+router.get("/jobs/:jobId", requireAuth, (req, res) => {
+  const job = jobs.get(req.params.jobId);
+
+  // Users can only see their own jobs
+  if (!job || job.userId !== req.user.id) {
+    return res.status(404).json({ error: "Analysis not found." });
+  }
+
+  if (job.status === "processing") {
+    const running = getRunningJob(job.userId); // also marks stuck jobs as failed
+
+    if (running && running.id === job.id) {
+      return res.status(200).json(publicJob(job));
+    }
+  }
+
+  if (job.status === "failed") {
+    return res.status(200).json({
+      jobId: job.id,
+      status: "failed",
+      fileName: job.fileName,
+      error: job.error || JOB_ERROR_FALLBACK,
+    });
+  }
+
+  return res.status(200).json({
+    jobId: job.id,
+    status: "completed",
+    fileName: job.fileName,
+    analysis: job.result,
+  });
 });
 
 /**
