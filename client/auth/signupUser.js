@@ -342,13 +342,21 @@ async function handleSignUp() {
             throw new Error(err.error || "Sign‑up failed.");
         }
 
+        
         const data = await resp.json();
 
-        // Optional: store user_id or log in silently (from your original code)
-        // localStorage.setItem("user_id", data.user.id);
+        if (data.needsEmailConfirmation) {
+            alert(
+                "Your ScientiaForge account has been created! " +
+                "Please check your inbox and click the verification link " +
+                "before logging in. Also check your spam folder."
+            );
+        } else {
+            alert("Account created successfully! You can now log in.");
+        }
 
-        alert("Account created! Please log in.");
         window.location.href = "Login.html";
+
         
     } catch (err) {
         alert("Error: " + err.message);
