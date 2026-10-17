@@ -273,60 +273,83 @@
                     <h3>Add a reminder or goal</h3>
 
                     <form id="plannerEventForm" class="planner-form">
-                    <label>
-                        Type
-                        <select name="type" required>
-                        <option value="reminder">Reminder</option>
-                        <option value="goal">Goal</option>
-                        </select>
-                    </label>
-
-                    <label>
-                        Title
-                        <input
-                        name="title"
-                        type="text"
-                        maxlength="150"
-                        placeholder="e.g. Practise interview questions"
-                        required
-                        />
-                    </label>
-
-                    <label>
-                        Description
-                        <textarea
-                        name="description"
-                        rows="3"
-                        maxlength="2000"
-                        placeholder="Optional details..."
-                        ></textarea>
-                    </label>
-
-                    <div class="planner-form-row">
                         <label>
-                        Date
-                        <input name="event_date" type="date" required />
+                            Type
+                            <select name="type" required>
+                            <option value="reminder">Reminder</option>
+                            <option value="goal">Goal</option>
+                            </select>
                         </label>
 
                         <label>
-                        Time — optional
-                        <input name="event_time" type="time" />
+                            Title
+                            <input
+                            name="title"
+                            type="text"
+                            maxlength="150"
+                            required
+                            placeholder="What do you want to do?"
+                            />
                         </label>
-                    </div>
 
-                    <label>
-                        Notify me at — optional
-                        <input name="remind_at" type="datetime-local" />
-                    </label>
+                        <label>
+                            Description
+                            <textarea
+                            name="description"
+                            rows="3"
+                            maxlength="2000"
+                            placeholder="Optional details..."
+                            ></textarea>
+                        </label>
 
-                    <small>
-                        Times use your device’s local timezone.
-                        Notification delivery will be connected in the next step.
-                    </small>
+                        <fieldset id="reminderFields" class="planner-fieldset">
+                            <legend>Reminder deadline</legend>
 
-                    <button class="btn btn-primary" type="submit">
-                        Save entry
-                    </button>
+                            <div class="planner-form-row">
+                            <label>
+                                Due date
+                                <input name="event_date" type="date" required />
+                            </label>
+
+                            <label>
+                                Due time — optional
+                                <input name="event_time" type="time" />
+                            </label>
+                            </div>
+                        </fieldset>
+
+                        <fieldset
+                            id="goalFields"
+                            class="planner-fieldset"
+                            hidden
+                            disabled
+                        >
+                            <legend>Goal schedule</legend>
+
+                            <label>
+                            Start date and time
+                            <input name="starts_at" type="datetime-local" />
+                            </label>
+
+                            <label>
+                            End date and time
+                            <input name="ends_at" type="datetime-local" />
+                            </label>
+                        </fieldset>
+
+                        <label>
+                            <span id="notifyFieldLabel">Notify me at — required</span>
+                            <input name="remind_at" type="datetime-local" required />
+                        </label>
+
+                        <small>
+                            Times use your device’s local timezone.
+                            Date-only reminders become overdue after the due date ends.
+                        </small>
+
+                        <button class="btn btn-primary" type="submit">
+                            Save entry
+                        </button>
                     </form>
 
                     <p id="plannerMessage" role="status" aria-live="polite"></p>

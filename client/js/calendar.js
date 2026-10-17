@@ -35,6 +35,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
     return `${year}-${month}-${day}`;
   }
+  function eventCoversDate(event, key) {
+    if (event.status !== "active") return false;
+
+    if (
+      event.type === "goal" &&
+      event.starts_at &&
+      event.ends_at
+    ) {
+      const [year, month, day] = key.split("-").map(Number);
+      const dayStart = new Date(year, month - 1, day).getTime();
+      const dayEnd = new Date(year, month - 1, day + 1).getTime();
+
+      // Treat goal intervals as [start, end).
+      return (
+        Date.parse(event.starts_at) < dayEnd &&
+        Date.parse(event.ends_at) > dayStart
+      );
+    }
+
+    return event.event_date === key;
+  }
+
+  function announceSelectedDate() {
+    document.dispatchEvent(
+      new CustomEvent("planner:date-selected", {
+        detail: { date: selectedDate },
+      })
+    );
+  }
 
   const now = new Date();
 
@@ -62,14 +91,10 @@ document.addEventListener("DOMContentLoaded", () => {
       year: "numeric",
     });
 
-    dateInput.value = selectedDate;
     selectedEvents.replaceChildren();
 
     const matchingEvents = events
-      .filter((event) =>
-        event.event_date === selectedDate &&
-        event.status === "active"
-      )
+      .filter((event) => eventCoversDate(event, selectedDate))
       .sort((a, b) =>
         (a.event_time || "").localeCompare(b.event_time || "")
       );
@@ -89,12 +114,17 @@ document.addEventListener("DOMContentLoaded", () => {
       title.textContent = event.title;
 
       const details = document.createElement("p");
-      details.textContent = [
-        event.type === "goal" ? "Goal" : "Reminder",
-        event.event_time
-          ? event.event_time.slice(0, 5)
-          : "No time set",
-      ].join(" · ");
+      details.textContent =
+        event.type === "goal" && event.starts_at && event.ends_at
+          ? `Goal · ${new Date(event.starts_at).toLocaleString()} → ${
+              new Date(event.ends_at).toLocaleString()
+            }`
+          : [
+              event.type === "goal" ? "Goal" : "Reminder",
+              event.event_time
+                ? event.event_time.slice(0, 5)
+                : "No time set",
+            ].join(" · ");
 
       card.append(title, details);
 
@@ -128,12 +158,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const numberOfDays = new Date(year, month + 1, 0).getDate();
 
-    const activeDates = new Set(
-      events
-        .filter((event) => event.status === "active")
-        .map((event) => event.event_date)
-    );
-
     const today = dateKey(new Date());
 
     for (let index = 0; index < startingOffset; index++) {
@@ -145,8 +169,9 @@ document.addEventListener("DOMContentLoaded", () => {
     for (let day = 1; day <= numberOfDays; day++) {
       const date = new Date(year, month, day);
       const key = dateKey(date);
-      const hasEvents = activeDates.has(key);
-
+      const hasEvents = events.some((event) =>
+        eventCoversDate(event, key)
+      );
       const button = document.createElement("button");
       button.type = "button";
       button.className = "calendar-day";
@@ -177,6 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
       button.addEventListener("click", () => {
         selectedDate = key;
         renderCalendar();
+        announceSelectedDate();
 
         // Restore focus after rebuilding the buttons.
         daysContainer.querySelector(".is-selected")?.focus();
@@ -238,6 +264,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     selectedDate = dateKey(displayedMonth);
     renderCalendar();
+    announceSelectedDate();
   }
 
   previousButton.addEventListener("click", () => moveMonth(-1));
@@ -254,6 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     selectedDate = dateKey(today);
     renderCalendar();
+    announceSelectedDate();
   });
 
   document.getElementById("plannerBtn")

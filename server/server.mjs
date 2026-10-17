@@ -1393,8 +1393,8 @@ app.get("/api/planner/events", requireAuth, async (req, res) => {
     const { data, error } = await supabaseAdmin
       .from("calendar_events")
       .select(
-        "id, title, description, type, event_date, event_time, remind_at, status, created_at"
-      )
+          "id, title, description, type, event_date, event_time, remind_at, starts_at, ends_at, due_at, status, created_at"
+        )
       .eq("user_id", req.userId)
       .order("event_date", { ascending: true });
 
@@ -1429,123 +1429,221 @@ app.post("/api/planner/events", requireAuth, async (req, res) => {
       });
     }
 
-    const {
-      title,
-      description = "",
-      type,
-      event_date,
-      event_time = null,
-      remind_at = null,
-    } = req.body ?? {};
+    const body = req.body ?? {};
+
+    const fail = (message) =>
+      res.status(400).json({ error: message });
+
+    const timestamp = (value) => {
+      if (
+        typeof value !== "string" ||
+        !/(Z|[+-]\d{2}:\d{2})$/i.test(value)
+      ) {
+        return null;
+      }
+
+      const milliseconds = Date.parse(value);
+      return Number.isFinite(milliseconds) ? milliseconds : null;
+    };
+
+    const dateIsValid = (value) => {
+      if (
+        typeof value !== "string" ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(value)
+      ) {
+        return false;
+      }
+
+      const parsed = new Date(`${value}T00:00:00Z`);
+
+      return (
+        Number.isFinite(parsed.getTime()) &&
+        parsed.toISOString().slice(0, 10) === value
+      );
+    };
 
     if (
-      typeof title !== "string" ||
-      !title.trim() ||
-      title.trim().length > 150
+      typeof body.title !== "string" ||
+      !body.title.trim() ||
+      body.title.trim().length > 150
     ) {
-      return res.status(400).json({
-        error: "Enter a title between 1 and 150 characters.",
-      });
+      return fail("Enter a title between 1 and 150 characters.");
     }
+
+    const description = body.description ?? "";
 
     if (
       typeof description !== "string" ||
       description.length > 2000
     ) {
-      return res.status(400).json({
-        error: "Description must be 2000 characters or fewer.",
-      });
+      return fail("Description must be 2000 characters or fewer.");
     }
 
-    if (!["reminder", "goal"].includes(type)) {
-      return res.status(400).json({
-        error: "Choose reminder or goal.",
-      });
+    if (!["reminder", "goal"].includes(body.type)) {
+      return fail("Choose reminder or goal.");
     }
 
-    const parsedDate =
-      typeof event_date === "string" &&
-      /^\d{4}-\d{2}-\d{2}$/.test(event_date)
-        ? new Date(`${event_date}T00:00:00Z`)
-        : null;
+    if (!dateIsValid(body.event_date)) {
+      return fail("Choose a valid date.");
+    }
+
+    const eventTime = body.event_time || null;
 
     if (
-      !parsedDate ||
-      !Number.isFinite(parsedDate.getTime()) ||
-      parsedDate.toISOString().slice(0, 10) !== event_date
-    ) {
-      return res.status(400).json({
-        error: "Choose a valid date.",
-      });
-    }
-
-    if (
-      event_time !== null &&
+      eventTime !== null &&
       (
-        typeof event_time !== "string" ||
-        !/^([01]\d|2[0-3]):[0-5]\d$/.test(event_time)
+        typeof eventTime !== "string" ||
+        !/^([01]\d|2[0-3]):[0-5]\d$/.test(eventTime)
       )
     ) {
-      return res.status(400).json({
-        error: "Choose a valid time.",
-      });
+      return fail("Choose a valid time.");
     }
 
-    let reminderTimestamp = null;
+    const notifyValue = body.remind_at;
+    const hasNotification =
+      notifyValue !== undefined &&
+      notifyValue !== null &&
+      notifyValue !== "";
 
-    if (remind_at !== null) {
-      if (
-        typeof remind_at !== "string" ||
-        !Number.isFinite(Date.parse(remind_at))
-      ) {
-        return res.status(400).json({
-          error: "Choose a valid notification time.",
-        });
+    const notifyTime = hasNotification
+      ? timestamp(notifyValue)
+      : null;
+
+    if (
+      hasNotification &&
+      (notifyTime === null || notifyTime <= Date.now())
+    ) {
+      return fail("Notification time must be valid and in the future.");
+    }
+
+    let startsAt = null;
+    let endsAt = null;
+    let dueAt = null;
+
+    if (body.type === "reminder") {
+      if (!hasNotification) {
+        return fail("Notify me at is required for reminders.");
       }
 
-      reminderTimestamp = new Date(remind_at).toISOString();
+      const deadline = timestamp(body.due_at);
 
-      if (Date.parse(reminderTimestamp) <= Date.now()) {
-        return res.status(400).json({
-          error: "Notification time must be in the future.",
-        });
+      if (deadline === null) {
+        return fail("Choose a valid reminder deadline.");
       }
+
+      if (notifyTime > deadline) {
+        return fail("Notification time cannot be after the deadline.");
+      }
+
+      dueAt = new Date(deadline).toISOString();
+    } else {
+      const start = timestamp(body.starts_at);
+      const end = timestamp(body.ends_at);
+
+      if (start === null || end === null) {
+        return fail("Goals require a start and end date/time.");
+      }
+
+      if (end <= start) {
+        return fail("The goal must end after it starts.");
+      }
+
+      if (hasNotification && notifyTime > end) {
+        return fail("Notification time cannot be after the goal ends.");
+      }
+
+      startsAt = new Date(start).toISOString();
+      endsAt = new Date(end).toISOString();
     }
 
     const { data, error } = await supabaseAdmin
-      .from("calendar_events")
-      .insert({
-        user_id: req.userId,
-        title: title.trim(),
-        description: description.trim() || null,
-        type,
-        event_date,
-        event_time,
-        remind_at: reminderTimestamp,
-        status: "active",
-      })
-      .select(
-        "id, title, description, type, event_date, event_time, remind_at, status, created_at"
-      )
-      .single();
+    .from("calendar_events")
+    .insert({
+      user_id: req.userId,
+      title: body.title.trim(),
+      description: description.trim() || null,
+      type: body.type,
+      event_date: body.event_date,
+      event_time: eventTime,
+      remind_at: hasNotification
+        ? new Date(notifyTime).toISOString()
+        : null,
+      starts_at: startsAt,
+      ends_at: endsAt,
+      due_at: dueAt,
+      status: "active",
+    })
+    .select(
+      "id, title, description, type, event_date, event_time, remind_at, starts_at, ends_at, due_at, status, created_at"
+    )
+    .single();
 
-    if (error) {
-      console.error("Planner create error:", error.message);
-
-      return res.status(500).json({
-        error: "Could not save your calendar entry.",
-      });
-    }
+    if (error) throw error;
 
     return res.status(201).json({ event: data });
   } catch (error) {
     console.error("Planner create error:", error);
 
     return res.status(500).json({
-      error: "An unexpected error occurred.",
+      error: "Could not save your calendar entry.",
     });
   }
 });
+
+app.patch(
+  "/api/planner/events/:id/status",
+  requireAuth,
+  async (req, res) => {
+    try {
+      if (!supabaseAdmin) {
+        return res.status(503).json({
+          error: "Planner database access is not configured.",
+        });
+      }
+
+      const uuidPattern =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+      if (!uuidPattern.test(req.params.id)) {
+        return res.status(400).json({
+          error: "Invalid entry ID.",
+        });
+      }
+
+      const status = req.body?.status;
+
+      if (!["active", "completed"].includes(status)) {
+        return res.status(400).json({
+          error: "Choose active or completed.",
+        });
+      }
+
+      const { data, error } = await supabaseAdmin
+        .from("calendar_events")
+        .update({ status })
+        .eq("id", req.params.id)
+        .eq("user_id", req.userId)
+        .select("id, status")
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (!data) {
+        return res.status(404).json({
+          error: "Entry not found.",
+        });
+      }
+
+      return res.json({ event: data });
+    } catch (error) {
+      console.error("Planner status error:", error);
+
+      return res.status(500).json({
+        error: "Could not update the entry.",
+      });
+    }
+  }
+);
 /* =========================================================
    PLANNER: GENERATE NOTIFICATIONS FOR DUE ENTRIES
 ========================================================= */
