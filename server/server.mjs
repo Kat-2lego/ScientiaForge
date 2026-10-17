@@ -1639,6 +1639,103 @@ app.post(
   }
 );
 /* =========================================================
+   PLANNER: LOAD NOTIFICATIONS + UNREAD COUNT
+========================================================= */
+
+app.get(
+  "/api/planner/notifications",
+  requireAuth,
+  async (req, res) => {
+    try {
+      if (!supabaseAdmin) {
+        return res.status(503).json({
+          error: "Planner database access is not configured.",
+        });
+      }
+
+      const { data, error } = await supabaseAdmin
+        .from("notifications")
+        .select("id, title, body, type, is_read, created_at")
+        .eq("user_id", req.userId)
+        .order("created_at", { ascending: false })
+        .limit(100);
+
+      if (error) throw error;
+
+      const { count, error: countError } = await supabaseAdmin
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", req.userId)
+        .eq("is_read", false);
+
+      if (countError) throw countError;
+
+      return res.json({
+        notifications: data ?? [],
+        unreadCount: count ?? 0,
+      });
+    } catch (error) {
+      console.error("Planner load notifications error:", error);
+
+      return res.status(500).json({
+        error: "Could not load notifications.",
+      });
+    }
+  }
+);
+
+/* =========================================================
+   PLANNER: MARK DISPLAYED NOTIFICATIONS READ
+========================================================= */
+
+app.post(
+  "/api/planner/notifications/read",
+  requireAuth,
+  async (req, res) => {
+    try {
+      if (!supabaseAdmin) {
+        return res.status(503).json({
+          error: "Planner database access is not configured.",
+        });
+      }
+
+      const ids = req.body?.ids;
+      const uuidPattern =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+      if (
+        !Array.isArray(ids) ||
+        ids.length === 0 ||
+        ids.length > 100 ||
+        !ids.every(
+          (id) => typeof id === "string" && uuidPattern.test(id)
+        )
+      ) {
+        return res.status(400).json({
+          error: "Provide between 1 and 100 valid notification IDs.",
+        });
+      }
+
+      const { error } = await supabaseAdmin
+        .from("notifications")
+        .update({ is_read: true })
+        .eq("user_id", req.userId)
+        .eq("is_read", false)
+        .in("id", [...new Set(ids)]);
+
+      if (error) throw error;
+
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Planner mark notifications read error:", error);
+
+      return res.status(500).json({
+        error: "Could not mark notifications read.",
+      });
+    }
+  }
+);
+/* =========================================================
    PREMIUM ACCESS CHECK
    Gate any premium-only route with: requireAuth, requirePremium
 ========================================================= */

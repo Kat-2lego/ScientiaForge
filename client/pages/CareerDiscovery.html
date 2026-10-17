@@ -544,7 +544,16 @@
           </section>
 
           <section class="planner-content hidden" id="notificationsTab">
-            <p>Notifications will go here.</p>
+            <h3>Notifications</h3>
+
+            <p
+              class="notification-status"
+              id="notificationStatus"
+              role="status"
+              aria-live="polite"
+            ></p>
+
+            <div id="notificationsList"></div>
           </section>
         </aside>
       </div>
@@ -560,6 +569,8 @@
   <script src="../js/planner-UI.js"></script>
   <script src="../js/planner.js"></script>
   <script src="../js/calendar.js"></script>
+  <script src="../js/notifications.js"></script>
+
 
   <script>
     lucide.createIcons();

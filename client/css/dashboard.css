@@ -1026,6 +1026,39 @@ input {
   font-size: 0.85rem;
   color: var(--text-main);
 }
+.notification-card {
+  margin-bottom: 10px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.notification-card.is-unread {
+  background: var(--primary-light);
+  border-left: 4px solid var(--primary);
+}
+
+.notification-card h4 {
+  margin: 0 0 6px;
+  color: var(--text-dark);
+  overflow-wrap: anywhere;
+}
+
+.notification-card p {
+  margin: 0 0 8px;
+  color: var(--text-main);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.notification-card time,
+.notification-status {
+  color: var(--text-main);
+  font-size: 0.8rem;
+}
 
 @media (max-width: 400px) {
   .planner-form-row {
