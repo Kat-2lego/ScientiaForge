@@ -299,8 +299,8 @@
                   name="title"
                   type="text"
                   maxlength="150"
-                  placeholder="e.g. Practise interview questions"
                   required
+                  placeholder="What do you want to do?"
                 />
               </label>
 
@@ -314,26 +314,49 @@
                 ></textarea>
               </label>
 
-              <div class="planner-form-row">
+              <fieldset id="reminderFields" class="planner-fieldset">
+                <legend>Reminder deadline</legend>
+
+                <div class="planner-form-row">
+                  <label>
+                    Due date
+                    <input name="event_date" type="date" required />
+                  </label>
+
+                  <label>
+                    Due time — optional
+                    <input name="event_time" type="time" />
+                  </label>
+                </div>
+              </fieldset>
+
+              <fieldset
+                id="goalFields"
+                class="planner-fieldset"
+                hidden
+                disabled
+              >
+                <legend>Goal schedule</legend>
+
                 <label>
-                  Date
-                  <input name="event_date" type="date" required />
+                  Start date and time
+                  <input name="starts_at" type="datetime-local" />
                 </label>
 
                 <label>
-                  Time — optional
-                  <input name="event_time" type="time" />
+                  End date and time
+                  <input name="ends_at" type="datetime-local" />
                 </label>
-              </div>
+              </fieldset>
 
               <label>
-                Notify me at — optional
-                <input name="remind_at" type="datetime-local" />
+                <span id="notifyFieldLabel">Notify me at — required</span>
+                <input name="remind_at" type="datetime-local" required />
               </label>
 
               <small>
                 Times use your device’s local timezone.
-                Notification delivery will be connected in the next step.
+                Date-only reminders become overdue after the due date ends.
               </small>
 
               <button class="btn btn-primary" type="submit">

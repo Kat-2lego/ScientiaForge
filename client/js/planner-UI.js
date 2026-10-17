@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  const tabs = overlay.querySelectorAll(".planner-tab");
+  const tabs = overlay.querySelectorAll(".planner-tab[data-tab]");
   let previousFocus = null;
 
   function switchTab(tabName) {
