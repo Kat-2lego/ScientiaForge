@@ -933,8 +933,10 @@ app.post("/api/auth/signup", async (req, res) => {
     logAudit(userId, "sign_up", { desc: "User account created", req });
     sendWelcomeEmail(email, firstName);
 
+    
     return res.status(201).json({
       success: true,
+      needsEmailConfirmation: !data.session,
       message: data.session
         ? "Account created successfully."
         : "Account created. Check your email to confirm your account.",
@@ -943,6 +945,8 @@ app.post("/api/auth/signup", async (req, res) => {
         email: data.user.email,
       },
     });
+
+
   } catch (error) {
     console.error("❌ Signup error:", error.message);
     return res.status(500).json({
@@ -1374,7 +1378,363 @@ async function requireAuth(req, res, next) {
   req.userId = user.id;
   next();
 }
+/* =========================================================
+   PLANNER: LOAD CURRENT USER'S CALENDAR EVENTS
+========================================================= */
 
+app.get("/api/planner/events", requireAuth, async (req, res) => {
+  try {
+    if (!supabaseAdmin) {
+      return res.status(503).json({
+        error: "Planner database access is not configured on the server.",
+      });
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from("calendar_events")
+      .select(
+        "id, title, description, type, event_date, event_time, remind_at, status, created_at"
+      )
+      .eq("user_id", req.userId)
+      .order("event_date", { ascending: true });
+
+    if (error) {
+      console.error("Planner: failed to load events:", error.message);
+
+      return res.status(500).json({
+        error: "Could not load your calendar events.",
+      });
+    }
+
+    return res.status(200).json({
+      events: data ?? [],
+    });
+  } catch (error) {
+    console.error("Planner events error:", error);
+
+    return res.status(500).json({
+      error: "An unexpected error occurred while loading your calendar.",
+    });
+  }
+});
+/* =========================================================
+   PLANNER: CREATE REMINDER OR GOAL
+========================================================= */
+
+app.post("/api/planner/events", requireAuth, async (req, res) => {
+  try {
+    if (!supabaseAdmin) {
+      return res.status(503).json({
+        error: "Planner database access is not configured.",
+      });
+    }
+
+    const {
+      title,
+      description = "",
+      type,
+      event_date,
+      event_time = null,
+      remind_at = null,
+    } = req.body ?? {};
+
+    if (
+      typeof title !== "string" ||
+      !title.trim() ||
+      title.trim().length > 150
+    ) {
+      return res.status(400).json({
+        error: "Enter a title between 1 and 150 characters.",
+      });
+    }
+
+    if (
+      typeof description !== "string" ||
+      description.length > 2000
+    ) {
+      return res.status(400).json({
+        error: "Description must be 2000 characters or fewer.",
+      });
+    }
+
+    if (!["reminder", "goal"].includes(type)) {
+      return res.status(400).json({
+        error: "Choose reminder or goal.",
+      });
+    }
+
+    const parsedDate =
+      typeof event_date === "string" &&
+      /^\d{4}-\d{2}-\d{2}$/.test(event_date)
+        ? new Date(`${event_date}T00:00:00Z`)
+        : null;
+
+    if (
+      !parsedDate ||
+      !Number.isFinite(parsedDate.getTime()) ||
+      parsedDate.toISOString().slice(0, 10) !== event_date
+    ) {
+      return res.status(400).json({
+        error: "Choose a valid date.",
+      });
+    }
+
+    if (
+      event_time !== null &&
+      (
+        typeof event_time !== "string" ||
+        !/^([01]\d|2[0-3]):[0-5]\d$/.test(event_time)
+      )
+    ) {
+      return res.status(400).json({
+        error: "Choose a valid time.",
+      });
+    }
+
+    let reminderTimestamp = null;
+
+    if (remind_at !== null) {
+      if (
+        typeof remind_at !== "string" ||
+        !Number.isFinite(Date.parse(remind_at))
+      ) {
+        return res.status(400).json({
+          error: "Choose a valid notification time.",
+        });
+      }
+
+      reminderTimestamp = new Date(remind_at).toISOString();
+
+      if (Date.parse(reminderTimestamp) <= Date.now()) {
+        return res.status(400).json({
+          error: "Notification time must be in the future.",
+        });
+      }
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from("calendar_events")
+      .insert({
+        user_id: req.userId,
+        title: title.trim(),
+        description: description.trim() || null,
+        type,
+        event_date,
+        event_time,
+        remind_at: reminderTimestamp,
+        status: "active",
+      })
+      .select(
+        "id, title, description, type, event_date, event_time, remind_at, status, created_at"
+      )
+      .single();
+
+    if (error) {
+      console.error("Planner create error:", error.message);
+
+      return res.status(500).json({
+        error: "Could not save your calendar entry.",
+      });
+    }
+
+    return res.status(201).json({ event: data });
+  } catch (error) {
+    console.error("Planner create error:", error);
+
+    return res.status(500).json({
+      error: "An unexpected error occurred.",
+    });
+  }
+});
+/* =========================================================
+   PLANNER: GENERATE NOTIFICATIONS FOR DUE ENTRIES
+========================================================= */
+
+app.post(
+  "/api/planner/notifications/sync",
+  requireAuth,
+  async (req, res) => {
+    try {
+      if (!supabaseAdmin) {
+        return res.status(503).json({
+          error: "Planner database access is not configured.",
+        });
+      }
+
+      const now = new Date().toISOString();
+
+      const {
+        data: dueEntries,
+        error: dueError,
+      } = await supabaseAdmin
+        .from("calendar_events")
+        .select("id, title, description, type")
+        .eq("user_id", req.userId)
+        .eq("status", "active")
+        .lte("remind_at", now);
+
+      if (dueError) {
+        console.error(
+          "Planner: failed to check due entries:",
+          dueError.message
+        );
+
+        return res.status(500).json({
+          error: "Could not check due reminders.",
+        });
+      }
+
+      let createdCount = 0;
+
+      if (dueEntries?.length) {
+        const notifications = dueEntries.map((entry) => ({
+          user_id: req.userId,
+          reference_id: entry.id,
+          type: entry.type,
+          title: `${
+            entry.type === "goal" ? "Goal reminder" : "Reminder"
+          }: ${entry.title}`,
+          body:
+            entry.description ||
+            "Your scheduled reminder is due.",
+          is_read: false,
+        }));
+
+        const {
+          data: created,
+          error: insertError,
+        } = await supabaseAdmin
+          .from("notifications")
+          .upsert(notifications, {
+            onConflict: "user_id,reference_id",
+            ignoreDuplicates: true,
+          })
+          .select("id");
+
+        if (insertError) {
+          console.error(
+            "Planner: failed to create notifications:",
+            insertError.message
+          );
+
+          return res.status(500).json({
+            error: "Could not create reminder notifications.",
+          });
+        }
+
+        createdCount = created?.length ?? 0;
+      }
+
+      return res.status(200).json({
+        success: true,
+        created: createdCount,
+      });
+    } catch (error) {
+      console.error("Planner notification sync error:", error);
+
+      return res.status(500).json({
+        error: "An unexpected notification error occurred.",
+      });
+    }
+  }
+);
+/* =========================================================
+   PLANNER: LOAD NOTIFICATIONS + UNREAD COUNT
+========================================================= */
+
+app.get(
+  "/api/planner/notifications",
+  requireAuth,
+  async (req, res) => {
+    try {
+      if (!supabaseAdmin) {
+        return res.status(503).json({
+          error: "Planner database access is not configured.",
+        });
+      }
+
+      const { data, error } = await supabaseAdmin
+        .from("notifications")
+        .select("id, title, body, type, is_read, created_at")
+        .eq("user_id", req.userId)
+        .order("created_at", { ascending: false })
+        .limit(100);
+
+      if (error) throw error;
+
+      const { count, error: countError } = await supabaseAdmin
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", req.userId)
+        .eq("is_read", false);
+
+      if (countError) throw countError;
+
+      return res.json({
+        notifications: data ?? [],
+        unreadCount: count ?? 0,
+      });
+    } catch (error) {
+      console.error("Planner load notifications error:", error);
+
+      return res.status(500).json({
+        error: "Could not load notifications.",
+      });
+    }
+  }
+);
+
+/* =========================================================
+   PLANNER: MARK DISPLAYED NOTIFICATIONS READ
+========================================================= */
+
+app.post(
+  "/api/planner/notifications/read",
+  requireAuth,
+  async (req, res) => {
+    try {
+      if (!supabaseAdmin) {
+        return res.status(503).json({
+          error: "Planner database access is not configured.",
+        });
+      }
+
+      const ids = req.body?.ids;
+      const uuidPattern =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+      if (
+        !Array.isArray(ids) ||
+        ids.length === 0 ||
+        ids.length > 100 ||
+        !ids.every(
+          (id) => typeof id === "string" && uuidPattern.test(id)
+        )
+      ) {
+        return res.status(400).json({
+          error: "Provide between 1 and 100 valid notification IDs.",
+        });
+      }
+
+      const { error } = await supabaseAdmin
+        .from("notifications")
+        .update({ is_read: true })
+        .eq("user_id", req.userId)
+        .eq("is_read", false)
+        .in("id", [...new Set(ids)]);
+
+      if (error) throw error;
+
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Planner mark notifications read error:", error);
+
+      return res.status(500).json({
+        error: "Could not mark notifications read.",
+      });
+    }
+  }
+);
 /* =========================================================
    PREMIUM ACCESS CHECK
    Gate any premium-only route with: requireAuth, requirePremium
