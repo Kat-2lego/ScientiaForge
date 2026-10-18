@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SkillForge - Career Discovery additions
+   ScientiaForge - Career Discovery additions
    Loaded AFTER CareerDiscovery.css. Everything here is additive: the existing
    design language (rounded cards, blue/cyan gradient, Plus Jakarta Sans) is
    preserved, and no existing rule is overridden except where it blocked the
@@ -314,7 +314,7 @@ PROFILE_RICHNESS_TARGET_ANSWERS: int = 18
 # Job zone / salary (§27, §51)
 # ---------------------------------------------------------------------------
 
-# ZAR monthly bands. These are SkillForge planning estimates, NOT O*NET data,
+# ZAR monthly bands. These are ScientiaForge planning estimates, NOT O*NET data,
 # and every response marks them salary_is_estimate = True.
 SALARY_ESTIMATES_ZAR: Dict[int, str] = {
     1: "R6,000 - R12,000",
@@ -325,7 +325,7 @@ SALARY_ESTIMATES_ZAR: Dict[int, str] = {
 }
 SALARY_FALLBACK_ZAR = "R20,000 - R38,000"
 SALARY_DISCLAIMER = (
-    "SkillForge estimate for the South African market. Not O*NET wage data."
+    "ScientiaForge estimate for the South African market. Not O*NET wage data."
 )
 
 JOB_ZONE_LABELS: Dict[int, str] = {

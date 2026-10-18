@@ -353,7 +353,7 @@ const FEEDBACK_REASONS = {
 };
 
 const SORTS = [
-  { id: "recommended", name: "SkillForge recommended" },
+  { id: "recommended", name: "ScientiaForge recommended" },
   { id: "relevance", name: "Most relevant" },
   { id: "views", name: "Most viewed" },
   { id: "engagement", name: "Highest engagement" },

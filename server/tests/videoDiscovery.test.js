@@ -149,7 +149,7 @@ test("feedback: reasons must match the answer; votes reach the ranking", async (
   assert.deepEqual(stats.get(vid("trigIdGen02")), { up: 12, down: 0 });
   const r = await d.search({ subject: "mathematics", topic: "trigonometry", subtopic: "identities" });
   const gen = r.results.find((x) => x.id === vid("trigIdGen02"));
-  assert.ok(gen.reasons.includes("Rated useful by 12 of 12 SkillForge learners"));
+  assert.ok(gen.reasons.includes("Rated useful by 12 of 12 ScientiaForge learners"));
   assert.ok(gen.breakdown.learner_feedback > 80);
 });
 

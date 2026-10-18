@@ -1,7 +1,7 @@
-/* SkillForge · Study Hub · Study videos (Video Discovery)
+/* ScientiaForge · Study Hub · Study videos (Video Discovery)
  *
  * Builds the video search inside #videosPanel. Your existing curated list (videoSubject /
- * searchVideosBtn / videosList) is kept underneath in "SkillForge picks".
+ * searchVideosBtn / videosList) is kept underneath in "ScientiaForge picks".
  * Needs nscCommon.js (window.NSC) loaded first, and this file after StudyHub.js:
  *   <link rel="stylesheet" href="../css/VideoDiscovery.css" />
  *   <script src="../js/VideoDiscovery.js"></script>
@@ -23,7 +23,7 @@
     try {
       res = await fetch(`${BASE}${path}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
     } catch {
-      const err = new Error("Can't reach SkillForge right now. Check your connection and try again.");
+      const err = new Error("Can't reach ScientiaForge right now. Check your connection and try again.");
       err.status = 0;
       throw err;
     }
@@ -58,7 +58,7 @@
   /* ================================================================ layout */
   const legacy = document.createElement("details");
   legacy.className = "nsc-other vd-legacy";
-  legacy.innerHTML = `<summary><i data-lucide="list-video"></i> SkillForge picks: videos from our study list</summary>`;
+  legacy.innerHTML = `<summary><i data-lucide="list-video"></i> ScientiaForge picks: videos from our study list</summary>`;
   const legacyBody = document.createElement("div");
   legacyBody.className = "nsc-other-body";
   while (panel.firstChild) legacyBody.appendChild(panel.firstChild);
@@ -277,8 +277,8 @@
   }
 
   function matchRing(v) {
-    return `<span class="vd-match" style="--m:${Number(v.match) || 0}" title="SkillForge match: how well this video fits your request">
-        <span class="vd-match-num">${Number(v.match) || 0}</span><span class="vd-match-label">SkillForge<br />match</span></span>`;
+    return `<span class="vd-match" style="--m:${Number(v.match) || 0}" title="ScientiaForge match: how well this video fits your request">
+        <span class="vd-match-num">${Number(v.match) || 0}</span><span class="vd-match-label">ScientiaForge<br />match</span></span>`;
   }
 
   function whyPanel(v) {
@@ -289,7 +289,7 @@
       ["curriculum", "Curriculum and grade fit", b.curriculum],
       ["channel", "Channel trust", b.channel],
       ["engagement", "Viewer engagement", b.engagement],
-      ["feedback", "SkillForge learners' ratings", b.learner_feedback],
+      ["feedback", "ScientiaForge learners' ratings", b.learner_feedback],
       ["freshness", "How recent", b.freshness],
     ]
       .map(([key, label, value]) =>
@@ -310,7 +310,7 @@
         ${v.reasons && v.reasons.length ? `<ul class="vd-reasons">${v.reasons.map((r) => `<li><i data-lucide="check"></i>${esc(r)}</li>`).join("")}</ul>` : ""}
         ${v.cautions && v.cautions.length ? `<ul class="vd-cautions">${v.cautions.map((r) => `<li><i data-lucide="info"></i>${esc(r)}</li>`).join("")}</ul>` : ""}
         <div class="vd-bars">${rows}</div>
-        <p class="vd-why-note">Confidence: <strong>${conf}</strong>. The match is SkillForge's estimate of fit for your request, not a YouTube figure. From YouTube: ${esc(numbers.join(", ")) || "no statistics"}.</p>
+        <p class="vd-why-note">Confidence: <strong>${conf}</strong>. The match is ScientiaForge's estimate of fit for your request, not a YouTube figure. From YouTube: ${esc(numbers.join(", ")) || "no statistics"}.</p>
       </div>`;
   }
 

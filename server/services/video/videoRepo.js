@@ -141,7 +141,7 @@ function createVideoRepo(supabase, { now = () => new Date(), maxAgeDays = 30 } =
       if (videoId) q = q.eq("provider_video_id", videoId);
       check(await q);
     },
-    /** Video IDs SkillForge itself still points at (so the refresh job keeps them fresh). */
+    /** Video IDs ScientiaForge itself still points at (so the refresh job keeps them fresh). */
     async referencedIds(ids) {
       if (!ids.length) return new Set();
       const [saved, history, flags] = await Promise.all([

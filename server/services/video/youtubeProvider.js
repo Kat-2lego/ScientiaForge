@@ -35,7 +35,7 @@ function parseDuration(iso) {
 
 const toCount = (v) => (v === undefined || v === null || v === "" ? null : Number(v));
 
-/** YouTube resource -> SkillForge's common Video shape (as stored in vd_videos). */
+/** YouTube resource -> ScientiaForge's common Video shape (as stored in vd_videos). */
 function normalizeVideo(item, now = new Date()) {
   const sn = item.snippet || {};
   const st = item.statistics || {};
@@ -74,7 +74,7 @@ function createYouTubeProvider({ apiKey, quota, fetch: fetchImpl = globalThis.fe
 
   async function call(resource, params, { searchCalls = 0, cost }) {
     const allowed = await quota.charge({ searchCalls, units: cost });
-    if (!allowed) throw new QuotaExceededError("SkillForge's daily YouTube budget is used up");
+    if (!allowed) throw new QuotaExceededError("ScientiaForge's daily YouTube budget is used up");
     const url = new URL(`${baseUrl}/${resource}`);
     for (const [k, v] of Object.entries(params)) if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, v);
     url.searchParams.set("key", apiKey);

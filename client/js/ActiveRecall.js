@@ -1,4 +1,4 @@
-/* SkillForge · NSC Active Recall session
+/* ScientiaForge · NSC Active Recall session
    ActiveRecall.html?paper=ID    start a new session on a paper
    ActiveRecall.html?session=ID  resume / view results
    ActiveRecall.html?retry=ID    retry the incorrect answers of a finished session */
@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
     back.href = `PastPaper.html?id=${encodeURIComponent(data.session.paper_id)}`;
     const title = `${paperName(data.session.paper)}, ${sessionLabel(data.session.paper)}`;
     document.getElementById("arTitle").textContent = data.session.mode === "retry" ? `${title} (retry)` : title;
-    document.title = `Active Recall: ${title} | SkillForge`;
+    document.title = `Active Recall: ${title} | ScientiaForge`;
 
     if (state.session.status === "completed") return renderResults();
     const first = state.questions.findIndex(needsAction);

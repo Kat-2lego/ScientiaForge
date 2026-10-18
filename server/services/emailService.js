@@ -1,6 +1,6 @@
 /* =========================================================
    EMAIL SERVICE
-   Sends a real "Welcome to SkillForge" email straight from this
+   Sends a real "Welcome to ScientiaForge" email straight from this
    backend via SMTP — separate from Supabase Auth's built-in
    templates (those only cover verification/security flows: confirm
    signup, reset password, etc., not a free-standing welcome note).
@@ -36,8 +36,8 @@ function welcomeEmailHtml(firstName) {
 
   return `
     <div style="font-family: Arial, Helvetica, sans-serif; max-width: 480px; margin: 0 auto; color: #0f172a;">
-      <h2 style="color: #1e50ff; margin-bottom: 4px;">Welcome to SkillForge, ${name}! 🎉</h2>
-      <p>We're glad you're here. SkillForge is built to take you from education to employment, whatever stage you're at.</p>
+      <h2 style="color: #1e50ff; margin-bottom: 4px;">Welcome to ScientiaForge, ${name}! 🎉</h2>
+      <p>We're glad you're here. ScientiaForge is built to take you from education to employment, whatever stage you're at.</p>
       <p>Here's what you can jump into right away:</p>
       <ul style="line-height: 1.7;">
         <li><strong>CV Analyzer</strong> — instant, AI-powered feedback on your CV</li>
@@ -47,7 +47,7 @@ function welcomeEmailHtml(firstName) {
         <li><strong>Study Hub</strong> — video tutorials, past exam papers, and bursary listings</li>
       </ul>
       <p>Log back in any time to pick up where you left off.</p>
-      <p style="margin-top: 24px;">— The SkillForge Team</p>
+      <p style="margin-top: 24px;">— The ScientiaForge Team</p>
     </div>
   `;
 }
@@ -68,7 +68,7 @@ export async function sendWelcomeEmail(toEmail, firstName) {
     await transporter.sendMail({
       from: SMTP_FROM || SMTP_USER,
       to: toEmail,
-      subject: "Welcome to SkillForge!",
+      subject: "Welcome to ScientiaForge!",
       html: welcomeEmailHtml(firstName),
     });
   } catch (err) {

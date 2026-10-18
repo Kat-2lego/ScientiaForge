@@ -134,7 +134,7 @@ test("reasons are only claimed when the data supports them", () => {
   const nsc = r.items.find((s) => s.video.provider_video_id === vid("trigIdNSC01"));
   assert.ok(nsc.reasons.includes("Made for the NSC (CAPS)"));
   assert.ok(nsc.reasons.includes("Aimed at Grade 12"));
-  assert.ok(nsc.reasons.includes("From an educator SkillForge trusts"));
+  assert.ok(nsc.reasons.includes("From an educator ScientiaForge trusts"));
   const generic = r.items.find((s) => s.video.provider_video_id === vid("trigIdGen02"));
   if (generic) {
     assert.ok(!generic.reasons.some((x) => /NSC|Grade 12|trusts/.test(x)), generic.reasons.join("; "));
@@ -149,7 +149,7 @@ test("verified videos get the badge and a small boost; blocked ones vanish", () 
   assert.ok(!ids(r).includes(vid("trigIdNSC01")));
   const verified = r.items.find((s) => s.video.provider_video_id === vid("trigIdGen02"));
   assert.ok(verified.badges.some((b) => b.kind === "verified"));
-  assert.ok(verified.reasons.includes("Checked by the SkillForge team"));
+  assert.ok(verified.reasons.includes("Checked by the ScientiaForge team"));
 });
 
 test("groups: top matches first, no video repeated across groups", () => {

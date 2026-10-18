@@ -1,5 +1,5 @@
 /**
- * SkillForge - background CV analysis tracker
+ * ScientiaForge - background CV analysis tracker
  *
  * Add this to EVERY dashboard page (before the page's own script):
  *   script tag with src="../js/cvAnalysisTracker.js"
@@ -43,7 +43,7 @@
     }
 
     try {
-      // SkillForge pages keep the token here (same as CvDashboard.html)
+      // ScientiaForge pages keep the token here (same as CvDashboard.html)
       const savedToken = localStorage.getItem("sb-access-token");
       if (savedToken) return { Authorization: `Bearer ${savedToken}` };
 
@@ -286,7 +286,7 @@
       setCard({
         state: "processing",
         title: "Analysing your CV",
-        detail: `${job.fileName || "Your CV"}, ${formatElapsed(job.startedAt)} so far. You can keep using SkillForge.`,
+        detail: `${job.fileName || "Your CV"}, ${formatElapsed(job.startedAt)} so far. You can keep using ScientiaForge.`,
         closable: false,
       });
 

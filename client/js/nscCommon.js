@@ -1,4 +1,4 @@
-/* SkillForge · Study Hub · shared helpers for the NSC pages (window.NSC). */
+/* ScientiaForge · Study Hub · shared helpers for the NSC pages (window.NSC). */
 (function () {
   "use strict";
 
@@ -46,7 +46,7 @@
     try {
       res = await fetch(`${BASE}${path}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
     } catch {
-      const err = new Error("Can't reach SkillForge right now. Check your connection and try again.");
+      const err = new Error("Can't reach ScientiaForge right now. Check your connection and try again.");
       err.status = 0;
       throw err;
     }
