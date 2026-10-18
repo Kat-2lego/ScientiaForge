@@ -1,5 +1,5 @@
 """
-SkillForge Career Discovery - central configuration.
+ScientiaForge Career Discovery - central configuration.
 
 Every tunable number used by the matching engine lives here. Nothing in
 matching_engine.py, career_repository.py or profile_builder.py should

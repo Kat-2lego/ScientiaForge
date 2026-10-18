@@ -256,7 +256,7 @@ export class ReportGenerator {
 
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(26); doc.setFont("helvetica", "bold");
-    doc.text("SkillForge AI", 15, 22);
+    doc.text("ScientiaForge AI", 15, 22);
 
     doc.setFontSize(13); doc.setFont("helvetica", "normal");
     doc.text("Interview Performance Report", 15, 32);
@@ -335,10 +335,10 @@ export class ReportGenerator {
     for (let p = 1; p <= pages; p++) {
       doc.setPage(p);
       doc.setFontSize(8); doc.setTextColor(148, 163, 184);
-      doc.text(`SkillForge AI · Confidential · Page ${p} of ${pages}`, W / 2, 290, { align: "center" });
+      doc.text(`ScientiaForge AI · Confidential · Page ${p} of ${pages}`, W / 2, 290, { align: "center" });
     }
 
-    doc.save(`SkillForge_Interview_Report_${Date.now()}.pdf`);
+    doc.save(`ScientiaForge_Interview_Report_${Date.now()}.pdf`);
   }
 }
 

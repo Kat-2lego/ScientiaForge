@@ -12,7 +12,7 @@
  *   node server/scripts/videoAdmin.js preview --subject mathematics --grade 12 --curriculum NSC --topic trigonometry [--q "..."] [--minutes 20]
  *   node server/scripts/videoAdmin.js quota
  *
- * Run from the SkillForge folder (where package.json and .env are). Reads SUPABASE_URL,
+ * Run from the ScientiaForge folder (where package.json and .env are). Reads SUPABASE_URL,
  * SUPABASE_SERVICE_ROLE_KEY and YOUTUBE_API_KEY from SkillForge/.env (then server/.env if present).
  * Its own Supabase client, on purpose: server/db.js is a raw Postgres connection (ES module),
  * and this tool runs as its own process, not inside server.mjs.

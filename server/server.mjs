@@ -111,7 +111,7 @@ app.use("/api/discovery", createProxyMiddleware({
   changeOrigin: true,
 }));
 /*
-  Main SkillForge server: port 5000
+  Main ScientiaForge server: port 5000
   CV Analyzer server: port 5001
 */
 const PORT = Number(process.env.PORT) || 5000;
@@ -459,7 +459,7 @@ app.get(
     res.status(200).json({
       success: true,
       message:
-        "SkillForge server is running.",
+        "ScientiaForge server is running.",
       port: PORT,
     });
   }
@@ -605,7 +605,7 @@ app.post(
             await supabase.auth.signOut();
             return res.status(503).json({
               error:
-                "SkillForge is temporarily down for maintenance. Please try again shortly.",
+                "ScientiaForge is temporarily down for maintenance. Please try again shortly.",
             });
           }
         }
@@ -3739,7 +3739,7 @@ const server = app.listen(PORT, (err) => {
     process.exit(1);
   }
 
-  console.log(`✅ Main SkillForge server running on ${APP_URL}`);
+  console.log(`✅ Main ScientiaForge server running on ${APP_URL}`);
   console.log(`🔐 Login page: ${APP_URL}/pages/LogIn.html`);
 });
 

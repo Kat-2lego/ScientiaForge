@@ -9,7 +9,7 @@ const { createMemoryVideoRepo } = require("./fakeVideoRepo");
 const { createFakeYouTube } = require("./fakeYouTube");
 const { CHANNELS, vid } = require("./videoFixtures");
 
-// Behaves like a typical SkillForge requireAuth: 401 JSON when there's no valid token.
+// Behaves like a typical ScientiaForge requireAuth: 401 JSON when there's no valid token.
 function requireAuth(req, res, next) {
   const token = (req.headers.authorization || "").replace(/^Bearer /, "");
   if (!token) return res.status(401).json({ error: "Missing token" });

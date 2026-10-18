@@ -21,8 +21,8 @@ class ServiceError extends Error {
   }
 }
 
-const UNAVAILABLE = "Live video search is temporarily unavailable, so these results come from SkillForge's saved library.";
-const QUOTA = "Live YouTube search has reached today's limit, so these results come from SkillForge's saved library.";
+const UNAVAILABLE = "Live video search is temporarily unavailable, so these results come from ScientiaForge's saved library.";
+const QUOTA = "Live YouTube search has reached today's limit, so these results come from ScientiaForge's saved library.";
 
 function thumbnailFor(video) {
   return video.thumbnail_url || `https://i.ytimg.com/vi/${video.provider_video_id}/mqdefault.jpg`;

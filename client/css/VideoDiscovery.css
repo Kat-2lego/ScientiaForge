@@ -1,4 +1,4 @@
-/* SkillForge · Study Hub · Study videos (Video Discovery). Uses the --nsc-* tokens from StudyHub.css. */
+/* ScientiaForge · Study Hub · Study videos (Video Discovery). Uses the --nsc-* tokens from StudyHub.css. */
 
 .vd,
 .vd *,
@@ -606,7 +606,7 @@
   color: var(--nsc-primary);
 }
 
-/* The one bold element: SkillForge Match as a ring. */
+/* The one bold element: ScientiaForge Match as a ring. */
 .vd-match {
   display: inline-flex;
   align-items: center;

@@ -1,5 +1,5 @@
 /**
- * SkillForge AI Onboarding & Control Engine
+ * ScientiaForge AI Onboarding & Control Engine
  * Location: ../auth/signupUser.js
  * * Features:
  * - Slide window panel transition mechanisms

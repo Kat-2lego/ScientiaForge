@@ -1,5 +1,5 @@
 """
-SkillForge Career Discovery - O*NET repository.
+ScientiaForge Career Discovery - O*NET repository.
 
 The whole O*NET feature space is small enough (~250k rows) to load once into
 process memory in a handful of bulk queries and then score entirely in RAM.

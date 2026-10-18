@@ -1,5 +1,5 @@
 /**
- * SkillForge Match: how well a video fits THIS learner's request, from measurable signals.
+ * ScientiaForge Match: how well a video fits THIS learner's request, from measurable signals.
  * It is not a verdict on teaching quality, and it is never shown as a YouTube number.
  *
  * Pipeline per video:  gates  ->  component scores (0-100)  ->  weighted average of the
@@ -143,7 +143,7 @@ function calculateCurriculumFit(video, req, ctx, cfg) {
   return { score: Math.max(0, Math.min(100, score)), signals };
 }
 
-/** Channel trust: SkillForge's curated list first; otherwise specialisation in this subject. */
+/** Channel trust: ScientiaForge's curated list first; otherwise specialisation in this subject. */
 function calculateChannelTrust(video, req, ctx, cfg) {
   const c = cfg.channel;
   const flag = ctx.flags && ctx.flags.get(video.provider_video_id);
@@ -186,7 +186,7 @@ function calculateEngagement(video, cfg) {
   return { score: sum / weights, parts, rawLikeRate };
 }
 
-/** SkillForge learners' own votes, smoothed so a handful of votes can't swing a ranking. */
+/** ScientiaForge learners' own votes, smoothed so a handful of votes can't swing a ranking. */
 function calculateLearnerFeedback(stats, cfg) {
   const f = cfg.feedback;
   const up = (stats && stats.up) || 0;
@@ -339,15 +339,15 @@ function explain(video, req, parts, cfg) {
   if (cur && cur.curriculumMatch) reasons.push(`Made for ${req.curriculum === "NSC" ? "the NSC (CAPS)" : req.curriculum}`);
   if (cur && cur.gradeMatch) reasons.push(`Aimed at Grade ${req.grade}`);
   if (rel.type && rel.type.score >= 0.8 && TYPE_REASON[rel.type.type]) reasons.push(TYPE_REASON[rel.type.type]);
-  if (parts.verified) reasons.push("Checked by the SkillForge team");
-  else if (parts.channel.level === "channel_verified") reasons.push("From an educator verified by SkillForge");
-  else if (parts.channel.level === "trusted") reasons.push("From an educator SkillForge trusts");
+  if (parts.verified) reasons.push("Checked by the ScientiaForge team");
+  else if (parts.channel.level === "channel_verified") reasons.push("From an educator verified by ScientiaForge");
+  else if (parts.channel.level === "trusted") reasons.push("From an educator ScientiaForge trusts");
   if (parts.time.fits && video.duration_seconds) reasons.push(`Fits your ${req.minutes} minutes (${formatMinutes(video.duration_seconds)})`);
   else if (parts.time.inRange) reasons.push("Matches the length you chose");
   const eng = parts.engagement;
   if (eng && eng.rawLikeRate !== null && eng.rawLikeRate >= 0.03 && video.view_count >= 1000) reasons.push("High like-to-view ratio on YouTube");
   if (parts.feedback && parts.feedback.votes >= cfg.feedback.minVotesToShow && parts.feedback.up / parts.feedback.votes >= 0.7) {
-    reasons.push(`Rated useful by ${parts.feedback.up} of ${parts.feedback.votes} SkillForge learners`);
+    reasons.push(`Rated useful by ${parts.feedback.up} of ${parts.feedback.votes} ScientiaForge learners`);
   }
   if (req.subjectNode && !req.subjectNode.stable && parts.freshness && parts.freshness.ageDays < 365) reasons.push("Published in the last year");
 
@@ -373,7 +373,7 @@ function confidenceOf(parts) {
 function badgesOf(video, req, parts, types) {
   const badges = [];
   const cur = parts.curriculum && parts.curriculum.signals;
-  if (parts.verified) badges.push({ kind: "verified", label: "SkillForge verified" });
+  if (parts.verified) badges.push({ kind: "verified", label: "ScientiaForge verified" });
   if (cur && cur.curriculumMatch) badges.push({ kind: "curriculum", label: req.curriculum });
   if (cur && cur.gradeMatch) badges.push({ kind: "grade", label: `Grade ${req.grade}` });
   if (req.subtopicNode && parts.relevance.subtopicScore >= 0.8) badges.push({ kind: "topic", label: req.subtopicNode.name });

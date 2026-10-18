@@ -222,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadApplyContent();
 });
 */
-/* SkillForge · Study Hub
+/* ScientiaForge · Study Hub
    - NSC past papers (official DBE papers + memos, Active Recall)
    - My active recall (session history)
    - Study videos, How to apply (unchanged behaviour, now HTML-escaped)

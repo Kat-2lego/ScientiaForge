@@ -1,4 +1,4 @@
-/* SkillForge · NSC past paper details: downloads, preview, Active Recall entry point. */
+/* ScientiaForge · NSC past paper details: downloads, preview, Active Recall entry point. */
 document.addEventListener("DOMContentLoaded", async () => {
   "use strict";
   const { api, esc, safeUrl, icons, formatDate, paperName, sessionLabel, param } = window.NSC;
@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  document.title = `${paperName(paper)}, ${sessionLabel(paper)} | SkillForge Study Hub`;
+  document.title = `${paperName(paper)}, ${sessionLabel(paper)} | ScientiaForge Study Hub`;
   const n = paper.recall_session_size;
   const article = /^(8|11|18)/.test(String(n)) ? "an" : "a"; // an 8-, an 11-, an 18-question
   const selfCount = Math.max(0, paper.recall_question_count - paper.auto_markable_count);

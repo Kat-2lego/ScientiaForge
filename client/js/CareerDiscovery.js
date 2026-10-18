@@ -1,5 +1,5 @@
 /* ==========================================================================
- * SkillForge AI - Career Discovery
+ * ScientiaForge AI - Career Discovery
  *
  * The browser collects choices and renders results. It never scores anything:
  * questions come from the API, answers go back as (question_id, option_id) and
@@ -145,7 +145,7 @@
       // A dead server and a CORS rejection look the same here, so say both.
       throw new ApiError(
         "NETWORK_ERROR",
-        "Could not reach the SkillForge engine. Check that the API is running on " +
+        "Could not reach the ScientiaForge engine. Check that the API is running on " +
           CONFIG.API_BASE + ".",
         0
       );
