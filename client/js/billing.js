@@ -406,12 +406,62 @@ document.getElementById('addPaymentMethod')?.addEventListener('click', () => {
     // Integrate with Stripe Elements, PayPal, etc.
 });
 
+// =========================================================
 // Cancel subscription
-document.getElementById('cancelSubscription')?.addEventListener('click', () => {
-    if (confirm('Are you sure you want to cancel your subscription? You will retain access until the end of your billing period.')) {
-        // Call your API to cancel subscription
-        console.log('Cancel subscription');
+// =========================================================
+document.getElementById('cancelSubscription')?.addEventListener('click', async () => {
+  const confirmed = confirm(
+    'Are you sure you want to cancel your subscription? You will retain access until the end of your billing period.'
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  const btn = document.getElementById('cancelSubscription');
+  const originalText = btn.textContent;
+
+  btn.disabled = true;
+  btn.textContent = 'Cancelling...';
+
+  try {
+    // ⚠️ Match this key to however your login stores the token
+    const token = localStorage.getItem('access_token');
+
+    if (!token) {
+      throw new Error('You are not signed in. Please log in and try again.');
     }
+
+    const response = await fetch('/api/billing/cancel-subscription', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to cancel subscription.');
+    }
+
+    const until = data.accessUntil
+      ? new Date(data.accessUntil).toLocaleDateString()
+      : 'the end of your billing period';
+
+    alert(
+      `Your subscription has been cancelled. You will retain access until ${until}.`
+    );
+
+    btn.textContent = 'Cancelled';
+  } catch (err) {
+    console.error('Cancel subscription failed:', err);
+    alert(err.message || 'Something went wrong. Please try again.');
+
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
 });
 
 // Export payment history
