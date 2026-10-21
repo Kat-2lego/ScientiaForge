@@ -64,6 +64,19 @@ document.addEventListener('DOMContentLoaded', () => {
       avatarCircle.textContent = ''; // remove "TM"
     }
   }
+
+const UpdatePasswordBtn = document.getElementById('changePasswordBtn');
+
+if (UpdatePasswordBtn) {
+  UpdatePasswordBtn.addEventListener('click', async () => { 
+    try {
+            // Navigate to another HTML page
+            window.location.href = 'ForgotPassword.html';
+        } catch (error) {
+            console.error('Navigation failed:', error);
+        }
+  })
+};
   // ---------- Delete Account Logic ----------
 const deleteAccountBtn =
   document.getElementById("deleteAccountBtn");
