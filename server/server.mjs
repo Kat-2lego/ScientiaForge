@@ -2023,6 +2023,54 @@ app.post('/api/billing/auto-renew', requireAuth, async (req, res) => {
 });
 
 /* =========================================================
+   BILLING: CANCEL SUBSCRIPTION
+========================================================= */
+app.post('/api/billing/cancel-subscription', requireAuth, async (req, res) => {
+  try {
+    const { data: subscription, error: fetchError } = await databaseClient
+      .from('user_subscriptions')
+      .select('status, end_date, auto_renew')
+      .eq('user_id', req.userId)
+      .eq('status', 'active')
+      .maybeSingle();
+
+    if (fetchError) {
+      console.error('Failed to fetch subscription:', fetchError.message);
+      return res.status(500).json({ error: 'Could not retrieve your subscription.' });
+    }
+
+    if (!subscription) {
+      return res.status(404).json({ error: 'You do not have an active subscription to cancel.' });
+    }
+
+    if (subscription.end_date && new Date(subscription.end_date) <= new Date()) {
+      return res.status(400).json({ error: 'Your subscription has already expired.' });
+    }
+
+    const { error: updateError } = await databaseClient
+      .from('user_subscriptions')
+      .update({ auto_renew: false })
+      .eq('user_id', req.userId)
+      .eq('status', 'active');
+
+    if (updateError) {
+      console.error('Failed to cancel subscription:', updateError.message);
+      return res.status(500).json({ error: 'Failed to cancel your subscription. Please try again.' });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Your subscription has been cancelled and will not renew. You can continue using premium until your current subscription expires.',
+      accessUntil: subscription.end_date,
+      autoRenew: false
+    });
+  } catch (error) {
+    console.error('Cancel subscription error:', error.message);
+    return res.status(500).json({ error: 'An internal server error occurred.' });
+  }
+});
+
+/* =========================================================
    BILLING: GET BILLING DATA
 ========================================================= */
 
