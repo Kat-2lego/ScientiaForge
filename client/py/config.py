@@ -121,14 +121,14 @@ REST_PAGE_SIZE: int = 1000
 SCALE_PREFERENCE: Dict[str, List[str]] = {
     "abilities": ["IM", "LV"],
     "knowledge": ["IM", "LV"],
-    "skills": ["IM", "LV"],
+    "skillss": ["IM", "LV"],
     "work_activities": ["IM", "LV"],
     # This database's work_styles table uses WI and DR rather than O*NET's IM.
     # WI is preferred: DR is 0-10 but averages 0.86, so most values sit at zero
     # and percentile ranking cannot separate occupations. Swap the order here
     # if a future import restores IM.
     "work_styles": ["WI", "DR", "IM"],
-    "interests": ["OI"],
+    "interestss": ["OI"],
 }
 
 # Theoretical min/max per scale, used for the first (linear) normalisation
@@ -146,8 +146,8 @@ SCALE_BOUNDS: Dict[str, tuple] = {
 ELEMENT_PREFIXES: Dict[str, tuple] = {
     "abilities": ("1.A.",),
     "work_styles": ("1.D.",),   # this database numbers work styles 1.D.*
-    "interests": ("1.B.1.",),   # the six RIASEC elements only
-    "skills": ("2.A.", "2.B."),
+    "interestss": ("1.B.1.",),   # the six RIASEC elements only
+    "skillss": ("2.A.", "2.B."),
     "knowledge": ("2.C.",),
     "work_activities": ("4.A.",),
 }
@@ -163,10 +163,10 @@ SUPPRESS_TRUE_VALUES = {"Y", "y", "1", "T", "TRUE", "true", True, 1}
 
 COMPONENT_WEIGHTS: Dict[str, float] = {
     "domain": 0.15,
-    "interests": 0.20,
+    "interestss": 0.20,
     "abilities": 0.10,
     "knowledge": 0.15,
-    "skills": 0.12,
+    "skillss": 0.12,
     "work_activities": 0.10,
     "work_styles": 0.08,
     "technology": 0.05,
@@ -179,7 +179,7 @@ COMPONENT_WEIGHTS: Dict[str, float] = {
 # more. The delta is taken proportionally from the remaining components so the
 # total still sums to 1.0 (see config.resolve_weights).
 DEEP_SCAN_BOOST: Dict[str, float] = {
-    "interests": 0.04,
+    "interestss": 0.04,
     "work_styles": 0.04,
 }
 

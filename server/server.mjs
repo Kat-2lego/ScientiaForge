@@ -106,7 +106,8 @@ console.log(
 
 const app = express();
 
-app.use("/api/discovery", createProxyMiddleware({
+app.use(createProxyMiddleware({
+  pathFilter: "/api/discovery/**",
   target: "http://127.0.0.1:8000",
   changeOrigin: true,
 }));

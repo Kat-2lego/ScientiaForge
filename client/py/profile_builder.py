@@ -20,7 +20,7 @@ import question_bank
 
 logger = logging.getLogger("skillforge.profile")
 
-VECTOR_TABLES = ("interests", "knowledge", "skills", "abilities",
+VECTOR_TABLES = ("interests", "knowledge", "skillss", "abilities",
                  "work_activities", "work_styles")
 
 
@@ -200,7 +200,7 @@ def build_user_profile(
     profile.background_vectors = {t: _normalise(v) for t, v in background_raw.items()}
     profile.technology_profile = _normalise_to_sum(raw_tech) or dict(profile.domain_profile)
 
-    interests_vector = profile.vectors.get("interests", {})
+    interests_vector = profile.vectors.get("interestss", {})
     profile.riasec = {
         name: round(interests_vector.get(element_id, 0.0), 4)
         for name, element_id in mappings.RIASEC_ELEMENTS.items()

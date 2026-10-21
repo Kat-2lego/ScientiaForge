@@ -59,7 +59,13 @@
   "use strict";
 
   const CONFIG = {
-    API_BASE: window.SKILLFORGE_API_BASE || "http://127.0.0.1:8000",
+    // An empty string is a VALID value: it means "same origin", which is what
+    // we want when Express proxies /api/discovery to the Python API. Using ||
+    // here would treat "" as unset and silently fall back to port 8000.
+    API_BASE:
+      typeof window.SKILLFORGE_API_BASE === "string"
+        ? window.SKILLFORGE_API_BASE
+        : "http://127.0.0.1:8000",
     MAX_DOMAINS: 3,
     SEARCH_DEBOUNCE_MS: 250,
     SEARCH_MIN_CHARS: 2,

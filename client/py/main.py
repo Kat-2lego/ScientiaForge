@@ -464,7 +464,7 @@ def occupation_detail(onetsoc_code: str) -> Dict[str, Any]:
         "image_url": engine.resolve_image(occupation),
         "technologies": engine.select_tech_skills(occupation),
         "technology_demand": engine.technology_demand_label(occupation),
-        "top_skills": top_elements("skills"),
+        "top_skills": top_elements("skillss"),
         "top_knowledge": top_elements("knowledge"),
         "top_work_activities": top_elements("work_activities"),
         "top_abilities": top_elements("abilities"),

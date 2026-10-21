@@ -116,7 +116,7 @@ def calculate_riasec_match(
     profile: UserProfile, occupation: Occupation
 ) -> Optional[DimensionResult]:
     """Shape comparison over the six RIASEC elements, not a keyword search (§10)."""
-    occ_interests = occupation.features.get("interests", {})
+    occ_interests = occupation.features.get("interestss", {})
     if not occ_interests:
         return None
 
@@ -322,13 +322,13 @@ def calculate_final_score(
 
     components: Dict[str, Optional[DimensionResult]] = {
         "domain": domain_result,
-        "interests": calculate_riasec_match(profile, occupation),
+        "interestss": calculate_riasec_match(profile, occupation),
         "abilities": score_element_vector(
             profile.vector("abilities"), occupation.features.get("abilities", {})),
         "knowledge": score_element_vector(
             profile.vector("knowledge"), occupation.features.get("knowledge", {})),
-        "skills": score_element_vector(
-            profile.vector("skills"), occupation.features.get("skills", {})),
+        "skillss": score_element_vector(
+            profile.vector("skillss"), occupation.features.get("skillss", {})),
         "work_activities": score_element_vector(
             profile.vector("work_activities"), occupation.features.get("work_activities", {})),
         "work_styles": score_element_vector(
@@ -417,9 +417,9 @@ def calculate_confidence(
 # ---------------------------------------------------------------------------
 
 DIMENSION_PHRASES = {
-    "interests": "interest alignment",
+    "interestss": "interest alignment",
     "knowledge": "knowledge alignment",
-    "skills": "skill alignment",
+    "skillss": "skill alignment",
     "abilities": "ability alignment",
     "work_activities": "day-to-day activity match",
     "work_styles": "work-style match",

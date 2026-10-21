@@ -36,9 +36,9 @@ logger = logging.getLogger("skillforge.repository")
 
 FEATURE_TABLES: Tuple[str, ...] = (
     "abilities",
-    "interests",
+    "interestss",
     "knowledge",
-    "skills",
+    "skillss",
     "work_activities",
     "work_styles",
 )
@@ -50,11 +50,11 @@ TABLE_COLUMNS: Dict[str, List[str]] = {
                   "recommend_suppress", "not_relevant"],
     "knowledge": ["onetsoc_code", "element_id", "scale_id", "data_value",
                   "recommend_suppress", "not_relevant"],
-    "skills": ["onetsoc_code", "element_id", "scale_id", "data_value",
+    "skillss": ["onetsoc_code", "element_id", "scale_id", "data_value",
                "recommend_suppress", "not_relevant"],
     "work_activities": ["onetsoc_code", "element_id", "scale_id", "data_value",
                         "recommend_suppress", "not_relevant"],
-    "interests": ["onetsoc_code", "element_id", "scale_id", "data_value"],
+    "interestss": ["onetsoc_code", "element_id", "scale_id", "data_value"],
     "work_styles": ["onetsoc_code", "element_id", "scale_id", "data_value"],
 }
 
@@ -459,11 +459,11 @@ def validate_database(driver: Optional[BaseDriver] = None) -> Dict[str, Any]:
         "occupation_data": 1016,
         "content_model_reference": 630,
         "abilities": 46488,
-        "interests": 5538,
+        "interestss": 5538,
         "job_zones": 923,
         "knowledge": 29502,
         "related_occupations": 18460,
-        "skills": 31290,
+        "skillss": 31290,
         "technology_skills": 32773,
         "work_activities": 36654,
         "work_styles": 37422,
