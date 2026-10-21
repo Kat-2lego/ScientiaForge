@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Articulation Coach | SkillForge AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/Articulation.css" />
+</head>
+<body>
+<div class="layout">
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div>
+      <div class="logo">
+        <span class="logo-dark">Skill</span><span class="logo-blue">Forge</span>
+      </div>
+
+      <nav class="nav">
+        <a class="nav-item" href="Dashboard.html" data-label="Dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a class="nav-item" href="CareerDiscovery.html" data-label="Career Discovery">
+          <i data-lucide="compass"></i>
+          <span>Career Discovery</span>
+        </a>
+
+        <a class="nav-item" href="CvDashboard.html" data-label="CV Analyzer">
+          <i data-lucide="file-search"></i>
+          <span>CV Analyzer</span>
+        </a>
+
+        <a class="nav-item" href="InterviewSimulator.html" data-label="Interview Simulator">
+          <i data-lucide="mic"></i>
+          <span>Interview Simulator</span>
+        </a>
+
+        <a class="nav-item active" href="Articulation.html" data-label="Articulation Coach" aria-current="page">
+          <i data-lucide="audio-waveform"></i>
+          <span>Articulation Coach</span>
+        </a>
+
+        <a class="nav-item" href="SkillGapAnalysis.html" data-label="Skill Gap Analysis">
+          <i data-lucide="bar-chart-3"></i>
+          <span>Skill Gap Analysis</span>
+        </a>
+
+        <a class="nav-item" href="CareerPathfinder.html" data-label="Career Pathfinder">
+          <i data-lucide="graduation-cap"></i>
+          <span>Career Pathfinder</span>
+        </a>
+
+        <a class="nav-item" href="StudyHub.html" data-label="Study Hub">
+          <i data-lucide="book-open"></i>
+          <span>Study Hub</span>
+        </a>
+
+        <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
+          <i data-lucide="activity"></i>
+          <span>Progress Tracker</span>
+        </a>
+
+        <a class="nav-item" href="Settings.html" data-label="Settings">
+          <i data-lucide="settings"></i>
+          <span>Settings</span>
+        </a>
+
+        <a class="nav-item" href="Support.html" data-label="Help & Support">
+          <i data-lucide="life-buoy"></i>
+          <span>Help/Support</span>
+        </a>
+
+        <a class="nav-item" href="" data-label="Log Out">
+          <i data-lucide="log-out"></i>
+          <span>Logout</span>
+        </a>
+      </nav>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="sidebar">
+          <i data-lucide="menu"></i>
+        </button>
+      </div>
+      <div class="topbar-right">
+        <div class="profile">
+          <div class="avatar"></div>
+          <div>
+            <div class="profile-name" id="profileName">&hellip;</div>
+            <div class="profile-email" id="profileEmail">&hellip;</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="art-intro">
+      <h1>Articulation Coach</h1>
+      <p>Say it out loud. Your coach listens, shows you exactly where you paused or said &ldquo;um&rdquo;, and talks back.</p>
+    </section>
+
+    <noscript><p class="art-error">The Articulation Coach needs JavaScript. Turn it on and reload the page.</p></noscript>
+
+    <div class="art-stage">
+
+      <!-- ===== coach ===== -->
+      <aside class="panel art-coach" aria-label="Your coach">
+        <canvas id="coachCanvas" width="340" height="400" aria-hidden="true"></canvas>
+        <div class="art-coach-badge" id="coachBadge" aria-hidden="true" hidden>S</div>
+        <p class="art-coach-name">Coach Sipho</p>
+        <p class="art-status" id="coachStatus" role="status" aria-live="polite" data-state="idle">Ready when you are.</p>
+
+        <label class="art-voice">
+          <input type="checkbox" id="voiceToggle" checked />
+          <span>Coach speaks the feedback</span>
+        </label>
+
+        <div class="art-recent" id="recentBox">
+          <h3>Your recent sessions</h3>
+          <p class="art-recent-summary" id="recentSummary" hidden></p>
+          <ul id="recentList"></ul>
+          <p class="art-empty" id="recentEmpty">No sessions yet. Your first one shows up here.</p>
+        </div>
+      </aside>
+
+      <!-- ===== practice ===== -->
+      <section class="panel art-practice" aria-label="Practice">
+
+        <div class="art-tabs" role="tablist" aria-label="Practice mode">
+          <button type="button" class="art-tab" role="tab" id="tab-explain" data-mode="explain" aria-selected="true" aria-controls="practiceBody">Explain it</button>
+          <button type="button" class="art-tab" role="tab" id="tab-repeat" data-mode="repeat" aria-selected="false" aria-controls="practiceBody" tabindex="-1">Say it clearly</button>
+        </div>
+
+        <p class="art-mode-desc" id="modeDesc"></p>
+
+        <div id="practiceBody" role="tabpanel" aria-labelledby="tab-explain">
+          <div class="art-filters" id="filters" role="group" aria-label="Prompt type"></div>
+
+          <div class="art-prompt">
+            <p class="art-prompt-text" id="promptText">Loading your prompts&hellip;</p>
+            <p class="art-prompt-meta" id="promptMeta"></p>
+            <div class="art-prompt-actions">
+              <button type="button" class="art-btn-quiet" id="btnHear" hidden>
+                <i data-lucide="volume-2"></i><span>Hear it</span>
+              </button>
+              <button type="button" class="art-btn-quiet" id="btnNext">
+                <i data-lucide="shuffle"></i><span>Different prompt</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="art-recorder">
+            <button type="button" class="art-record" id="btnRecord" data-state="idle" disabled>
+              <span class="art-record-dot"></span>
+              <span id="btnRecordLabel">Start recording</span>
+            </button>
+            <div class="art-timer" id="timer" aria-hidden="true">0:00</div>
+            <div class="art-meter" aria-hidden="true"><span id="meterFill"></span></div>
+            <p class="art-hint" id="recHint"></p>
+          </div>
+
+          <div class="art-error" id="errorBox" role="alert" hidden></div>
+        </div>
+
+        <!-- ===== results ===== -->
+        <section class="art-results" id="results" aria-labelledby="resultHeadline" hidden>
+
+          <div class="art-verdict">
+            <h2 id="resultHeadline"></h2>
+            <p class="art-score" id="scoreLine" hidden></p>
+            <p class="art-coach-reply" id="coachReply"></p>
+          </div>
+
+          <div class="art-block" id="explainBlock" hidden>
+            <h3>What I heard</h3>
+            <p class="art-transcript" id="transcript"></p>
+            <ul class="art-legend" aria-label="Key">
+              <li><span class="art-swatch art-swatch--filler"></span>Filler sound</li>
+              <li><span class="art-swatch art-swatch--gap"></span>Pause of 1.5 seconds or more</li>
+            </ul>
+          </div>
+
+          <div class="art-block" id="repeatBlock" hidden>
+            <h3>Your sentence, word by word</h3>
+            <p class="art-sentence" id="sentence"></p>
+            <ul class="art-legend" aria-label="Key">
+              <li><span class="art-swatch art-swatch--missed"></span>Word I did not hear</li>
+              <li><span class="art-swatch art-swatch--misheard"></span>Word that sounded different</li>
+            </ul>
+            <ul class="art-wordlist" id="wordList"></ul>
+            <p class="art-extra" id="extraWords" hidden></p>
+          </div>
+
+          <div class="art-block" id="paceBlock" hidden>
+            <h3>Pace</h3>
+            <div class="art-pace">
+              <div class="art-pace-track" role="img" id="paceTrack">
+                <span class="art-pace-sweet"></span>
+                <span class="art-pace-marker" id="paceMarker" data-label=""></span>
+              </div>
+              <div class="art-pace-scale" aria-hidden="true">
+                <span style="left:0%">80</span>
+                <span style="left:41.667%">130</span>
+                <span style="left:66.667%">160</span>
+                <span style="left:100%">200</span>
+              </div>
+            </div>
+            <p class="art-pace-note" id="paceNote"></p>
+          </div>
+
+          <dl class="art-facts" id="facts"></dl>
+
+          <div class="art-feedback" id="feedback">
+            <div id="strengthBlock">
+              <h3>What worked</h3>
+              <ul id="strengthList"></ul>
+            </div>
+            <div id="improveBlock">
+              <h3>Work on this next</h3>
+              <ul id="improveList"></ul>
+            </div>
+          </div>
+
+          <p class="art-followup" id="followUp" hidden></p>
+
+          <div class="art-result-actions">
+            <button type="button" class="art-btn-primary" id="btnAgain">Try this prompt again</button>
+            <button type="button" class="art-btn-quiet" id="btnAnother">Next prompt</button>
+            <button type="button" class="art-btn-quiet" id="btnReplay">Hear the feedback again</button>
+          </div>
+        </section>
+
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>lucide.createIcons();</script>
+<script src="../js/auth.js"></script>
+<script type="module" src="../js/Articulation.js"></script>
+</body>
+</html>

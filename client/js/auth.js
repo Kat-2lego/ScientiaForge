@@ -28,12 +28,14 @@ window.getAuthHeaders = function getAuthHeaders() {
   const token = localStorage.getItem("sb-access-token");
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
+
 /* =========================================================
    ACTIVITY HEARTBEAT
    Pings the server every 60s while this tab is the active one, so the
    admin dashboard's "online now" count and average session length stay
    accurate. Paused via the Page Visibility API when the tab is hidden,
    so switching away doesn't inflate "online" numbers.
+========================================================= */
 
 let heartbeatTimer = null;
 
@@ -67,6 +69,7 @@ document.addEventListener("visibilitychange", () => {
    sidebar link on Dashboard.html) once we've confirmed this account
    has the admin role. Safe no-op on pages with no such element, and
    fails closed (stays hidden) if the check can't be completed.
+========================================================= */
 
 async function revealAdminLinksIfAdmin() {
   const token = localStorage.getItem("sb-access-token");
@@ -95,4 +98,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   startHeartbeat();
   revealAdminLinksIfAdmin();
-});*/
+});

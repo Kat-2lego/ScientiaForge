@@ -132,18 +132,25 @@
         <p class="card-sub">A record of sign-ins, feature use, and admin actions across ScientiaForge.</p>
 
         <div class="table-toolbar">
-          <select class="table-filter-select" id="auditActionFilter">
-            <option value="">All actions</option>
-            <option value="sign_up">Sign-ups</option>
-            <option value="sign_in">Sign-ins</option>
-            <option value="sign_out">Sign-outs</option>
-            <option value="interview_started">Interviews started</option>
-            <option value="interview_completed">Interviews completed</option>
-            <option value="skillgap_run">Skill-gap runs</option>
-            <option value="admin_promote">Admin promotions</option>
-            <option value="admin_demote">Admin revocations</option>
-            <option value="admin_settings_update">Settings changes</option>
-          </select>
+<select class="table-filter-select" id="auditActionFilter">
+              <option value="">All actions</option>
+              <option value="sign_up">Sign-ups</option>
+              <option value="sign_in">Sign-ins</option>
+              <option value="sign_out">Sign-outs</option>
+              <option value="profile_updated">Profile updates</option>
+              <option value="cv_uploaded">CV uploads</option>
+              <option value="cv_analysed">CV analyses</option>
+              <option value="interview_started">Interviews started</option>
+              <option value="interview_completed">Interviews completed</option>
+              <option value="skill_gap_run">Skill-gap runs</option>
+              <option value="payment_succeeded">Payments</option>
+              <option value="payment_failed">Failed payments</option>
+              <option value="subscription_created">New subscriptions</option>
+              <option value="subscription_cancelled">Cancelled subscriptions</option>
+              <option value="admin_promote">Admin promotions</option>
+              <option value="admin_demote">Admin revocations</option>
+              <option value="admin_settings_update">Settings changes</option>
+            </select>
         </div>
 
         <div class="activity-feed" id="auditLogList">

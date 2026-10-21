@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English Coach | SkillForge AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/EnglishCoach.css" />
+</head>
+<body>
+<div class="layout">
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div>
+      <div class="logo">
+        <span class="logo-dark">Skill</span><span class="logo-blue">Forge</span>
+      </div>
+
+      <nav class="nav">
+        <a class="nav-item" href="Dashboard.html" data-label="Dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a class="nav-item" href="CareerDiscovery.html" data-label="Career Discovery">
+          <i data-lucide="compass"></i>
+          <span>Career Discovery</span>
+        </a>
+
+        <a class="nav-item" href="CvDashboard.html" data-label="CV Analyzer">
+          <i data-lucide="file-search"></i>
+          <span>CV Analyzer</span>
+        </a>
+
+        <a class="nav-item" href="InterviewSimulator.html" data-label="Interview Simulator">
+          <i data-lucide="mic"></i>
+          <span>Interview Simulator</span>
+        </a>
+
+        <a class="nav-item active" href="EnglishCoach.html" data-label="English Coach" aria-current="page">
+          <i data-lucide="messages-square"></i>
+          <span>English Coach</span>
+        </a>
+
+        <a class="nav-item" href="Articulation.html" data-label="Articulation Coach">
+          <i data-lucide="audio-waveform"></i>
+          <span>Articulation Coach</span>
+        </a>
+
+        <a class="nav-item" href="SkillGapAnalysis.html" data-label="Skill Gap Analysis">
+          <i data-lucide="bar-chart-3"></i>
+          <span>Skill Gap Analysis</span>
+        </a>
+
+        <a class="nav-item" href="CareerPathfinder.html" data-label="Career Pathfinder">
+          <i data-lucide="graduation-cap"></i>
+          <span>Career Pathfinder</span>
+        </a>
+
+        <a class="nav-item" href="StudyHub.html" data-label="Study Hub">
+          <i data-lucide="book-open"></i>
+          <span>Study Hub</span>
+        </a>
+
+        <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
+          <i data-lucide="activity"></i>
+          <span>Progress Tracker</span>
+        </a>
+
+        <a class="nav-item" href="Settings.html" data-label="Settings">
+          <i data-lucide="settings"></i>
+          <span>Settings</span>
+        </a>
+
+        <a class="nav-item" href="Support.html" data-label="Help & Support">
+          <i data-lucide="life-buoy"></i>
+          <span>Help/Support</span>
+        </a>
+
+        <a class="nav-item" href="" data-label="Log Out">
+          <i data-lucide="log-out"></i>
+          <span>Logout</span>
+        </a>
+      </nav>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="sidebar">
+          <i data-lucide="menu"></i>
+        </button>
+      </div>
+      <div class="topbar-right">
+        <div class="profile">
+          <div class="avatar"></div>
+          <div>
+            <div class="profile-name" id="profileName">&hellip;</div>
+            <div class="profile-email" id="profileEmail">&hellip;</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="eng-intro">
+      <h1>English Coach</h1>
+      <p>Chat with Sipho every day. He listens, talks back like a real conversation partner, and shows you how your English is growing.</p>
+    </section>
+
+    <noscript><p class="eng-error">The English Coach needs JavaScript. Turn it on and reload the page.</p></noscript>
+
+    <div class="eng-tabs" id="engTabs" role="tablist" aria-label="English Coach" hidden>
+      <button type="button" class="eng-tab" role="tab" id="tab-talk" aria-selected="true" aria-controls="screenTalk">Talk</button>
+      <button type="button" class="eng-tab" role="tab" id="tab-progress" aria-selected="false" aria-controls="screenProgress" tabindex="-1">My progress</button>
+    </div>
+
+    <p class="eng-error" id="errorBox" role="alert" hidden></p>
+
+    <!-- ===================== loading ===================== -->
+    <section class="panel eng-center" id="screenLoading" aria-live="polite">
+      <p id="loadingText">Getting your coach ready&hellip;</p>
+      <div id="loadError" hidden>
+        <p class="eng-error-text" id="loadErrorText"></p>
+        <button type="button" class="eng-btn" id="btnRetryLoad">Try again</button>
+      </div>
+    </section>
+
+    <!-- ===================== set-up: level + goal ===================== -->
+    <section class="panel eng-setup" id="screenSetup" aria-labelledby="setupTitle" hidden>
+      <p class="eng-step" id="setupStep">Step 1 of 4</p>
+      <h2 id="setupTitle" tabindex="-1"></h2>
+      <p class="eng-help" id="setupHelp"></p>
+      <div id="setupBody"></div>
+      <p class="eng-error-text" id="setupError" role="alert" hidden></p>
+      <div class="eng-nav">
+        <button type="button" class="eng-btn eng-btn-ghost" id="btnSetupBack">Back</button>
+        <button type="button" class="eng-btn eng-btn-primary" id="btnSetupNext">Next</button>
+      </div>
+    </section>
+
+    <!-- ===================== talk ===================== -->
+    <div class="eng-stage" id="screenTalk" role="tabpanel" aria-labelledby="tab-talk" hidden>
+
+      <aside class="panel eng-coach" aria-label="Your coach">
+        <canvas id="coachCanvas" width="340" height="400" aria-hidden="true"></canvas>
+        <div class="eng-coach-badge" id="coachBadge" aria-hidden="true" hidden>S</div>
+        <p class="eng-coach-name">Coach Sipho</p>
+        <p class="eng-status" id="coachStatus" role="status" aria-live="polite" data-state="idle">Ready when you are.</p>
+
+        <div class="eng-switches">
+          <label class="eng-switch"><input type="checkbox" id="voiceToggle" checked /><span>Sipho speaks</span></label>
+          <label class="eng-switch"><input type="checkbox" id="handsFreeToggle" /><span>Hands-free (he listens after he speaks)</span></label>
+        </div>
+        <p class="eng-fine" id="voiceNote"></p>
+        <p class="eng-fine">Sipho is an AI. Your recordings are never saved.</p>
+      </aside>
+
+      <section class="panel eng-talk" aria-label="Conversation">
+
+        <!-- before the chat starts -->
+        <div id="talkStart">
+          <h2 id="startGreeting">Hello</h2>
+          <p class="eng-lead" id="startLine"></p>
+          <div class="eng-chips" id="startChips"></div>
+          <div id="talkLadder" class="eng-ladder-wrap"></div>
+          <button type="button" class="eng-btn eng-btn-primary eng-btn-big" id="btnStart">Start today&rsquo;s chat</button>
+          <p class="eng-fine">Headphones work best, so Sipho&rsquo;s voice does not echo into your microphone.</p>
+          <p class="eng-error-text" id="startError" role="alert" hidden></p>
+        </div>
+
+        <!-- during the chat -->
+        <div id="talkLive" hidden>
+          <div class="eng-live-head">
+            <div>
+              <p class="eng-clock" id="sessionClock" aria-label="Chat time">0:00</p>
+              <p class="eng-fine" id="goalNote"></p>
+            </div>
+            <div class="eng-goalbar" aria-hidden="true"><span id="goalFill"></span></div>
+          </div>
+
+          <div class="eng-log" id="convoLog" role="log" aria-live="polite" aria-relevant="additions" aria-label="Your conversation with Sipho" tabindex="0"></div>
+
+          <div class="eng-retry" id="retryBox" hidden>
+            <p id="retryMsg"></p>
+            <button type="button" class="eng-btn" id="btnRetry">Try again</button>
+          </div>
+
+          <div class="eng-idea" id="ideaBox" hidden>
+            <p class="eng-idea-title">You could say:</p>
+            <ul id="ideaList"></ul>
+          </div>
+
+          <div class="eng-controls">
+            <button type="button" class="eng-mic" id="btnMic" data-state="idle" aria-describedby="liveHint">
+              <span class="eng-mic-icon" aria-hidden="true"></span>
+              <span id="btnMicLabel">Tap to talk</span>
+            </button>
+            <div class="eng-meter" aria-hidden="true"><span id="meterFill"></span></div>
+          </div>
+          <p class="eng-fine eng-center-text" id="liveHint">Tap the mic, say your answer, then tap again to send.</p>
+
+          <div class="eng-type" id="typeBox" hidden>
+            <label class="eng-sr" for="typeInput">Type your answer</label>
+            <input type="text" id="typeInput" maxlength="400" autocomplete="off" placeholder="Type your answer here" />
+            <button type="button" class="eng-btn eng-btn-primary" id="btnSend">Send</button>
+          </div>
+
+          <div class="eng-tools">
+            <button type="button" class="eng-btn eng-btn-ghost" id="btnIdea">Give me an idea</button>
+            <button type="button" class="eng-btn eng-btn-ghost" id="btnType" aria-expanded="false" aria-controls="typeBox">Type instead</button>
+            <button type="button" class="eng-btn eng-btn-ghost" id="btnReplay">Hear that again</button>
+          </div>
+
+          <div class="eng-finish">
+            <button type="button" class="eng-btn eng-btn-primary" id="btnFinish">Finish and see my level</button>
+            <button type="button" class="eng-link" id="btnLeave">Leave without finishing</button>
+            <p class="eng-fine" id="finishNote" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===================== today's result ===================== -->
+    <section class="panel eng-result" id="screenResult" aria-labelledby="resultHeadline" hidden>
+      <p class="eng-kicker">Your English today</p>
+      <h2 id="resultHeadline" tabindex="-1"></h2>
+      <p class="eng-lead" id="resultSub"></p>
+      <p class="eng-confidence" id="resultConfidence"></p>
+      <div id="resultLadder" class="eng-ladder-wrap"></div>
+      <p class="eng-summary" id="resultSummary"></p>
+      <p class="eng-note" id="resultNote" hidden></p>
+
+      <div class="eng-grid">
+        <section aria-labelledby="skillsTitle">
+          <h3 id="skillsTitle">Your skills today</h3>
+          <ul class="eng-skills" id="skillList"></ul>
+        </section>
+        <section aria-labelledby="strengthTitle" id="strengthBlock">
+          <h3 id="strengthTitle">What went well</h3>
+          <ul class="eng-plain" id="strengthList"></ul>
+        </section>
+      </div>
+
+      <section aria-labelledby="improveTitle" id="improveBlock">
+        <h3 id="improveTitle">How you can improve</h3>
+        <ul class="eng-improve" id="improveList"></ul>
+      </section>
+
+      <section aria-labelledby="vocabTitle" id="vocabBlock">
+        <h3 id="vocabTitle">Words to try next time</h3>
+        <ul class="eng-vocab" id="vocabList"></ul>
+      </section>
+
+      <p class="eng-next" id="nextTime"></p>
+      <ul class="eng-stats" id="resultStats"></ul>
+
+      <div class="eng-actions">
+        <button type="button" class="eng-btn eng-btn-primary" id="btnChatAgain">Chat again</button>
+        <button type="button" class="eng-btn" id="btnSeeProgress">See my progress</button>
+      </div>
+    </section>
+
+    <!-- ===================== progress ===================== -->
+    <section class="panel eng-progress" id="screenProgress" role="tabpanel" aria-labelledby="tab-progress" hidden>
+      <div class="eng-stat-row">
+        <div class="eng-stat"><span class="eng-stat-num" id="progStreak">0</span><span class="eng-stat-label">day streak</span></div>
+        <div class="eng-stat"><span class="eng-stat-num" id="progMinutes">0</span><span class="eng-stat-label">minutes spoken</span></div>
+        <div class="eng-stat"><span class="eng-stat-num" id="progSessions">0</span><span class="eng-stat-label">chats</span></div>
+      </div>
+
+      <section aria-labelledby="progLevelTitle">
+        <h2 id="progLevelTitle" tabindex="-1">Your level</h2>
+        <p class="eng-level-big" id="progLevel"></p>
+        <p class="eng-lead" id="progLevelSub"></p>
+        <div id="progLadder" class="eng-ladder-wrap"></div>
+        <p class="eng-gap" id="progGap"></p>
+      </section>
+
+      <section aria-labelledby="chartTitle">
+        <h3 id="chartTitle">Your level, day by day</h3>
+        <div id="progChart" class="eng-chart"></div>
+        <p class="eng-fine" id="progEmpty" hidden>Chat on a few different days and your line will grow here.</p>
+      </section>
+
+      <section aria-labelledby="recentTitle">
+        <h3 id="recentTitle">Recent chats</h3>
+        <ul class="eng-recent" id="recentList"></ul>
+      </section>
+
+      <div class="eng-actions">
+        <button type="button" class="eng-btn" id="btnChangeGoals">Change my goals</button>
+        <button type="button" class="eng-btn eng-btn-ghost" id="btnDeleteData">Delete my English practice data</button>
+      </div>
+      <div class="eng-delete" id="deleteBox" hidden role="alertdialog" aria-labelledby="deleteMsg">
+        <p id="deleteMsg">This deletes your level, goals and every chat result. Your recordings were never saved. This cannot be undone.</p>
+        <button type="button" class="eng-btn eng-btn-danger" id="btnDeleteYes">Yes, delete it</button>
+        <button type="button" class="eng-btn" id="btnDeleteNo">Keep it</button>
+      </div>
+      <p class="eng-fine">We keep your level, goals and short themes from each chat. We never keep recordings or what you said.</p>
+    </section>
+
+  </main>
+</div>
+
+<script>lucide.createIcons();</script>
+<script src="../js/auth.js"></script>
+<script src="../js/vad.js"></script>
+<script type="module" src="../js/EnglishCoach.js"></script>
+</body>
+</html>

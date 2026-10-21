@@ -6,18 +6,15 @@
    level (set_user_role() + the trg_prevent_direct_role_change
    trigger from database/admin_panel_migration.sql).
 
-   NOTE ON THE AUDIT LOG: server.mjs already calls an
-   insert_audit_log(p_user_id, p_action, p_entity, p_entity_id,
-   p_desc, p_ip, p_ua) function that exists in your database, but
-   since it wasn't created from a .sql file in this repo, we can't
-   see the exact table/column names it writes to from here. The
-   /audit-log route below guesses `public.audit_log` with columns
-   (id, user_id, action, entity, entity_id, desc, created_at) — the
-   natural read-side of that function signature. If your table is
-   named differently, this route degrades gracefully (returns
-   `unavailable: true` instead of crashing) — update the
-   `.from("audit_log")` call below once you know the real name.
-   Everything else in this file does not depend on that guess.
+   NOTE ON THE AUDIT LOG: audit events live in public.audit_logs
+   (audit_log_id, user_id, action, entity_name, entity_id, description,
+   ip_address, user_agent, created_at). `action` is a Postgres ENUM, so
+   only labels that exist in that enum can be written or filtered on —
+   anything else raises "invalid input value for enum". The admin
+   actions this file records (admin_promote, admin_demote,
+   admin_settings_update) are added to the enum by
+   database/audit_admin_actions.sql; until that has been run those
+   entries are skipped with a warning and nothing else is affected.
 ========================================================= */
 
 import express from "express";
@@ -54,9 +51,8 @@ const APP_URL = process.env.APP_URL || `http://localhost:${process.env.PORT || 5
 const ONLINE_WINDOW_MS = 2 * 60 * 1000; // "online now" = a heartbeat in the last 2 minutes
 
 /* =========================================================
-   AUDIT LOG HELPER (write side — reuses the RPC that already
-   exists in the database, so unlike the read side above, this
-   part is on solid ground)
+   AUDIT LOG HELPER (write side — reuses the insert_audit_log RPC
+   that already exists in the database)
 ========================================================= */
 
 async function logAdminAudit(userId, action, { entity = "admin", entityId = null, desc = null } = {}) {
@@ -382,7 +378,9 @@ router.get("/stats/feature-usage", async (req, res) => {
     safeCount(warnings, "cvAnalyses", supabaseAdmin.from("cv_analyses").select("*", { count: "exact", head: true })),
     safeCount(warnings, "interviewsStarted", supabaseAdmin.from("audit_logs").select("*", { count: "exact", head: true }).eq("action", "interview_started")),
     safeCount(warnings, "interviewsCompleted", supabaseAdmin.from("audit_logs").select("*", { count: "exact", head: true }).eq("action", "interview_completed")),
-    safeCount(warnings, "skillGapRuns", supabaseAdmin.from("audit_logs").select("*", { count: "exact", head: true }).eq("action", "skillgap_run")),
+    // Counted from feature_events (written by the /api/skillgap route) so it
+    // matches the "Feature Usage Over Time" chart.
+    safeCount(warnings, "skillGapRuns", supabaseAdmin.from("feature_events").select("*", { count: "exact", head: true }).eq("feature", "skill_gap").eq("event_type", "completed")),
   ]);
 
   res.json({ cvAnalyses, interviewsStarted, interviewsCompleted, skillGapRuns, warnings });
@@ -390,14 +388,12 @@ router.get("/stats/feature-usage", async (req, res) => {
 
 /* =========================================================
    GET /api/admin/stats/feature-timeline?days=30 (or ?from=&to=)
-   Daily "completed" counts per feature, from public.feature_events —
-   this is the table server.mjs/cvRoutes.js actually write to (unlike
-   the feature-usage endpoint above, which leans on the audit_log
-   table-name guess), so it's on solid ground regardless of that guess.
+   Daily "completed" counts per feature, from public.feature_events
+   (written by server.mjs and cvRoutes.js through logFeatureEvent).
    Powers the date-range-filterable feature usage chart.
 ========================================================= */
 
-const TRACKED_FEATURES = ["interview_simulator", "cv_analyzer", "skill_gap", "career_discovery"];
+const TRACKED_FEATURES = ["interview_simulator", "cv_analyzer", "skill_gap", "career_discovery", "articulation", "english_coach"];
 
 router.get("/stats/feature-timeline", async (req, res) => {
   const { since, until, days } = resolveDateRange(req.query, 30, 365);
@@ -787,7 +783,9 @@ router.post("/users/:id/demote", async (req, res) => {
 
 /* =========================================================
    GET /api/admin/audit-log
-   See the file-level note at the top about the table-name guess.
+   Paged list from public.audit_logs, newest first. `action` is an enum
+   column, so filtering on a value that isn't in the enum returns an
+   empty page rather than an error.
 ========================================================= */
 
 router.get("/audit-log", async (req, res) => {
@@ -797,10 +795,12 @@ router.get("/audit-log", async (req, res) => {
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
+  const emptyPage = { entries: [], total: 0, page, pageSize, unavailable: false };
+
   try {
     let query = supabaseAdmin
       .from("audit_logs")
-      .select("id, user_id, action, entity_name, entity_id, description, created_at", { count: "exact" });
+      .select("audit_log_id, user_id, action, entity_name, entity_id, description, created_at", { count: "exact" });
 
     if (action) query = query.eq("action", action);
 
@@ -808,6 +808,9 @@ router.get("/audit-log", async (req, res) => {
       .order("created_at", { ascending: false })
       .range(from, to);
 
+    // 22P02 = "invalid input value for enum": the requested action isn't a
+    // label this database knows about, so there are simply no such entries.
+    if (error && error.code === "22P02") return res.json(emptyPage);
     if (error) throw error;
 
     const userIds = [...new Set((data || []).map((r) => r.user_id).filter(Boolean))];
@@ -819,7 +822,7 @@ router.get("/audit-log", async (req, res) => {
 
     res.json({
       entries: (data || []).map((r) => ({
-        id: r.id,
+        id: r.audit_log_id,
         userId: r.user_id,
         userEmail: emailsById[r.user_id] || null,
         action: r.action,
@@ -836,12 +839,9 @@ router.get("/audit-log", async (req, res) => {
   } catch (err) {
     console.warn("GET /admin/audit-log unavailable:", err.message);
     res.json({
-      entries: [],
-      total: 0,
-      page,
-      pageSize,
+      ...emptyPage,
       unavailable: true,
-      note: "Couldn't read the audit log table — see the note at the top of server/routes/admin.js.",
+      note: "Couldn't read the audit log — check the server terminal for the reason.",
     });
   }
 });
@@ -910,4 +910,4 @@ router.put("/settings", async (req, res) => {
   }
 });
 
-export default router; 
+export default router;

@@ -205,9 +205,11 @@ const FEATURE_LABELS = {
   cv_analyzer: "CV Analyzer",
   skill_gap: "Skill-Gap Analysis",
   career_discovery: "Career Discovery",
+  articulation: "Articulation Coach",
+  english_coach: "English Coach",
 };
 
-const FEATURE_COLORS = ["--primary", "--orange", "--cyan", "--admin-purple"];
+const FEATURE_COLORS = ["--primary", "--orange", "--cyan", "--admin-purple", "--admin-green", "--admin-red"];
 
 function renderFeatureTimelineChart(canvas, days, series) {
   return new Chart(canvas, {

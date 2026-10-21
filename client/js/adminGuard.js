@@ -266,14 +266,20 @@ function escapeHtml(str) {
    Used by the dashboard's "Live activity" feed and the Settings page's
    audit log, so one entry looks the same wherever it's shown.
 ========================================================= */
-
 const ACTION_META = {
   sign_up: { icon: "user-plus", color: "green", label: "signed up" },
   sign_in: { icon: "log-in", color: "blue", label: "signed in" },
   sign_out: { icon: "log-out", color: "blue", label: "signed out" },
+  profile_updated: { icon: "user", color: "blue", label: "updated their profile" },
+  cv_uploaded: { icon: "file-text", color: "blue", label: "uploaded a CV" },
+  cv_analysed: { icon: "file-search", color: "green", label: "had a CV analysed" },
   interview_started: { icon: "mic", color: "orange", label: "started a mock interview" },
   interview_completed: { icon: "check-circle", color: "green", label: "completed a mock interview" },
-  skillgap_run: { icon: "bar-chart-3", color: "blue", label: "ran a skill-gap analysis" },
+  skill_gap_run: { icon: "bar-chart-3", color: "blue", label: "ran a skill-gap analysis" },
+  payment_succeeded: { icon: "credit-card", color: "green", label: "made a payment" },
+  payment_failed: { icon: "ban", color: "red", label: "had a payment fail" },
+  subscription_created: { icon: "badge-check", color: "green", label: "started a subscription" },
+  subscription_cancelled: { icon: "x", color: "red", label: "cancelled their subscription" },
   admin_promote: { icon: "shield-plus", color: "purple", label: "was promoted to admin" },
   admin_demote: { icon: "shield-minus", color: "red", label: "had admin access revoked" },
   admin_settings_update: { icon: "settings", color: "purple", label: "updated site settings" },

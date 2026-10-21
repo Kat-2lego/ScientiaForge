@@ -15,12 +15,14 @@ import createNscRouter from "./routes/nscPapers.cjs";
 import createVideoDiscoveryRouter from "./routes/videoDiscovery.cjs";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import adminRoutes from "./routes/admin.js";
+import articulationRoutes from "./routes/articulation.js";
 
 import { getOccupationSkills } from "./escoClient.mjs";
 import { computeSkillGap } from "./skillMatcher.mjs";
 import { searchEscoOccupations } from "./escoClient.mjs";
 import { INDUSTRIES } from "./industries.mjs";
 import { LEARNING_MODULES } from "./learningModules.mjs";
+import englishRoutes from "./routes/english.js";
 
 
 
@@ -293,6 +295,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
    MIDDLEWARE
 ========================================================= */
 
+
+
 app.use(
   cors({
     origin: true,
@@ -427,6 +431,8 @@ app.use("/api/cv", cvRoutes);
 app.use("/api/career-pathfinder", careerPathfinderRoutes);
 app.use("/api/study-hub", studyHubRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/articulation", articulationRoutes);
+app.use("/api/english", englishRoutes); 
 
 
 const requireAuthWithUser = (req, res, next) =>
@@ -475,6 +481,7 @@ const PERSONA_VOICES = {
   "hr-manager": { voice: "en-ZA-LeahNeural", rate: 0.97, pitch: "+10Hz" },
   "product-manager": { voice: "en-GB-RyanNeural", rate: 1.0, pitch: "-5Hz" },
   "consultant": { voice: "en-IN-NeerjaNeural", rate: 1.08, pitch: "+5Hz" },
+  "articulation-coach": { voice: "en-ZA-LukeNeural", rate: 0.95, pitch: "+0Hz" },
 };
 
 const DEFAULT_VOICE = { voice: "en-US-AriaNeural", rate: 1.0, pitch: "+0Hz" };
@@ -2606,6 +2613,19 @@ app.post("/api/skillgap", async (req, res) => {
     const matchScore = requiredSkills.length
       ? Math.round((have.length / requiredSkills.length) * 100)
       : 0;
+
+    // Record this run for the admin dashboard. Best-effort and not awaited, so
+    // it can never slow down or break the response. The page sends the user's
+    // token; if it's missing or invalid, nothing is recorded.
+    getUserFromToken(req)
+      .then((user) => {
+        if (!user) return;
+        logAudit(user.id, "skill_gap_run", { desc: "Ran a skill-gap analysis", req });
+        logFeatureEvent(user.id, "skill_gap", "completed", {
+          metadata: { matchScore, missingCount: missing.length },
+        });
+      })
+      .catch(() => {});
 
     return res.json({
       have,
