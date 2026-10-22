@@ -11,7 +11,7 @@
 //   btn.textContent = "Signing in…";
 //   btn.disabled = true;
 
-//   fetch("http://localhost:5001/api/auth/login", {  // ✅ FIXED: with /api/
+//   fetch("/api", {  // ✅ FIXED: with /api/
 //     method: "POST",
 //     headers: {
 //       "Content-Type": "application/json",
