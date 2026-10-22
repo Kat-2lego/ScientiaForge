@@ -23,7 +23,7 @@
   // ------------------------------------------------------------
   const CONFIG = {
     // Same base URL your CV page currently uses for /upload, /latest etc.
-    apiBase: window.SKILLFORGE_CV_API || "http://localhost:5001/api/cv",
+    apiBase: window.SKILLFORGE_CV_API || "/api",
 
     // Where the "View results" link goes
     cvPageUrl: window.SKILLFORGE_CV_PAGE || "../pages/CvDashboard.html",

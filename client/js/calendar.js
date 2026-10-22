@@ -229,7 +229,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5001/api/planner/events",
+        "/api/planner/events",
         {
           headers: {
             Authorization: `Bearer ${token}`,

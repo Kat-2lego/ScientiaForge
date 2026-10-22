@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const API = typeof API_BASE !== "undefined" ? API_BASE : "http://localhost:5001/api";
+  const API = typeof API_BASE !== "undefined" ? API_BASE : "/api";
   const BASE = `${API}/study-hub/nsc`;
 
   /* ---------------------------------------------------------------- auth

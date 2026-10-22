@@ -65,7 +65,7 @@
     API_BASE:
       typeof window.SKILLFORGE_API_BASE === "string"
         ? window.SKILLFORGE_API_BASE
-        : "http://127.0.0.1:8000",
+        : "https://scientiaforge-career-api.onrender.com",
     MAX_DOMAINS: 3,
     SEARCH_DEBOUNCE_MS: 250,
     SEARCH_MIN_CHARS: 2,

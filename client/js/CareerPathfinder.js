@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const API = typeof API_BASE !== "undefined" ? API_BASE : "http://localhost:5001/api";
+  const API = typeof API_BASE !== "undefined" ? API_BASE : "/api";
 
   const subjectSearchInput = document.getElementById("subjectSearchInput");
   const subjectOptionsList = document.getElementById("subjectOptions");

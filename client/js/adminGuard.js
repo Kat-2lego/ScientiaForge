@@ -5,7 +5,7 @@
 // helpers) that adminDashboard.js / adminUsers.js / adminSettings.js all
 // build on, so none of them duplicate auth-header or formatting logic.
 
-const ADMIN_API_BASE = "http://localhost:5001/api";
+const ADMIN_API_BASE = "/api";
 
 /* =========================================================
    PAGE GUARD

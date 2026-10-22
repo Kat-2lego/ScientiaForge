@@ -543,7 +543,7 @@ app.post("/api/tts", async (req, res) => {
 ========================================================= */
 
 app.post(
-  "/api/auth/login",
+  "/api",
   async (req, res) => {
     const email =
       typeof req.body.email === "string"
