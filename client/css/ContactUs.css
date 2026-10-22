@@ -30,20 +30,9 @@ body {
 .orb-2 { bottom: -10%; left: -10%; background: var(--royal); }
 .grid-overlay { position: absolute; inset: 0; background-image: radial-gradient(rgba(0, 51, 160, 0.05) 1px, transparent 1px); background-size: 40px 40px; }
 
-.glass-nav {
-    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-    width: 90%; max-width: 1200px; height: 70px;
-    background: var(--glass-bg); backdrop-filter: blur(15px);
-    border: 1px solid var(--border); border-radius: 20px; z-index: 1000;
-}
-.nav-content { display: flex; justify-content: space-between; align-items: center; height: 100%; padding: 0 30px; }
-.logo { display: flex; align-items: center; gap: 10px; font-size: 20px; color: var(--navy); font-weight: 700; }
 .logo-symbol { width: 30px; height: 30px; background: var(--royal); border-radius: 8px; }
 .nav-links a { color: var(--text-light); text-decoration: none; margin: 0 15px; font-weight: 600; font-size: 14px; }
 .nav-links a:hover { color: var(--royal); }
-.nav-link { text-decoration: none; color: var(--navy); font-weight: 700; font-size: 14px; }
-.nav-cta { background: var(--royal); color: white; padding: 10px 24px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 14px; }
-.nav-actions { display: flex; align-items: center; gap: 20px; }
 
 /* The Contact Wrapper section */
 .contact-wrapper { padding: 160px 0 100px; }
@@ -145,4 +134,31 @@ input:focus, select:focus, textarea:focus {
 
 @media (max-width: 992px) {
     .contact-grid { grid-template-columns: 1fr; gap: 60px; }
+}
+@media (max-width: 768px) {
+  .contact-wrapper {
+    padding: 140px 0 70px;
+  }
+
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .contact-info h1 {
+    font-size: 34px;
+  }
+
+  .contact-form-container {
+    padding: 24px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .faq-card {
+    flex-direction: column;
+    text-align: center;
+  }
 }

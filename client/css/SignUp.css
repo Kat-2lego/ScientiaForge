@@ -104,16 +104,28 @@ body {
 }
 
 .cyber-form-strip {
-  display: flex;
-  width: 300%; /* Represents 3 sequential individual panel pages (300%) */
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  align-items: flex-start;
+  display: block;
+  width: 100%;
 }
 
 .form-step-panel {
-  width: 33.333%; /* Each structural section step claims exactly 1 full view segment */
-  padding: 0 5px;
-  flex-shrink: 0;
+  display: none;
+  width: 100%;
+  padding: 0;
+}
+.form-step-panel.active-panel {
+  display: block;
+  animation: fadeStep 0.25s ease;
+}
+@keyframes fadeStep {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* BASE FIELD WRAPPER CONTROLS */
@@ -470,4 +482,94 @@ body {
 /* 4. Keeps components stable on rendering */
 .final-login-btn {
     width: 100% !important;
+}
+/* Mobile: focus only on the form */
+
+/* Small phones */
+@media (max-width: 420px) {
+  .sector-left {
+    padding: 20px 14px;
+  }
+
+  .brand-name {
+    font-size: 27px;
+  }
+
+  .auth-titles h2 {
+    font-size: 21px;
+  }
+}
+/* Phones only: hide side panel */
+@media (max-width: 767px) {
+  .master-viewport {
+    max-width: 100%;
+    padding: 16px;
+  }
+
+  .interface-deck {
+    flex-direction: column;
+  }
+
+  .sector-right,
+  .kinetic-divider {
+    display: none !important;
+  }
+
+  .sector-left {
+    padding: 24px 18px;
+  }
+
+  .brand-name {
+    font-size: 30px;
+  }
+
+  .auth-titles h2 {
+    font-size: 23px;
+  }
+
+  .roles-checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .step-navigation-actions {
+    flex-direction: column-reverse;
+  }
+
+  .back-step-btn,
+  .secure-submit {
+    width: 100%;
+  }
+}
+
+/* Tablets: keep both panels, but reduce bulk */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .master-viewport {
+    max-width: 96%;
+    padding: 16px;
+  }
+
+  .interface-deck {
+    max-width: 100%;
+  }
+
+  .sector-left,
+  .sector-right {
+    padding: 28px 24px;
+  }
+
+  .brand-name {
+    font-size: 32px;
+  }
+
+  .auth-titles h2 {
+    font-size: 24px;
+  }
+
+  .welcome-copy h3 {
+    font-size: 24px;
+  }
+
+  .roles-checkbox-grid {
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  }
 }

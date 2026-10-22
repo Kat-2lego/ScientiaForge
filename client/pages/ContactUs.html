@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Us | ScientiaForge AI</title>
+    <link rel="stylesheet" href="../css/shared-nav.css">
     <link rel="stylesheet" href="../css/ContactUs.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="../css/theme.css" />
@@ -17,21 +18,29 @@
         <div class="grid-overlay"></div>
     </div>
 
-    <nav class="glass-nav">
-        <div class="nav-content">
-            <div class="logo">
-                <div class="logo-symbol"></div>
-                <span>ScientiaForge <strong>AI</strong></span>
-            </div>
-            <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="features.html">Features</a>
-                <a href="about.html">About</a>
-                <a href="ContactUs.html">Contact Us</a>
-            </div>
+    <nav class="site-nav">
+        <div class="nav-inner">
+            <a href="index.html" class="nav-logo">
+            <img src="../assets/logo-symbol.png" alt="ScientiaForge Logo" class="nav-logo-img"/>
+            <span class="logo-text"><strong><span class="logo-dark">Scientia</span><span class="logo-blue">Forge</span></strong></span>
+            </a>
+
+            <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+            <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <div class="nav-menu">
+            <ul class="page-tabs">
+                <li><a href="index.html" class="tab">Home</a></li>
+                <li><a href="Features.html" class="tab">Features</a></li>
+                <li><a href="about.html" class="tab">About</a></li>
+                <li><a href="ContactUs.html" class="tab active">Contact Us</a></li>
+            </ul>
+
             <div class="nav-actions">
-                <a href="../pages/login.html" class="nav-link">Log In</a>
-                <a href="../pages/signup.html" class="nav-cta">Get Started</a>
+                <a href="login.html" class="nav-link">Log In</a>
+                <a href="signup.html" class="nav-cta">Get Started</a>
+            </div>
             </div>
         </div>
     </nav>
@@ -128,5 +137,6 @@
         </div>
     </section>
     <script src="../js/auth.js"></script>
+    <script src="../js/landing-nav.js"></script>
 </body>
 </html>

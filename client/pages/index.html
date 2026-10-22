@@ -4,30 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="../css/shared-nav.css">
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <nav class="main-nav">
-        <div class="nav-container">
-            <div class="logo">
-                <svg viewBox="0 0 40 40" class="logo-svg">
-                    <path d="M20 5 C10 5, 5 15, 5 25 C5 35, 15 35, 20 35 C25 35, 35 35, 35 25 C35 15, 30 5, 20 5 Z" fill="none" stroke="#0033a0" stroke-width="4"/>
-                    <path d="M20 10 C15 10, 10 15, 10 20 C10 25, 15 30, 20 30 C25 30, 30 25, 30 20" fill="none" stroke="#00a2ed" stroke-width="3"/>
-                </svg>
-                <span class="brand-text">ScientiaForge <strong>AI</strong></span>
-            </div>
-            
-            <ul class="nav-links">
-                <li><a href="../pages/index.html">Home</a></li>
-                <li><a href="../pages/Features.html">Features</a></li>
-                <li><a href="../pages/about.html">About</a></li>
-                <li><a href="../pages/ContactUs.html">Contact Us</a></li>
+    <nav class="site-nav">
+        <div class="nav-inner">
+            <a href="index.html" class="nav-logo">
+            <img src="../assets/logo-symbol.png" alt="ScientiaForge Logo" class="nav-logo-img"/>
+            <span class="logo-text"><strong><span class="logo-dark">Scientia</span><span class="logo-blue">Forge</span></strong></span>
+            </a>
+
+            <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+            <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <div class="nav-menu">
+            <ul class="page-tabs">
+                <li><a href="index.html" class="tab active">Home</a></li>
+                <li><a href="Features.html" class="tab">Features</a></li>
+                <li><a href="about.html" class="tab">About</a></li>
+                <li><a href="ContactUs.html" class="tab">Contact Us</a></li>
             </ul>
 
             <div class="nav-actions">
-                <a href="../pages/login.html" class="nav-link">Log In</a>
-                <a href="../pages/signup.html" class="nav-cta">Get Started</a>
+                <a href="login.html" class="nav-link">Log In</a>
+                <a href="signup.html" class="nav-cta">Get Started</a>
+            </div>
             </div>
         </div>
     </nav>
@@ -91,7 +95,7 @@
 
     <section class="why-us-section">
         <div class="why-us-container">
-            <h2 class="section-heading">Why ScientiaForge AI?</h2>
+            <h2 class="section-heading">Why ScientiaForge?</h2>
             
             <div class="benefits-row">
                 <div class="benefit-item">
@@ -125,5 +129,7 @@
             </div>
         </div>
     </section>
+
+    <script src="../js/landing-nav.js"></script>
 </body>
 </html>
