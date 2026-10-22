@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev:server": "nodemon --env-file=.env server/server.mjs",
     "dev:api": "python -m uvicorn main:app --reload --port 8000 --app-dir client/py",
-    "dev": "concurrently -n server,api -c blue,green \"npm:dev:server\" \"npm:dev:api\""
+    "dev": "concurrently -n server,api -c blue,green \"npm:dev:server\" \"npm:dev:api\"",
+    "start": "node server/server.mjs"
   },
   "repository": {
     "type": "git",
