@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-  const API_BASE = "http://localhost:5001/api";
+  const API_BASE = "/api";
 
   let currentSkills = [];   // [{skill_id, name, level, ...}]
   let currentJobId = null;

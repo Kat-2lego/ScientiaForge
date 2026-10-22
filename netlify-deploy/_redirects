@@ -1,1 +1,9 @@
-/ /pages/LogIn.html 302
+# Forward API requests to the Render Node.js backend
+/api/*  https://scientiaforge-backend.onrender.com/api/:splat  200
+
+# Forward backend endpoints that are not under /api
+/create-payment-intent  https://scientiaforge-backend.onrender.com/create-payment-intent  200
+/download_cv  https://scientiaforge-backend.onrender.com/download_cv  200
+
+# Send the root URL to the login page
+/  /pages/index.html  302

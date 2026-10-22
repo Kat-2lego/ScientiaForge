@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  const apiBase = "http://localhost:5001/api/planner";
+  const apiBase = "/api";
   let queue = Promise.resolve();
 
   function isNotificationsOpen() {

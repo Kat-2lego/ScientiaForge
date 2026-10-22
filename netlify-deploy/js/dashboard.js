@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ================= API URL ================= */
  
   const API_URL =
-    "http://localhost:5001/api/cv/upload";
+    "/api";
  
   /* ================= UPLOAD CV ================= */
  
