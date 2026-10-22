@@ -71,49 +71,21 @@ const industryDataMap = {
  * Slide Control Matrix Engine
  * Shifts the display viewport track wrapper left or right
  */
-function goToStep(stepNumber) {
-    // 1. Step 1 Validation: Check core credentials before advancing to step 2
-    if (stepNumber === 2) {
-        const firstNames = document.getElementById("sf-names").value.trim();
-        const email = document.getElementById("sf-email").value.trim();
-        const password = document.getElementById("sf-pass").value;
+function goToStep(step) {
+  document.querySelectorAll(".form-step-panel").forEach(panel => {
+    panel.classList.remove("active-panel");
+  });
 
-        if (!firstNames || !email || !password) {
-            alert("Please fill in all fields.");
-            return;
-        }
+  const targetPanel = document.getElementById(`panel-${step}`);
+  if (targetPanel) {
+    targetPanel.classList.add("active-panel");
+  }
 
-        if (password.length < 8) {
-            alert("Password must be at least 8 characters.");
-            return;
-        }
-    }
-    
-    // 2. Step 2 Validation: Check industry and career level selections before advancing to step 3
-    if (stepNumber === 3) {
-        const industry = document.getElementById('sf-industry').value;
-        const experience = document.getElementById('sf-experience').value;
+  document.querySelectorAll(".step-dot").forEach((dot, index) => {
+    dot.classList.toggle("active", index + 1 === step);
+  });
 
-        if (!industry || !experience) {
-            alert("Please pick your target industry and experience level to advance.");
-            return;
-        }
-    }
-
-    // 3. Perform the sliding viewport animation transformation
-    const targetStrip = document.getElementById('onboardingForm');
-    const transformationValue = (stepNumber - 1) * -33.333;
-    targetStrip.style.transform = `translateX(${transformationValue}%)`;
-
-    // 4. Cycle the top dashboard step indicator circles classes
-    document.querySelectorAll('.step-dot').forEach(dot => {
-        const targetDotIndex = parseInt(dot.getAttribute('data-step'));
-        if (targetDotIndex === stepNumber) {
-            dot.classList.add('active');
-        } else {
-            dot.classList.remove('active');
-        }
-    });
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 /**
