@@ -4,7 +4,7 @@
   Authentication is handled by the main ScientiaForge server.
 */
 const LOGIN_API_URL =
-  "/api/auth/login";
+  "/api";
 
 /* =========================================================
    PAGE ELEMENTS
