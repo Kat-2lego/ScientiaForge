@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ScientiaForge | Skill Gap Analysis</title>
+
+  <link rel="stylesheet" href="../css/dashboard.css">
+
+  <link rel="stylesheet" href="../css/skillGapAnalysis.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/theme.css" />
+  <script src="../js/theme.js"></script>
+</head>
+
+<body>
+
+  <div class="layout">
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+ 
+    <aside class="sidebar" id="sidebar">
+      <div>
+        <div class="logo">
+          <span class="logo-dark">Scientia</span><span class="logo-blue">Forge</span>
+        </div>
+ 
+        <nav class="nav">
+          <a class="nav-item" href="dashboard.html" data-label="Dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+ 
+          <a class="nav-item" href="CareerDiscovery.html" data-label="Career Discovery">
+            <i data-lucide="compass"></i>
+            <span>Career Discovery</span>
+          </a>
+ 
+          <a class="nav-item" href="cvDashboard.html" data-label="CV Analyzer">
+            <i data-lucide="file-search"></i>
+            <span>CV Analyzer</span>
+          </a>
+ 
+          <a class="nav-item" href="InterviewSimulator.html" data-label="Interview Simulator">
+            <i data-lucide="mic"></i>
+            <span>Interview Simulator</span>
+          </a>
+
+          <a class="nav-item" href="Articulation.html" data-label="Articulation Coach">
+            <i data-lucide="audio-waveform"></i>
+            <span>Articulation Coach</span>
+          </a>
+ 
+          <a class="nav-item active" href="SkillGapAnalysis.html" data-label="Skill Gap Analysis">
+            <i data-lucide="bar-chart-3"></i>
+            <span>Skill Gap Analysis</span>
+          </a>
+ 
+          <a class="nav-item" href="CareerPathfinder.html" data-label="Career Pathfinder">
+            <i data-lucide="graduation-cap"></i>
+            <span>Career Pathfinder</span>
+          </a>
+ 
+          <a class="nav-item" href="StudyHub.html" data-label="Study Hub">
+            <i data-lucide="book-open"></i>
+            <span>Study Hub</span>
+          </a>
+ 
+          <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
+            <i data-lucide="activity"></i>
+            <span>Progress Tracker</span>
+          </a>
+ 
+          <a class="nav-item" href="Settings.html" data-label="Settings">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+          </a>
+ 
+          <a class="nav-item" href="Support.html" data-label="Help & Support">
+            <i data-lucide="life-buoy"></i>
+            <span>Help/Support</span>
+          </a>
+ 
+          <a class="nav-item" href="" data-label="Log Out">
+            <i data-lucide="log-out"></i>
+            <span>Logout</span>
+          </a>
+        </nav>
+      </div>
+ 
+      <div class="download-card">
+        <div class="download-icon">
+          <i data-lucide="smartphone"></i>
+        </div>
+        <h3>Download Our Mobile App</h3>
+        <p>Track your progress anywhere, anytime.</p>
+        <button class="download-btn">Download</button>
+      </div>
+    </aside>
+ 
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="sidebar">
+            <i data-lucide="menu"></i>
+          </button>
+
+          <label class="searchbar">
+            <i data-lucide="search"></i>
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search ScientiaForge..."
+              autocomplete="off"
+            />
+          </label>
+        </div>
+
+        <div class="topbar-right">
+          <button class="icon-btn planner-btn" id="plannerBtn" aria-label="Open calendar and notifications">
+            <i data-lucide="calendar-days"></i>
+          </button>
+
+          <button class="icon-btn notification-btn" id="notificationBtn" aria-label="Open notifications">
+            <i data-lucide="bell"></i>
+            <span class="notification-badge hidden" id="notificationBadge">0</span>
+          </button>
+
+          <button class="icon-btn" mail-btn id="mailBtn" aria-label="Open mail">
+            <i data-lucide="mail"></i>
+          </button>
+
+          <div class="profile">
+            <div class="avatar"></div>
+            <div>
+              <div class="profile-name"></div>
+              <div class="profile-email"></div>
+            </div>
+          </div>
+        </div>
+      </header>
+    <section class="skill-dashboard">
+
+      <div class="skill-dashboard-header">
+        <div>
+          <h1><i data-lucide="bar-chart-3"></i> Skill Gap Analysis</h1>
+          <p>Compare your current skills with job requirements</p>
+        </div>
+
+        <div class="header-selects">
+          <select class="industry-select" id="industrySelect" aria-label="Select industry">
+            <option value="">Select industry…</option>
+            <!-- populated by JS -->
+          </select>
+
+          <select class="job-select" id="jobSelect" aria-label="Select career" disabled>
+            <option value="">Select career…</option>
+            <!-- populated by JS -->
+          </select>
+        </div>
+      </div>
+
+      <!-- METRICS -->
+      <div class="skill-metrics">
+
+        <div class="metric-card">
+          <div class="metric-card-head">
+            <span class="metric-icon-circle blue"><i data-lucide="target"></i></span>
+            <h3>Match Score</h3>
+          </div>
+          <div class="big-number" id="matchScore">–</div>
+          <span>Overall compatibility</span>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-card-head">
+            <span class="metric-icon-circle green"><i data-lucide="check-circle-2"></i></span>
+            <h3>Skills You Have</h3>
+          </div>
+          <div class="big-number good" id="haveCount">–</div>
+          <span>Matched skills</span>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-card-head">
+            <span class="metric-icon-circle orange"><i data-lucide="x-circle"></i></span>
+            <h3>Missing Skills</h3>
+          </div>
+          <div class="big-number warn" id="missingCount">–</div>
+          <span>Skills to learn</span>
+        </div>
+
+      </div>
+
+      <!-- SKILLS -->
+      <div class="skill-grid">
+
+        <div class="skill-box">
+          <div class="skill-box-header">
+            <h2 class="good">
+              <i data-lucide="check-circle-2" style="color: #28a745;"></i>
+              Your Skills
+            </h2>
+            <button id="editSkillsBtn" class="edit-skills-btn" type="button">
+              <i data-lucide="plus"></i> Edit
+            </button>
+          </div>
+
+          <div class="skill-list" id="haveSkills">
+            <!-- populated by JS -->
+          </div>
+
+          <!-- Spinner for Your Skills -->
+          <div class="skill-loading" id="haveSkillsLoading" style="display:none;">
+            <div class="skill-spinner"></div>
+            <span>Loading your skills…</span>
+          </div>
+
+          <div class="view-all-link" id="viewAllHaveLink">View all your skills</div>
+        </div>
+
+        <div class="skill-box">
+          <h2 class="missing">
+            <i data-lucide="x-circle" style="color: #dc3545;"></i>
+            Missing Skills
+          </h2>
+
+          <div class="skill-list" id="missingSkills">
+            <!-- populated by JS -->
+          </div>
+
+          <!-- Spinner for Missing Skills (ESCO) -->
+          <div class="skill-loading" id="missingSkillsLoading" style="display:none;">
+            <div class="skill-spinner"></div>
+            <span>Loading career skills from ESCO…</span>
+          </div>
+
+          <div class="view-all-link" id="viewAllMissingLink">View all missing skills</div>
+        </div>
+
+      </div>
+
+      <!-- ROADMAP -->
+      <div class="roadmap">
+
+        <h2><i data-lucide="wrench"></i> Learning Roadmap</h2>
+
+        <div class="roadmap-items">
+
+          <div class="road-step">
+            <div class="step-num">1</div>
+            <div>
+              <h4>Learn Git & GitHub</h4>
+              <p>Version control basics</p>
+            </div>
+          </div>
+
+          <div class="road-step">
+            <div class="step-num">2</div>
+            <div>
+              <h4>Master React</h4>
+              <p>Build modern UI applications</p>
+            </div>
+          </div>
+
+          <div class="road-step">
+            <div class="step-num">3</div>
+            <div>
+              <h4>Build API Projects</h4>
+              <p>Connect frontend + backend</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+    <!-- PLANNER SLIDE-OVER -->
+      <div class="planner-overlay hidden" id="plannerOverlay">
+        <aside class="planner-panel" role="dialog" aria-modal="true">
+          <header class="planner-header">
+            <h2>Planner</h2>
+            <button class="icon-btn" id="closePlannerBtn" type="button" aria-label="Close planner">
+              <i data-lucide="x"></i>
+            </button>
+          </header>
+
+          <div class="planner-tabs">
+            <button class="planner-tab active" data-tab="calendar" type="button">Calendar</button>
+            <button class="planner-tab" data-tab="notifications" type="button">Notifications</button>
+          </div>
+
+          <section class="planner-content" id="calendarTab">
+            <div class="planner-calendar">
+              <div class="calendar-toolbar">
+                <button
+                  class="icon-btn"
+                  id="previousMonthBtn"
+                  type="button"
+                  aria-label="Previous month"
+                >
+                  ‹
+                </button>
+
+                <h3 id="calendarMonthLabel" aria-live="polite"></h3>
+
+                <button
+                  class="icon-btn"
+                  id="nextMonthBtn"
+                  type="button"
+                  aria-label="Next month"
+                >
+                  ›
+                </button>
+              </div>
+
+              <button class="planner-tab" id="calendarTodayBtn" type="button">
+                Today
+              </button>
+
+              <div class="calendar-weekdays" aria-hidden="true">
+                <span>Mon</span>
+                <span>Tue</span>
+                <span>Wed</span>
+                <span>Thu</span>
+                <span>Fri</span>
+                <span>Sat</span>
+                <span>Sun</span>
+              </div>
+
+              <div
+                class="calendar-days"
+                id="calendarDays"
+                role="group"
+                aria-label="Choose a date"
+              ></div>
+
+              <p id="calendarLoadStatus" role="status"></p>
+
+              <h4 id="selectedDateLabel"></h4>
+              <div id="selectedDateEvents"></div>
+            </div>
+            
+
+            <h3>Your reminders & goals</h3>
+            <div id="plannerEventsList"></div>
+
+            <h3>Add a reminder or goal</h3>
+
+            <form id="plannerEventForm" class="planner-form">
+              <label>
+                Type
+                <select name="type" required>
+                  <option value="reminder">Reminder</option>
+                  <option value="goal">Goal</option>
+                </select>
+              </label>
+
+              <label>
+                Title
+                <input
+                  name="title"
+                  type="text"
+                  maxlength="150"
+                  required
+                  placeholder="What do you want to do?"
+                />
+              </label>
+
+              <label>
+                Description
+                <textarea
+                  name="description"
+                  rows="3"
+                  maxlength="2000"
+                  placeholder="Optional details..."
+                ></textarea>
+              </label>
+
+              <fieldset id="reminderFields" class="planner-fieldset">
+                <legend>Reminder deadline</legend>
+
+                <div class="planner-form-row">
+                  <label>
+                    Due date
+                    <input name="event_date" type="date" required />
+                  </label>
+
+                  <label>
+                    Due time — optional
+                    <input name="event_time" type="time" />
+                  </label>
+                </div>
+              </fieldset>
+
+              <fieldset
+                id="goalFields"
+                class="planner-fieldset"
+                hidden
+                disabled
+              >
+                <legend>Goal schedule</legend>
+
+                <label>
+                  Start date and time
+                  <input name="starts_at" type="datetime-local" />
+                </label>
+
+                <label>
+                  End date and time
+                  <input name="ends_at" type="datetime-local" />
+                </label>
+              </fieldset>
+
+              <label>
+                <span id="notifyFieldLabel">Notify me at — required</span>
+                <input name="remind_at" type="datetime-local" required />
+              </label>
+
+              <small>
+                Times use your device’s local timezone.
+                Date-only reminders become overdue after the due date ends.
+              </small>
+
+              <button class="btn btn-primary" type="submit">
+                Save entry
+              </button>
+            </form>
+
+            <p id="plannerMessage" role="status" aria-live="polite"></p>
+          </section>
+
+          <section class="planner-content hidden" id="notificationsTab">
+            <h3>Notifications</h3>
+
+            <p
+              class="notification-status"
+              id="notificationStatus"
+              role="status"
+              aria-live="polite"
+            ></p>
+
+            <div id="notificationsList"></div>
+          </section>
+        </aside>
+      </div>
+  </main>
+
+</div>
+
+<div class="modal-overlay" id="skillsModalOverlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Edit Your Skills</h3>
+      <button id="closeSkillsModal" class="modal-close-btn" type="button">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-current-skills" id="modalSkillsList">
+        <!-- populated by JS -->
+      </div>
+
+      <input
+        type="text"
+        id="newSkillInput"
+        placeholder="Type a skill and press Enter..."
+        class="modal-skill-input"
+      />
+      <p class="modal-hint">Press Enter to add. Click × on a pill to remove.</p>
+    </div>
+
+    <div class="modal-footer">
+      <button id="doneSkillsBtn" class="btn-primary-modal" type="button">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: All Your Skills -->
+<div class="modal-overlay" id="allHaveSkillsModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>All Your Skills for This Career</h3>
+      <button class="modal-close-btn" data-close-modal="allHaveSkillsModal" type="button">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-skill-list" id="allHaveSkillsList">
+        <!-- populated by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: All Missing Skills -->
+<div class="modal-overlay" id="allMissingSkillsModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>All Required Skills You’re Missing</h3>
+      <button class="modal-close-btn" data-close-modal="allMissingSkillsModal" type="button">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-skill-list" id="allMissingSkillsList">
+        <!-- populated by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+lucide.createIcons();
+</script>
+<script src="../js/skillGap.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/planner-UI.js"></script>
+<script src="../js/planner.js"></script>
+<script src="../js/calendar.js"></script>
+<script src="../js/notifications.js"></script>
+
+
+</body>
+</html>

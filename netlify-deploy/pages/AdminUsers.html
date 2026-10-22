@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScientiaForge Admin — Users</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/admin.css" />
+    <link rel="stylesheet" href="../css/theme.css" />
+  <script src="../js/theme.js"></script>
+</head>
+<body class="admin-auth-pending">
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div>
+        <div class="logo">
+          <span class="logo-dark">Scientia</span><span class="logo-blue">Forge</span>
+        </div>
+
+        <nav class="nav">
+          <a class="nav-item" href="Admin.html" data-label="Dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+
+          <a class="nav-item active" href="AdminUsers.html" data-label="Users">
+            <i data-lucide="users"></i>
+            <span>Users</span>
+          </a>
+
+          <a class="nav-item" href="AdminSettings.html" data-label="Settings">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+          </a>
+
+          <a class="nav-item" href="Dashboard.html" data-label="Back to App">
+            <i data-lucide="arrow-left-circle"></i>
+            <span>Back to App</span>
+          </a>
+
+          <a class="nav-item" href="" data-label="Log Out">
+            <i data-lucide="log-out"></i>
+            <span>Logout</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="download-card">
+        <div class="download-icon"><i data-lucide="shield"></i></div>
+        <h3>You're in Admin Mode</h3>
+        <p>Actions here affect real user accounts.</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+            <i data-lucide="menu"></i>
+          </button>
+          <div class="admin-pill"><i data-lucide="shield-check"></i>Admin Panel</div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="profile">
+            <div class="avatar"></div>
+            <div>
+              <div class="profile-name" data-admin-name>&hellip;</div>
+              <div class="profile-email" data-admin-email>&hellip;</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="admin-header">
+        <div>
+          <h1><i data-lucide="users"></i> Users</h1>
+          <p>Every registered account &mdash; search, review, and manage admin access.</p>
+        </div>
+      </section>
+
+      <section class="table-panel">
+        <div class="table-toolbar">
+          <label class="table-search">
+            <i data-lucide="search"></i>
+            <input type="text" id="userSearchInput" placeholder="Search by email&hellip;" autocomplete="off" />
+          </label>
+
+          <select class="table-filter-select" id="roleFilterSelect">
+            <option value="">All roles</option>
+            <option value="admin">Admins only</option>
+            <option value="user">Users only</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Joined</th>
+                <th>Status</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr><td colspan="5" class="table-empty">Loading users&hellip;</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <span class="pagination-info" id="paginationInfo"></span>
+          <div class="pagination-controls" id="paginationControls"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ===================== PROMOTE / DEMOTE CONFIRM MODAL ===================== -->
+  <div class="modal-overlay" id="confirmModal" hidden>
+    <div class="modal-box">
+      <h2 id="confirmModalTitle">Are you sure?</h2>
+      <p id="confirmModalBody"></p>
+      <div class="modal-actions">
+        <button class="modal-btn-cancel" id="confirmModalCancel">Cancel</button>
+        <button class="modal-btn-confirm" id="confirmModalConfirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== USER DETAIL MODAL ===================== -->
+  <div class="modal-overlay" id="detailModal" hidden>
+    <div class="modal-box">
+      <h2>User Detail</h2>
+      <div id="detailModalBody"></div>
+      <div class="modal-actions">
+        <button class="modal-btn-cancel" id="detailModalClose">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastHost"></div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../js/adminGuard.js"></script>
+  <script src="../js/adminUsers.js"></script>
+  <script src="../js/auth.js"></script>
+</body>
+</html>

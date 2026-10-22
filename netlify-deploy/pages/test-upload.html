@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ScientiaForge CV Upload Test</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+  <script src="../js/theme.js"></script>
+</head>
+
+<body>
+
+  <h2>Upload CV Test</h2>
+
+  <input type="file" id="cvFile" />
+  <button onclick="uploadCV()">Upload CV</button>
+
+  <script>
+    async function uploadCV() {
+
+      console.log("UPLOAD BUTTON CLICKED"); // 👈 DEBUG LOG
+
+      const file = document.getElementById("cvFile").files[0];
+
+      if (!file) {
+        console.log("NO FILE SELECTED");
+        alert("Please select a file first");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("cv", file); // MUST MATCH backend: upload.single("cv")
+
+      try {
+        const res = await fetch("http://localhost:5000/api/cv/upload", {
+          method: "POST",
+          body: formData
+        });
+
+        console.log("STATUS:", res.status);
+
+        const data = await res.json();
+
+        console.log("RESPONSE:", data);
+
+        alert(data.message);
+
+      } catch (error) {
+        console.log("ERROR:", error);
+        alert("Request failed");
+      }
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScientiaForge sign up</title>
+    <link rel="stylesheet" href="../css/SignUp.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../auth/signupUser.js" defer></script>
+</head>
+<body>
+
+    <div class="master-viewport">
+        <div class="chassis-outer-shell">
+            <div class="chassis-inner-recess">
+                
+                <main class="interface-deck">
+                    
+                    <section class="sector sector-left">
+                        <div class="brand-header">
+                            <h1 class="brand-name">Scientia<span>Forge</span></h1>
+                        </div>
+
+                        <div class="step-indicator-container">
+                            <div class="step-dot active" data-step="1"></div>
+                            <div class="step-dot" data-step="2"></div>
+                            <div class="step-dot" data-step="3"></div>
+                        </div>
+
+                        <div class="form-viewport">
+                            <form class="cyber-form-strip" id="onboardingForm" onsubmit="event.preventDefault();">
+                                
+                                <div class="form-step-panel" id="panel-1">
+                                    <div class="auth-titles">
+                                        <h2>Create your account</h2>
+                                        <p>Start your AI-powered career journey</p>
+                                    </div>
+
+                                    <div class="field-wrapper email">
+                                        <p>Full Names:</p>
+                                        <input type="text" id="sf-names" placeholder="Enter full names" class="input" required />
+                                    </div>
+
+                                    <div class="field-wrapper email">
+                                        <p>Email:</p>
+                                        <input type="email" id="sf-email" placeholder="Email address" class="input" required />
+                                    </div>
+
+                                    <div class="field-wrapper pass" style="position: relative;">
+                                        <p>Password:</p>
+                                        <input type="password" id="sf-pass" placeholder="••••" class="input" required />
+                                        <button type="button" id="sf-eye-icon-btn" onclick="togglePw()" style="position: absolute; right: 15px; bottom: 12px; background: none; border: none; cursor: pointer; color: #64748b;">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+
+                                    <button type="button" class="secure-submit next-step-btn" onclick="goToStep(2)">
+                                        <span class="btn-inner-text">Next <i class="fas fa-arrow-right"></i></span>
+                                    </button>
+
+                                    <div class="auth-switch">
+                                        <div class="divider-line"><span>OR</span></div>
+                                        <p>Already have an account? <a href="Login.html" class="link-forgot">Login</a></p>
+                                    </div>
+                                </div>
+
+                                <div class="form-step-panel" id="panel-2">
+                                    <div class="auth-titles">
+                                        <h2>Career Profile</h2>
+                                        <p>Help us customize your track metrics</p>
+                                    </div>
+
+                                    <div class="field-wrapper">
+                                        <p>Target Industry:</p>
+                                        <select id="sf-industry" class="input select-input" onchange="handleIndustryChange()">
+                                            <option value="" disabled selected>Select an industry...</option>
+                                            <option value="IT">Technology & IT</option>
+                                            <option value="RealEstate">Real Estate & Property</option>
+                                            <option value="Healthcare">Healthcare & Social Work</option>
+                                            <option value="Education">Education & Training</option>
+                                            <option value="Finance">Finance & Banking</option>
+                                            <option value="Retail">Retail & Customer Service</option>
+                                            <option value="Engineering">Engineering & Manufacturing</option>
+                                            <option value="Construction">Construction & Trades</option>
+                                            <option value="Entrepreneurship">Entrepreneurship & Startups</option>
+                                            <option value="Agriculture">Agriculture & Farming</option>
+                                            <option value="Hospitality">Hospitality & Tourism</option>
+                                            <option value="Marketing">Media, Marketing & Communications</option>  
+                                            <option value="Management">Project & Product Management</option>
+                                            <option value="Sales">Sales & Customer Success</option>
+                                            <option value="Other">Other...</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="field-wrapper hidden-element" id="custom-industry-wrapper">
+                                        <p>Specify Industry:</p>
+                                        <input type="text" id="sf-custom-industry" placeholder="Type your industry track" class="input" />
+                                    </div>
+
+                                    <div class="field-wrapper">
+                                        <p>Desired Target Role:</p>
+                                        <div id="roles-dynamic-container" class="roles-checkbox-grid">
+                                            <p class="form-placeholder-text">Please pick an industry above first...</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="field-wrapper">
+                                        <p>Career Experience Level:</p>
+                                        <select id="sf-experience" class="input select-input">
+                                            <option value="" disabled selected>Select experience level...</option>
+                                            <option value="Beginner">Beginner</option>
+                                            <option value="Entry-Level">Entry-Level</option>
+                                            <option value="Intermediate">Intermediate</option>
+                                            <option value="Experienced">Experienced Professional</option>
+                                            <option value="Switcher">Career Switcher</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="step-navigation-actions">
+                                        <button type="button" class="back-step-btn" onclick="goToStep(1)">Back</button>
+                                        <button type="button" class="secure-submit next-step-btn" onclick="goToStep(3)">Next</button>
+                                    </div>
+                                </div>
+
+                                <div class="form-step-panel" id="panel-3">
+                                    <div class="auth-titles">
+                                        <h2>Skill Interests</h2>
+                                        <p>Select relevant tags for your Skills Gap Analysis</p>
+                                    </div>
+
+                                    <div class="field-wrapper">
+                                        <p>Suggested Skill Chips (Click to select):</p>
+                                        <div id="suggested-chips-container" class="chips-flex-wrapper">
+                                            </div>
+                                    </div>
+
+                                    <div class="field-wrapper">
+                                        <p>Your Selected Track Skills:</p>
+                                        <div class="tags-input-master-container">
+                                            <div id="selected-tags-wrapper" class="chips-flex-wrapper dynamic-selections">
+                                                </div>
+                                            <div class="autocomplete-inline-wrapper">
+                                                <input type="text" id="sf-skills-autocomplete" placeholder="Type skill and press Enter..." class="input chip-input-field" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="standard-plan-notice">
+                                        <span class="plan-notice-icon">
+                                            <i class="fas fa-check-circle"></i>
+                                        </span>
+
+                                        <div>
+                                            <strong>Standard account</strong>
+                                            <p>You can upgrade to Premium anytime from your dashboard.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="field-wrapper">
+                                        <p>Phone Number (optional):</p>
+                                        <input type="tel" id="sf-phone" placeholder="e.g. 082 123 4567" class="input" />
+                                    </div>
+
+                                    <div class="field-wrapper">
+                                        <p>Location (optional):</p>
+                                        <input type="text" id="sf-location" placeholder="e.g. Johannesburg, Gauteng" class="input" />
+                                    </div>
+
+                                    <div class="field-wrapper">
+                                        <p>How did you hear about ScientiaForge? (optional):</p>
+                                        <select id="sf-referral" class="input select-input">
+                                            <option value="" selected>Prefer not to say</option>
+                                            <option value="Social Media">Social Media</option>
+                                            <option value="Friend or Family">Friend or Family</option>
+                                            <option value="School or University">School or University</option>
+                                            <option value="Search Engine">Search Engine</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="field-wrapper">
+                                        <p>LinkedIn Profile URL (optional):</p>
+                                        <input type="text" id="sf-linkedin" placeholder="https://linkedin.com/in/..." class="input" />
+                                    </div>
+                                                                        <div class="field-wrapper">
+                                        <p>Age Group (optional):</p>
+                                        <select id="sf-age-bracket" class="input select-input">
+                                            <option value="" selected>Prefer not to say</option>
+                                            <option value="Under 18">Under 18</option>
+                                            <option value="18-24">18-24</option>
+                                            <option value="25-34">25-34</option>
+                                            <option value="35-44">35-44</option>
+                                            <option value="45+">45+</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="field-wrapper">
+                                        <p>Gender (optional):</p>
+                                        <select id="sf-gender" class="input select-input">
+                                            <option value="" selected>Prefer not to say</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Non-binary">Non-binary</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="step-navigation-actions">
+                                        <button type="button" class="back-step-btn" onclick="goToStep(2)">Back</button>
+                                        <button type="button" class="secure-submit final-submit-btn" onclick="handleSignUp()">
+                                            <span class="btn-inner-text">Sign Up</span>
+                                            <div class="btn-lighting-overlay"></div>
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                    </section>
+
+                    <div class="kinetic-divider">
+                        <div class="divider-glow-core"></div>
+                    </div>
+
+                    <section class="sector sector-right">
+                        <div class="welcome-copy">
+                            <h3><p style="color: #000; font-weight: bold; margin-bottom: 5px;">Welcome To ScientiaForge!</p>Please sign up for your<br><span class="navy">Skill</span><span class="cyan">Forge</span> account.</h3>
+                            <p class="tagline">Forge Your Future. Master Your Career.</p>
+                        </div>
+
+                        <div class="visual-stage">
+                            <img src="../assets/handshake1.png" alt="Handshake" class="handshake-img">
+                        </div>
+                    </section>
+
+                </main>
+            </div>
+        </div>
+
+        <footer class="global-footer">
+            © 2026 ScientiaForge AI - ScriptSquad SECURE SIGN IN ACCESS
+        </footer>
+    </div>
+</body>
+</html>

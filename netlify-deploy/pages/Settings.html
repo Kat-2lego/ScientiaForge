@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScientiaForge Settings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/Settings.css">
+      <link rel="stylesheet" href="../css/theme.css" />
+  <script src="../js/theme.js"></script>
+</head>
+<body>
+
+    <div class="app-layout">
+        
+    <aside class="sidebar" id="sidebar">
+      <div>
+        <div class="logo">
+          <span class="logo-dark">Scientia</span><span class="logo-blue">Forge</span>
+        </div>
+
+        <nav class="nav">
+          <a class="nav-item" href="dashboard.html" data-label="Dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+
+          <a class="nav-item" href="CareerDiscovery.html" data-label="Career Discovery">
+            <i data-lucide="compass"></i>
+            <span>Career Discovery</span>
+          </a>
+
+          <a class="nav-item" href="cvDashboard.html" data-label="CV Analyzer">
+            <i data-lucide="file-search"></i>
+            <span>CV Analyzer</span>
+          </a>
+
+          <a class="nav-item" href="InterviewSimulator.html" data-label="Interview Simulator">
+            <i data-lucide="mic"></i>
+            <span>Interview Simulator</span>
+          </a>
+
+          <a class="nav-item" href="Articulation.html" data-label="Articulation Coach">
+            <i data-lucide="audio-waveform"></i>
+            <span>Articulation Coach</span>
+          </a>
+
+          <a class="nav-item" href="SkillGapAnalysis.html" data-label="Skill Gap Analysis">
+            <i data-lucide="bar-chart-3"></i>
+            <span>Skill Gap Analysis</span>
+          </a>
+
+          <a class="nav-item" href="CareerPathfinder.html" data-label="Career Pathfinder">
+            <i data-lucide="graduation-cap"></i>
+            <span>Career Pathfinder</span>
+            </a>
+
+            <a class="nav-item" href="StudyHub.html" data-label="Study Hub">
+            <i data-lucide="book-open"></i>
+            <span>Study Hub</span>
+            </a>
+
+          <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
+            <i data-lucide="activity"></i>
+            <span>Progress Tracker</span>
+          </a>
+
+          <a class="nav-item active" href="../pages/Settings.html" data-label="Settings">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+          </a>
+
+          <a class="nav-item" href="Support.html" data-label="Help & Support">
+            <i data-lucide="life-buoy"></i>
+            <span>Help/Support</span>
+          </a>
+
+          <a class="nav-item" href="" data-label="Log Out">
+            <i data-lucide="log-out"></i>
+            <span>Logout</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="download-card">
+        <div class="download-icon">
+          <i data-lucide="smartphone"></i>
+        </div>
+        <h3>Download Our Mobile App</h3>
+        <p>Track your progress anywhere, anytime.</p>
+        <button class="download-btn">Download</button>
+      </div>
+    </aside>
+
+        <main class="main-content">
+            
+            <header class="top-header">
+                <button class="hamburger-btn" id="toggle-sidebar">
+                    <i data-lucide="menu"></i>
+                </button>
+                <h1 class="page-title">Settings</h1>
+            </header>
+
+            <div class="scroll-container custom-scrollbar">
+                <div class="settings-wrapper">
+
+                    <!-- User Profile Section -->
+                    <div class="section-container">
+                        <h2 class="section-title">User Profile</h2>
+                        <p class="section-subtitle">Manage your digital identity and core platform preferences.</p>
+                        
+                        <div class="profile-card-large">
+                            <div class="profile-bg-pattern"></div>
+                            <div class="profile-content">
+                                <div class="profile-identity">
+                                    <div class="avatar-container" title="Click to update avatar">
+                                        <div class="avatar-circle">TM</div>
+                                        <div class="avatar-hover">
+                                            <i data-lucide="camera"></i>
+                                        </div>
+                                    </div>
+                                    <div class="profile-text">
+                                        <h3 class="user-name"></h3>
+                                        <p class="user-email"></p>
+                                        <div class="badge-group">
+                                            <span class="badge premium">Premium User</span>
+                                            <span class="badge active-status">Online</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="profile-controls">
+                                    <div class="theme-toggle-box">
+                                        <div class="toggle-text">
+                                            <i data-lucide="moon"></i>
+                                            <span>Dark Mode</span>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="darkModeToggle">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notifications -->
+                    <div class="section-container">
+                        <h2 class="section-title">Notifications</h2>
+                        <p class="section-subtitle">Control how and when you receive updates.</p>
+                        
+                        <div class="settings-card">
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Email Updates</h4>
+                                    <p>Weekly career insights and platform announcements.</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" checked id="emailUpdates">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="divider"></div>
+                            
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Interview Reminders</h4>
+                                    <p>Reminders for scheduled practice interviews.</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" checked id="interviewReminders">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security & Authentication -->
+                    <div class="section-container">
+                        <h2 class="section-title">Security & Authentication</h2>
+                        <p class="section-subtitle">Protect your account and manage access.</p>
+                        
+                        <div class="settings-card">
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Password Management</h4>
+                                    <p>Ensure your account is protected with a strong password.</p>
+                                </div>
+                                <button class="btn-secondary" id="changePasswordBtn">Update Password</button>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Two-Factor Authentication (2FA)</h4>
+                                    <p>Require a secondary code when logging in.</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" checked id="twoFactorAuth">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Login Alerts</h4>
+                                    <p>Get notified when someone logs into your account.</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" checked id="loginAlerts">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="divider"></div>
+                            
+                        </div>
+                    </div>
+
+                    
+                    <!-- Content Preferences -->
+                    <div class="section-container">
+                        <h2 class="section-title">Content Preferences</h2>
+                        <p class="section-subtitle">Tailor ScientiaForge to your career goals.</p>
+                        
+                        <div class="settings-card">
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Primary Career Field</h4>
+                                    <p>Your main area of professional interest.</p>
+                                </div>
+                                <select class="setting-select" id="careerFieldSelect">
+                                    <option value="IT">Technology & IT</option>
+                                        <option value="RealEstate">Real Estate & Property</option>
+                                        <option value="Healthcare">Healthcare & Social Work</option>
+                                        <option value="Education">Education & Training</option>
+                                        <option value="Finance">Finance & Banking</option>
+                                        <option value="Retail">Retail & Customer Service</option>
+                                        <option value="Engineering">Engineering & Manufacturing</option>
+                                        <option value="Construction">Construction & Trades</option>
+                                        <option value="Entrepreneurship">Entrepreneurship & Startups</option>
+                                        <option value="Agriculture">Agriculture & Farming</option>
+                                        <option value="Hospitality">Hospitality & Tourism</option>
+                                        <option value="Marketing">Media, Marketing & Communications</option>  
+                                        <option value="Management">Project & Product Management</option>
+                                        <option value="Sales">Sales & Customer Success</option>
+                                </select>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Experience Level</h4>
+                                    <p>Where you are in your career journey.</p>
+                                </div>
+                                <select class="setting-select" id="experienceLevelSelect">
+                                    <option value="student">Student</option>
+                                    <option value="entry">Entry Level (0-2 years)</option>
+                                    <option value="mid">Mid Level (3-5 years)</option>
+                                    <option value="senior">Senior Level (6-10 years)</option>
+                                    <option value="expert">Expert (10+ years)</option>
+                                </select>
+                            </div>                    
+                        </div>
+                    </div>
+
+                    <!-- Account Management -->
+                    <div class="section-container">
+                        <h2 class="section-title">Account Management</h2>
+                        <p class="section-subtitle">Billing, subscription, and legal information.</p>
+                        
+                        <div class="settings-card click-card">
+                            <a href="billing_Subscription.html" class="setting-row link-row">
+                                <div class="setting-icon"><i data-lucide="credit-card"></i></div>
+                                <div class="setting-info">
+                                    <h4>Manage Billing & Subscription</h4>
+                                    <p>View payment history and update your plan.</p>
+                                </div>
+                                <i data-lucide="chevron-right" class="arrow-icon"></i>
+                            </a>
+                        </div>
+                        <div class="settings-card click-card mt-3">
+                            <a href="#" class="setting-row link-row">
+                                <div class="setting-icon"><i data-lucide="file-text"></i></div>
+                                <div class="setting-info">
+                                    <h4>Terms of Service</h4>
+                                    <p>Read our terms and conditions.</p>
+                                </div>
+                                <i data-lucide="chevron-right" class="arrow-icon"></i>
+                            </a>
+                        </div>
+                        <div class="settings-card click-card mt-3">
+                            <a href="#" class="setting-row link-row">
+                                <div class="setting-icon"><i data-lucide="shield-check"></i></div>
+                                <div class="setting-info">
+                                    <h4>Privacy Policy</h4>
+                                    <p>Learn how we protect your data.</p>
+                                </div>
+                                <i data-lucide="chevron-right" class="arrow-icon"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Help & Support -->
+                    <div class="section-container">
+                        <h2 class="section-title">Help & Support</h2>
+                        <p class="section-subtitle">Get assistance and learn how to use the platform.</p>
+                        <div class="support-grid">
+                            <div class="support-card">
+                                <div class="support-icon"><i data-lucide="book"></i></div>
+                                <h4>Documentation</h4>
+                                <p>Read detailed guides.</p>
+                            </div>
+                            <div class="support-card">
+                                <div class="support-icon"><i data-lucide="mail"></i></div>
+                                <h4>Contact Us</h4>
+                                <p>Submit a support ticket.</p>
+                            </div>
+                            <div class="support-card">
+                                <div class="support-icon"><i data-lucide="message-circle"></i></div>
+                                <h4>Live Chat</h4>
+                                <p>Chat with our support team.</p>
+                            </div>
+                            <div class="support-card">
+                                <div class="support-icon"><i data-lucide="video"></i></div>
+                                <h4>Video Tutorials</h4>
+                                <p>Watch step-by-step guides.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- About -->
+                    <div class="section-container">
+                        <h2 class="section-title">About</h2>
+                        <p class="section-subtitle">Application information and version.</p>
+                        
+                        <div class="settings-card">
+                            <div class="about-row">
+                                <div class="about-info">
+                                    <h4>ScientiaForge</h4>
+                                    <p>Version 2.4.1</p>
+                                    <p class="build-info">Build 2026.08.20</p>
+                                </div>
+                                <div class="about-logo">
+                                    <span class="logo-dark">Scientia</span><span class="logo-blue">Forge</span>
+                                </div>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Check for Updates</h4>
+                                    <p>Ensure you're using the latest version.</p>
+                                </div>
+                                <button class="btn-secondary" id="checkUpdates">Check Now</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Privacy & Data Control -->
+                    <div class="section-container">
+                        <h2 class="section-title">Privacy & Data Control</h2>
+                        <p class="section-subtitle">Control your data and privacy settings.</p>
+                        
+                        <div class="settings-card click-card">
+                            <a href="#" class="setting-row link-row">
+                                <div class="setting-icon"><i data-lucide="shield"></i></div>
+                                <div class="setting-info">
+                                    <h4>Privacy Settings</h4>
+                                    <p>Control who can see your profile and activity.</p>
+                                </div>
+                                <i data-lucide="chevron-right" class="arrow-icon"></i>
+                            </a>
+                        </div>
+                      
+                        <div id = "deleteAccountBtn" class="settings-card click-card mt-3 delete-account-card" onclick="openModal()">
+                            <a href="#" class="setting-row link-row">
+                                <div class="setting-icon delete-icon"><i data-lucide="trash-2"></i></div>
+                                <div class="setting-info delete-info">
+                                    <h4>Delete Account</h4>
+                                    <p>Permanently remove your account and data.</p>
+                                </div>
+                                <i data-lucide="chevron-right" class="arrow-icon"></i>
+                            </a>
+                        </div>   
+
+                    </div>
+                </div>
+            </div>
+        </main>
+
+    </div>
+    <!-- Modal -->
+  <div id="deleteModal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h2 id="modalTitle">Delete your account?</h2>
+      <p>
+        This action is permanent. All your data will be deleted and you will be logged out.
+      </p>
+      <div class="modal-actions">
+        <button id="cancelDeleteBtn" class="secondary-btn">Cancel</button>
+        <button id="confirmDeleteBtn" class="danger-btn">Delete Account</button>
+      </div>
+      <p id="deleteError" class="error-text" hidden></p>
+    </div>
+  </div>
+
+    <!-- Supabase client first -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        window.supabase = window.supabase.createClient(
+            'https://imozjvllleijknuimsde.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imltb3pqdmxsbGVpamtudWltc2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNzA4MzQsImV4cCI6MjA5MTc0NjgzNH0.ypgtyUrczofLQxG9gP-Z1SlKa3v68jAtUgdhtwz2swY'
+        );
+    </script>
+    <script src="../js/settings.js"></script>
+    <script src="../js/auth.js"></script>
+</body>
+</html>

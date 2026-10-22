@@ -1,0 +1,609 @@
+/* ==========================================================================
+   SkillForge — dark theme
+   ==========================================================================
+   Loaded LAST on every page so its overrides win. Nothing here applies until
+   <html data-theme="dark"> is set by js/theme.js, so light mode is untouched.
+
+   Two layers:
+     1. Dark values for the CSS variables the pages already use. This covers
+        most of the UI on its own.
+     2. Targeted overrides for rules that hardcode a colour instead of using a
+        variable. These were generated from the stylesheets themselves, so the
+        list matches what is actually in the code.
+
+   Adding a new page? Use the variables below and it inherits dark mode free.
+   ========================================================================== */
+
+html[data-theme="dark"] {
+  /* ---- canonical dark tokens (referenced by the overrides further down) -- */
+  --sf-bg: #0b1120;
+  --sf-surface: #151c2c;
+  --sf-surface-2: #1c2436;
+  --sf-surface-3: #243049;
+  --sf-text: #e8edf7;
+  --sf-text-soft: #c2cbdd;
+  --sf-text-dim: #8c99b0;
+  --sf-border: #2b3650;
+
+  color-scheme: dark;
+
+  /* ---- dashboard.css / CareerDiscovery.css / most pages --------------- */
+  --bg-main: var(--sf-bg);
+  --bg-card: var(--sf-surface);
+  --bg-card-hover: var(--sf-surface-2);
+  --bg-white: var(--sf-surface);
+  --bg-offwhite: var(--sf-surface-2);
+  --card: var(--sf-surface);
+  --panel: var(--sf-surface);
+  --bg: var(--sf-bg);
+  --white: var(--sf-surface);
+  --white-soft: var(--sf-surface-2);
+
+  --text: var(--sf-text);
+  --text-dark: var(--sf-text);
+  --text-main: var(--sf-text-soft);
+  --text-muted: var(--sf-text-dim);
+  --text-light: var(--sf-text-dim);
+  --muted: var(--sf-text-dim);
+  --navy: var(--sf-text);
+  --dark-navy: var(--sf-text);
+  --color-navy: var(--sf-text);
+  --black: var(--sf-text);
+  --black-soft: var(--sf-text-soft);
+  --black-line: var(--sf-border);
+
+  --border: var(--sf-border);
+  --border-light: var(--sf-border);
+  --line: var(--sf-border);
+
+  /* Brand colours are lifted slightly so they stay legible on dark. */
+  --primary: #60a5fa;
+  --primary-blue: #60a5fa;
+  --blue: #60a5fa;
+  --blue-dark: #3b82f6;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+  --royal: #60a5fa;
+  --light-blue: #38bdf8;
+  --cyan: #22d3ee;
+  --color-cyan: #22d3ee;
+  --orange: #fb923c;
+  --green: #34d399;
+  --red: #f87171;
+  --danger: #f87171;
+  --good: #34d399;
+  --avg: #fbbf24;
+  --low: #f87171;
+
+  /* Tinted "-light" backgrounds become dark tints, not pale washes. */
+  --primary-light: #16233d;
+  --blue-050: #16233d;
+  --blue-100: #1b2b49;
+  --blue-soft: #16233d;
+  --cyan-light: #0c2b33;
+  --orange-light: #33220f;
+  --admin-green-light: #11291f;
+  --admin-purple-light: #1f1a33;
+  --admin-red-light: #331818;
+  --glass-bg: rgba(21, 28, 44, 0.72);
+
+  --grey-100: var(--sf-surface-2);
+  --grey-200: var(--sf-surface-3);
+  --grey-300: #35415c;
+  --grey-500: var(--sf-text-dim);
+  --grey-600: var(--sf-text-dim);
+  --grey-700: var(--sf-text-soft);
+
+  /* Shadows need to be heavier to read against a dark background. */
+  --shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 10px 22px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 20px 44px rgba(0, 0, 0, 0.55);
+  --shadow-blue: 0 10px 26px rgba(37, 99, 235, 0.35);
+
+  /* ---- Interview Simulator ------------------------------------------- */
+  --isim-surface: var(--sf-surface);
+  --isim-surface-tint: var(--sf-surface-2);
+  --isim-border: var(--sf-border);
+  --isim-ink: var(--sf-text);
+  --isim-text-strong: var(--sf-text);
+  --isim-text-body: var(--sf-text-soft);
+  --isim-text-muted: var(--sf-text-dim);
+
+  /* ---- Past papers / Active Recall ------------------------------------ */
+  --nsc-card: var(--sf-surface);
+  --nsc-card-hover: var(--sf-surface-2);
+  --nsc-border: var(--sf-border);
+  --nsc-text: var(--sf-text);
+  --nsc-heading: var(--sf-text);
+  --nsc-muted: var(--sf-text-dim);
+  --nsc-primary: #60a5fa;
+  --nsc-primary-light: #16233d;
+  --nsc-correct-bg: #11291f;
+  --nsc-correct-line: #1f5138;
+  --nsc-incorrect-bg: #331818;
+  --nsc-incorrect-line: #6b2626;
+  --nsc-amber-bg: #33280f;
+  --nsc-amber-line: #6b541f;
+
+  --vd-ring-track: var(--sf-surface-3);
+  --vd-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* The page background itself, whatever each stylesheet calls it. */
+html[data-theme="dark"],
+html[data-theme="dark"] body {
+  background-color: var(--sf-bg);
+  color: var(--sf-text);
+}
+
+/* Form controls rarely use the variables, so they are handled directly. */
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+  background-color: var(--sf-surface-2);
+  color: var(--sf-text);
+  border-color: var(--sf-border);
+}
+
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+  color: var(--sf-text-dim);
+}
+
+html[data-theme="dark"] option {
+  background-color: var(--sf-surface-2);
+  color: var(--sf-text);
+}
+
+/* Images and illustrations keep their own colours; only flatten the harsh
+   white backgrounds behind transparent logos. */
+html[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: var(--sf-surface-2);
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--sf-surface-3);
+}
+
+/* ==========================================================================
+   Generated overrides — rules in the stylesheets that hardcode a light
+   colour. Regenerate these if you add new hardcoded colours.
+   ========================================================================== */
+
+/* --- from ActiveRecall.css --- */
+html[data-theme="dark"] body.nsc-focus {
+  background-color: var(--sf-surface-2);
+}
+html[data-theme="dark"] .nsc-back:hover {
+  background-color: var(--sf-surface-2);
+}
+html[data-theme="dark"] .nsc-message {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .pp-recall.is-unavailable {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .pp-recall p {
+  color: var(--sf-text-soft);
+}
+html[data-theme="dark"] .pp-toggle button[aria-selected="true"] {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .pp-frame {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .ar-card {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .ar-context {
+  background-color: var(--sf-surface-2);
+}
+html[data-theme="dark"] .ar-context div {
+  color: var(--sf-text-soft);
+}
+html[data-theme="dark"] .ar-option {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .ar-key {
+  background-color: var(--sf-surface-2);
+}
+html[data-theme="dark"] .ar-input {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .ar-input:disabled {
+  background-color: var(--sf-surface-2);
+  color: var(--sf-text-soft);
+}
+html[data-theme="dark"] .ar-result.is-skipped {
+  background-color: var(--sf-surface-2);
+}
+html[data-theme="dark"] .ar-btn-incorrect {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .ar-results-hero {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .ar-results-sub {
+  color: var(--sf-text-soft);
+}
+html[data-theme="dark"] .ar-score-meter span {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .ar-stat {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .ar-review-item {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .ar-review-context {
+  background-color: var(--sf-surface-2);
+}
+html[data-theme="dark"] .ar-review-body .ar-compare > div {
+  background-color: var(--sf-surface-2);
+}
+
+/* --- from CareerDiscovery.additions.css --- */
+html[data-theme="dark"] .result-chip {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .career-search {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .search-results {
+  background-color: var(--sf-surface);
+}
+
+/* --- from CareerDiscovery.css --- */
+html[data-theme="dark"] .searchbar {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .profile {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .chip {
+  background-color: var(--sf-surface-2);
+}
+html[data-theme="dark"] .dropdown {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .slider:before {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .btn-secondary {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .quiz-option-btn {
+  background-color: var(--sf-surface);
+}
+
+/* --- from CareerPathfinder.css --- */
+html[data-theme="dark"] .status-closed {
+  background-color: var(--sf-surface-2);
+}
+
+/* --- from ContactUs.css --- */
+html[data-theme="dark"] .social-icons a {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .contact-form-container {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+  background-color: var(--sf-surface-2);
+  border-color: var(--sf-border);
+}
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] select:focus,
+html[data-theme="dark"] textarea:focus {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .faq-card {
+  background-color: var(--sf-surface-2);
+}
+
+/* --- from Features.css --- */
+html[data-theme="dark"] .ui-window {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .voice-module {
+  background-color: var(--sf-surface);
+}
+
+/* --- from InterviewSimulator.css --- */
+html[data-theme="dark"] .duration-control input[type="range"]::-webkit-slider-thumb {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .duration-control input[type="range"]::-moz-range-thumb {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .question-count-control input[type="number"] {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .role-search-input {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .role-suggestions {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .persona-canvas {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .speaking-indicator span {
+  background-color: var(--sf-surface);
+}
+
+/* --- from Interviewreport.css --- */
+html[data-theme="dark"] .webcam-placeholder i {
+  color: var(--sf-text-soft);
+}
+html[data-theme="dark"] .webcam-toggle-btn {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .rpt-score-band {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .rpt-section {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .rpt-kpi-card {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .rpt-tips-list li {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .rpt-actions {
+  background-color: var(--sf-surface);
+}
+
+/* --- from Settings.css --- */
+html[data-theme="dark"] .hamburger-btn {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .slider:before {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .btn-secondary {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .setting-select {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .font-size-btn {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .modal-content {
+  background-color: var(--sf-surface);
+}
+
+/* --- from SignUp.css --- */
+html[data-theme="dark"] body {
+  background-color: var(--sf-surface-2);
+}
+html[data-theme="dark"] .interface-deck {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .sector-left {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .field-wrapper p {
+  color: var(--sf-text-soft);
+}
+html[data-theme="dark"] .input {
+  background-color: var(--sf-surface);
+  color: var(--sf-text);
+}
+html[data-theme="dark"] .roles-checkbox-grid {
+  background-color: var(--sf-surface-2);
+  border-color: var(--sf-border);
+}
+html[data-theme="dark"] .checkbox-lbl-item {
+  color: var(--sf-text-soft);
+}
+html[data-theme="dark"] .skill-chip-btn {
+  background-color: var(--sf-surface-2);
+}
+html[data-theme="dark"] .skill-chip-btn:hover {
+  color: var(--sf-text);
+}
+html[data-theme="dark"] .tags-input-master-container {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .back-step-btn:hover {
+  background-color: var(--sf-surface-2);
+  color: var(--sf-text);
+}
+html[data-theme="dark"] .auth-titles h2 {
+  color: var(--sf-text);
+}
+html[data-theme="dark"] .divider-line span {
+  background-color: var(--sf-surface);
+}
+
+/* --- from SkillGapAnalysis.css --- */
+html[data-theme="dark"] .industry-select {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .skill-spinner {
+  border-color: var(--sf-border);
+}
+html[data-theme="dark"] .modal-card {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .modal-card {
+  background-color: var(--sf-surface);
+}
+
+/* --- from StudyHub.css --- */
+html[data-theme="dark"] .nsc-field select {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .nsc-chip-plain {
+  background-color: var(--sf-surface-2);
+}
+html[data-theme="dark"] .nsc-btn-ghost {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .nsc-more {
+  background-color: var(--sf-surface);
+}
+
+/* --- from Suport.css --- */
+html[data-theme="dark"] .social-icons a {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .contact-form-container {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+  background-color: var(--sf-surface-2);
+  border-color: var(--sf-border);
+}
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] select:focus,
+html[data-theme="dark"] textarea:focus {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .faq-card {
+  background-color: var(--sf-surface-2);
+}
+
+/* --- from VideoDiscovery.css --- */
+html[data-theme="dark"] .vd-badge {
+  background-color: var(--sf-surface-2);
+  color: var(--sf-text-soft);
+}
+
+/* --- from about.css --- */
+html[data-theme="dark"] .stat-box {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .mv-card {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .value-item {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .team-card {
+  background-color: var(--sf-surface);
+  border-color: var(--sf-border);
+}
+html[data-theme="dark"] .social-links a {
+  background-color: var(--sf-surface-2);
+}
+
+/* --- from admin.css --- */
+html[data-theme="dark"] .date-range-presets button.active {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .date-range-custom input[type="date"] {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .admin-tab {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .chart-range-toggle button.active {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .table-filter-select {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .btn-chip {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .pagination-controls button {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .switch .slider:before {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .modal-box {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .toast {
+  background-color: var(--sf-surface);
+}
+
+/* --- from billing.css --- */
+html[data-theme="dark"] .hamburger-btn {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .btn-secondary-outline {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .plan-card-btn {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .history-filter-select {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .btn-export {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .btn-method-action {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .btn-add-payment {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .form-input {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .slider:before {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .btn-cancel {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .paywall-content {
+  background-color: var(--sf-surface);
+}
+
+/* --- from cvDashboard.css --- */
+html[data-theme="dark"] .cv-score-circle-inner {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .modal-box {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .modal-box button {
+  background-color: var(--sf-surface);
+}
+
+/* --- from dashboard.css --- */
+html[data-theme="dark"] .download-btn {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .menu-btn,
+html[data-theme="dark"] .icon-btn {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .searchbar {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .profile {
+  background-color: var(--sf-surface);
+}
+html[data-theme="dark"] .search-empty {
+  background-color: var(--sf-surface);
+}
+
+/* --- from payments.css --- */
+html[data-theme="dark"] .back-btn {
+  color: var(--sf-text);
+}
+html[data-theme="dark"] .back-btn:hover {
+  background-color: var(--sf-surface);
+}
+
+/* --- from styles.css --- */
+html[data-theme="dark"] .why-us-section {
+  background-color: var(--sf-surface);
+  border-color: var(--sf-border);
+}

@@ -1,0 +1,1144 @@
+/* ==========================================================================
+   ScientiaForge - Career Discovery additions
+   Loaded AFTER CareerDiscovery.css. Everything here is additive: the existing
+   design language (rounded cards, blue/cyan gradient, Plus Jakarta Sans) is
+   preserved, and no existing rule is overridden except where it blocked the
+   new dynamic content.
+   ========================================================================== */
+/*careerDiscovery.additions.css"""
+SkillForge Career Discovery - central configuration.
+
+Every tunable number used by the matching engine lives here. Nothing in
+matching_engine.py, career_repository.py or profile_builder.py should
+contain a magic constant.
+"""
+
+from __future__ import annotations
+
+import os
+from pathlib import Path
+from typing import Dict, List
+
+# ---------------------------------------------------------------------------
+# .env loading
+# ---------------------------------------------------------------------------
+# Set-and-forget credentials: put them in py/.env instead of re-exporting them
+# in every terminal (and `export` does not exist in PowerShell at all).
+# Real environment variables always win over the file.
+
+
+_loaded_from: List[str] = []
+_seen_keys: set = set()
+_duplicate_keys: set = set()
+
+
+def _dotenv_candidates() -> List[Path]:
+    """Where to look for .env, nearest first.
+
+    An explicit SKILLFORGE_DOTENV wins. Otherwise we start beside this file
+    and walk up the project tree, so the API still finds a .env kept at the
+    repository root while uvicorn runs from client/py.
+    """
+    seen: List[Path] = []
+
+    explicit = os.getenv("SKILLFORGE_DOTENV", "").strip().strip('"').strip("'")
+    if explicit:
+        seen.append(Path(explicit).expanduser())
+        # Git Bash hands over MSYS paths like /c/Users/me/.env, which Windows
+        # Python cannot resolve. Translate to C:/Users/me/.env and try that too.
+        if len(explicit) > 2 and explicit[0] == "/" and explicit[2] == "/":
+            seen.append(Path(f"{explicit[1].upper()}:/{explicit[3:]}"))
+        # A bad explicit path is not a dead end: fall through to the search.
+
+    here = Path(__file__).resolve().parent
+    for folder in [here, *here.parents][:6] + [Path.cwd(), *Path.cwd().parents][:4]:
+        candidate = folder / ".env"
+        if candidate not in seen:
+            seen.append(candidate)
+    return seen
+
+
+def _load_dotenv() -> None:
+    for candidate in _dotenv_candidates():
+        if not candidate.is_file():
+            continue
+        for line in candidate.read_text(encoding="utf-8-sig").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            key = key.strip()
+            if key.lower().startswith("set "):        # tolerate `set KEY=value`
+                key = key[4:].strip()
+            value = value.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = value
+            elif key in _seen_keys:
+                _duplicate_keys.add(key)
+            _seen_keys.add(key)
+        _loaded_from.append(str(candidate))
+        break
+
+
+_load_dotenv()
+
+
+# ---------------------------------------------------------------------------
+# Database / runtime
+# ---------------------------------------------------------------------------
+
+# Preferred: direct Postgres connection string from Supabase
+#   Project Settings -> Database -> Connection string -> URI
+#   postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres
+DATABASE_URL: str = os.getenv("SUPABASE_DB_URL", "") or os.getenv("DATABASE_URL", "")
+
+# Fallback: PostgREST (supabase-py / httpx). Used when DATABASE_URL is empty.
+SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
+SUPABASE_SERVICE_KEY: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+SUPABASE_ANON_KEY: str = os.getenv("SUPABASE_ANON_KEY", "")
+
+# Origins allowed to call the API during development / deployment.
+CORS_ORIGINS: List[str] = [
+    o.strip()
+    for o in os.getenv(
+        "SKILLFORGE_CORS_ORIGINS",
+        "http://127.0.0.1:5501,http://localhost:5501,"
+        "http://127.0.0.1:5500,http://localhost:5500,"
+        "http://127.0.0.1:3000,http://localhost:3000",
+    ).split(",")
+    if o.strip()
+]
+
+# The O*NET cache is built once and reused. Rebuild after this many seconds.
+CACHE_TTL_SECONDS: int = int(os.getenv("SKILLFORGE_CACHE_TTL", "21600"))  # 6h
+
+# Rows fetched per page when using the PostgREST fallback driver.
+REST_PAGE_SIZE: int = 1000
+
+
+# ---------------------------------------------------------------------------
+# O*NET scales
+# ---------------------------------------------------------------------------
+# The analytical tables store several scales per element. We never assume a
+# single scale: database.py/career_repository.py inspect the distinct scale_id
+# values actually present and pick the first available entry of this list.
+#
+#   IM = Importance (1-5)   LV = Level (0-7)   OI = Occupational Interest (1-7)
+#   IH = Interest High-Point (not a per-RIASEC value, deliberately excluded)
+SCALE_PREFERENCE: Dict[str, List[str]] = {
+    "abilities": ["IM", "LV"],
+    "knowledge": ["IM", "LV"],
+    "skills": ["IM", "LV"],
+    "work_activities": ["IM", "LV"],
+    # This database's work_styles table uses WI and DR rather than O*NET's IM.
+    # WI is preferred: DR is 0-10 but averages 0.86, so most values sit at zero
+    # and percentile ranking cannot separate occupations. Swap the order here
+    # if a future import restores IM.
+    "work_styles": ["WI", "DR", "IM"],
+    "interests": ["OI"],
+}
+
+# Theoretical min/max per scale, used for the first (linear) normalisation
+# pass before percentile ranking.
+SCALE_BOUNDS: Dict[str, tuple] = {
+    "IM": (1.0, 5.0),
+    "LV": (0.0, 7.0),
+    "OI": (1.0, 7.0),
+    "WI": (-3.0, 5.0),      # observed -1.42 to 3.00 in this database
+    "DR": (0.0, 10.0),
+}
+
+# Element-id prefixes that legitimately belong in each table. Anything else in
+# the table is logged and ignored rather than silently scored.
+ELEMENT_PREFIXES: Dict[str, tuple] = {
+    "abilities": ("1.A.",),
+    "work_styles": ("1.D.",),   # this database numbers work styles 1.D.*
+    "interests": ("1.B.1.",),   # the six RIASEC elements only
+    "skills": ("2.A.", "2.B."),
+    "knowledge": ("2.C.",),
+    "work_activities": ("4.A.",),
+}
+
+# Values used by O*NET for the suppression flags. Rows whose flag is in this
+# set are excluded from scoring (§18).
+SUPPRESS_TRUE_VALUES = {"Y", "y", "1", "T", "TRUE", "true", True, 1}
+
+
+# ---------------------------------------------------------------------------
+# Matching weights (§11) - must sum to 1.0
+# ---------------------------------------------------------------------------
+
+COMPONENT_WEIGHTS: Dict[str, float] = {
+    "domain": 0.15,
+    "interests": 0.20,
+    "abilities": 0.10,
+    "knowledge": 0.15,
+    "skills": 0.12,
+    "work_activities": 0.10,
+    "work_styles": 0.08,
+    "technology": 0.05,
+    "academic_background": 0.03,
+    "job_zone": 0.02,
+}
+
+# When Deep Personality Scan is enabled the behavioural answers add real
+# evidence about interests and temperament, so those two dimensions are worth
+# more. The delta is taken proportionally from the remaining components so the
+# total still sums to 1.0 (see config.resolve_weights).
+DEEP_SCAN_BOOST: Dict[str, float] = {
+    "interests": 0.04,
+    "work_styles": 0.04,
+}
+
+
+def resolve_weights(deep_scan_enabled: bool) -> Dict[str, float]:
+    """Return the component weights for this run, always summing to 1.0."""
+    weights = dict(COMPONENT_WEIGHTS)
+    if not deep_scan_enabled:
+        return weights
+
+    boost_total = sum(DEEP_SCAN_BOOST.values())
+    donors = {k: v for k, v in weights.items() if k not in DEEP_SCAN_BOOST}
+    donor_total = sum(donors.values())
+
+    for key, extra in DEEP_SCAN_BOOST.items():
+        weights[key] = weights[key] + extra
+    for key, value in donors.items():
+        weights[key] = value - boost_total * (value / donor_total)
+
+    # Guard against drift from float arithmetic.
+    total = sum(weights.values())
+    return {k: v / total for k, v in weights.items()}
+
+
+# ---------------------------------------------------------------------------
+# Score calibration (§14)
+# ---------------------------------------------------------------------------
+# Component scores are percentile-based: 0.50 means "an average occupation for
+# what this user asked for". The mapping below is absolute - it never rescales
+# against the best result in the list - so a weak top match honestly reports a
+# weak number.
+#
+#   raw 0.50 -> 50   (average)
+#   raw 0.75 -> ~78  (good)
+#   raw 0.90 -> ~92  (exceptional)
+CALIBRATION_GAMMA: float = 0.92          # <1 lifts the middle of the curve
+CALIBRATION_FLOOR: float = 0.0
+CALIBRATION_CEILING: float = 100.0
+
+
+def calibrate(raw: float) -> float:
+    """Map a 0..1 weighted raw score onto the published 0-100 scale."""
+    raw = max(0.0, min(1.0, raw))
+    return max(
+        CALIBRATION_FLOOR,
+        min(CALIBRATION_CEILING, 100.0 * (raw ** CALIBRATION_GAMMA)),
+    )
+
+
+SCORE_BANDS = [
+    (90, "Exceptional alignment"),
+    (80, "Strong alignment"),
+    (70, "Good alignment"),
+    (60, "Moderate alignment"),
+    (50, "Possible alignment"),
+    (0, "Weak alignment"),
+]
+
+
+# ---------------------------------------------------------------------------
+# Result selection
+# ---------------------------------------------------------------------------
+
+# Hard ceiling on how many questions a user is ever asked in one run. Domain
+# questions are trimmed to fit; core and deep-scan questions are never cut.
+MAX_QUESTIONS: int = 24
+MIN_DOMAIN_QUESTIONS: int = 3
+
+RESULT_COUNT: int = 10                # target number of returned careers (8-12)
+RESULT_COUNT_MIN: int = 8
+RESULT_COUNT_MAX: int = 12
+
+# Answers may push weight onto domains the user did not select. That keeps
+# cross-domain exploration alive (§15) without letting the questionnaire
+# silently replace the user's own choice: unselected domains are damped, and a
+# domain only widens the candidate pool once it clears POOL_DOMAIN_MIN_WEIGHT.
+# Seed weight given to each domain the user explicitly selected, before any
+# answers are counted.
+SELECTED_DOMAIN_SEED: float = 2.0
+UNSELECTED_DOMAIN_DAMPING: float = 0.35
+POOL_DOMAIN_MIN_WEIGHT: float = 0.15
+
+# Relevance ladder used by the no-match fallback (§43). The engine walks down
+# this list until it has at least RESULT_COUNT_MIN candidates.
+RELEVANCE_THRESHOLDS: List[float] = [0.55, 0.45, 0.35, 0.25, 0.0]
+
+# Minimum domain fitness for an occupation to enter the candidate pool at the
+# strictest level. Occupations below this AND outside every selected SOC family
+# get the irrelevance penalty instead of a place in the pool.
+DOMAIN_RELEVANCE_FLOOR: float = 0.45
+IRRELEVANCE_PENALTY: float = 0.25     # subtracted from the raw score
+
+# Maximal-marginal-relevance diversity (§23). 0 = pure score, 1 = pure variety.
+DIVERSITY_LAMBDA: float = 0.22
+# Never let diversity promote a career whose raw score is this far below the
+# best remaining candidate.
+DIVERSITY_MAX_SCORE_SACRIFICE: float = 0.06
+
+# Related occupations (§24) must still clear this raw score to be shown.
+RELATED_MIN_RAW_SCORE: float = 0.45
+RELATED_MAX_RESULTS: int = 6
+
+# Deterministic tie-break epsilon (§13). Ties are broken by onetsoc_code, never
+# by randomness.
+TIE_EPSILON: float = 0.001
+
+
+# ---------------------------------------------------------------------------
+# Confidence (§44)
+# ---------------------------------------------------------------------------
+# Confidence is about evidence, not about the size of the score.
+CONFIDENCE_WEIGHTS = {
+    "data_coverage": 0.45,     # how many O*NET dimensions this occupation has
+    "profile_richness": 0.35,  # how much the user actually told us
+    "score_margin": 0.20,      # separation from the median candidate
+}
+CONFIDENCE_BANDS = [(0.75, "High"), (0.5, "Moderate"), (0.0, "Low")]
+
+# A questionnaire with this many answered questions counts as "complete"
+# evidence for the profile-richness term.
+PROFILE_RICHNESS_TARGET_ANSWERS: int = 18
+
+
+# ---------------------------------------------------------------------------
+# Job zone / salary (§27, §51)
+# ---------------------------------------------------------------------------
+
+# ZAR monthly bands. These are ScientiaForge planning estimates, NOT O*NET data,
+# and every response marks them salary_is_estimate = True.
+SALARY_ESTIMATES_ZAR: Dict[int, str] = {
+    1: "R6,000 - R12,000",
+    2: "R12,000 - R22,000",
+    3: "R20,000 - R38,000",
+    4: "R32,000 - R65,000",
+    5: "R55,000 - R110,000",
+}
+SALARY_FALLBACK_ZAR = "R20,000 - R38,000"
+SALARY_DISCLAIMER = (
+    "ScientiaForge estimate for the South African market. Not O*NET wage data."
+)
+
+JOB_ZONE_LABELS: Dict[int, str] = {
+    1: "Little or no preparation needed",
+    2: "Some preparation needed",
+    3: "Medium preparation needed",
+    4: "Considerable preparation needed",
+    5: "Extensive preparation needed",
+}
+
+# Target job zone implied by the user's stated background/education level.
+BACKGROUND_TARGET_JOB_ZONE: Dict[str, int] = {
+    "cs": 4,
+    "math": 4,
+    "art": 3,
+    "business": 4,
+    "engineering": 4,
+    "health": 5,
+}
+DEFAULT_TARGET_JOB_ZONE: int = 4
+# Reaching one zone higher than your current level is aspirational, not a
+# mismatch, so over-shooting is penalised less than under-shooting.
+JOB_ZONE_OVERSHOOT_PENALTY: float = 0.12
+JOB_ZONE_UNDERSHOOT_PENALTY: float = 0.22
+
+
+# ---------------------------------------------------------------------------
+# Presentation (§52, §53)
+# ---------------------------------------------------------------------------
+# Images never influence matching. Resolution is by SOC group, with a neutral
+# fallback so a missing image can never break a recommendation.
+CAREER_IMAGE_FALLBACK = (
+    "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40"
+    "?auto=format&fit=crop&w=800&q=80"
+)
+CAREER_IMAGES_BY_SOC: Dict[str, str] = {
+    "15-125": "https://images.unsplash.com/photo-1498050108023-c5249f4df085",  # software
+    "15-124": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31",     # networks
+    "15-20":  "https://images.unsplash.com/photo-1551288049-bebda4e38f71",     # data science
+    "15-11":  "https://images.unsplash.com/photo-1531482615713-2afd69097998",  # research
+    "15-":    "https://images.unsplash.com/photo-1461749280684-dccba630e2f6",  # computing
+    "27-102": "https://images.unsplash.com/photo-1561070791-2526d30994b5",     # design
+    "27-101": "https://images.unsplash.com/photo-1513364776144-60967b0f800f",  # art/media
+    "27-30":  "https://images.unsplash.com/photo-1495020689067-958852a7765e",  # media/comms
+    "27-":    "https://images.unsplash.com/photo-1522542550221-31fd19575a2d",  # creative
+    "13-20":  "https://images.unsplash.com/photo-1554224155-6726b3ff858f",     # finance
+    "13-":    "https://images.unsplash.com/photo-1552664730-d307ca884978",     # business
+    "11-":    "https://images.unsplash.com/photo-1600880292203-757bb62b4baf",  # management
+    "17-":    "https://images.unsplash.com/photo-1504307651254-35680f356dfd",  # engineering
+    "19-":    "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69",  # science
+    "25-":    "https://images.unsplash.com/photo-1524178232363-1fb2b075b655",  # education
+    "29-":    "https://images.unsplash.com/photo-1580281657527-47b083b1f6f1",  # health
+    "41-":    "https://images.unsplash.com/photo-1556740738-b6a63e27c4df",     # sales
+}
+IMAGE_QUERY_SUFFIX = "?auto=format&fit=crop&w=800&q=80"
+
+# Technology demand labelling. O*NET gives us technology-level demand signals
+# only, so we never claim occupation-level labour demand.
+TECH_DEMAND_BANDS = [
+    (5, "Strong technology demand signal"),
+    (2, "Moderate technology demand signal"),
+    (1, "Emerging technology demand signal"),
+    (0, "No technology demand signal available"),
+]
+MAX_TECH_SKILLS_RETURNED: int = 6
+
+/* ---------------------------------------------------------------- a11y ---- */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.chip:focus-visible,
+.career-card:focus-visible,
+.quiz-option-btn:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+}
+
+/* Match status is never carried by colour alone: every card also states its
+   score, band and confidence in text. */
+
+.sf-notice {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 60;
+  max-width: 380px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: var(--text-dark);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: var(--shadow-lg);
+}
+
+/* ------------------------------------------------------------ questionnaire */
+
+.q-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.q-setup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+.label-hint {
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.field-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+select.dropdown[multiple] {
+  min-height: 140px;
+  padding: 8px;
+}
+
+select.dropdown[multiple] option {
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.quiz-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.quiz-tag {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--primary);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.quiz-progress-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+  margin-bottom: 22px;
+}
+
+.quiz-progress-bar .progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--primary), var(--cyan));
+  transition: width 0.3s ease;
+}
+
+.quiz-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 18px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.quiz-back {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.quiz-back[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---------------------------------------------------------------- loading */
+
+.ai-processing {
+  text-align: center;
+  padding: 46px 20px;
+}
+
+.ai-processing h3 {
+  font-size: 20px;
+  color: var(--text-dark);
+  margin: 18px 0 6px;
+}
+
+.ai-processing p {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.spinner {
+  width: 38px;
+  height: 38px;
+  margin: 0 auto;
+  border-radius: 50%;
+  border: 3px solid rgba(37, 99, 235, 0.15);
+  border-top-color: var(--primary);
+  animation: sf-spin 0.9s linear infinite;
+}
+
+@keyframes sf-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation-duration: 3s; }
+  .quiz-progress-bar .progress-fill { transition: none; }
+}
+
+/* ---------------------------------------------------------------- results */
+
+.result-card-pro {
+  position: relative;
+  overflow: hidden;
+  padding: 28px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, #eff6ff, #ecfeff);
+  border: 1px solid var(--border);
+}
+
+.ai-badge {
+  display: inline-block;
+  padding: 5px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--primary), var(--cyan));
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.result-main {
+  margin: 14px 0 8px;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-dark);
+  line-height: 1.3;
+}
+
+.result-main span {
+  color: var(--primary);
+}
+
+.result-desc {
+  color: var(--text-main);
+  font-size: 14px;
+}
+
+.result-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.result-chip {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.result-note {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.result-reset {
+  margin-top: 18px;
+  width: max-content;
+  padding: 10px 20px;
+  gap: 10px;
+}
+
+/* ------------------------------------------------------------ career cards */
+
+.career-card .card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.career-card .card-band {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.career-card .card-reason {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-main);
+  margin-bottom: 10px;
+}
+
+.career-card .card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 11px;
+}
+
+.card-footer .group-tag {
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.card-footer .demand {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.placeholder-card {
+  opacity: 0.75;
+}
+
+.placeholder-card h4 {
+  margin-bottom: 8px;
+}
+
+/* ----------------------------------------------------------- right panel */
+
+.panel-score-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.panel-match {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.panel-confidence {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.panel-reason {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-main);
+  background: var(--bg-main);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+
+.panel-factors {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.panel-factors li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 12px;
+  color: var(--text-main);
+}
+
+.panel-factors li::before {
+  content: "\2713";
+  position: absolute;
+  left: 0;
+  color: var(--cyan);
+  font-weight: 800;
+}
+
+.salary-qualifier {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.panel-jobzone {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+}
+
+.skills-tags .muted,
+.roadmap-detail .muted {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 12px;
+}
+
+.breakdown {
+  background: var(--bg-main);
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+}
+
+.breakdown h4 {
+  font-size: 13px;
+  color: var(--text-dark);
+  margin-bottom: 12px;
+}
+
+.breakdown-row {
+  display: grid;
+  grid-template-columns: 118px 1fr 28px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 7px;
+}
+
+.breakdown-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.breakdown-track {
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.breakdown-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--primary), var(--cyan));
+}
+
+.breakdown-value {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.roadmap-detail {
+  margin-top: 14px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-main);
+}
+
+.roadmap-detail p {
+  margin-bottom: 6px;
+}
+
+/* ----------------------------------------------------------------- errors */
+
+.sf-error {
+  text-align: center;
+  padding: 34px 24px;
+  border-radius: var(--radius-lg);
+  background: #fff7ed;
+  border: 1px solid rgba(249, 115, 22, 0.25);
+}
+
+.sf-error-icon {
+  font-size: 30px;
+  color: var(--orange);
+  margin-bottom: 10px;
+}
+
+.sf-error h3 {
+  font-size: 18px;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+}
+
+.sf-error p {
+  font-size: 13px;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+
+.sf-error-code {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+.sf-error .btn-secondary {
+  margin: 16px auto 0;
+  width: max-content;
+  padding: 10px 22px;
+}
+
+/* ------------------------------------------------------------- responsive */
+
+@media (max-width: 1100px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    padding: 0 24px;
+  }
+
+  /* The details panel moves below the results instead of squeezing them. */
+  .content-right {
+    order: 2;
+  }
+
+  .details-panel {
+    height: auto;
+  }
+
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .related-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .dashboard-grid {
+    padding: 0 16px;
+    gap: 20px;
+  }
+
+  .topbar {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .cards-grid,
+  .related-grid,
+  .q-setup-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .q-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .btn-next {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .quiz-question {
+    font-size: 18px;
+  }
+
+  .quiz-option-btn {
+    padding: 15px 16px;
+    font-size: 14px;
+  }
+
+  .breakdown-row {
+    grid-template-columns: 96px 1fr 26px;
+  }
+
+  .sf-notice {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    max-width: none;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+}
+
+/* ------------------------------------------------- grouped domain chips ---- */
+
+.chips-container.grouped {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.chip-group-label {
+  width: 100%;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.chips-container.grouped .chip {
+  font-size: 12px;
+  padding: 7px 13px;
+
+}
+
+/* --------------------------------------------------------- career search --- */
+
+.career-search {
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  margin-bottom: 22px;
+  box-shadow: var(--shadow-sm);
+}
+
+.search-head h3 {
+  font-size: 15px;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+}
+
+.search-head p {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.search-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-row .search-icon {
+  position: absolute;
+  left: 14px;
+  font-size: 13px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+#careerSearchInput {
+  width: 100%;
+  padding: 12px 40px 12px 38px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-main);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text-main);
+}
+
+#careerSearchInput::placeholder { color: var(--text-muted); }
+
+#careerSearchInput:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.search-clear {
+  position: absolute;
+  right: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.search-clear:hover { color: var(--text-dark); }
+
+.search-results {
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  z-index: 30;
+  margin-top: 6px;
+  max-height: 340px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
+}
+
+.search-status,
+.search-note {
+  padding: 14px 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.search-note {
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-main);
+}
+
+.search-hit {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.search-hit:last-child { border-bottom: none; }
+
+.search-hit:hover,
+.search-hit:focus-visible {
+  background: var(--bg-main);
+}
+
+.search-hit-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.search-hit-main strong {
+  font-size: 13px;
+  color: var(--text-dark);
+}
+
+.search-hit-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.search-hit-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.search-score {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+.search-score.muted {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 10px;
+}
+
+.search-zone {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+@media (max-width: 720px) {
+  .chips-container.grouped { max-height: 220px; }
+  .search-results { left: 12px; right: 12px; }
+  .search-hit { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .search-hit-meta { flex-direction: row; align-items: center; gap: 10px; }
+}

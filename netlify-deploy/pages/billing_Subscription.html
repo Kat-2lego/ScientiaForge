@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing & Subscription | ScientiaForge</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/Billing.css">
+      <link rel="stylesheet" href="../css/theme.css" />
+  <script src="../js/theme.js"></script>
+</head>
+<body>
+
+    <div class="app-layout">
+        
+    <aside class="sidebar" id="sidebar">
+      <div>
+        <div class="logo">
+          <span class="logo-dark">Skill</span><span class="logo-blue">Forge</span>
+        </div>
+
+        <nav class="nav">
+          <a class="nav-item" href="dashboard.html" data-label="Dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+
+          <a class="nav-item" href="CareerDiscovery.html" data-label="Career Discovery">
+            <i data-lucide="compass"></i>
+            <span>Career Discovery</span>
+          </a>
+
+          <a class="nav-item" href="cvDashboard.html" data-label="CV Analyzer">
+            <i data-lucide="file-search"></i>
+            <span>CV Analyzer</span>
+          </a>
+
+          <a class="nav-item" href="InterviewSimulator.html" data-label="Interview Simulator">
+            <i data-lucide="mic"></i>
+            <span>Interview Simulator</span>
+          </a>
+
+          <a class="nav-item" href="Articulation.html" data-label="Articulation Coach">
+            <i data-lucide="audio-waveform"></i>
+            <span>Articulation Coach</span>
+          </a>
+
+          <a class="nav-item" href="SkillGapAnalysis.html" data-label="Skill Gap Analysis">
+            <i data-lucide="bar-chart-3"></i>
+            <span>Skill Gap Analysis</span>
+          </a>
+
+          <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
+            <i data-lucide="activity"></i>
+            <span>Progress Tracker</span>
+          </a>
+
+          <a class="nav-item" href="Settings.html" data-label="Settings">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+          </a>
+
+          <a class="nav-item" href="Support.html" data-label="Help & Support">
+            <i data-lucide="life-buoy"></i>
+            <span>Help/Support</span>
+          </a>
+
+          <a class="nav-item" href="" data-label="Log Out">
+            <i data-lucide="log-out"></i>
+            <span>Logout</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="download-card">
+        <div class="download-icon">
+          <i data-lucide="smartphone"></i>
+        </div>
+        <h3>Download Our Mobile App</h3>
+        <p>Track your progress anywhere, anytime.</p>
+        <button class="download-btn">Download</button>
+      </div>
+    </aside>
+
+        <main class="main-content">
+            
+            <header class="top-header">
+                <button class="hamburger-btn" id="toggle-sidebar">
+                    <i data-lucide="menu"></i>
+                </button>
+                <h1 class="page-title">Billing & Subscription</h1>
+            </header>
+
+            <div class="scroll-container custom-scrollbar">
+                <div class="billing-wrapper">
+
+                    <!-- Current Plan Overview -->
+                    <div class="section-container">
+                        <h2 class="section-title">Current Plan</h2>
+                        <p class="section-subtitle">Manage your subscription and billing details.</p>
+                        
+                        <div class="plan-overview-card">
+                            <div class="plan-header">
+                                <div class="plan-info">
+                                    <div class="plan-badge-wrapper">
+                                        <span class="plan-badge" id="currentPlanBadge" data-plan="free">Free</span>
+                                        <span class="plan-status" id="planStatus">Active</span>
+                                    </div>
+                                    <h3 class="plan-name" id="currentPlanName">Free Plan</h3>
+                                    <p class="plan-price" id="currentPlanPrice">R0<span>/month</span></p>
+                                </div>
+                                <div class="plan-icon-wrapper" data-plan="free">
+                                    <i data-lucide="crown" class="plan-icon"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="plan-features-list" id="currentPlanFeatures">
+                                <div class="feature-item">
+                                    <i data-lucide="check-circle" class="feature-icon"></i>
+                                    <span>5 CV analyses per month</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i data-lucide="check-circle" class="feature-icon"></i>
+                                    <span>Basic career discovery</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i data-lucide="check-circle" class="feature-icon"></i>
+                                    <span>3 interview simulations</span>
+                                </div>
+                            </div>
+
+                            <div class="plan-actions">
+                                
+                                <button class="btn-upgrade" id="upgradePlanBtn" onclick="window.location.href='payments.html'">
+                                    <i data-lucide="zap"></i>
+                                    Upgrade to Premium
+                                </button>
+                            </div>
+
+                            <div class="billing-info-row">
+                                <div class="billing-detail">
+                                    <span class="billing-label">Next billing date</span>
+                                    <span class="billing-value" id="nextBillingDate">—</span>
+                                </div>
+
+                                <div class="billing-detail">
+                                    <span class="billing-label">Payment method</span>
+                                    <div class="payment-method-display" id="paymentMethod">
+                                        <i data-lucide="credit-card"></i>
+                                        <span>Not added</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Available Plans -->
+                    <div class="section-container">
+                        <h2 class="section-title">Available Plans</h2>
+                        <p class="section-subtitle">Choose the plan that fits your career goals.</p>
+                        
+                        <div class="plans-grid">
+                            <!-- Free Plan -->
+                            <div class="plan-card" data-plan="free">
+                                <div class="plan-card-header">
+                                    <h3 class="plan-card-name">Free</h3>
+                                    <div class="plan-card-price">
+                                        <span class="price-amount">R0</span>
+                                        <span class="price-period">/month</span>
+                                    </div>
+                                    <p class="plan-card-description">Perfect for getting started</p>
+                                </div>
+                                
+                                <ul class="plan-features">
+                                    <li class="feature-row">
+                                        <i data-lucide="check" class="feature-check"></i>
+                                        <span>5 CV analyses/month</span>
+                                    </li>
+                                    <li class="feature-row">
+                                        <i data-lucide="check" class="feature-check"></i>
+                                        <span>Basic career discovery</span>
+                                    </li>
+                                    <li class="feature-row">
+                                        <i data-lucide="check" class="feature-check"></i>
+                                        <span>3 interview simulations</span>
+                                    </li>
+                                    <li class="feature-row disabled">
+                                        <i data-lucide="x" class="feature-x"></i>
+                                        <span>Skill gap analysis</span>
+                                    </li>
+                                    <li class="feature-row disabled">
+                                        <i data-lucide="x" class="feature-x"></i>
+                                        <span>Progress tracking</span>
+                                    </li>
+                                    <li class="feature-row disabled">
+                                        <i data-lucide="x" class="feature-x"></i>
+                                        <span>Priority support</span>
+                                    </li>
+                                </ul>
+
+                                <button class="plan-card-btn" id="selectFreePlan" disabled>
+                                    Current Plan
+                                </button>
+                            </div>
+
+                            <!-- Premium Plan -->
+                            <div class="plan-card featured" data-plan="premium">
+                                <div class="popular-badge">
+                                    <i data-lucide="star"></i>
+                                    <span>Most Popular</span>
+                                </div>
+                                <div class="plan-card-header">
+                                    <h3 class="plan-card-name">Premium</h3>
+                                    <div class="plan-card-price">
+                                        <span class="price-amount">R149.00</span>
+                                        <span class="price-period">/month</span>
+                                    </div>
+                                    <p class="plan-card-description">For serious career growth</p>
+                                </div>
+                                
+                                <ul class="plan-features">
+                                    <li class="feature-row">
+                                        <i data-lucide="check" class="feature-check"></i>
+                                        <span>Unlimited CV analyses</span>
+                                    </li>
+                                    <li class="feature-row">
+                                        <i data-lucide="check" class="feature-check"></i>
+                                        <span>Advanced career discovery</span>
+                                    </li>
+                                    <li class="feature-row">
+                                        <i data-lucide="check" class="feature-check"></i>
+                                        <span>Unlimited interview sims</span>
+                                    </li>
+                                    <li class="feature-row">
+                                        <i data-lucide="check" class="feature-check"></i>
+                                        <span>Skill gap analysis</span>
+                                    </li>
+                                    <li class="feature-row">
+                                        <i data-lucide="check" class="feature-check"></i>
+                                        <span>Progress tracking</span>
+                                    </li>
+                                    <li class="feature-row disabled">
+                                        <i data-lucide="x" class="feature-x"></i>
+                                        <span>Priority support</span>
+                                    </li>
+                                </ul>
+
+                                <button type="button" class="plan-card-btn primary" onclick="window.location.href='payments.html'">
+                                    <i data-lucide="zap"></i>
+                                    Upgrade to Premium
+                                </button>
+                            </div>                        
+                        </div>
+                    </div>
+
+                    <!-- Payment History -->
+                    <div class="section-container" id="paymentHistorySection">
+                        <h2 class="section-title">Payment History</h2>
+                        <p class="section-subtitle">View and download your past invoices.</p>
+                        
+                        <div class="payment-history-card">
+                            <div class="history-header">
+                                <div class="history-filters">
+                                    <select class="history-filter-select" id="yearFilter">
+                                        <option value="2026">2026</option>
+                                        <option value="2025">2025</option>
+                                        <option value="2024">2024</option>
+                                    </select>
+                                </div>
+                                <button class="btn-export" id="exportHistory">
+                                    <i data-lucide="download"></i>
+                                    Export All
+                                </button>
+                            </div>
+
+                            <div class="history-table-wrapper">
+                                <table class="history-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Description</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>Invoice</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="paymentHistoryBody">
+                                        <tr class="history-row">
+                                            <td class="date-cell">
+                                                <div class="date-display">
+                                                    <span class="date-day">20</span>
+                                                    <span class="date-month">Aug 2026</span>
+                                                </div>
+                                            </td>
+                                            <td class="description-cell">
+                                                <span class="description-text">Premium Plan - Monthly</span>
+                                                <span class="description-sub">Payment ID: #INV-2026-0820</span>
+                                            </td>
+                                            <td class="amount-cell">
+                                                <span class="amount-value">R149.00</span>
+                                            </td>
+                                            <td class="status-cell">
+                                                <span class="status-badge paid">
+                                                    <i data-lucide="check-circle"></i>
+                                                    Paid
+                                                </span>
+                                            </td>
+                                            <td class="invoice-cell">
+                                                <button class="btn-invoice" onclick="downloadInvoice('INV-2026-0820')">
+                                                    <i data-lucide="download"></i>
+                                                    PDF
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr class="history-row">
+                                            <td class="date-cell">
+                                                <div class="date-display">
+                                                    <span class="date-day">20</span>
+                                                    <span class="date-month">Jul 2026</span>
+                                                </div>
+                                            </td>
+                                            <td class="description-cell">
+                                                <span class="description-text">Premium Plan - Monthly</span>
+                                                <span class="description-sub">Payment ID: #INV-2026-0720</span>
+                                            </td>
+                                            <td class="amount-cell">
+                                                <span class="amount-value">R149.00</span>
+                                            </td>
+                                            <td class="status-cell">
+                                                <span class="status-badge paid">
+                                                    <i data-lucide="check-circle"></i>
+                                                    Paid
+                                                </span>
+                                            </td>
+                                            <td class="invoice-cell">
+                                                <button class="btn-invoice" onclick="downloadInvoice('INV-2026-0720')">
+                                                    <i data-lucide="download"></i>
+                                                    PDF
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr class="history-row">
+                                            <td class="date-cell">
+                                                <div class="date-display">
+                                                    <span class="date-day">20</span>
+                                                    <span class="date-month">Jun 2026</span>
+                                                </div>
+                                            </td>
+                                            <td class="description-cell">
+                                                <span class="description-text">Premium Plan - Monthly</span>
+                                                <span class="description-sub">Payment ID: #INV-2026-0620</span>
+                                            </td>
+                                            <td class="amount-cell">
+                                                <span class="amount-value">R149.00</span>
+                                            </td>
+                                            <td class="status-cell">
+                                                <span class="status-badge paid">
+                                                    <i data-lucide="check-circle"></i>
+                                                    Paid
+                                                </span>
+                                            </td>
+                                            <td class="invoice-cell">
+                                                <button class="btn-invoice" onclick="downloadInvoice('INV-2026-0620')">
+                                                    <i data-lucide="download"></i>
+                                                    PDF
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="empty-state hidden" id="noPaymentsState">
+                                <i data-lucide="receipt" class="empty-icon"></i>
+                                <h4>No Payment History</h4>
+                                <p>Your payment history will appear here once you make your first purchase.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Billing Details -->
+                    <div class="section-container">
+                        <h2 class="section-title">Billing Details</h2>
+                        <p class="section-subtitle">Update your billing information and payment methods.</p>
+                        
+                        <div class="billing-details-card">
+                            <div class="billing-section">
+                                <h3 class="billing-section-title">Payment Method</h3>
+                                <div class="payment-methods-list" id="paymentMethodsList">
+                                    <div class="payment-method-item active">
+                                        <div class="payment-method-icon">
+                                            <i data-lucide="credit-card"></i>
+                                        </div>
+                                        <div class="payment-method-info">
+                                            <span class="payment-method-name">Visa ending in 4242</span>
+                                            <span class="payment-method-expiry">Expires 12/2027</span>
+                                        </div>
+                                        <div class="payment-method-actions">
+                                            <button class="btn-method-action" onclick="editPaymentMethod()">
+                                                <i data-lucide="edit-2"></i>
+                                            </button>
+                                            <button class="btn-method-action" onclick="removePaymentMethod()">
+                                                <i data-lucide="trash-2"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="btn-add-payment" id="addPaymentMethod">
+                                    <i data-lucide="plus"></i>
+                                    Add Payment Method
+                                </button>
+                            </div>
+
+                            <div class="divider"></div>
+
+                            <div class="billing-section">
+                                <h3 class="billing-section-title">Billing Information</h3>
+                                <div class="billing-form-grid">
+                                    <div class="form-group">
+                                        <label class="form-label">Email Address</label>
+                                        <input type="email" class="form-input" id="billingEmail" value="user@example.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Full Name</label>
+                                        <input type="text" class="form-input" id="billingName" value="John Doe">
+                                    </div>
+                                    <div class="form-group full-width">
+                                        <label class="form-label">Company Name (Optional)</label>
+                                        <input type="text" class="form-input" id="billingCompany" placeholder="Your company name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Country</label>
+                                        <select class="form-input" id="billingCountry">
+                                            <option value="ZA">South Africa</option>
+                                            <option value="US">United States</option>
+                                            <option value="GB">United Kingdom</option>
+                                            <option value="NG">Nigeria</option>
+                                            <option value="KE">Kenya</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Postal Code</label>
+                                        <input type="text" class="form-input" id="billingPostal" placeholder="1234">
+                                    </div>
+                                </div>
+                                <button class="btn-save" id="saveBillingInfo">
+                                    <i data-lucide="save"></i>
+                                    Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subscription Settings -->
+                    <div class="section-container">
+                        <h2 class="section-title">Subscription Settings</h2>
+                        <p class="section-subtitle">Manage your subscription preferences.</p>
+                        
+                        <div class="settings-card">
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Auto-renewal</h4>
+                                    <p>Your subscription will automatically renew at the end of each billing period.</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" checked id="autoRenewal">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <h4>Email Receipts</h4>
+                                    <p>Receive email receipts for all payments.</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" checked id="emailReceipts">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="setting-row" id="cancelSubscriptionRow">
+                                <div class="setting-info">
+                                    <h4>Cancel Subscription</h4>
+                                    <p>Cancel your subscription at any time. You'll retain access until the end of your billing period.</p>
+                                </div>
+                                <button class="btn-cancel" id="cancelSubscription">
+                                    Cancel Subscription
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Paywall Modal (Your existing paywall integration point) -->
+    <div class="paywall-modal" id="paywallModal">
+        <div class="paywall-content">
+            <button class="paywall-close" onclick="closePaywall()">
+                <i data-lucide="x"></i>
+            </button>
+            <!-- Your existing paywall content will be injected here -->
+            <div id="paywallContainer">
+                <!-- This is where your paywall backend integrates -->
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/billing.js"></script>
+    <script src="../js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Hub | ScientiaForge AI</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/CareerPathfinder.css" />
+  <link rel="stylesheet" href="../css/StudyHub.css" />
+  <link rel="stylesheet" href="../css/VideoDiscovery.css" />
+    <link rel="stylesheet" href="../css/theme.css" />
+  <script src="../js/theme.js"></script>
+</head>
+<body>
+
+  <div class="layout">
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+ 
+    <aside class="sidebar" id="sidebar">
+      <div>
+        <div class="logo">
+          <span class="logo-dark">Scientia</span><span class="logo-blue">Forge</span>
+        </div>
+ 
+        <nav class="nav">
+          <a class="nav-item" href="dashboard.html" data-label="Dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+ 
+          <a class="nav-item" href="CareerDiscovery.html" data-label="Career Discovery">
+            <i data-lucide="compass"></i>
+            <span>Career Discovery</span>
+          </a>
+ 
+          <a class="nav-item" href="cvDashboard.html" data-label="CV Analyzer">
+            <i data-lucide="file-search"></i>
+            <span>CV Analyzer</span>
+          </a>
+ 
+          <a class="nav-item" href="InterviewSimulator.html" data-label="Interview Simulator">
+            <i data-lucide="mic"></i>
+            <span>Interview Simulator</span>
+          </a>
+
+          <a class="nav-item" href="Articulation.html" data-label="Articulation Coach">
+            <i data-lucide="audio-waveform"></i>
+            <span>Articulation Coach</span>
+          </a>
+ 
+          <a class="nav-item" href="SkillGapAnalysis.html" data-label="Skill Gap Analysis">
+            <i data-lucide="bar-chart-3"></i>
+            <span>Skill Gap Analysis</span>
+          </a>
+ 
+          <a class="nav-item" href="CareerPathfinder.html" data-label="Career Pathfinder">
+            <i data-lucide="graduation-cap"></i>
+            <span>Career Pathfinder</span>
+          </a>
+ 
+          <a class="nav-item active" href="StudyHub.html" data-label="Study Hub">
+            <i data-lucide="book-open"></i>
+            <span>Study Hub</span>
+          </a>
+ 
+          <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
+            <i data-lucide="activity"></i>
+            <span>Progress Tracker</span>
+          </a>
+ 
+          <a class="nav-item" href="Settings.html" data-label="Settings">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+          </a>
+ 
+          <a class="nav-item" href="Support.html" data-label="Help & Support">
+            <i data-lucide="life-buoy"></i>
+            <span>Help/Support</span>
+          </a>
+ 
+          <a class="nav-item" href="" data-label="Log Out">
+            <i data-lucide="log-out"></i>
+            <span>Logout</span>
+          </a>
+        </nav>
+      </div>
+ 
+      <div class="download-card">
+        <div class="download-icon">
+          <i data-lucide="smartphone"></i>
+        </div>
+        <h3>Download Our Mobile App</h3>
+        <p>Track your progress anywhere, anytime.</p>
+        <button class="download-btn">Download</button>
+      </div>
+    </aside>
+ 
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="sidebar">
+            <i data-lucide="menu"></i>
+          </button>
+          <label class="searchbar">
+            <i data-lucide="search"></i>
+            <input type="text" id="searchInput" placeholder="Search ScientiaForge..." autocomplete="off" />
+          </label>
+        </div>
+
+        <div class="topbar-right">
+
+          <button class="icon-btn planner-btn" id="plannerBtn" aria-label="Open calendar and notifications">
+            <i data-lucide="calendar-days"></i>
+          </button>
+
+          <button class="icon-btn notification-btn" id="notificationBtn" aria-label="Open notifications">
+            <i data-lucide="bell"></i>
+            <span class="notification-badge hidden" id="notificationBadge">0</span>
+          </button>
+
+          <button class="icon-btn" mail-btn id="mailBtn" aria-label="Open mail">
+            <i data-lucide="mail"></i>
+          </button>
+          
+          <div class="profile">
+            <div class="avatar"></div>
+            <div>
+              <div class="profile-name"></div>
+              <div class="profile-email"></div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="cp-wrap">
+        <div class="page-header">
+          <h1>Study Hub</h1>
+          <p>Past papers for every subject and grade, study videos, and guidance on how to apply to a university or a bursary.</p>
+        </div>
+
+        <div class="sh-tabs">
+          <button class="cp-tab active" data-panel="papersPanel">Past papers</button>
+          <button class="cp-tab" data-panel="videosPanel">Study videos</button>
+          <button class="cp-tab" data-panel="applyPanel">How to apply</button>
+        </div>
+
+        <!-- Past papers -->
+        <section class="cp-card" id="papersPanel">
+          <h2>Find past papers</h2>
+          <p class="cp-subtext">Papers link out to the official Department of Basic Education (NSC) or IEB portals — pick your subject, grade and curriculum below.</p>
+          <div class="cp-filters">
+            <div class="filter-group">
+              <label>Subject</label>
+              <select id="paperSubject"><option value="">All subjects</option></select>
+            </div>
+            <div class="filter-group">
+              <label>Grade</label>
+              <select id="paperGrade">
+                <option value="">All grades</option>
+                <option value="12">Grade 12</option>
+                <option value="11">Grade 11</option>
+                <option value="10">Grade 10</option>
+                <option value="9">Grade 9</option>
+                <option value="8">Grade 8</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>Curriculum</label>
+              <select id="paperCurriculum">
+                <option value="">Both</option>
+                <option value="NSC">NSC (DBE)</option>
+                <option value="IEB">IEB</option>
+              </select>
+            </div>
+            <button class="btn-primary" id="searchPapersBtn">Search</button>
+          </div>
+          <div id="papersList" class="resource-list"></div>
+        </section>
+
+        <!-- Study videos -->
+        <section class="cp-card" id="videosPanel" style="display:none;">
+          <h2>Study videos</h2>
+          <p class="cp-subtext">YouTube videos to help you study each subject.</p>
+          <div class="cp-filters">
+            <div class="filter-group">
+              <label>Subject</label>
+              <select id="videoSubject"><option value="">All subjects</option></select>
+            </div>
+            <button class="btn-primary" id="searchVideosBtn">Search</button>
+          </div>
+          <div id="videosList" class="resource-list"></div>
+        </section>
+
+        <!-- How to apply -->
+        <section class="cp-card" id="applyPanel" style="display:none;">
+          <h2>How to apply to a university</h2>
+          <p class="cp-subtext">Application-guide videos, by institution.</p>
+          <div id="applyUniList" class="resource-list"></div>
+
+          <h2 style="margin-top:24px;">How to apply for a bursary</h2>
+          <div id="applyBursaryVideoList" class="resource-list"></div>
+
+          <h2 style="margin-top:24px;">Apply for a bursary</h2>
+          <p class="cp-subtext">Tap "Apply" to be taken straight to the official bursary application page.</p>
+          <div id="applyBursaryList" class="bursary-list"></div>
+        </section>
+      </div>
+      <!-- PLANNER SLIDE-OVER -->
+      <div class="planner-overlay hidden" id="plannerOverlay">
+        <aside class="planner-panel" role="dialog" aria-modal="true">
+          <header class="planner-header">
+            <h2>Planner</h2>
+            <button class="icon-btn" id="closePlannerBtn" type="button" aria-label="Close planner">
+              <i data-lucide="x"></i>
+            </button>
+          </header>
+
+          <div class="planner-tabs">
+            <button class="planner-tab active" data-tab="calendar" type="button">Calendar</button>
+            <button class="planner-tab" data-tab="notifications" type="button">Notifications</button>
+          </div>
+
+          <section class="planner-content" id="calendarTab">
+            <div class="planner-calendar">
+              <div class="calendar-toolbar">
+                <button
+                  class="icon-btn"
+                  id="previousMonthBtn"
+                  type="button"
+                  aria-label="Previous month"
+                >
+                  ‹
+                </button>
+
+                <h3 id="calendarMonthLabel" aria-live="polite"></h3>
+
+                <button
+                  class="icon-btn"
+                  id="nextMonthBtn"
+                  type="button"
+                  aria-label="Next month"
+                >
+                  ›
+                </button>
+              </div>
+
+              <button class="planner-tab" id="calendarTodayBtn" type="button">
+                Today
+              </button>
+
+              <div class="calendar-weekdays" aria-hidden="true">
+                <span>Mon</span>
+                <span>Tue</span>
+                <span>Wed</span>
+                <span>Thu</span>
+                <span>Fri</span>
+                <span>Sat</span>
+                <span>Sun</span>
+              </div>
+
+              <div
+                class="calendar-days"
+                id="calendarDays"
+                role="group"
+                aria-label="Choose a date"
+              ></div>
+
+              <p id="calendarLoadStatus" role="status"></p>
+
+              <h4 id="selectedDateLabel"></h4>
+              <div id="selectedDateEvents"></div>
+            </div>
+            
+
+            <h3>Your reminders & goals</h3>
+            <div id="plannerEventsList"></div>
+
+            <h3>Add a reminder or goal</h3>
+
+            <form id="plannerEventForm" class="planner-form">
+              <label>
+                Type
+                <select name="type" required>
+                  <option value="reminder">Reminder</option>
+                  <option value="goal">Goal</option>
+                </select>
+              </label>
+
+              <label>
+                Title
+                <input
+                  name="title"
+                  type="text"
+                  maxlength="150"
+                  required
+                  placeholder="What do you want to do?"
+                />
+              </label>
+
+              <label>
+                Description
+                <textarea
+                  name="description"
+                  rows="3"
+                  maxlength="2000"
+                  placeholder="Optional details..."
+                ></textarea>
+              </label>
+
+              <fieldset id="reminderFields" class="planner-fieldset">
+                <legend>Reminder deadline</legend>
+
+                <div class="planner-form-row">
+                  <label>
+                    Due date
+                    <input name="event_date" type="date" required />
+                  </label>
+
+                  <label>
+                    Due time — optional
+                    <input name="event_time" type="time" />
+                  </label>
+                </div>
+              </fieldset>
+
+              <fieldset
+                id="goalFields"
+                class="planner-fieldset"
+                hidden
+                disabled
+              >
+                <legend>Goal schedule</legend>
+
+                <label>
+                  Start date and time
+                  <input name="starts_at" type="datetime-local" />
+                </label>
+
+                <label>
+                  End date and time
+                  <input name="ends_at" type="datetime-local" />
+                </label>
+              </fieldset>
+
+              <label>
+                <span id="notifyFieldLabel">Notify me at — required</span>
+                <input name="remind_at" type="datetime-local" required />
+              </label>
+
+              <small>
+                Times use your device’s local timezone.
+                Date-only reminders become overdue after the due date ends.
+              </small>
+
+              <button class="btn btn-primary" type="submit">
+                Save entry
+              </button>
+            </form>
+
+            <p id="plannerMessage" role="status" aria-live="polite"></p>
+          </section>
+
+          <section class="planner-content hidden" id="notificationsTab">
+            <h3>Notifications</h3>
+
+            <p
+              class="notification-status"
+              id="notificationStatus"
+              role="status"
+              aria-live="polite"
+            ></p>
+
+            <div id="notificationsList"></div>
+          </section>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/nscCommon.js"></script> 
+  <script src="../js/StudyHub.js"></script>
+  <script src="../js/VideoDiscovery.js"></script>
+  <script src="../js/planner-UI.js"></script>
+  <script src="../js/planner.js"></script>
+  <script src="../js/calendar.js"></script>
+  <script src="../js/notifications.js"></script>
+
+  
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

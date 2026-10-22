@@ -1,0 +1,1567 @@
+/* ═══════════════════════════════════════════════════════════════
+   INTERVIEW SIMULATOR — visual redesign (v4: forced contrast)
+
+   The question bubble, timer, response panel and progress bar below
+   use !important on their background/text-color declarations. This
+   is deliberate: earlier passes set these colors normally, but the
+   box in production is still rendering dark with unreadable text,
+   which means something loaded after this file (most likely
+   InterviewReport.css, which loads after this file in your <head>)
+   is overriding them, or the browser is serving a cached copy.
+   !important guarantees these specific declarations win regardless
+   of load order once this file actually loads — it does not fix a
+   browser cache serving the old file, so a hard refresh is still
+   required after replacing it.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --isim-violet: #6d28d9;
+  --isim-teal: #0f766e;
+  --isim-amber: #b45309;
+  --isim-ink: #111827;
+
+  /* Self-contained, guaranteed-contrast text colors for the
+     in-interview screen. Never sourced from shared theme tokens. */
+  --isim-text-strong: #0f172a;   /* headings, question text, answers */
+  --isim-text-body:   #334155;   /* secondary body copy */
+  --isim-text-muted:  #64748b;   /* labels, hints, meta */
+  --isim-surface:     #ffffff;   /* card backgrounds */
+  --isim-surface-tint:#f8fafc;   /* subtle inset surfaces */
+  --isim-border:      #e2e8f0;   /* card borders on light surfaces */
+}
+
+.interview-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 4px 24px 48px;
+  font-size: 16px;
+}
+
+/* ── Page header ───────────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.page-header-icon {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  color: #fff;
+  background: var(--isim-ink);
+}
+
+.page-header h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: var(--text-dark);
+  margin: 0 0 4px;
+}
+
+.page-header p {
+  font-size: 1.02rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ── Shared section-card shell (setup screen) ─────────────────── */
+.setup-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 30px 32px;
+  box-shadow: var(--shadow-sm);
+}
+
+.setup-card h3,
+.setup-card > label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0 0 20px;
+  letter-spacing: -0.01em;
+}
+
+.setup-card > label em {
+  font-style: normal;
+  font-weight: 500;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-left: 4px;
+}
+
+.section-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  font-size: 1.02rem;
+  flex-shrink: 0;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+}
+
+.interview-type-section .section-icon {
+  color: var(--isim-violet);
+  background: color-mix(in srgb, var(--isim-violet) 10%, transparent);
+}
+
+.duration-section .section-icon {
+  color: var(--isim-teal);
+  background: color-mix(in srgb, var(--isim-teal) 10%, transparent);
+}
+
+.question-count-section .section-icon {
+  color: var(--isim-amber);
+  background: color-mix(in srgb, var(--isim-amber) 10%, transparent);
+}
+
+.field-hint {
+  display: block;
+  margin-top: 12px;
+  font-size: 0.87rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+/* ── Setup layout: main column + sticky summary ──────────────────── */
+.setup-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 28px;
+  align-items: start;
+}
+
+.setup-main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+.setup-card-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.setup-summary {
+  position: sticky;
+  top: 24px;
+}
+
+/* ── Interview type ────────────────────────────────────────────── */
+.interview-types {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.interview-type {
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 24px 18px;
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+  text-align: center;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.interview-type-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--isim-violet) 8%, transparent);
+  color: var(--isim-violet);
+  font-size: 1.3rem;
+}
+
+.interview-type:hover {
+  border-color: var(--primary);
+}
+
+.interview-type.active {
+  border-color: var(--primary);
+  border-width: 2px;
+  box-shadow: inset 0 0 0 1px var(--primary);
+  color: var(--text-dark);
+}
+
+.interview-type.active .interview-type-icon {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* ── Duration ──────────────────────────────────────────────────── */
+.duration-control {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.duration-control input[type="range"] {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--border);
+  cursor: pointer;
+  outline: none;
+}
+
+.duration-control input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid var(--primary);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.2);
+  cursor: pointer;
+}
+
+.duration-control input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid var(--primary);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.2);
+  cursor: pointer;
+}
+
+.duration-value {
+  min-width: 76px;
+  text-align: center;
+  padding: 9px 14px;
+  border-radius: 10px;
+  background: var(--isim-ink);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.94rem;
+}
+
+.range-scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* ── Number of questions ───────────────────────────────────────── */
+.question-count-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stepper-btn {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-main);
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.stepper-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.question-count-control input[type="number"] {
+  width: 100px;
+  padding: 10px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-align: center;
+  background: #fff;
+  color: var(--text-main);
+  -moz-appearance: textfield;
+}
+
+.question-count-control input[type="number"]::-webkit-outer-spin-button,
+.question-count-control input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.question-count-control input[type="number"]:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.question-count-value {
+  margin-left: auto;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--isim-amber) 10%, transparent);
+  color: var(--isim-amber);
+  font-weight: 700;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* ── Target role search ────────────────────────────────────────── */
+.role-search-wrap {
+  position: relative;
+}
+
+.role-search-icon {
+  position: absolute;
+  left: 17px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  pointer-events: none;
+}
+
+.role-search-input {
+  width: 100%;
+  padding: 14px 16px 14px 44px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  font-size: 1rem;
+  background: #fff;
+  color: var(--text-main);
+  transition: border-color 0.15s ease;
+}
+
+.role-search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.role-suggestions {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.14);
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.role-suggestion-item {
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.role-suggestion-item:hover {
+  background: color-mix(in srgb, var(--primary) 7%, transparent);
+}
+
+.role-suggestion-custom {
+  color: var(--primary);
+  font-weight: 700;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+  padding-top: 14px;
+}
+
+.role-selected-chip {
+  margin-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px 9px 16px;
+  border-radius: 10px;
+  background: var(--isim-ink);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.role-selected-chip button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 6px;
+  width: 22px;
+  height: 22px;
+  color: #fff;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* ── Persona grid ──────────────────────────────────────────────── */
+.persona-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+@media (max-width: 1100px) {
+  .persona-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.persona-card {
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 16px 20px;
+  background: var(--bg-card);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.persona-card:hover {
+  border-color: var(--primary);
+}
+
+.persona-card.active {
+  border-color: var(--primary);
+  border-width: 2px;
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+.persona-tag {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--primary);
+}
+
+.persona-avatar-wrap {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  padding: 3px;
+  background: var(--border);
+  transition: background-color 0.16s ease;
+}
+
+.persona-card.active .persona-avatar-wrap {
+  background: var(--primary);
+}
+
+.persona-canvas {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #fff;
+  display: block;
+}
+
+.persona-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.persona-info strong {
+  font-size: 1rem;
+  color: var(--text-dark);
+}
+
+.persona-info span {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* ── Persona preview strip ─────────────────────────────────────── */
+.persona-preview {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: color-mix(in srgb, var(--border) 30%, white);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+
+.persona-preview-avatar {
+  font-size: 1.35rem;
+  min-width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  background: var(--isim-ink);
+  color: #fff;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.persona-preview-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.persona-preview-text strong {
+  font-size: 1.02rem;
+  color: var(--text-dark);
+}
+
+.persona-preview-text span {
+  font-size: 0.86rem;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.persona-preview-text p {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  margin: 6px 0 0;
+  line-height: 1.6;
+}
+
+/* ── Interview summary (sticky) ──────────────────────────────────── */
+.preview-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.1);
+  overflow: hidden;
+}
+
+.preview-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--cyan));
+}
+
+.preview-card h4 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.12rem;
+  font-weight: 700;
+  margin: 4px 0 20px;
+  color: var(--text-dark);
+}
+
+.preview-card h4 i {
+  color: var(--primary);
+}
+
+.summary-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  font-size: 0.94rem;
+}
+
+.summary-row:last-of-type {
+  border-bottom: none;
+}
+
+.summary-row i {
+  width: 20px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.summary-label {
+  color: var(--text-muted);
+  flex: 1;
+}
+
+.summary-row strong {
+  color: var(--text-dark);
+  font-weight: 700;
+  text-align: right;
+  max-width: 55%;
+}
+
+.ticket-divider {
+  position: relative;
+  margin: 20px -28px;
+  border-top: 1.5px dashed var(--border);
+}
+
+.ticket-divider i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  padding: 0 12px;
+  font-size: 0.85rem;
+}
+
+.webcam-option {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.webcam-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 13px 16px;
+  border-radius: 10px;
+  border: 1.5px dashed color-mix(in srgb, var(--primary) 50%, var(--border));
+  background: transparent;
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.webcam-toggle-btn:hover {
+  background: color-mix(in srgb, var(--primary) 6%, transparent);
+}
+
+.webcam-toggle-btn.active {
+  border-style: solid;
+  background: var(--primary);
+  color: #fff;
+}
+
+.webcam-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.preview-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.preview-actions .btn-primary,
+.preview-actions .btn-secondary,
+.interview-controls .btn-primary,
+.interview-controls .btn-secondary {
+  width: 100%;
+  justify-content: center;
+  padding: 15px 20px;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 11px;
+}
+
+.preview-actions .btn-primary,
+.interview-controls .btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--cyan)) !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+.interview-controls .btn-secondary {
+  background: var(--isim-surface) !important;
+  border: 1.5px solid var(--isim-border) !important;
+  color: var(--isim-text-body) !important;
+}
+
+.interview-controls .btn-secondary:hover {
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   IN-INTERVIEW SCREEN — forced contrast zone.
+   Every rule below that controls a background or text color a
+   candidate must read uses !important. This is the block to check
+   first in DevTools if anything still looks wrong: if a color here
+   still shows as struck-through / overridden, something with even
+   higher specificity (an inline style, or another !important rule
+   later in the cascade) is the real conflict, and its selector will
+   be visible in the Styles panel.
+   ══════════════════════════════════════════════════════════════ */
+
+.interview-ui {
+  margin-top: 4px;
+}
+
+/* ── Session header: interviewer badge + timer ───────────────── */
+.interview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.interviewer-badge {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--isim-ink) !important;
+  border-radius: 999px;
+  padding: 10px 22px 10px 16px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.16);
+}
+
+.interviewer-live-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.25);
+  animation: pulseDot 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.interviewer-name-block {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.interviewer-name-block strong {
+  font-size: 1rem;
+  color: #ffffff !important;
+}
+
+.interviewer-name-block small {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
+.timer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--isim-text-strong) !important;
+  background: var(--isim-surface) !important;
+  border: 1.5px solid var(--isim-border);
+  border-radius: 999px;
+  padding: 10px 22px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.timer i {
+  color: var(--isim-text-muted) !important;
+}
+
+/* ── Interview stage: avatar + candidate ──────────────────────── */
+.interview-stage {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 26px;
+  align-items: stretch;
+}
+
+@media (max-width: 1000px) {
+  .interview-stage { grid-template-columns: 1fr; }
+}
+
+.avatar-panel {
+  background: var(--isim-surface) !important;
+  border: 1px solid var(--isim-border);
+  border-radius: 16px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.avatar-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--isim-text-muted) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 18px;
+}
+
+/* This wrap is deliberately dark — it's the frame around the avatar
+   canvas, not text-bearing, so it's fine as-is. */
+.avatar-canvas-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--isim-ink);
+}
+
+.avatar-canvas-wrap canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.speaking-indicator {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.speaking-indicator span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0.9;
+  animation: speakBounce 1s ease-in-out infinite;
+}
+
+.speaking-indicator span:nth-child(2) { animation-delay: 0.15s; }
+.speaking-indicator span:nth-child(3) { animation-delay: 0.3s; }
+
+/* Question bubble — THIS is the box that was reported unreadable.
+   Background and text color are forced with !important so nothing
+   loaded after this file (e.g. InterviewReport.css) can silently
+   turn it dark again. */
+.question-bubble {
+  position: relative;
+  width: 100%;
+  margin-top: 24px;
+  background: #ffffff !important;
+  border: 1px solid var(--isim-border);
+  border-left: 4px solid var(--primary);
+  border-radius: 14px;
+  padding: 20px 22px;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+}
+
+.question-bubble::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: 36px;
+  width: 14px;
+  height: 14px;
+  background: #ffffff !important;
+  border-left: 1px solid var(--isim-border);
+  border-top: 1px solid var(--isim-border);
+  transform: rotate(45deg);
+}
+
+.question-meta {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.question-time-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--isim-amber) 12%, transparent);
+  color: var(--isim-amber);
+}
+
+#currentQuestion {
+  margin: 0 !important;
+  font-size: 1.14rem !important;
+  line-height: 1.65 !important;
+  color: #0f172a !important;
+  font-weight: 600 !important;
+  background: transparent !important;
+}
+
+/* ── Candidate panel ───────────────────────────────────────────── */
+.candidate-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.webcam-wrap {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--isim-ink);
+  aspect-ratio: 4 / 3;
+  border: 1px solid var(--isim-border);
+}
+
+.webcam-wrap video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scaleX(-1);
+}
+
+.webcam-wrap canvas#webcamOverlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: scaleX(-1);
+}
+
+.webcam-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #94a3b8;
+  font-size: 0.92rem;
+  text-align: center;
+  background: var(--isim-ink);
+}
+
+.webcam-placeholder i {
+  font-size: 2rem;
+  color: #475569;
+}
+
+.webcam-wrap.is-live .webcam-placeholder {
+  display: none;
+}
+
+.live-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 5;
+  display: none;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+}
+
+.webcam-wrap.is-live .live-badge {
+  display: inline-flex;
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+  animation: pulseDot 1.4s ease-in-out infinite;
+}
+
+/* ── Diagram / given-data box (intentionally dark, code-style) ──── */
+.diagram-box {
+  background: var(--isim-ink);
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+
+.diagram-box-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #93c5fd;
+  margin-bottom: 12px;
+}
+
+.diagram-copy-btn {
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 0.76rem;
+  transition: background-color 0.15s ease;
+}
+
+.diagram-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.diagram-box pre {
+  margin: 0;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: #e2e8f0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ── Response panel ────────────────────────────────────────────── */
+.response-panel {
+  background: var(--isim-surface) !important;
+  border: 1px solid var(--isim-border);
+  border-radius: 16px;
+  padding: 22px 24px;
+  box-shadow: var(--shadow-sm);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.response-panel > label {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--isim-text-strong) !important;
+  margin-bottom: 12px;
+}
+
+.mic-input {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.record-btn,
+.stop-btn {
+  border: 1.5px solid var(--isim-border);
+  border-radius: 10px;
+  padding: 11px 18px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: border-color 0.15s ease, color 0.15s ease;
+  background: var(--isim-surface) !important;
+  color: var(--isim-text-body) !important;
+}
+
+.record-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary) !important;
+}
+
+.record-btn.recording {
+  background: #fef2f2 !important;
+  border-color: #dc2626;
+  color: #dc2626 !important;
+}
+
+.record-btn.recording i {
+  animation: pulseDot 1s ease-in-out infinite;
+}
+
+.stop-btn {
+  background: color-mix(in srgb, var(--primary) 6%, white) !important;
+}
+
+textarea#transcript {
+  width: 100%;
+  min-height: 150px;
+  border: 1.5px solid var(--isim-border);
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 1rem;
+  font-family: inherit;
+  line-height: 1.55;
+  resize: vertical;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  transition: border-color 0.15s ease;
+}
+
+textarea#transcript::placeholder {
+  color: var(--isim-text-muted) !important;
+}
+
+textarea#transcript:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.final-answer-wrap {
+  margin-top: 16px;
+}
+
+.final-answer-wrap label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--isim-text-strong) !important;
+  margin-bottom: 9px;
+}
+
+.final-answer-input {
+  width: 100%;
+  max-width: 240px;
+  padding: 13px 16px;
+  border: 2px solid var(--primary);
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--isim-text-strong) !important;
+  background: color-mix(in srgb, var(--primary) 5%, white) !important;
+}
+
+.final-answer-input:focus {
+  outline: none;
+}
+
+/* ── Interview controls + progress ────────────────────────────── */
+.interview-controls {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin: 26px 0 20px;
+}
+
+.interview-progress {
+  background: var(--isim-surface) !important;
+  border: 1px solid var(--isim-border);
+  border-radius: 14px;
+  padding: 18px 22px;
+}
+
+.interview-progress h5 {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--isim-text-strong) !important;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--isim-surface-tint) !important;
+  overflow: hidden;
+  margin-bottom: 9px;
+  border: 1px solid var(--isim-border);
+}
+
+.bar-fill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--cyan));
+  border-radius: 999px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progress-label {
+  font-size: 0.87rem;
+  font-weight: 600;
+  color: var(--isim-text-muted) !important;
+}
+
+/* ── Feedback / report wrapper ────────────────────────────────── */
+.feedback-ui {
+  margin-top: 4px;
+}
+
+.feedback-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Motion — used sparingly: only genuine "live" indicators pulse.
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.45; transform: scale(0.85); }
+}
+
+@keyframes speakBounce {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50%      { transform: translateY(-4px); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .interviewer-live-dot,
+  .live-dot,
+  .speaking-indicator span,
+  .bar-fill {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Accessibility: visible keyboard focus everywhere interactive
+   ═══════════════════════════════════════════════════════════════ */
+
+.interview-type:focus-visible,
+.persona-card:focus-visible,
+.stepper-btn:focus-visible,
+.webcam-toggle-btn:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Responsive
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1180px) {
+  .setup-grid {
+    grid-template-columns: 1fr;
+  }
+  .setup-summary {
+    position: static;
+  }
+}
+
+@media (max-width: 900px) {
+  .interview-types {
+    grid-template-columns: 1fr 1fr;
+  }
+  .setup-card-row {
+    grid-template-columns: 1fr;
+  }
+  .preview-actions {
+    flex-direction: column;
+  }
+  .interview-controls {
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 768px) {
+  .interview-dashboard {
+    padding: 4px 16px 36px;
+  }
+  .interview-types {
+    grid-template-columns: 1fr;
+  }
+  .setup-card {
+    padding: 24px 22px;
+  }
+  .interview-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .ticket-divider {
+    margin: 20px -22px;
+  }
+}
+
+@media (max-width: 640px) {
+  .persona-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .feedback-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .final-answer-input {
+    max-width: 100%;
+  }
+
+  .interview-controls .btn-primary,
+  .interview-controls .btn-secondary {
+    flex: 1 1 100%;
+  }
+
+  .webcam-wrap {
+    aspect-ratio: 16 / 10;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .page-header-icon {
+    width: 52px;
+    height: 52px;
+    font-size: 1.2rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .setup-card {
+    padding: 18px 16px;
+  }
+
+  .timer {
+    padding: 8px 16px;
+    font-size: 1rem;
+  }
+
+  .avatar-canvas-wrap {
+    max-width: 100%;
+  }
+}
+/* ═══════════════════════════════════════════════════════════════
+   Hidden utility
+   ═══════════════════════════════════════════════════════════════ */
+
+.hidden {
+  display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Feedback report internals
+   ═══════════════════════════════════════════════════════════════ */
+
+.feedback-card {
+  background: var(--isim-surface) !important;
+  border: 1px solid var(--isim-border);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+}
+
+.feedback-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.feedback-header h3 {
+  font-size: 1.3rem;
+  margin: 0;
+  color: var(--isim-text-strong) !important;
+  font-weight: 700;
+}
+
+.overall-score {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+}
+
+.overall-score .label {
+  color: var(--isim-text-muted) !important;
+}
+
+.overall-score .score {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--isim-text-strong) !important;
+}
+
+.feedback-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.score-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+}
+
+.score-item h5 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--isim-text-strong) !important;
+}
+
+.score-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.92rem;
+  padding: 8px 13px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  color: var(--isim-text-strong) !important;
+}
+
+.score-badge .score {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-right: 2px;
+}
+
+.score-badge .label {
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.score-badge.high {
+  background: color-mix(in srgb, #16a34a 14%, transparent);
+  color: #15803d !important;
+}
+
+.score-badge.good {
+  background: color-mix(in srgb, var(--isim-amber) 12%, transparent);
+  color: var(--isim-amber) !important;
+}
+
+.score-badge.weak {
+  background: color-mix(in srgb, #dc2626 12%, transparent);
+  color: #dc2626 !important;
+}
+
+.feedback-tips {
+  margin-bottom: 24px;
+}
+
+.feedback-tips h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 14px;
+  color: var(--isim-text-strong) !important;
+}
+
+.feedback-tips ul {
+  list-style: disc;
+  padding-left: 22px;
+  margin: 0;
+}
+
+.feedback-tips li {
+  margin-bottom: 9px;
+  font-size: 0.97rem;
+  color: var(--isim-text-body) !important;
+  line-height: 1.55;
+}
+
+.qa-breakdown {
+  margin-bottom: 24px;
+}
+
+.qa-breakdown h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--isim-text-strong) !important;
+  margin: 0 0 14px;
+}
+
+.qa-item {
+  border: 1px solid var(--isim-border);
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 12px;
+  background: var(--isim-surface-tint) !important;
+}
+
+.qa-q {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: var(--isim-text-strong) !important;
+  margin-bottom: 9px;
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+}
+
+.qa-num {
+  background: var(--isim-ink);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+  margin-top: 1px;
+}
+
+.qa-a {
+  font-size: 0.9rem;
+  color: var(--isim-text-muted) !important;
+  margin-bottom: 9px;
+  line-height: 1.6;
+}
+
+.qa-fb {
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--primary) 70%, black 10%) !important;
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  border-radius: 9px;
+  padding: 11px 13px;
+  line-height: 1.6;
+}
