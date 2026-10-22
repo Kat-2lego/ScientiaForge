@@ -32,24 +32,7 @@ body {
     overflow-x: hidden;
 }
 
-/* For the navigation part*/
-.main-nav {
-    width: 100%;
-    padding: 20px 0;
-    background: transparent;
-    position: absolute;
-    top: 0;
-    z-index: 100;
-}
 
-.nav-container {
-    max-width: 1300px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 40px;
-}
 .nav-actions { display: flex; align-items: center; gap: 20px; }
 .nav-cta { background-color : #0033a0; color: white; padding: 10px 24px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 14px; transition: 0.3s; }
 .nav-cta:hover { background: #002277; transform: scale(1.03);}
@@ -75,12 +58,6 @@ body {
 
 .brand-text strong {
     color: var(--primary-blue);
-}
-
-.nav-links {
-    display: flex;
-    list-style: none;
-    gap: 35px;
 }
 
 .nav-links a {
@@ -165,7 +142,7 @@ body {
 }
 
 .highlight-blue {
-    color: var(--primary-blue);
+    color: var(--light-blue);
 }
 
 .hero-subtitle {
@@ -358,4 +335,66 @@ body {
     font-size: 13px;
     color: var(--text-muted);
     line-height: 1.5;
+}
+@media (max-width: 1024px) {
+  .hero-container {
+    flex-direction: column;
+    text-align: center;
+    padding: 0 24px;
+  }
+
+  .hero-content {
+    max-width: 100%;
+  }
+
+  .hero-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .hero-image-wrapper {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .benefits-row {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .benefit-item {
+    flex: 1 1 calc(50% - 20px);
+  }
+
+  .benefit-item:not(:last-child)::after {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-section {
+    min-height: auto;
+    padding-top: 130px;
+    padding-bottom: 60px;
+  }
+
+  .hero-title {
+    font-size: 34px;
+  }
+
+  .hero-subtitle {
+    font-size: 16px;
+  }
+
+  .hero-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .benefit-item {
+    flex: 1 1 100%;
+  }
+
+  .section-heading::before,
+  .section-heading::after {
+    display: none;
+  }
 }
