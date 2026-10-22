@@ -1,7 +1,11 @@
-# Forward API requests to the Render Node.js backend
+
+# Forward the exact login endpoint to Render
+/api  https://scientiaforge-backend.onrender.com/api  200
+
+# Forward all other API endpoints to Render
 /api/*  https://scientiaforge-backend.onrender.com/api/:splat  200
 
-# Forward backend endpoints that are not under /api
+# Forward backend endpoints outside /api
 /create-payment-intent  https://scientiaforge-backend.onrender.com/create-payment-intent  200
 /download_cv  https://scientiaforge-backend.onrender.com/download_cv  200
 
