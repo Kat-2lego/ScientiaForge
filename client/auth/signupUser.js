@@ -287,7 +287,7 @@ async function handleSignUp() {
 
     // 5. Send complete profile package to backend server
     try {
-        const resp = await fetch("api/auth/signup", {
+        const resp = await fetch("https://scientiaforge-backend.onrender.com/api/auth/signup", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
