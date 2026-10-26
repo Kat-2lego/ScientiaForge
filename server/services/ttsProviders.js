@@ -190,24 +190,47 @@ export async function elevenLabsSpeech({ text, voiceId, modelId, apiKey, baseUrl
   return { audio: Buffer.from(await res.arrayBuffer()), contentType: "audio/mpeg" };
 }
 
-/** Microsoft's free voice, through the msedge-tts package you already use. */
+/** Microsoft's free voice, through the Python edge-tts package (the JS packages stopped working). */
 export async function edgeSpeech({ text, voice = "en-ZA-LukeNeural", rate = 0.95, pitch = "+0Hz" }) {
-  const { MsEdgeTTS, OUTPUT_FORMAT } = await import("msedge-tts");
-  const tts = new MsEdgeTTS();
-  await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
-  const { audioStream } = await tts.toStream(text, { rate, pitch });
-  const chunks = [];
-  await new Promise((resolve, reject) => {
-    audioStream.on("data", (c) => chunks.push(c));
-    audioStream.on("end", resolve);
-    audioStream.on("error", reject);
-  });
-  try { tts.close?.(); } catch { /* ignore */ }
-  const audio = Buffer.concat(chunks);
-  if (!audio.length) throw new TtsError("empty", "The free voice returned no audio");
-  return { audio, contentType: "audio/mpeg" };
-}
+  const { execFile } = await import("node:child_process");
+  const { writeFile, readFile, unlink } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const { randomUUID } = await import("node:crypto");
 
+  // The old code used a multiplier (0.95); edge-tts wants a percent string ("-5%").
+  const pct = Math.round((rate - 1) * 100);
+  const ratePct = `${pct >= 0 ? "+" : ""}${pct}%`;
+
+  const id = randomUUID();
+  const textFile = join(tmpdir(), `tts-${id}.txt`);
+  const audioFile = join(tmpdir(), `tts-${id}.mp3`);
+
+  try {
+    await writeFile(textFile, text, "utf8");
+    await new Promise((resolve, reject) => {
+      execFile(
+        process.env.EDGE_TTS_PYTHON || "python",
+        [
+          "-m", "edge_tts",
+          "--voice", voice,
+          `--rate=${ratePct}`,
+          `--pitch=${pitch}`,
+          "--file", textFile,
+          "--write-media", audioFile,
+        ],
+        { timeout: 15000, windowsHide: true },
+        (err, _stdout, stderr) => (err ? reject(new TtsError("edge_failed", String(stderr || err.message).slice(0, 300))) : resolve()),
+      );
+    });
+    const audio = await readFile(audioFile);
+    if (!audio.length) throw new TtsError("empty", "The free voice returned no audio");
+    return { audio, contentType: "audio/mpeg" };
+  } finally {
+    unlink(textFile).catch(() => {});
+    unlink(audioFile).catch(() => {});
+  }
+}
 /* ---------- budget: premium voices cost money ---------- */
 
 export function createBudget(limitChars, now = () => new Date()) {

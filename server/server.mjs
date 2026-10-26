@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import WebSocket from "ws";
-import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
+import { edgeSpeech } from "./services/ttsProviders.js";
 import cvRoutes from "./cv-analyzer/routes/cvRoutes.js";
 import careerPathfinderRoutes from "./routes/careerPathfinder.js";
 import studyHubRoutes from "./routes/studyHub.js";
@@ -522,26 +522,29 @@ app.post("/api/tts", async (req, res) => {
   const voiceConfig =
     PERSONA_VOICES[personaId] || (personaId ? pickFallbackVoice(personaId) : DEFAULT_VOICE);
 
+  let timer;
   try {
-    const tts = new MsEdgeTTS();
-    await tts.setMetadata(voiceConfig.voice, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
-
-    const { audioStream } = await tts.toStream(text, {
-      rate: voiceConfig.rate,
-      pitch: voiceConfig.pitch,
+    const deadline = new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error("Edge TTS timed out after 12s")), 12000);
     });
 
-    res.setHeader("Content-Type", "audio/mpeg");
+    const { audio, contentType } = await Promise.race([
+      edgeSpeech({
+        text,
+        voice: voiceConfig.voice,
+        rate: voiceConfig.rate,
+        pitch: voiceConfig.pitch,
+      }),
+      deadline,
+    ]);
 
-    audioStream.on("error", (err) => {
-      console.error("❌ TTS stream error:", err.message);
-      if (!res.headersSent) res.status(500).end();
-    });
-
-    audioStream.pipe(res);
+    res.setHeader("Content-Type", contentType);
+    return res.send(audio);
   } catch (error) {
     console.error("❌ TTS generation error:", error.message);
     return res.status(500).json({ error: "TTS generation failed." });
+  } finally {
+    clearTimeout(timer);
   }
 });
 
