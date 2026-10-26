@@ -83,7 +83,45 @@ main.main-content {
   color: var(--text);
   font-size: 0.95rem;
 }
- 
+
+/* Wraps the topbar search bar so the career-search results dropdown has
+   somewhere to anchor to. Explicit flex sizing here (rather than leaving
+   .searchbar's own width:min(100%,560px) to resolve against an auto-width
+   flex parent) keeps the bar exactly as wide as it was before the wrap was
+   added. */
+.searchbar-wrap {
+  position: relative;
+  flex: 0 1 560px;
+  min-width: 0;
+}
+
+.searchbar-wrap .searchbar {
+  width: 100%;
+}
+
+.searchbar-wrap .searchbar input {
+  padding-right: 22px;
+}
+
+.searchbar-wrap .search-clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.searchbar-wrap .search-clear:hover {
+  color: var(--text-dark);
+}
+
 /* profile */
 .profile {
   display: flex;

@@ -108,9 +108,16 @@ console.log(
 
 const app = express();
 
+// In local dev, nothing sets DISCOVERY_API_URL, so this still proxies to the
+// FastAPI service started by `npm run dev:api` on 127.0.0.1:8000 exactly as
+// before. In production, set DISCOVERY_API_URL to wherever the Career
+// Discovery Python service is actually deployed (its own Render Web
+// Service, most likely) — "npm start" only ever starts this Node server, it
+// does not start that service too, so without this the proxy has nothing to
+// reach and every /api/discovery/* call fails.
 app.use(createProxyMiddleware({
   pathFilter: "/api/discovery/**",
-  target: "http://127.0.0.1:8000",
+  target: process.env.DISCOVERY_API_URL || "http://127.0.0.1:8000",
   changeOrigin: true,
 }));
 /*
@@ -3767,6 +3774,322 @@ Return only a valid JSON array of strings.
     });
   }
 );
+
+/* =========================================================
+   DASHBOARD: REAL-TIME SUMMARY FOR THE LOGGED-IN USER
+   Everything the Dashboard page's stat cards, recommendations,
+   goal-completion ring and "Upcoming" panel need, computed from
+   cv_documents, interview_sessions, feature_events and
+   calendar_events — nothing here is hardcoded on the client.
+========================================================= */
+
+// For a reminder, "effective time" is just its due date. For a goal, it's
+// the start time while the goal hasn't begun yet, then the end time once
+// it's under way — so an in-progress goal still surfaces as "upcoming"
+// via its deadline instead of disappearing the moment it starts.
+function dashboardEventEffectiveTime(event) {
+  if (event.type === "goal") {
+    const startsAtMs = event.starts_at ? Date.parse(event.starts_at) : NaN;
+    if (Number.isFinite(startsAtMs) && startsAtMs > Date.now()) {
+      return startsAtMs;
+    }
+
+    const endsAtMs = event.ends_at ? Date.parse(event.ends_at) : NaN;
+    return Number.isFinite(endsAtMs) ? endsAtMs : null;
+  }
+
+  const dueAtMs = event.due_at ? Date.parse(event.due_at) : NaN;
+  return Number.isFinite(dueAtMs) ? dueAtMs : null;
+}
+
+app.get("/api/dashboard/summary", requireAuth, async (req, res) => {
+  const userId = req.userId;
+
+  // Each data source is independent — a problem with one table (or a table
+  // that doesn't exist yet in an older project) should degrade that one
+  // section gracefully instead of failing the whole dashboard.
+  const safe = async (label, fn, fallback) => {
+    try {
+      return await fn();
+    } catch (error) {
+      console.warn(`Dashboard summary: ${label} skipped:`, error.message);
+      return fallback;
+    }
+  };
+
+  try {
+    const [
+      cvDocs,
+      cvTotalCount,
+      interviewSessions,
+      interviewTotalCompleted,
+      skillGapEvents,
+      goalRows,
+      calendarEvents,
+      activityThisMonth,
+      activityLastMonth,
+      activityRecentRows,
+    ] = await Promise.all([
+      safe("cv documents", async () => {
+        const { data, error } = await databaseClient
+          .from("cv_documents")
+          .select("overall_score, ats_score, analysed_at, is_latest")
+          .eq("user_id", userId)
+          .order("analysed_at", { ascending: false, nullsFirst: false })
+          .limit(5);
+        if (error) throw error;
+        return data || [];
+      }, []),
+
+      safe("cv total count", async () => {
+        const { count, error } = await databaseClient
+          .from("cv_documents")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId);
+        if (error) throw error;
+        return count || 0;
+      }, 0),
+
+      safe("interview sessions", async () => {
+        const { data, error } = await databaseClient
+          .from("interview_sessions")
+          .select("overall_score, completed_at")
+          .eq("user_id", userId)
+          .eq("status", "completed")
+          .order("completed_at", { ascending: false, nullsFirst: false })
+          .limit(5);
+        if (error) throw error;
+        return data || [];
+      }, []),
+
+      safe("interview total completed", async () => {
+        const { count, error } = await databaseClient
+          .from("interview_sessions")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .eq("status", "completed");
+        if (error) throw error;
+        return count || 0;
+      }, 0),
+
+      safe("skill gap events", async () => {
+        const { data, error } = await databaseClient
+          .from("feature_events")
+          .select("metadata, created_at")
+          .eq("user_id", userId)
+          .eq("feature", "skill_gap")
+          .eq("event_type", "completed")
+          .order("created_at", { ascending: false })
+          .limit(5);
+        if (error) throw error;
+        return data || [];
+      }, []),
+
+      safe("goals", async () => {
+        const { data, error } = await databaseClient
+          .from("calendar_events")
+          .select("id, status")
+          .eq("user_id", userId)
+          .eq("type", "goal");
+        if (error) throw error;
+        return data || [];
+      }, []),
+
+      safe("upcoming calendar events", async () => {
+        const { data, error } = await databaseClient
+          .from("calendar_events")
+          .select("id, title, type, starts_at, ends_at, due_at, status")
+          .eq("user_id", userId)
+          .eq("status", "active")
+          .limit(25);
+        if (error) throw error;
+        return data || [];
+      }, []),
+
+      safe("activity this month", async () => {
+        const now = new Date();
+        const start = new Date(
+          Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)
+        ).toISOString();
+
+        const { count, error } = await databaseClient
+          .from("feature_events")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .eq("event_type", "completed")
+          .gte("created_at", start);
+        if (error) throw error;
+        return count || 0;
+      }, 0),
+
+      safe("activity last month", async () => {
+        const now = new Date();
+        const start = new Date(
+          Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1)
+        ).toISOString();
+        const end = new Date(
+          Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)
+        ).toISOString();
+
+        const { count, error } = await databaseClient
+          .from("feature_events")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .eq("event_type", "completed")
+          .gte("created_at", start)
+          .lt("created_at", end);
+        if (error) throw error;
+        return count || 0;
+      }, 0),
+
+      safe("activity recent", async () => {
+        const since = new Date(
+          Date.now() - 35 * 24 * 60 * 60 * 1000
+        ).toISOString();
+
+        const { data, error } = await databaseClient
+          .from("feature_events")
+          .select("created_at")
+          .eq("user_id", userId)
+          .eq("event_type", "completed")
+          .gte("created_at", since)
+          .limit(2000);
+        if (error) throw error;
+        return data || [];
+      }, []),
+    ]);
+
+    // ---------------- CV ----------------
+    const latestCv = cvDocs.find((doc) => doc.is_latest) || cvDocs[0] || null;
+    const previousCv = cvDocs.find((doc) => doc !== latestCv) || null;
+
+    const cv = {
+      hasAnalysis: !!latestCv,
+      score: latestCv?.overall_score ?? null,
+      ats: latestCv?.ats_score ?? null,
+      previousScore: previousCv?.overall_score ?? null,
+      analyzedAt: latestCv?.analysed_at ?? null,
+      totalAnalyzed: cvTotalCount,
+      history: cvDocs
+        .slice()
+        .reverse()
+        .map((doc) => doc.overall_score)
+        .filter((value) => typeof value === "number"),
+    };
+
+    // ---------------- Interview ----------------
+    const latestInterview = interviewSessions[0] || null;
+    const previousInterview = interviewSessions[1] || null;
+
+    const interview = {
+      hasSession: !!latestInterview,
+      score: latestInterview?.overall_score ?? null,
+      previousScore: previousInterview?.overall_score ?? null,
+      completedAt: latestInterview?.completed_at ?? null,
+      totalCompleted: interviewTotalCompleted,
+      history: interviewSessions
+        .slice()
+        .reverse()
+        .map((session) => session.overall_score)
+        .filter((value) => typeof value === "number"),
+    };
+
+    // ---------------- Skill gap ----------------
+    const latestSkillGap = skillGapEvents[0] || null;
+    const previousSkillGap = skillGapEvents[1] || null;
+
+    const skillGap = {
+      hasRun: !!latestSkillGap,
+      matchScore: latestSkillGap?.metadata?.matchScore ?? null,
+      previousMatchScore: previousSkillGap?.metadata?.matchScore ?? null,
+      missingCount: latestSkillGap?.metadata?.missingCount ?? null,
+      ranAt: latestSkillGap?.created_at ?? null,
+      history: skillGapEvents
+        .slice()
+        .reverse()
+        .map((event) => event.metadata?.matchScore)
+        .filter((value) => typeof value === "number"),
+    };
+
+    // ---------------- Composite readiness ----------------
+    const readinessParts = [cv.score, interview.score, skillGap.matchScore].filter(
+      (value) => typeof value === "number" && Number.isFinite(value)
+    );
+
+    const readinessPercent = readinessParts.length
+      ? Math.round(
+          readinessParts.reduce((sum, value) => sum + value, 0) /
+            readinessParts.length
+        )
+      : null;
+
+    // ---------------- Goals ----------------
+    const completedGoals = goalRows.filter(
+      (goal) => goal.status === "completed"
+    ).length;
+
+    const goals = {
+      total: goalRows.length,
+      completed: completedGoals,
+      completionPercent: goalRows.length
+        ? Math.round((completedGoals / goalRows.length) * 100)
+        : null,
+    };
+
+    // ---------------- Upcoming ----------------
+    const now = Date.now();
+    const upcomingCandidates = calendarEvents
+      .map((event) => ({ event, at: dashboardEventEffectiveTime(event) }))
+      .filter((entry) => entry.at !== null)
+      .sort((a, b) => a.at - b.at);
+
+    const nextUpcoming =
+      upcomingCandidates.find((entry) => entry.at >= now) ||
+      upcomingCandidates[0] ||
+      null;
+
+    const upcoming = nextUpcoming
+      ? {
+          id: nextUpcoming.event.id,
+          title: nextUpcoming.event.title,
+          type: nextUpcoming.event.type,
+          when: new Date(nextUpcoming.at).toISOString(),
+          isOverdue: nextUpcoming.at < now,
+        }
+      : null;
+
+    // ---------------- Activity ----------------
+    const weekMs = 7 * 24 * 60 * 60 * 1000;
+    const weekBuckets = [0, 0, 0, 0, 0];
+
+    activityRecentRows.forEach((row) => {
+      const ageMs = now - new Date(row.created_at).getTime();
+      const weekIndex = 4 - Math.min(4, Math.floor(ageMs / weekMs));
+      if (weekIndex >= 0 && weekIndex <= 4) weekBuckets[weekIndex] += 1;
+    });
+
+    const activity = {
+      thisMonth: activityThisMonth,
+      lastMonth: activityLastMonth,
+      recentWeeks: weekBuckets,
+    };
+
+    return res.status(200).json({
+      cv,
+      interview,
+      skillGap,
+      goals,
+      upcoming,
+      activity,
+      readinessPercent,
+    });
+  } catch (error) {
+    console.error("Dashboard summary error:", error);
+    return res.status(500).json({
+      error: "Could not load your dashboard data.",
+    });
+  }
+});
 
 /* =========================================================
    GLOBAL ERROR HANDLER

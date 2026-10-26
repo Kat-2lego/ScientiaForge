@@ -105,6 +105,17 @@ CORS_ORIGINS: List[str] = [
 # The O*NET cache is built once and reused. Rebuild after this many seconds.
 CACHE_TTL_SECONDS: int = int(os.getenv("SKILLFORGE_CACHE_TTL", "21600"))  # 6h
 
+# Where the built cache is persisted to disk between process restarts. A
+# platform spin-down/spin-up (Render's free tier, for example) restarts the
+# process but keeps its filesystem, so this turns what would otherwise be a
+# multi-minute Supabase rebuild back into a sub-second load. Perfectly safe
+# on a non-persistent disk too: if the file is ever missing, the cache is
+# just rebuilt from Supabase exactly as it always was.
+CACHE_FILE_PATH: str = os.getenv(
+    "SKILLFORGE_CACHE_FILE",
+    str(Path(__file__).resolve().parent / ".onet_cache.pkl"),
+)
+
 # Rows fetched per page when using the PostgREST fallback driver.
 REST_PAGE_SIZE: int = 1000
 

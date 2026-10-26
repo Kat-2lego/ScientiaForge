@@ -118,21 +118,13 @@
   }
 
   function authToken() {
-    // Supabase stores its session under a project-scoped key.
-    try {
-      for (let i = 0; i < localStorage.length; i += 1) {
-        const key = localStorage.key(i);
-        if (!key || key.indexOf("-auth-token") === -1) continue;
-        const parsed = JSON.parse(localStorage.getItem(key) || "{}");
-        if (parsed && parsed.access_token) return parsed.access_token;
-        if (parsed && parsed.currentSession && parsed.currentSession.access_token) {
-          return parsed.currentSession.access_token;
-        }
-      }
-    } catch (error) {
-      console.warn("Could not read the Supabase session:", error);
-    }
-    return localStorage.getItem("sf_access_token") || null;
+    // Every other page (auth.js, dashboard.js, planner.js, CvDashboard.html,
+    // InterviewSimulator.js, ...) stores the session under this one key, set
+    // at login. This used to scan for a key matching Supabase's own default
+    // "<project>-auth-token" session format instead, which nothing in this
+    // app actually writes — so it silently found no token, and every
+    // discovery request (including Save Career Path) went out unauthenticated.
+    return localStorage.getItem("sb-access-token") || null;
   }
 
   async function api(path, options) {
@@ -364,12 +356,72 @@
     ].join("");
   }
 
-  async function runAnalysis() {
+  /* ------------------------------------------------------- matching jobs */
+  // generate-matches used to be one blocking request: on a cold cache that
+  // could sit for minutes, and navigating away lost it completely. It now
+  // starts a job and returns a job_id right away; this polls for the result
+  // and keeps enough state in localStorage that coming back to this page
+  // mid-job resumes watching it instead of starting over (resumeDiscoveryJob,
+  // called from init).
+
+  const JOB_STORAGE_KEY = "sf_discovery_job";
+  const JOB_MAX_AGE_MS = 30 * 60 * 1000; // mirrors the backend's JOB_TTL_SECONDS
+  const POLL_INTERVAL_MS = 2000;
+  const POLL_MAX_ATTEMPTS = 300; // ~10 minutes before giving up and saying so
+
+  function persistJobState(jobId) {
+    try {
+      localStorage.setItem(
+        JOB_STORAGE_KEY,
+        JSON.stringify({
+          jobId: jobId,
+          startedAt: Date.now(),
+          domains: state.domains,
+          background: state.background,
+          subjects: state.subjects,
+          deepScan: state.deepScan,
+          answers: state.answers
+        })
+      );
+    } catch (error) {
+      console.warn("Could not save discovery job state:", error);
+    }
+  }
+
+  function loadJobState() {
+    try {
+      const raw = localStorage.getItem(JOB_STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !parsed.jobId || !parsed.startedAt) return null;
+      if (Date.now() - parsed.startedAt > JOB_MAX_AGE_MS) {
+        clearJobState();
+        return null;
+      }
+      return parsed;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function clearJobState() {
+    try {
+      localStorage.removeItem(JOB_STORAGE_KEY);
+    } catch (error) {
+      /* best-effort */
+    }
+  }
+
+  function wait(ms) {
+    return new Promise((resolve) => window.setTimeout(resolve, ms));
+  }
+
+  async function watchJob(jobId) {
     const wrapper = $("#questionnaireWrapper");
     wrapper.innerHTML = loadingBlock(CONFIG.LOADING_STAGES[0]);
 
-    // Stages advance while the request is genuinely in flight; nothing is
-    // padded with artificial delay.
+    // Stages advance while the job is genuinely still processing; nothing
+    // is padded with artificial delay.
     let stage = 0;
     const timer = window.setInterval(() => {
       stage = Math.min(stage + 1, CONFIG.LOADING_STAGES.length - 1);
@@ -378,7 +430,54 @@
     }, CONFIG.STAGE_INTERVAL_MS);
 
     try {
-      const data = await api("/api/discovery/generate-matches", {
+      for (let attempt = 0; attempt < POLL_MAX_ATTEMPTS; attempt += 1) {
+        const data = await api(
+          "/api/discovery/generate-matches/" + encodeURIComponent(jobId)
+        );
+
+        if (data.status === "processing") {
+          await wait(POLL_INTERVAL_MS);
+          continue;
+        }
+
+        window.clearInterval(timer);
+        clearJobState();
+        const node = $("#loadingStage");
+        if (node) node.textContent = "Analysis complete.";
+
+        const result = data.result || {};
+        state.matches = result.matches || [];
+        state.related = result.related_careers || [];
+        state.profile = result.profile || null;
+        state.sessionId = result.session_id || null;
+
+        if (!state.matches.length) {
+          renderEmpty(result.result_note);
+          return;
+        }
+        renderResults(result);
+        return;
+      }
+
+      window.clearInterval(timer);
+      throw new ApiError(
+        "TIMEOUT",
+        "This is taking much longer than expected. Please try again.",
+        0
+      );
+    } catch (error) {
+      window.clearInterval(timer);
+      renderError(error);
+    }
+  }
+
+  async function runAnalysis() {
+    clearJobState();
+    const wrapper = $("#questionnaireWrapper");
+    wrapper.innerHTML = loadingBlock(CONFIG.LOADING_STAGES[0]);
+
+    try {
+      const started = await api("/api/discovery/generate-matches", {
         method: "POST",
         body: JSON.stringify({
           core_domains: state.domains,
@@ -390,24 +489,28 @@
         })
       });
 
-      window.clearInterval(timer);
-      const node = $("#loadingStage");
-      if (node) node.textContent = "Analysis complete.";
-
-      state.matches = data.matches || [];
-      state.related = data.related_careers || [];
-      state.profile = data.profile || null;
-      state.sessionId = data.session_id || null;
-
-      if (!state.matches.length) {
-        renderEmpty(data.result_note);
-        return;
-      }
-      renderResults(data);
+      persistJobState(started.job_id);
+      await watchJob(started.job_id);
     } catch (error) {
-      window.clearInterval(timer);
       renderError(error);
     }
+  }
+
+  // Called from init(). If the user submitted the questionnaire, then left
+  // this page before it finished, this picks the same job back up instead
+  // of showing the questionnaire from scratch or silently losing it.
+  async function resumeDiscoveryJob() {
+    const saved = loadJobState();
+    if (!saved) return false;
+
+    state.domains = saved.domains || [];
+    state.background = saved.background || [];
+    state.subjects = saved.subjects || [];
+    state.deepScan = !!saved.deepScan;
+    state.answers = saved.answers || [];
+
+    await watchJob(saved.jobId);
+    return true;
   }
 
   /* -------------------------------------------------------------- results */
@@ -599,7 +702,7 @@
 
     renderFactors(match.top_factors || []);
     renderBreakdown(match.score_breakdown || {});
-    await loadRoadmap(match.onetsoc_code);
+    await loadRoadmap(match.onetsoc_code, match.job_zone);
   }
 
   function setText(selector, value) {
@@ -648,7 +751,31 @@
       .join("");
   }
 
-  async function loadRoadmap(code) {
+  // O*NET's job zones (1 = little/no preparation needed, through 5 =
+  // extensive preparation) are the one real, per-career signal available for
+  // "how long roughly does this take" — nothing here provides actual course
+  // durations, so a fixed 3-6/3-10/1-4 month timeline for every career was
+  // never true for most of them. These ranges are SkillForge's own estimate
+  // of typical preparation length by zone, not official data (said plainly
+  // in the roadmap-note under the timeline).
+  const ROADMAP_BY_JOB_ZONE = {
+    1: { study: "1-2 months", certs: "1-3 months", projects: "2-4 weeks" },
+    2: { study: "2-4 months", certs: "2-5 months", projects: "1-2 months" },
+    3: { study: "4-8 months", certs: "3-8 months", projects: "1-3 months" },
+    4: { study: "6-12 months", certs: "4-10 months", projects: "2-4 months" },
+    5: { study: "1-2 years", certs: "6-12 months", projects: "3-6 months" }
+  };
+  const DEFAULT_ROADMAP_TIMING = ROADMAP_BY_JOB_ZONE[4];
+
+  function renderRoadmapTimeline(jobZone) {
+    const timing = ROADMAP_BY_JOB_ZONE[jobZone] || DEFAULT_ROADMAP_TIMING;
+    setText("#roadmapStudyTime", timing.study);
+    setText("#roadmapCertsTime", timing.certs);
+    setText("#roadmapProjectsTime", timing.projects);
+  }
+
+  async function loadRoadmap(code, jobZone) {
+    renderRoadmapTimeline(jobZone);
     const container = $("#panelRoadmapDetail");
     if (!container) return;
     container.innerHTML = '<p class="muted">Loading learning signals...</p>';
@@ -679,8 +806,12 @@
   /* --------------------------------------------------------------- search */
 
   function setupSearch() {
-    const input = $("#careerSearchInput");
-    const clear = $("#careerSearchClear");
+    // This used to be a second, dedicated search box in its own card
+    // ("Already know the career?"). It's gone now — the topbar's own
+    // "Search ScientiaForge..." bar does career search on this page instead,
+    // so there's exactly one search field, not two.
+    const input = $("#searchInput");
+    const clear = $("#searchClear");
     if (!input) return;
 
     input.addEventListener("input", () => {
@@ -701,7 +832,7 @@
         input.blur();
       }
       if (event.key === "ArrowDown") {
-        const first = $("#careerSearchResults .search-hit");
+        const first = $("#searchResults .search-hit");
         if (first) {
           event.preventDefault();
           first.focus();
@@ -719,30 +850,30 @@
     }
 
     document.addEventListener("click", (event) => {
-      const panel = $(".career-search");
+      const panel = $(".searchbar-wrap");
       if (panel && !panel.contains(event.target)) hideSearchResults();
     });
   }
 
   function hideSearchResults() {
-    const box = $("#careerSearchResults");
+    const box = $("#searchResults");
     if (box) {
       box.hidden = true;
       box.innerHTML = "";
     }
-    const input = $("#careerSearchInput");
+    const input = $("#searchInput");
     if (input) input.setAttribute("aria-expanded", "false");
   }
 
   async function runSearch(query) {
-    const box = $("#careerSearchResults");
+    const box = $("#searchResults");
     if (!box) return;
 
     // Out-of-order responses must not overwrite newer ones.
     const seq = ++state.searchSeq;
 
     box.hidden = false;
-    $("#careerSearchInput").setAttribute("aria-expanded", "true");
+    $("#searchInput").setAttribute("aria-expanded", "true");
     box.innerHTML = '<div class="search-status">Searching...</div>';
 
     readSelections();
@@ -773,7 +904,7 @@
   }
 
   function renderSearchResults(data) {
-    const box = $("#careerSearchResults");
+    const box = $("#searchResults");
     if (!box) return;
 
     if (!data.count) {
@@ -823,7 +954,7 @@
           event.preventDefault();
           const previous = button.previousElementSibling;
           if (previous && previous.classList.contains("search-hit")) previous.focus();
-          else $("#careerSearchInput").focus();
+          else $("#searchInput").focus();
         }
       });
     });
@@ -856,7 +987,7 @@
     const tech = $("#panelTech");
     if (tech) tech.innerHTML = "";
     state.selected = hit;
-    await loadRoadmap(hit.onetsoc_code);
+    await loadRoadmap(hit.onetsoc_code, hit.job_zone);
     announce("Showing " + hit.title + ". Complete the questionnaire to see your match.");
   }
 
@@ -889,30 +1020,129 @@
     }
   }
 
-  function startLearning() {
-    if (!state.selected) {
-      announce("Choose a career first.");
+  /* ----------------------------------------------------- saved career paths */
+  // "Start Learning" used to hand off to ProgressTracker for a course
+  // sequence this app doesn't actually provide. This panel is what a person
+  // can genuinely act on instead: everything they've saved with "Save
+  // Career Path", in one place, opened straight from the button that used
+  // to be a dead end.
+
+  // This opens as a slide-over (mirrors #plannerOverlay) rather than a
+  // dropdown anchored to the button: the button lives inside .details-panel,
+  // which has overflow:hidden so the hero image's rounded corners clip
+  // cleanly - a dropdown popping out of it would be silently clipped too,
+  // which is exactly what "nothing happens when I click it" looked like.
+  let savedCareersFocus = null;
+
+  function openSavedCareersOverlay() {
+    const overlay = $("#savedCareersOverlay");
+    if (!overlay) return;
+    savedCareersFocus = document.activeElement;
+    overlay.classList.remove("hidden");
+    $("#closeSavedCareersBtn")?.focus();
+    loadSavedCareersList();
+  }
+
+  function closeSavedCareersOverlay() {
+    const overlay = $("#savedCareersOverlay");
+    if (overlay) overlay.classList.add("hidden");
+    savedCareersFocus?.focus();
+  }
+
+  async function loadSavedCareersList() {
+    const list = $("#savedCareersList");
+    if (!list) return;
+    list.innerHTML = '<div class="search-status">Loading your saved careers...</div>';
+
+    try {
+      const data = await api("/api/discovery/saved-careers");
+      renderSavedCareers(data.saved_careers || []);
+    } catch (error) {
+      list.innerHTML =
+        '<div class="search-status">' +
+        escapeHtml(
+          error.code === "AUTH_REQUIRED"
+            ? "Sign in to view your saved career paths."
+            : error.message
+        ) +
+        "</div>";
+    }
+  }
+
+  function renderSavedCareers(rows) {
+    if (window.SkillForgeShortlist) {
+  window.SkillForgeShortlist.render(rows);
+  return;
+}
+    const list = $("#savedCareersList");
+    if (!list) return;
+
+    if (!rows.length) {
+      list.innerHTML =
+        '<div class="search-status">No saved career paths yet. Use "Save Career Path" ' +
+        "on a career you like to add one.</div>";
       return;
     }
-    // The learning path is driven by the selected O*NET occupation (§32).
-    sessionStorage.setItem(
-      "sf_learning_target",
-      JSON.stringify({
-        onetsoc_code: state.selected.onetsoc_code,
-        title: state.selected.title,
-        job_zone: state.selected.job_zone,
-        session_id: state.sessionId
+
+    list.innerHTML = rows
+      .map((row, index) => {
+        const zone = row.job_zone
+          ? '<span class="search-hit-desc">Job zone ' + row.job_zone + "</span>"
+          : "";
+        return (
+          '<button type="button" class="search-hit" data-index="' + index + '">' +
+          '<span class="search-hit-main">' +
+          "<strong>" + escapeHtml(row.title || "Unknown career") + "</strong>" +
+          zone +
+          "</span>" +
+          '<i class="fa-solid fa-chevron-right" aria-hidden="true"></i>' +
+          "</button>"
+        );
       })
-    );
-    window.location.href =
-      "ProgressTracker.html?occupation=" +
-      encodeURIComponent(state.selected.onetsoc_code);
+      .join("");
+
+    list.querySelectorAll(".search-hit").forEach((button) => {
+      button.addEventListener("click", () => openSavedCareer(rows[Number(button.dataset.index)]));
+    });
+  }
+
+  async function openSavedCareer(record) {
+    closeSavedCareersOverlay();
+
+    // If it's one of this session's own results, show it fully scored; a
+    // career saved in an earlier session has no score to show against the
+    // current questionnaire, so it's shown plainly instead.
+    const known =
+      state.matches.find((m) => m.onetsoc_code === record.onetsoc_code) ||
+      state.related.find((m) => m.onetsoc_code === record.onetsoc_code);
+    if (known) {
+      selectCareer(known);
+      announce("Showing " + known.title + " - " + known.match_score + "% match.");
+      return;
+    }
+
+    setText("#panelTitle", record.title || "Saved career");
+    setText("#panelDesc", "");
+    setText("#panelMatch", "--");
+    setText("#panelConfidence", "Saved career path");
+    setText("#panelReason", "");
+    setText("#panelJobZone", record.job_zone ? "Job zone " + record.job_zone : "");
+    setText("#panelSalary", "--");
+    renderFactors([]);
+    renderBreakdown({});
+    const tech = $("#panelTech");
+    if (tech) tech.innerHTML = "";
+    const hero = $("#panelHero");
+    if (hero) hero.style.backgroundImage = record.image_url ? "url('" + record.image_url + "')" : "none";
+    state.selected = { onetsoc_code: record.onetsoc_code, title: record.title, job_zone: record.job_zone };
+    await loadRoadmap(record.onetsoc_code, record.job_zone);
+    announce("Showing your saved career: " + (record.title || "career") + ".");
   }
 
   /* ---------------------------------------------------------------- errors */
 
   const ERROR_HINTS = {
-    NETWORK_ERROR: "Start the API with: uvicorn main:app --reload --port 8000",
+    NETWORK_ERROR: "The career-matching engine is unreachable right now. Please try again shortly.",
     DATABASE_ERROR: "The O*NET data in Supabase could not be read.",
     VALIDATION_ERROR: "Adjust your selections and try again.",
     INVALID_QUESTIONNAIRE: "Answer the questions again so the engine has something to score.",
@@ -921,6 +1151,7 @@
   };
 
   function renderError(error) {
+    clearJobState();
     const code = error.code || "SERVER_ERROR";
     $("#questionnaireWrapper").innerHTML = [
       '<div class="sf-error" role="alert">',
@@ -956,7 +1187,7 @@
 
   /* ------------------------------------------------------------------ init */
 
-  function init() {
+  async function init() {
     setupDomainChips();
 
     setupSearch();
@@ -967,8 +1198,28 @@
     const save = $("#saveCareerBtn");
     if (save) save.addEventListener("click", saveCareerPath);
 
-    const learn = $("#startLearningBtn");
-    if (learn) learn.addEventListener("click", startLearning);
+    const savedBtn = $("#savedCareersBtn");
+    if (savedBtn) savedBtn.addEventListener("click", openSavedCareersOverlay);
+
+    const closeSavedBtn = $("#closeSavedCareersBtn");
+    if (closeSavedBtn) closeSavedBtn.addEventListener("click", closeSavedCareersOverlay);
+
+    const savedOverlay = $("#savedCareersOverlay");
+    if (savedOverlay) {
+      savedOverlay.addEventListener("click", (event) => {
+        if (event.target === savedOverlay) closeSavedCareersOverlay();
+      });
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (
+        event.key === "Escape" &&
+        savedOverlay &&
+        !savedOverlay.classList.contains("hidden")
+      ) {
+        closeSavedCareersOverlay();
+      }
+    });
 
     const toggle = $("#personalityToggle");
     if (toggle) {
@@ -981,6 +1232,10 @@
         );
       });
     }
+
+    // If a questionnaire was submitted before the person left this page,
+    // pick the same job back up instead of showing the setup screen again.
+    await resumeDiscoveryJob();
   }
 
   if (document.readyState === "loading") {
@@ -1013,5 +1268,9 @@ async function loadUserGreeting() {
     console.error("Failed to load user:", err);
   }
 }
+window.SkillForgeDiscovery = {
+  state, api, selectCareer, announce,
+  openSavedCareer, closeSavedCareersOverlay
+};
  
 loadUserGreeting();

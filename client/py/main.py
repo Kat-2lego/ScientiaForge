@@ -12,9 +12,12 @@ from __future__ import annotations
 
 import logging
 import statistics
+import threading
+import time
+import uuid
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, Header, Request
+from fastapi import BackgroundTasks, FastAPI, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -77,6 +80,31 @@ app.add_middleware(
 )
 
 
+@app.on_event("startup")
+def _warm_cache_on_startup() -> None:
+    """Start building the O*NET cache the moment the process boots.
+
+    Without this, the person who happens to submit the questionnaire first
+    after a deploy (or after a free-tier instance spins back up) is the one
+    who pays for the cold build. A background thread means uvicorn still
+    starts accepting connections — and passes its health check — right away;
+    it does not block startup, it just means the warm-up is already under way
+    before any real request needs it.
+    """
+    def _build() -> None:
+        try:
+            cache = career_repository.get_cache()
+            logger.info(
+                "Startup cache warm-up finished: %d occupations", len(cache.occupations)
+            )
+        except DatabaseError as exc:
+            # Not fatal: the first real request will simply try again and
+            # surface the DATABASE_ERROR normally.
+            logger.warning("Startup cache warm-up failed, will retry on request: %s", exc)
+
+    threading.Thread(target=_build, name="onet-cache-warmup", daemon=True).start()
+
+
 # ---------------------------------------------------------------------------
 # Error handling (§40)
 # ---------------------------------------------------------------------------
@@ -122,6 +150,93 @@ def _bearer(authorization: Optional[str]) -> Optional[str]:
     if len(parts) == 2 and parts[0].lower() == "bearer":
         return parts[1].strip()
     return None
+
+
+# ---------------------------------------------------------------------------
+# Matching jobs
+#
+# generate-matches used to block the request for as long as the match took,
+# which meant a cold cache (first request after a deploy or a free-tier
+# spin-down) could hold a browser connection open for minutes, and a user who
+# navigated away mid-request lost everything. POST now only *starts* the job
+# and returns a job_id straight away; the actual work runs in a background
+# thread and the frontend polls GET .../generate-matches/{job_id} for the
+# result. The job itself still comes from the same in-memory cache, so this
+# is purely about not holding the HTTP request open — it does not change the
+# matching logic at all (§55).
+# ---------------------------------------------------------------------------
+
+JOB_TTL_SECONDS = 30 * 60  # stop answering for a job id older than this
+
+_jobs: Dict[str, Dict[str, Any]] = {}
+_jobs_lock = threading.Lock()
+
+
+def _prune_jobs_locked() -> None:
+    cutoff = time.time() - JOB_TTL_SECONDS
+    stale = [job_id for job_id, job in _jobs.items() if job["created_at"] < cutoff]
+    for job_id in stale:
+        del _jobs[job_id]
+
+
+def _create_job() -> str:
+    job_id = uuid.uuid4().hex
+    with _jobs_lock:
+        _prune_jobs_locked()
+        _jobs[job_id] = {
+            "status": "processing",
+            "created_at": time.time(),
+            "result": None,
+            "error": None,
+        }
+    return job_id
+
+
+def _get_job(job_id: str) -> Optional[Dict[str, Any]]:
+    with _jobs_lock:
+        job = _jobs.get(job_id)
+        return dict(job) if job is not None else None
+
+
+def _complete_job(job_id: str, result: Dict[str, Any]) -> None:
+    with _jobs_lock:
+        if job_id in _jobs:
+            _jobs[job_id]["status"] = "completed"
+            _jobs[job_id]["result"] = result
+
+
+def _fail_job(job_id: str, code: str, message: str, status: int) -> None:
+    with _jobs_lock:
+        if job_id in _jobs:
+            _jobs[job_id]["status"] = "failed"
+            _jobs[job_id]["error"] = {"code": code, "message": message, "status": status}
+
+
+def _run_matching_job(
+    job_id: str, payload: QuestionnairePayload, access_token: Optional[str]
+) -> None:
+    try:
+        response = _build_match_response(payload, access_token)
+        _complete_job(job_id, response.model_dump())
+    except validators.AppError as exc:
+        logger.warning("Job %s: %s", job_id, exc.code)
+        _fail_job(job_id, exc.code, exc.public_message, exc.status)
+    except DatabaseError as exc:
+        logger.error("Job %s: database failure: %s", job_id, exc, exc_info=True)
+        _fail_job(
+            job_id,
+            "DATABASE_ERROR",
+            "Career data could not be loaded. Please try again shortly.",
+            503,
+        )
+    except Exception:
+        logger.exception("Job %s: unhandled error", job_id)
+        _fail_job(
+            job_id,
+            "SERVER_ERROR",
+            "An unexpected error occurred while generating your matches.",
+            500,
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -198,11 +313,10 @@ def get_questionnaire(request: QuestionnaireRequest) -> QuestionnaireResponse:
 # Matching
 # ---------------------------------------------------------------------------
 
-@app.post("/api/discovery/generate-matches", response_model=MatchResponse)
-def generate_career_matches(
-    payload: QuestionnairePayload,
-    authorization: Optional[str] = Header(default=None),
+def _build_match_response(
+    payload: QuestionnairePayload, access_token: Optional[str]
 ) -> MatchResponse:
+    """The actual matching work (§55). Called from the background job runner."""
     warnings: List[str] = []
 
     domains, domain_warnings = validators.validate_domains(payload.core_domains)
@@ -266,7 +380,7 @@ def generate_career_matches(
                 answers=answers,
                 results=matches,
                 fingerprint=profile.fingerprint,
-                access_token=_bearer(authorization),
+                access_token=access_token,
             )
             session_saved = session_id is not None
         except validators.AppError as exc:
@@ -285,6 +399,50 @@ def generate_career_matches(
         session_saved=session_saved,
         warnings=warnings,
     )
+
+
+@app.post("/api/discovery/generate-matches")
+def generate_career_matches(
+    payload: QuestionnairePayload,
+    background_tasks: BackgroundTasks,
+    authorization: Optional[str] = Header(default=None),
+) -> Dict[str, Any]:
+    """Start a match job and return immediately (§55).
+
+    The browser used to hold this connection open for as long as the match
+    took — several minutes on a cold cache. It now gets a job_id straight
+    away and polls GET .../generate-matches/{job_id}, so a slow first run
+    never looks like a dead request, and a user who navigates away and comes
+    back can resume watching the same job instead of starting over.
+    """
+    job_id = _create_job()
+    background_tasks.add_task(
+        _run_matching_job, job_id, payload, _bearer(authorization)
+    )
+    return {"job_id": job_id, "status": "processing"}
+
+
+@app.get("/api/discovery/generate-matches/{job_id}")
+def get_match_job(job_id: str) -> Dict[str, Any]:
+    job = _get_job(job_id)
+    if job is None:
+        raise validators.ValidationError(
+            "That job has expired or does not exist. Please run the questionnaire again.",
+            {"job_id": job_id},
+        )
+
+    if job["status"] == "processing":
+        return {"job_id": job_id, "status": "processing"}
+
+    if job["status"] == "failed":
+        error = job["error"] or {}
+        return _error_response(
+            error.get("code", "SERVER_ERROR"),
+            error.get("message", "Something went wrong while generating your matches."),
+            error.get("status", 500),
+        )
+
+    return {"job_id": job_id, "status": "completed", "result": job["result"]}
 
 
 # ---------------------------------------------------------------------------

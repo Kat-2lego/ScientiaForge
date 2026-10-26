@@ -108,6 +108,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     </section>`;
   icons(root);
 
+  window.NSCExam && window.NSCExam.mount(root, paper);
+  
   /* preview toggle */
   const frame = document.getElementById("ppFrame");
   const openLink = document.getElementById("ppOpen");

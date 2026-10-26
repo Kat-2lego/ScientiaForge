@@ -23,9 +23,11 @@ from __future__ import annotations
 
 import bisect
 import logging
+import pickle
 import threading
 import time
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import config
@@ -434,15 +436,62 @@ def _ingest_technology(
 # Public accessors
 # ---------------------------------------------------------------------------
 
+def _load_cache_from_disk() -> Optional[ONetCache]:
+    """Best-effort load of a previously-built cache (§ performance).
+
+    Returns None for anything that isn't a clean, current, non-stale cache -
+    missing file, corrupt pickle, a shape left over from an older version of
+    this module, or one that's simply past its TTL - so the caller always has
+    a safe fallback: build fresh from Supabase, exactly as before.
+    """
+    path = Path(config.CACHE_FILE_PATH)
+    if not path.is_file():
+        return None
+    try:
+        with path.open("rb") as handle:
+            cache = pickle.load(handle)
+    except Exception as exc:
+        logger.warning("On-disk O*NET cache could not be read, rebuilding: %s", exc)
+        return None
+    if not isinstance(cache, ONetCache):
+        logger.warning("On-disk O*NET cache has an unexpected shape, rebuilding.")
+        return None
+    if time.time() - cache.built_at > config.CACHE_TTL_SECONDS:
+        logger.info("On-disk O*NET cache is past its TTL, rebuilding.")
+        return None
+    return cache
+
+
+def _save_cache_to_disk(cache: ONetCache) -> None:
+    """Persist the cache so the next process start can skip the Supabase
+    rebuild. Failure here is never fatal - it only costs the next cold start
+    the rebuild it would have needed anyway."""
+    path = Path(config.CACHE_FILE_PATH)
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp_path = path.with_suffix(path.suffix + ".tmp")
+        with tmp_path.open("wb") as handle:
+            pickle.dump(cache, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        tmp_path.replace(path)  # atomic on POSIX - never leaves a half file
+    except Exception as exc:
+        logger.warning("Could not persist the O*NET cache to disk: %s", exc)
+
+
 def get_cache(force_rebuild: bool = False) -> ONetCache:
     global _cache
     with _lock:
+        if _cache is None and not force_rebuild:
+            _cache = _load_cache_from_disk()
+
         expired = (
             _cache is not None
             and time.time() - _cache.built_at > config.CACHE_TTL_SECONDS
         )
+
         if _cache is None or expired or force_rebuild:
             _cache = build_cache()
+            _save_cache_to_disk(_cache)
+
         return _cache
 
 

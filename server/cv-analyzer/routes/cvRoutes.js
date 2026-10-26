@@ -8,6 +8,7 @@ import { normalizeCvAnalysis } from "../services/scoreService.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { enforceQuota, getUserPlanAndUsage } from "../services/quotaService.js";
 import { supabaseAdmin } from "../services/supabaseClient.js";
+import { logFeatureEvent } from "../../services/featureEvents.js";
 
 const router = express.Router();
 
@@ -325,6 +326,13 @@ async function runAnalysisJob(job, { cvText, fileSize, usage }) {
     });
 
     console.log(`✅ [cv/job ${job.id}] finished in ${Date.now() - job.startedAtMs}ms`);
+
+    // Best-effort and not awaited — the dashboard's "Activities" count and
+    // the admin feature-usage charts both read this, but a logging hiccup
+    // here should never hold up the response the user is waiting on.
+    logFeatureEvent(userId, "cv_analyzer", "completed", {
+      metadata: { score: analysis.score, ats: analysis.ats },
+    });
   } catch (error) {
     console.error(`❌ [cv/job ${job.id}] failed after ${Date.now() - job.startedAtMs}ms:`, error);
 
