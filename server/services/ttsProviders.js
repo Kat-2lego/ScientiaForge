@@ -8,11 +8,13 @@
                  stitched into one WAV.
      openai      gpt-4o-mini-tts (steerable tone). Needs OPENAI_API_KEY.
      elevenlabs  Generally rated the most natural. Needs ELEVENLABS_API_KEY.
-     edge        Microsoft's free voice. Always the last resort.
+     edge        Microsoft Neural voices through the official Azure Speech
+                 REST API. Needs AZURE_SPEECH_KEY and AZURE_SPEECH_REGION.
+                 Always the last resort.
 
    Choose with ENGLISH_TTS_PROVIDER. If a premium provider fails, is not
    configured, or the learner has used their daily premium-voice budget,
-   the reply is spoken by the free voice instead of failing.
+   the reply is spoken by the Azure voice instead of failing.
 ========================================================= */
 
 const GROQ_MODEL = "canopylabs/orpheus-v1-english";
@@ -190,47 +192,48 @@ export async function elevenLabsSpeech({ text, voiceId, modelId, apiKey, baseUrl
   return { audio: Buffer.from(await res.arrayBuffer()), contentType: "audio/mpeg" };
 }
 
-/** Microsoft's free voice, through the Python edge-tts package (the JS packages stopped working). */
+/**
+ * Microsoft Neural voices through the official Azure Speech REST API.
+ * Plain HTTPS, so it works on Render, Netlify Functions, or anywhere else.
+ * Needs AZURE_SPEECH_KEY and AZURE_SPEECH_REGION (e.g. "southafricanorth").
+ */
 export async function edgeSpeech({ text, voice = "en-ZA-LukeNeural", rate = 0.95, pitch = "+0Hz" }) {
-  const { execFile } = await import("node:child_process");
-  const { writeFile, readFile, unlink } = await import("node:fs/promises");
-  const { tmpdir } = await import("node:os");
-  const { join } = await import("node:path");
-  const { randomUUID } = await import("node:crypto");
+  const key = process.env.AZURE_SPEECH_KEY;
+  const region = process.env.AZURE_SPEECH_REGION;
+  if (!key || !region) {
+    throw new TtsError("not_configured", "AZURE_SPEECH_KEY / AZURE_SPEECH_REGION are not set");
+  }
 
-  // The old code used a multiplier (0.95); edge-tts wants a percent string ("-5%").
+  // The old code used a multiplier (0.95); SSML wants a percent string ("-5%").
   const pct = Math.round((rate - 1) * 100);
   const ratePct = `${pct >= 0 ? "+" : ""}${pct}%`;
+  const lang = voice.split("-").slice(0, 2).join("-");          // "en-ZA-LukeNeural" -> "en-ZA"
+  const safe = String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-  const id = randomUUID();
-  const textFile = join(tmpdir(), `tts-${id}.txt`);
-  const audioFile = join(tmpdir(), `tts-${id}.mp3`);
+  const ssml =
+    `<speak version="1.0" xml:lang="${lang}"><voice name="${voice}">` +
+    `<prosody rate="${ratePct}" pitch="${pitch}">${safe}</prosody></voice></speak>`;
 
-  try {
-    await writeFile(textFile, text, "utf8");
-    await new Promise((resolve, reject) => {
-      execFile(
-        process.env.EDGE_TTS_PYTHON || "python",
-        [
-          "-m", "edge_tts",
-          "--voice", voice,
-          `--rate=${ratePct}`,
-          `--pitch=${pitch}`,
-          "--file", textFile,
-          "--write-media", audioFile,
-        ],
-        { timeout: 15000, windowsHide: true },
-        (err, _stdout, stderr) => (err ? reject(new TtsError("edge_failed", String(stderr || err.message).slice(0, 300))) : resolve()),
-      );
-    });
-    const audio = await readFile(audioFile);
-    if (!audio.length) throw new TtsError("empty", "The free voice returned no audio");
-    return { audio, contentType: "audio/mpeg" };
-  } finally {
-    unlink(textFile).catch(() => {});
-    unlink(audioFile).catch(() => {});
+  const res = await fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`, {
+    method: "POST",
+    headers: {
+      "Ocp-Apim-Subscription-Key": key,
+      "Content-Type": "application/ssml+xml",
+      "X-Microsoft-OutputFormat": "audio-24khz-48kbitrate-mono-mp3",
+      "User-Agent": "skillforge",
+    },
+    body: ssml,
+    signal: AbortSignal.timeout(10000),
+  });
+  if (!res.ok) {
+    const detail = (await res.text().catch(() => "")).slice(0, 200);
+    throw new TtsError("provider_error", `azure: ${res.status} ${detail}`, res.status);
   }
+  const audio = Buffer.from(await res.arrayBuffer());
+  if (!audio.length) throw new TtsError("empty", "Azure returned no audio");
+  return { audio, contentType: "audio/mpeg" };
 }
+
 /* ---------- budget: premium voices cost money ---------- */
 
 export function createBudget(limitChars, now = () => new Date()) {
@@ -260,7 +263,7 @@ export function readConfig(env = process.env) {
     provider,
     configured,
     voice: env.ENGLISH_TTS_VOICE || "",
-    edgeVoice: env.ENGLISH_EDGE_VOICE || "en-ZA-LukeNeural",   // the free fallback voice
+    edgeVoice: env.ENGLISH_EDGE_VOICE || "en-ZA-LukeNeural",   // the Azure fallback voice
     groq: { apiKey: env.GROQ_API_KEY, baseUrl: (env.GROQ_BASE_URL || "https://api.groq.com").replace(/\/+$/, ""), voice: GROQ_VOICES.includes(env.ENGLISH_TTS_VOICE) ? env.ENGLISH_TTS_VOICE : "daniel" },
     openai: {
       apiKey: env.OPENAI_API_KEY,
@@ -295,7 +298,7 @@ export function createSynthesizer({ env = process.env, fetchImpl = globalThis.fe
       if (provider === "openai") return await openaiSpeech({ text, ...config.openai, fetchImpl: timedFetch });
       if (provider === "elevenlabs") return await elevenLabsSpeech({ text, ...config.elevenlabs, fetchImpl: timedFetch });
       let timer;
-      const deadline = new Promise((_, reject) => { timer = setTimeout(() => reject(new TtsError("timeout", "the free voice took too long")), config.timeoutMs); });
+      const deadline = new Promise((_, reject) => { timer = setTimeout(() => reject(new TtsError("timeout", "the Azure voice took too long")), config.timeoutMs); });
       try { return await Promise.race([edge({ text, voice: config.edgeVoice }), deadline]); } finally { clearTimeout(timer); }
     } catch (err) {
       if (timedOut(err)) throw new TtsError("timeout", `${provider} took longer than ${config.timeoutMs}ms`);
