@@ -328,6 +328,7 @@ export function createSynthesizer({ env = process.env, fetchImpl = globalThis.fe
           console.warn(`English coach voice: ${provider} failed (${err.code || "error"}): ${String(err.message).slice(0, 200)}${provider === "groq" && err.code === "terms_required" ? " Open https://console.groq.com/playground?model=canopylabs/orpheus-v1-english and accept the terms." : ""}`);
         }
       }
+      
     }
     throw lastError;
   }
