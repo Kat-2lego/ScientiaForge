@@ -23,6 +23,7 @@ import { searchEscoOccupations } from "./escoClient.mjs";
 import { INDUSTRIES } from "./industries.mjs";
 import { LEARNING_MODULES } from "./learningModules.mjs";
 import englishRoutes from "./routes/english.js";
+import { buildRoadmap } from "./roadmapBuilder.mjs";
 
 
 
@@ -2605,17 +2606,28 @@ app.post("/api/skillgap", async (req, res) => {
       });
     }
 
-    let requiredSkills = await getOccupationSkills(jobId, "en");
+    let requiredSkills;
 
-    if (!requiredSkills || requiredSkills.length === 0) {
-      console.warn("No ESCO skills found for occupation:", jobId);
-      requiredSkills = [
-        "Communication",
-        "Problem solving",
-        "Teamwork",
-        "Time management",
-        "Adaptability",
-      ];
+    try {
+      requiredSkills = await getOccupationSkills(jobId, "en");
+    } catch (error) {
+      console.error("[Skill Gap] Essential profile unavailable:", error);
+
+      const invalidOccupation = error.code === "INVALID_ESCO_OCCUPATION";
+
+      return res.status(invalidOccupation ? 400 : 503).json({
+        error: invalidOccupation
+          ? "The selected career has an invalid ESCO occupation identifier."
+          : "We couldn't load this career's essential skills. Please try again.",
+        code: error.code || "ESCO_PROFILE_UNAVAILABLE",
+      });
+    }
+
+    if (!requiredSkills.length) {
+      return res.status(503).json({
+        error: "No verified essential skills are available for this career.",
+        code: "ESCO_PROFILE_UNAVAILABLE",
+      });
     }
 
     const { have, missing } = computeSkillGap(userSkillNames, requiredSkills, 0.5);
@@ -2642,9 +2654,8 @@ app.post("/api/skillgap", async (req, res) => {
       missing,
       matchScore,
       meta: {
-        source: requiredSkills.length > 0 && requiredSkills[0] !== "Communication"
-          ? "ESCO"
-          : "fallback",
+        source: "ESCO",
+        skillScope: "essential",
         occupationUri: jobId,
       },
     });
@@ -2657,54 +2668,41 @@ app.post("/api/skillgap", async (req, res) => {
   }
 });
 
-// GET /api/roadmap?skills=skill1,skill2,skill3
+/* -----------------------------------------------
+   Get a learning roadmap based on missing skills. 
+   This is a placeholder implementation that returns a static roadmap. 
+   In a real implementation, this would query a database or an AI model 
+   to generate a personalized roadmap based on the user's missing skills.
+-------------------------------------------------- */
 
-app.get("/api/roadmap", async (req, res) => {
+app.post("/api/roadmap", (req, res) => {
   try {
-    const skillsParam = req.query.skills || "";
+    const { missingSkills } = req.body || {};
 
-    const userSkills = skillsParam
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-
-    if (userSkills.length === 0) {
-      return res.json({ roadmap: [] });
+    if (
+      !Array.isArray(missingSkills) ||
+      missingSkills.length > 500 ||
+      !missingSkills.every(
+        (skill) =>
+          typeof skill === "string" &&
+          skill.trim().length > 0 &&
+          skill.length <= 500
+      )
+    ) {
+      return res.status(400).json({
+        error:
+          "missingSkills must be an array of up to 500 non-empty skill names.",
+      });
     }
 
-    const userSkillsLower = userSkills.map((s) => s.toLowerCase());
-    const userSet = new Set(userSkillsLower);
+    const result = buildRoadmap(missingSkills, LEARNING_MODULES);
 
-    // Score modules by how many missing skills they cover
-    const scoredModules = LEARNING_MODULES.map((mod) => {
-      const modSkillsLower = mod.skills.map((s) => s.toLowerCase());
-      const overlap = modSkillsLower.filter((s) => userSet.has(s)).length;
-      return { module: mod, overlap };
-    });
-
-    // Keep only modules that match at least one missing skill
-    const relevant = scoredModules
-      .filter((m) => m.overlap > 0)
-      .sort((a, b) => b.overlap - a.overlap)
-      .slice(0, 5); // top 5
-
-    const roadmap = relevant.map((m) => ({
-      id: m.module.id,
-      title: m.module.title,
-      description: m.module.description,
-      steps: m.module.steps,
-      resourceUrl: m.module.resourceUrl,
-      matchedSkills: m.module.skills.filter((s) =>
-        userSet.has(s.toLowerCase())
-      ),
-    }));
-
-    return res.json({ roadmap });
+    return res.json(result);
   } catch (error) {
-    console.error("❌ /api/roadmap error:", error);
+    console.error("[Roadmap] Build failed:", error);
+
     return res.status(500).json({
-      error: "Failed to generate roadmap",
-      details: error.message,
+      error: "Could not build your learning roadmap. Please try again.",
     });
   }
 });
