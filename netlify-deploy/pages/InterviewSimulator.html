@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,6 +16,8 @@
   <link rel="stylesheet" href="../css/InterviewReport.css" />
     <link rel="stylesheet" href="../css/theme.css" />
   <script src="../js/theme.js"></script>
+  <link rel="stylesheet" href="../css/back-navigation.css">
+  <script src="../js/back-navigation.js" defer></script>
 </head>
 <body>
 <div class="layout">
@@ -142,6 +145,12 @@
         </div>
       </div>
     </header>
+      <div class="sf-back-container">
+        <button type="button" class="sf-back-btn" aria-label="Go back to previous page">
+          <span aria-hidden="true">←</span> Back
+        </button>
+      </div>
+
 
     <div class="interview-dashboard">
       <div class="page-header">
@@ -210,6 +219,7 @@
                     min="5"
                     step="1"
                     placeholder="No limit"
+
                   />
                   <button type="button" class="stepper-btn" id="questionCountIncrement" aria-label="Increase number of questions">
                     <i class="fa-solid fa-plus"></i>
@@ -445,6 +455,7 @@
                   <i class="fa-solid fa-stop"></i><span>Stop</span>
                 </button>
               </div>
+
               <textarea id="transcript" rows="6"
                 placeholder="Your spoken or typed answer, or show your working here…"></textarea>
 
