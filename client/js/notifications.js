@@ -37,13 +37,20 @@ document.addEventListener("DOMContentLoaded", () => {
       },
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Notification request failed.");
+    let data = null;
+    try {
+      data = await response.json();
+    } catch {
+      // Non-JSON response (e.g. an HTML 404 page)
     }
 
-    return data;
+    if (!response.ok) {
+      throw new Error(
+        data?.error || `Notification request failed (${response.status}).`
+      );
+    }
+
+    return data ?? {};
   }
 
   function updateBadge(count) {
@@ -56,6 +63,32 @@ document.addEventListener("DOMContentLoaded", () => {
         ? `Open notifications, ${count} unread`
         : "Open notifications"
     );
+  }
+
+  // Application Command Centre "you applied N days ago" reminders carry
+  // quick status buttons; every other notification (the existing planner
+  // reminders/goals) renders exactly as before.
+  const FOLLOWUP_TYPE = "app_followup_7d";
+  const FOLLOWUP_ACTIONS = [
+    { label: "Still waiting", status: null },
+    { label: "Interview", status: "interview" },
+    { label: "Offer", status: "offer" },
+    { label: "Rejected", status: "rejected" },
+  ];
+
+  async function handleFollowupAction(applicationId, status, actionsRow) {
+    actionsRow.querySelectorAll("button").forEach((b) => (b.disabled = true));
+    try {
+      if (status) {
+        await request(`/applications/${applicationId}/status`, {
+          method: "PATCH",
+          body: JSON.stringify({ status }),
+        });
+      }
+      actionsRow.textContent = status ? "Updated on your board." : "Thanks, noted.";
+    } catch (error) {
+      actionsRow.textContent = "Couldn't update - try again from the Job Tracker.";
+    }
   }
 
   function renderNotifications(items) {
@@ -85,8 +118,48 @@ document.addEventListener("DOMContentLoaded", () => {
       time.textContent = new Date(item.created_at).toLocaleString();
 
       card.append(title, body, time);
+
+      if (item.type === FOLLOWUP_TYPE && item.reference_id) {
+        const actions = document.createElement("div");
+        actions.className = "notification-actions";
+
+        FOLLOWUP_ACTIONS.forEach(({ label, status }) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = label;
+          btn.addEventListener("click", () =>
+            handleFollowupAction(item.reference_id, status, actions)
+          );
+          actions.appendChild(btn);
+        });
+
+        card.appendChild(actions);
+      }
+
       list.appendChild(card);
     });
+  }
+
+  // "Show a pop-up when the user opens the app and has new notifications" -
+  // once per page load, not on every 60s/visibility-change refresh.
+  let hasShownOpenToast = false;
+
+  function showNotificationToast(count) {
+    const toast = document.createElement("button");
+    toast.type = "button";
+    toast.className = "notification-toast";
+    toast.setAttribute("role", "status");
+    toast.innerHTML =
+      '<i data-lucide="bell"></i><span>' +
+      (count === 1 ? "You have 1 new update" : `You have ${count} new updates`) +
+      "</span>";
+    toast.addEventListener("click", () => {
+      toast.remove();
+      bell.click();
+    });
+    document.body.appendChild(toast);
+    window.lucide?.createIcons();
+    window.setTimeout(() => toast.remove(), 6000);
   }
 
   async function refreshNotifications() {
@@ -98,12 +171,17 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Generate notifications for newly due entries first.
-      await request("/notifications/sync", {
+      await request("/planner/notifications/sync", {
         method: "POST",
       });
 
-      const data = await request("/notifications");
+      const data = await request("/planner/notifications");
       updateBadge(data.unreadCount);
+
+      if (!hasShownOpenToast) {
+        hasShownOpenToast = true;
+        if (data.unreadCount > 0) showNotificationToast(data.unreadCount);
+      }
 
       // Update the badge while closed, but only mark items read
       // after rendering them in the open notifications tab.
@@ -122,7 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!unreadIds.length || !isNotificationsOpen()) return;
 
-      await request("/notifications/read", {
+      await request("/planner/notifications/read", {
         method: "POST",
         body: JSON.stringify({ ids: unreadIds }),
       });
@@ -132,7 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       // Fetch the actual remaining unread count; do not assume zero.
-      const updated = await request("/notifications");
+      const updated = await request("/planner/notifications");
       updateBadge(updated.unreadCount);
     } catch (error) {
       console.error("Notifications:", error);

@@ -1,3 +1,4 @@
+import "./loadEnv.mjs";
 import express from "express";
 import cors from "cors";
 import { createClient } from "@supabase/supabase-js";
@@ -13,9 +14,13 @@ import careerPathfinderRoutes from "./routes/careerPathfinder.js";
 import studyHubRoutes from "./routes/studyHub.js";
 import createNscRouter from "./routes/nscPapers.cjs";
 import createVideoDiscoveryRouter from "./routes/videoDiscovery.cjs";
+import readinessRoutes from "./routes/readiness.cjs"; 
 import { createProxyMiddleware } from "http-proxy-middleware";
 import adminRoutes from "./routes/admin.js";
 import articulationRoutes from "./routes/articulation.js";
+import applicationTrackerRoutes, {
+  generateApplicationNotifications,
+} from "./routes/applicationTracker.js";
 
 import { getOccupationSkills } from "./escoClient.mjs";
 import { computeSkillGap } from "./skillMatcher.mjs";
@@ -23,7 +28,7 @@ import { searchEscoOccupations } from "./escoClient.mjs";
 import { INDUSTRIES } from "./industries.mjs";
 import { LEARNING_MODULES } from "./learningModules.mjs";
 import englishRoutes from "./routes/english.js";
-
+import createSupportRouter from "./routes/support.js";
 
 
 
@@ -439,8 +444,15 @@ app.use("/api/career-pathfinder", careerPathfinderRoutes);
 app.use("/api/study-hub", studyHubRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/articulation", articulationRoutes);
-app.use("/api/english", englishRoutes); 
+app.use("/api/english", englishRoutes);
+app.use("/api/applications", applicationTrackerRoutes);
+app.use("/api/readiness", readinessRoutes); 
 
+if (supabaseAdmin) {
+  app.use("/api/support", createSupportRouter({ db: supabaseAdmin, requireAuth }));
+} else {
+  console.warn("⚠️ SUPABASE_SERVICE_ROLE_KEY is not set: the support inbox and rating prompts are off.");
+}
 
 const requireAuthWithUser = (req, res, next) =>
   Promise.resolve(requireAuth(req, res, () => { req.user = { id: req.userId }; next(); })).catch(next);
@@ -1736,6 +1748,19 @@ app.post(
         }
 
         createdCount = created?.length ?? 0;
+      }
+
+      // Application Command Centre deadline/follow-up reminders land in
+      // this same sync + the same notifications table, rather than a
+      // second polling mechanism. Best-effort: a problem here shouldn't
+      // break the calendar-reminder sync above, which has already succeeded.
+      try {
+        await generateApplicationNotifications(req.userId);
+      } catch (appNotifyError) {
+        console.warn(
+          "Application notification sync failed (non-fatal):",
+          appNotifyError.message
+        );
       }
 
       return res.status(200).json({

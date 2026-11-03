@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terms of Service | [PLATFORM NAME]</title>
+<!--
+  Legal page. Before launch:
+  1. Search this file for class="ph" and replace every highlighted [PLACEHOLDER] with real details.
+  2. Remove the ph highlight once done (the .ph rule in the <style> block), or leave it; it only styles text that still has brackets.
+  3. Have the final wording reviewed by an attorney.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3f6fb;
+    --card: #ffffff;
+    --ink: #0f1b3a;
+    --body: #2c3754;
+    --muted: #79859e;
+    --line: #e3e9f2;
+    --tint: #eaf0fb;
+    --link: #2257d4;
+    --amber-bg: #fff8e6;
+    --amber-line: #f0b43e;
+    --amber-edge: #f6e0aa;
+    --amber-ink: #6f4600;
+    --ph-bg: #fff0a8;
+    --ph-ink: #4f3b00;
+    --radius: 14px;
+    --gutter: 3rem;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--body);
+    font: 15.5px/1.7 "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--link); text-underline-offset: 2px; }
+  a:focus-visible, summary:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; border-radius: 4px; }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 72px; }
+
+  .back {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--muted); font-weight: 600; font-size: 14px; text-decoration: none; margin-bottom: 18px;
+  }
+  .back:hover { color: var(--ink); }
+
+  h1 { margin: 0 0 8px; color: var(--ink); font-size: 32px; line-height: 1.2; font-weight: 800; letter-spacing: -0.01em; }
+  .meta { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 0 0 16px; color: var(--muted); font-size: 13.5px; font-weight: 500; }
+  .meta span + span { padding-left: 20px; border-left: 1px solid var(--line); }
+  .lead { max-width: 760px; margin: 0 0 10px; font-size: 16px; }
+
+  .layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 28px; align-items: start; margin-top: 22px; }
+
+  /* Contents */
+  .toc {
+    position: sticky; top: 20px; max-height: calc(100vh - 40px); overflow: auto;
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(15, 27, 58, .04); padding: 14px 8px 10px 16px;
+  }
+  .toc summary { font-weight: 700; color: var(--ink); font-size: 15px; cursor: pointer; padding: 2px 8px 8px 0; list-style: none; }
+  .toc summary::-webkit-details-marker { display: none; }
+  .toc ol { list-style: none; margin: 0; padding: 0; }
+  .toc li a {
+    display: flex; gap: 10px; padding: 5px 8px 5px 0; color: var(--body); text-decoration: none;
+    font-size: 13.5px; line-height: 1.4; border-radius: 6px;
+  }
+  .toc li a:hover { color: var(--link); }
+  .toc .tn { flex: 0 0 1.6em; color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 600; }
+
+  /* Cards */
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(15, 27, 58, .04); padding: 24px 28px 14px; margin: 0 0 16px;
+    scroll-margin-top: 20px;
+  }
+  .card h2 { display: flex; align-items: center; margin: 0 0 16px; color: var(--ink); font-size: 18px; line-height: 1.3; font-weight: 700; }
+  .hn {
+    flex: 0 0 36px; width: 36px; height: 36px; margin-right: 12px; display: grid; place-items: center;
+    border-radius: 10px; background: var(--tint); color: var(--ink); font-size: 14px; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .card h3 { margin: 20px 0 8px; color: var(--ink); font-size: 15.5px; font-weight: 700; }
+  .body { padding-left: var(--gutter); max-width: 100%; }
+  .body p { margin: 0 0 12px; }
+  .body .cl { position: relative; }
+  .body .cl .n {
+    position: absolute; left: calc(-1 * var(--gutter)); width: calc(var(--gutter) - .6rem); text-align: right;
+    color: var(--muted); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; padding-top: 1px;
+  }
+  .body ul { margin: 0 0 12px; padding-left: 1.2em; }
+  .body li { margin: 0 0 6px; padding-left: 2px; }
+  .body li::marker { color: var(--muted); }
+  .body strong { color: var(--ink); font-weight: 700; }
+
+  /* Important notices (CPA s49: conspicuous) */
+  .notice {
+    display: flex; align-items: center; gap: 10px; margin: 0 0 14px; padding: 10px 14px;
+    background: var(--amber-bg); border: 1px solid var(--amber-edge); border-left: 4px solid var(--amber-line);
+    border-radius: 10px; color: var(--amber-ink);
+  }
+  .notice svg { flex: 0 0 auto; }
+  .notice p { margin: 0; font-size: 14px; font-weight: 600; }
+  .notice strong { color: var(--amber-ink); font-weight: 800; }
+  .notice .sep { display: inline-block; width: 1px; height: 14px; margin: 0 10px; background: var(--amber-line); vertical-align: -2px; }
+
+  /* Read first */
+  .first { background: var(--tint); border: 1px solid #dbe5f6; border-radius: var(--radius); padding: 18px 22px 8px; margin: 0 0 16px; }
+  .first h2 { margin: 0 0 8px; color: var(--ink); font-size: 15.5px; font-weight: 700; }
+  .first ul { margin: 0 0 8px; padding-left: 1.2em; }
+  .first li { margin: 0 0 6px; }
+
+  /* Placeholders still to be completed */
+  .ph { background: var(--ph-bg); color: var(--ph-ink); border-radius: 4px; padding: 0 4px; font-weight: 600; font-size: .94em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+
+  /* Related rows (same pattern as the Settings list) */
+  .rows { margin-top: 28px; display: grid; gap: 12px; }
+  .row {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 20px;
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(15, 27, 58, .04); color: inherit; text-decoration: none;
+  }
+  .row:hover { border-color: #cdd8ec; }
+  .row b { display: block; color: var(--ink); font-size: 15px; font-weight: 700; }
+  .row small { color: var(--muted); font-size: 13.5px; }
+  .row svg { color: var(--ink); flex: 0 0 auto; }
+
+  /* Desktop: contents stay visible; mobile: collapsible */
+  @media (min-width: 1000px) {
+    .toc summary { pointer-events: none; cursor: default; }
+  }
+  @media (max-width: 999px) {
+    .layout { grid-template-columns: 1fr; gap: 16px; }
+    .toc { position: static; max-height: none; }
+  }
+  @media (max-width: 700px) {
+    .wrap { padding: 20px 14px 56px; }
+    h1 { font-size: 26px; }
+    .card { padding: 18px 18px 8px; }
+    .body { padding-left: 0; }
+    .body .cl .n { position: static; display: inline-block; width: auto; margin-right: 8px; text-align: left; }
+    .meta span + span { padding-left: 0; border-left: 0; }
+    .notice { align-items: flex-start; }
+    .notice .sep { display: none; }
+    .notice strong::after { content: ". "; }
+  }
+  @media print {
+    body { background: #fff; font-size: 12pt; }
+    .back, .toc, .rows { display: none; }
+    .layout { display: block; }
+    .card, .first { box-shadow: none; break-inside: avoid-page; }
+    .ph { background: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="Settings.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>Back to settings</a>
+  <header>
+    <h1>Terms of Service</h1>
+    <p class="meta"><span><strong><span class="ph">[PLATFORM NAME]</span></strong></span><span>Last updated: <span class="ph">[DATE]</span></span><span>Version 1.0</span></p>
+    <p class="lead"><strong>Please read these Terms carefully.</strong> They are a legally binding agreement between you and us. Parts that limit our liability, place responsibility on you, or deal with your personal information are marked <strong>IMPORTANT NOTICE</strong> so that they are drawn to your attention, as required by section 49 of the Consumer Protection Act 68 of 2008 (the “CPA”).</p>
+  </header>
+
+  <div class="layout">
+    <details class="toc" id="toc" open>
+      <summary>Contents</summary>
+      <nav aria-label="Contents"><ol><li><a href="#sec-1"><span class="tn">1</span>About these Terms</a></li><li><a href="#sec-2"><span class="tn">2</span>Who we are</a></li><li><a href="#sec-3"><span class="tn">3</span>Key terms</a></li><li><a href="#sec-4"><span class="tn">4</span>Who may use the Platform</a></li><li><a href="#sec-5"><span class="tn">5</span>Your account</a></li><li><a href="#sec-6"><span class="tn">6</span>What the Platform offers</a></li><li><a href="#sec-7"><span class="tn">7</span>AI features and Outputs</a></li><li><a href="#sec-8"><span class="tn">8</span>CVs and personal information you upload</a></li><li><a href="#sec-9"><span class="tn">9</span>Your Content and the licence you give us</a></li><li><a href="#sec-10"><span class="tn">10</span>Acceptable use</a></li><li><a href="#sec-11"><span class="tn">11</span>Voice features (Interview Simulator and Articulation Coach)</a></li><li><a href="#sec-12"><span class="tn">12</span>Application Command Centre and job information</a></li><li><a href="#sec-13"><span class="tn">13</span>Education, career and study information</a></li><li><a href="#sec-14"><span class="tn">14</span>Free Plan, Premium and payments</a></li><li><a href="#sec-15"><span class="tn">15</span>Our intellectual property</a></li><li><a href="#sec-16"><span class="tn">16</span>Third-party services and links</a></li><li><a href="#sec-17"><span class="tn">17</span>Availability and support</a></li><li><a href="#sec-18"><span class="tn">18</span>Disclaimers</a></li><li><a href="#sec-19"><span class="tn">19</span>Limitation of liability</a></li><li><a href="#sec-20"><span class="tn">20</span>Indemnity</a></li><li><a href="#sec-21"><span class="tn">21</span>Suspension, termination and deletion</a></li><li><a href="#sec-22"><span class="tn">22</span>Changes to these Terms</a></li><li><a href="#sec-23"><span class="tn">23</span>Privacy</a></li><li><a href="#sec-24"><span class="tn">24</span>Complaints and dispute resolution</a></li><li><a href="#sec-25"><span class="tn">25</span>Governing law and jurisdiction</a></li><li><a href="#sec-26"><span class="tn">26</span>General</a></li><li><a href="#sec-27"><span class="tn">27</span>Contact us</a></li></ol></nav>
+    </details>
+
+    <main>
+      <aside class="first" aria-label="Key points">
+        <h2>Read this first</h2>
+        <ul><li>AI results are guidance, not guarantees (<a href="#sec-7">clause 7</a>).</li><li>Keep personal details off your CV: no ID number, home address, date of birth or bank details (<a href="#sec-8">clause 8</a>).</li><li>Check requirements, deadlines and bursaries with the institution or funder before you rely on them (<a href="#sec-7">clause 7.5</a>).</li></ul>
+      </aside>
+
+      <section class="card" id="sec-1" aria-labelledby="h-1"><h2 id="h-1"><span class="hn">1</span>About these Terms</h2><div class="body"><p class="cl"><span class="n">1.1</span>These Terms of Service (“Terms”) apply to your access to and use of the <span class="ph">[PLATFORM NAME]</span> website, web application and all related features and services (together, the “Platform”).</p>
+<p class="cl"><span class="n">1.2</span>By creating an account, ticking the acceptance box or using the Platform, you confirm that you have read, understood and agree to be bound by these Terms and our <a href="PrivacyPolicy.html">Privacy Policy</a>. If you do not agree, please do not use the Platform.</p>
+<p class="cl"><span class="n">1.3</span>These Terms are concluded electronically. Your clicking, ticking or continued use is your electronic signature and is valid and binding under the Electronic Communications and Transactions Act 25 of 2002 (“ECTA”).</p>
+<p class="cl"><span class="n">1.4</span>These Terms must be read together with our Privacy Policy and any feature-specific terms shown to you (for example at checkout). If there is a conflict, the more specific terms apply to that feature, except that the Privacy Policy always governs how we handle personal information.</p></div></section>
+<section class="card" id="sec-2" aria-labelledby="h-2"><h2 id="h-2"><span class="hn">2</span>Who we are</h2><div class="body"><p>In line with section 43 of the ECTA:</p>
+<ul><li><strong>Legal name:</strong> <span class="ph">[LEGAL ENTITY NAME]</span> trading as <span class="ph">[PLATFORM NAME]</span></li><li><strong>Legal status and registration number:</strong> <span class="ph">[e.g. private company (Pty) Ltd, Reg. No. ____]</span></li><li><strong>Physical address (also our address for legal notices):</strong> <span class="ph">[ADDRESS]</span>, South Africa</li><li><strong>Email:</strong> <span class="ph">[SUPPORT EMAIL]</span></li><li><strong>Website:</strong> <span class="ph">[URL]</span></li><li><strong>Information Officer:</strong> <span class="ph">[NAME]</span>, <span class="ph">[EMAIL]</span></li></ul>
+<p>We are “we”, “us” and “our” in these Terms. “You” means the person using the Platform.</p></div></section>
+<section class="card" id="sec-3" aria-labelledby="h-3"><h2 id="h-3"><span class="hn">3</span>Key terms</h2><div class="body"><ul><li><strong>AI Features:</strong> any part of the Platform that uses artificial intelligence, including CV analysis, mock interviews, the Articulation Coach, skill-gap analysis, career recommendations and job-match checks.</li><li><strong>AI Provider:</strong> a third-party company that supplies AI models, speech or other processing tools to us (for example Google and Groq).</li><li><strong>Content:</strong> anything you upload, type, speak or otherwise submit, including CVs, questionnaire answers, interview responses, job descriptions, notes and profile details.</li><li><strong>Output:</strong> any AI-generated or automatically generated result, such as scores, feedback, suggestions, summaries, transcripts and roadmaps.</li><li><strong>Free Plan / Premium:</strong> our free tier with usage limits, and our paid tier or paid features, as described on the Platform.</li><li><strong>Minor:</strong> a person under 18 years old.</li></ul></div></section>
+<section class="card" id="sec-4" aria-labelledby="h-4"><h2 id="h-4"><span class="hn">4</span>Who may use the Platform</h2><div class="body"><p class="cl"><span class="n">4.1</span>You may use the Platform if you are 18 or older and have legal capacity to enter into a contract.</p>
+<p class="cl"><span class="n">4.2</span><strong>Learners and Minors.</strong> Some features (for example Career Pathfinder) are designed for high school learners. If you are under 18 (but at least 13), you may use the Platform only with the knowledge and consent of your parent or legal guardian. Your parent or guardian confirms, by consenting, that they have read these Terms and the <a href="PrivacyPolicy.html">Privacy Policy</a>, agree to them on your behalf, and accept responsibility for your use. A Minor may not purchase Paid Features; purchases must be made or approved by a parent or guardian.</p>
+<p class="cl"><span class="n">4.3</span>The Platform is not intended for children under 13, and we do not knowingly allow them to register. If we learn that an account belongs to a child under 13, or to a Minor without guardian consent, we may suspend or delete it.</p>
+<p class="cl"><span class="n">4.4</span>The Platform is designed mainly for South African users and South African education and job-market information. If you use it from elsewhere, you are responsible for complying with your local laws.</p></div></section>
+<section class="card" id="sec-5" aria-labelledby="h-5"><h2 id="h-5"><span class="hn">5</span>Your account</h2><div class="body"><p class="cl"><span class="n">5.1</span>You must give accurate, current information when you register and keep it up to date.</p>
+<p class="cl"><span class="n">5.2</span>One account per person. Do not share your login or let anyone else use your account.</p>
+<p class="cl"><span class="n">5.3</span>Keep your password confidential. You are responsible for all activity under your account unless you notify us promptly of unauthorised use and we have had a reasonable chance to act.</p>
+<p class="cl"><span class="n">5.4</span>Administrator and staff roles are granted only by us. Attempting to obtain, guess or exploit elevated access is a serious breach of these Terms.</p></div></section>
+<section class="card" id="sec-6" aria-labelledby="h-6"><h2 id="h-6"><span class="hn">6</span>What the Platform offers</h2><div class="body"><p class="cl"><span class="n">6.1</span>The Platform currently includes tools such as Career Discovery, CV Analyzer, Interview Simulator, Skill Gap Analysis, Career Pathfinder, Study Hub (including past papers, video tutorials, bursary listings and active-recall practice), Progress Tracker, Articulation Coach and the Application Command Centre (job-application tracker). Features are described on the Platform and may change.</p>
+<p class="cl"><span class="n">6.2</span>We may add, change, limit, suspend or remove any feature at any time, including features still in development or testing. Where a change materially affects something you have already paid for, we will deal with it fairly and as the law requires.</p></div></section>
+<section class="card" id="sec-7" aria-labelledby="h-7"><h2 id="h-7"><span class="hn">7</span>AI features and Outputs</h2><div class="body"><div class="notice" role="note"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg><p><strong>Important notice</strong><span class="sep" aria-hidden="true"></span>Please read carefully</p></div>
+<p class="cl"><span class="n">7.1</span>Our AI Features generate Outputs automatically. Outputs can be inaccurate, incomplete, outdated, biased or simply wrong. They are provided as guidance and practice only.</p>
+<p class="cl"><span class="n">7.2</span>Outputs are <strong>not</strong> professional career counselling, legal, financial, medical, psychological or educational advice, and they are not a substitute for speaking to a qualified person.</p>
+<p class="cl"><span class="n">7.3</span><strong>We do not guarantee any result.</strong> We do not promise that using the Platform will get you a job, an interview, a university or college place, a bursary, better marks, or any other outcome.</p>
+<p class="cl"><span class="n">7.4</span>CV scores, match percentages and similar ratings are indicative only. They are not produced by, and do not reflect, any employer’s or recruitment system’s actual assessment.</p>
+<p class="cl"><span class="n">7.5</span>Information about admission requirements, APS scores, course availability, bursaries, deadlines and job requirements changes often. <strong>You must verify anything important with the relevant institution, funder or employer before you rely on it.</strong></p>
+<p class="cl"><span class="n">7.6</span>We do not make decisions about you that have legal or similarly significant effects based solely on automated processing. Outputs are information for you to consider; you decide what to do with them. You may ask us to explain an Output or to have a person review a concern.</p>
+<p class="cl"><span class="n">7.7</span>You are responsible for how you use Outputs, including checking that anything you send to an employer, institution or funder is true and accurate. Do not use Outputs to misrepresent your qualifications or experience.</p>
+<p class="cl"><span class="n">7.8</span>Similar inputs may produce similar Outputs for different users. We do not guarantee that Outputs are unique.</p>
+<p class="cl"><span class="n">7.9</span>If an Output is offensive, unsafe or clearly wrong, please report it to <span class="ph">[SUPPORT EMAIL]</span>.</p></div></section>
+<section class="card" id="sec-8" aria-labelledby="h-8"><h2 id="h-8"><span class="hn">8</span>CVs and personal information you upload</h2><div class="body"><div class="notice" role="note"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg><p><strong>Important notice</strong><span class="sep" aria-hidden="true"></span>Please read before you upload anything</p></div>
+<p class="cl"><span class="n">8.1</span><strong>Please do not include personal details that are not needed for CV analysis.</strong> In particular, remove the following from any CV, document or text you submit:</p>
+<ul><li>ID number, passport number or any other government identifier;</li><li>your full home street address (your city and province are enough);</li><li>date of birth, age, photograph, marital status or number of children;</li><li>race or ethnicity, religion, health or disability information, trade-union membership, political views, sexual orientation or criminal record;</li><li>bank, card, tax or payment details, and any passwords or access codes;</li><li>private contact details of referees (write “references available on request” instead);</li><li>personal information about any other person, unless you have their permission;</li><li>confidential information belonging to a current or former employer or client.</li></ul>
+<p class="cl"><span class="n">8.2</span><strong>Why this matters.</strong> The Platform uses third-party AI Providers to read and analyse your Content. When you upload a CV, its text is sent to those providers over the internet and is processed on their systems, which may be outside South Africa. Those providers have their own terms and privacy practices. Depending on the provider and the service tier, they may keep inputs for a period (for example for security and abuse monitoring) and may use inputs to improve or train their models. Once your Content has been sent to an AI Provider, we cannot recall it or control what the provider does with it under its own terms. As at the date of these Terms, we do not develop or train our own AI models using your Content.</p>
+<p class="cl"><span class="n">8.3</span>We recommend a “Platform-ready” version of your CV that contains only: your name (or initials), a professional email address, your city and province, your education, your skills and your work experience.</p>
+<p class="cl"><span class="n">8.4</span>If you include information beyond what we recommend, you do so voluntarily and at your own risk. By submitting it you confirm that you have read this clause, that you understand the risks described in <a href="#sec-8">clause 8.2</a>, and, to the extent the law permits, that you consent to that information being processed for the sole purpose of providing the feature you asked for. This clause does not reduce the duties we owe you under data-protection law.</p>
+<p class="cl"><span class="n">8.5</span>You may delete your uploaded CVs from your account at any time. Deleting them removes them from our systems (subject to our backup cycle in the <a href="PrivacyPolicy.html">Privacy Policy</a>) but does not and cannot remove copies already held by an AI Provider under its own terms.</p>
+<p class="cl"><span class="n">8.6</span>Only upload a CV or other document that is yours, or that the person it belongs to has authorised you to use.</p></div></section>
+<section class="card" id="sec-9" aria-labelledby="h-9"><h2 id="h-9"><span class="hn">9</span>Your Content and the licence you give us</h2><div class="body"><p class="cl"><span class="n">9.1</span>You keep ownership of your Content.</p>
+<p class="cl"><span class="n">9.2</span>To run the Platform, you give us a non-exclusive, worldwide, royalty-free licence to host, store, copy, process, analyse, transmit (including to AI Providers and other service providers acting for us) and display your Content for the purpose of providing, securing, supporting and operating the Platform and as described in our <a href="PrivacyPolicy.html">Privacy Policy</a>. The licence ends when your Content is deleted, subject to backups and copies we must keep by law. It is worldwide because cloud and AI services operate across borders.</p>
+<p class="cl"><span class="n">9.3</span>We may create anonymous, aggregated statistics from usage data (for example, how many users used a feature) that do not identify you. We may use these to run and improve the Platform and for internal and public reporting.</p>
+<p class="cl"><span class="n">9.4</span>You confirm that your Content is accurate to the best of your knowledge, that you have the right to submit it, and that it does not infringe anyone’s rights or break the law.</p>
+<p class="cl"><span class="n">9.5</span>We do not review Content in advance, but we may remove or restrict Content that breaches these Terms or the law.</p></div></section>
+<section class="card" id="sec-10" aria-labelledby="h-10"><h2 id="h-10"><span class="hn">10</span>Acceptable use</h2><div class="body"><p>You agree <strong>not</strong> to:</p>
+<ul><li>use the Platform for anything unlawful, fraudulent, defamatory, harassing, discriminatory or abusive;</li><li>upload false, plagiarised or misleading qualifications, or use the Platform to deceive employers, institutions or funders;</li><li>upload another person’s Content or personal information without authority;</li><li>upload malware, or attempt to probe, disrupt, overload or breach the Platform’s security;</li><li>scrape, copy, crawl or harvest the Platform, its data or Outputs by automated means, or resell them;</li><li>reverse engineer, decompile or try to extract our source code, prompts or models;</li><li>attempt to manipulate or “jailbreak” the AI Features, inject instructions designed to override them, or use them to generate harmful, illegal or sexually explicit content;</li><li>bypass usage limits, quotas, payment requirements or access controls, or use multiple accounts to do so;</li><li>impersonate any person, or interfere with another user’s use of the Platform;</li><li>use the Platform to build a competing product or to train another AI model.</li></ul></div></section>
+<section class="card" id="sec-11" aria-labelledby="h-11"><h2 id="h-11"><span class="hn">11</span>Voice features (Interview Simulator and Articulation Coach)</h2><div class="body"><p class="cl"><span class="n">11.1</span>Voice features need access to your device microphone, which you control through your browser settings.</p>
+<p class="cl"><span class="n">11.2</span>Speak only for yourself. Do not record or process the voice of another person without their consent, and avoid saying personal details (such as ID numbers or addresses) during practice sessions.</p>
+<p class="cl"><span class="n">11.3</span>Your speech is converted to text and analysed by AI Providers to produce feedback. Speech recognition may be less accurate for some accents, languages, background noise or devices. Feedback is for practice only and does not predict how a real interviewer or audience will respond.</p></div></section>
+<section class="card" id="sec-12" aria-labelledby="h-12"><h2 id="h-12"><span class="hn">12</span>Application Command Centre and job information</h2><div class="body"><p class="cl"><span class="n">12.1</span>The Application Command Centre helps you track job applications and compare your CV to a job description. We are <strong>not</strong> a recruitment agency, employment agency or employer. We do not place candidates, apply on your behalf, or guarantee that an employer will see or respond to anything.</p>
+<p class="cl"><span class="n">12.2</span>Deadlines, reminders and follow-up prompts are convenience tools. They may fail, be delayed or be inaccurate. <strong>You remain responsible for tracking and meeting your own deadlines.</strong></p>
+<p class="cl"><span class="n">12.3</span>When you paste or enter a job description or advert, it is processed by an AI Provider. Do not paste confidential or proprietary material.</p></div></section>
+<section class="card" id="sec-13" aria-labelledby="h-13"><h2 id="h-13"><span class="hn">13</span>Education, career and study information</h2><div class="body"><p class="cl"><span class="n">13.1</span>Career Discovery, Career Pathfinder, Study Hub and similar features contain information about careers, courses, institutions, requirements, bursaries and past examination papers. Some of it is compiled from public or third-party sources and from AI Outputs, and it may be incomplete or out of date.</p>
+<p class="cl"><span class="n">13.2</span>Past papers, videos, bursary listings and other third-party material remain the property of their owners and are made available for personal, non-commercial study. Links to bursary providers, institutions and other websites take you to sites we do not control; see <a href="#sec-16">clause 16</a>.</p>
+<p class="cl"><span class="n">13.3</span>Subject choices, course selections, applications and other decisions made using the Platform are yours. Always confirm requirements and deadlines directly with the institution or funder.</p></div></section>
+<section class="card" id="sec-14" aria-labelledby="h-14"><h2 id="h-14"><span class="hn">14</span>Free Plan, Premium and payments</h2><div class="body"><p class="cl"><span class="n">14.1</span>The Free Plan has usage limits (for example a limited number of CV uploads per month). Limits are shown on the Platform and may change. Unused allowances do not carry over to the next period.</p>
+<p class="cl"><span class="n">14.2</span>Some features (for example Premium and the Interview Simulator) are paid. Prices are shown in South African Rand (ZAR) at checkout and include VAT where applicable. The price shown at checkout is the price you agree to pay.</p>
+<p class="cl"><span class="n">14.3</span>Payments are processed by third-party payment providers. We do not store your full card or bank details. By paying you authorise us and our payment provider to charge you, and you confirm you are authorised to use the payment method.</p>
+<p class="cl"><span class="n">14.4</span><strong>Renewal and cancellation.</strong> A subscription renews automatically only if this was clearly shown before you paid. You may cancel at any time through your account settings or by contacting us; access continues until the end of the period you have paid for. Where the CPA requires a renewal reminder or a particular notice period, we will give it.</p>
+<p class="cl"><span class="n">14.5</span><strong>Price changes.</strong> We will give at least 30 days’ notice of price increases that affect an existing subscription. You may cancel before the new price applies.</p>
+<p class="cl"><span class="n">14.6</span><strong>Refunds and cooling-off.</strong> To the extent the ECTA cooling-off right applies to your purchase, you may cancel within 7 days of concluding the transaction and receive a refund, less the direct cost of returning performance. That right does not apply where the law excludes it, for example where you asked us to start the service and it has been provided. Nothing in this clause limits your rights under section 54 of the CPA, which entitles you to services performed to the standard reasonably expected and, if not, to have them performed again or to a refund. Otherwise, fees for AI usage already consumed are non-refundable. Approved refunds are paid to the original payment method within <span class="ph">[30]</span> days.</p>
+<p class="cl"><span class="n">14.7</span><strong>Failed or disputed payments.</strong> If a payment fails, is reversed or is charged back, we may suspend Paid Features until it is resolved. Please contact us before opening a dispute so we can fix any problem quickly.</p></div></section>
+<section class="card" id="sec-15" aria-labelledby="h-15"><h2 id="h-15"><span class="hn">15</span>Our intellectual property</h2><div class="body"><p class="cl"><span class="n">15.1</span>The Platform, its design, software, text, graphics, name, logo, questionnaires, scoring methods and compiled data are owned by us or our licensors and are protected by law.</p>
+<p class="cl"><span class="n">15.2</span>We give you a limited, personal, non-exclusive, non-transferable, revocable licence to use the Platform for your own personal, non-commercial career and study purposes in line with these Terms.</p>
+<p class="cl"><span class="n">15.3</span>You may use your Outputs for your own personal purposes (for example in your own CV). You may not sell, publish or commercially exploit our Outputs, data or content.</p>
+<p class="cl"><span class="n">15.4</span>If you send us suggestions or feedback, you agree we may use them freely without payment or credit.</p>
+<p class="cl"><span class="n">15.5</span>If you believe content on the Platform infringes your rights, please email <span class="ph">[SUPPORT EMAIL]</span> with details and we will investigate promptly.</p></div></section>
+<section class="card" id="sec-16" aria-labelledby="h-16"><h2 id="h-16"><span class="hn">16</span>Third-party services and links</h2><div class="body"><p>The Platform relies on and links to third parties such as AI Providers, hosting and database providers, payment providers, video platforms, bursary providers, institutions and employers. We do not control and are not responsible for their content, availability, accuracy or practices, and your dealings with them are governed by their own terms.</p></div></section>
+<section class="card" id="sec-17" aria-labelledby="h-17"><h2 id="h-17"><span class="hn">17</span>Availability and support</h2><div class="body"><p class="cl"><span class="n">17.1</span>We work to keep the Platform available but do not promise it will always be uninterrupted, secure or error-free. Outages may result from maintenance, load shedding, network failures, cyber-attacks, or failures or quota limits of third-party providers.</p>
+<p class="cl"><span class="n">17.2</span>We may impose reasonable limits on usage to protect the Platform and other users.</p>
+<p class="cl"><span class="n">17.3</span>Support is available through <span class="ph">[SUPPORT EMAIL]</span> and we aim to respond within a reasonable time.</p></div></section>
+<section class="card" id="sec-18" aria-labelledby="h-18"><h2 id="h-18"><span class="hn">18</span>Disclaimers</h2><div class="body"><div class="notice" role="note"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg><p><strong>Important notice</strong><span class="sep" aria-hidden="true"></span>This clause limits your rights</p></div>
+<p class="cl"><span class="n">18.1</span>To the maximum extent permitted by law, the Platform and all Outputs are provided “as is” and “as available”. We do not give any warranty that the Platform or Outputs will be accurate, complete, current, suitable for your purpose, or free of errors or interruptions.</p>
+<p class="cl"><span class="n">18.2</span>Nothing in these Terms excludes or limits any right you have under the CPA or any other law that cannot be excluded.</p></div></section>
+<section class="card" id="sec-19" aria-labelledby="h-19"><h2 id="h-19"><span class="hn">19</span>Limitation of liability</h2><div class="body"><div class="notice" role="note"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg><p><strong>Important notice</strong><span class="sep" aria-hidden="true"></span>This clause limits our liability</p></div>
+<p class="cl"><span class="n">19.1</span>To the maximum extent permitted by law, we are not liable for any indirect, incidental, special or consequential loss, or for loss of income, opportunity, employment, admission, bursary or data, arising from your use of, or inability to use, the Platform or from your reliance on any Output.</p>
+<p class="cl"><span class="n">19.2</span>To the maximum extent permitted by law, our total liability to you for all claims arising from or related to the Platform will not exceed the greater of (a) the amount you paid us in the 12 months before the event giving rise to the claim, and (b) R<span class="ph">[500]</span>.</p>
+<p class="cl"><span class="n">19.3</span>We are not liable for loss caused by third parties, including AI Providers, hosting, database and payment providers, or by events outside our reasonable control (<a href="#sec-26">clause 26.5</a>), or for loss caused by your failure to follow these Terms (including <a href="#sec-8">clause 8</a>).</p>
+<p class="cl"><span class="n">19.4</span><strong>Nothing in these Terms limits or excludes our liability for fraud, wilful misconduct or gross negligence, for death or personal injury, or for anything else that the law does not allow us to limit.</strong></p></div></section>
+<section class="card" id="sec-20" aria-labelledby="h-20"><h2 id="h-20"><span class="hn">20</span>Indemnity</h2><div class="body"><p>To the extent permitted by law, you indemnify us against any claim, loss or reasonable cost (including legal costs) arising from your breach of these Terms, your unlawful use of the Platform, or Content you submitted without the right to do so (including another person’s personal information).</p></div></section>
+<section class="card" id="sec-21" aria-labelledby="h-21"><h2 id="h-21"><span class="hn">21</span>Suspension, termination and deletion</h2><div class="body"><p class="cl"><span class="n">21.1</span>You may stop using the Platform and delete your account at any time through your account settings or by emailing us.</p>
+<p class="cl"><span class="n">21.2</span>We may suspend or terminate your access, with notice where reasonably possible, if you breach these Terms, misuse the Platform, put it or others at risk, fail to pay, or if we are required to by law, or if we discontinue the Platform.</p>
+<p class="cl"><span class="n">21.3</span>On termination your licence to use the Platform ends. We will handle your data as set out in the <a href="PrivacyPolicy.html">Privacy Policy</a>. Clauses that by their nature should continue (including 7, 8, 9, 15, 18-20 and 24-26) will survive termination.</p>
+<p class="cl"><span class="n">21.4</span>If we end your paid access without fault on your part, we will refund the unused portion of any prepaid fees.</p></div></section>
+<section class="card" id="sec-22" aria-labelledby="h-22"><h2 id="h-22"><span class="hn">22</span>Changes to these Terms</h2><div class="body"><p>We may update these Terms from time to time. We will give at least 30 days’ notice of material changes by email, notification or a notice on the Platform. If you do not accept the changes you may stop using the Platform and cancel before they take effect. Continued use after the effective date means you accept the updated Terms. Changes do not apply to disputes that arose before they took effect.</p></div></section>
+<section class="card" id="sec-23" aria-labelledby="h-23"><h2 id="h-23"><span class="hn">23</span>Privacy</h2><div class="body"><p>How we collect and use personal information is set out in our <a href="PrivacyPolicy.html">Privacy Policy</a>, which forms part of these Terms.</p></div></section>
+<section class="card" id="sec-24" aria-labelledby="h-24"><h2 id="h-24"><span class="hn">24</span>Complaints and dispute resolution</h2><div class="body"><p class="cl"><span class="n">24.1</span>If you have a complaint, please email <span class="ph">[SUPPORT EMAIL]</span>. We will acknowledge it and try to resolve it within <span class="ph">[10]</span> business days.</p>
+<p class="cl"><span class="n">24.2</span>If we cannot resolve it, either of us may suggest mediation. Nothing in this clause prevents you from approaching the National Consumer Commission, the National Consumer Tribunal, an applicable ombud or a court, or, for privacy matters, the Information Regulator.</p></div></section>
+<section class="card" id="sec-25" aria-labelledby="h-25"><h2 id="h-25"><span class="hn">25</span>Governing law and jurisdiction</h2><div class="body"><p>These Terms are governed by the laws of the Republic of South Africa. Subject to your rights as a consumer to use any court or forum permitted by law, the courts of South Africa, including the Gauteng Division of the High Court, Johannesburg, have jurisdiction.</p></div></section>
+<section class="card" id="sec-26" aria-labelledby="h-26"><h2 id="h-26"><span class="hn">26</span>General</h2><div class="body"><p class="cl"><span class="n">26.1</span><strong>Entire agreement.</strong> These Terms and the <a href="PrivacyPolicy.html">Privacy Policy</a> are the whole agreement between us about the Platform.</p>
+<p class="cl"><span class="n">26.2</span><strong>Severability.</strong> If any provision is found invalid or unenforceable, the rest remains in force and the provision will be limited to the extent needed.</p>
+<p class="cl"><span class="n">26.3</span><strong>No waiver.</strong> Not enforcing a right is not a waiver of it.</p>
+<p class="cl"><span class="n">26.4</span><strong>Assignment.</strong> You may not transfer your rights under these Terms. We may transfer ours to a successor or affiliate with notice to you.</p>
+<p class="cl"><span class="n">26.5</span><strong>Events beyond our control.</strong> We are not in breach if we are prevented or delayed by events outside our reasonable control, such as power outages, load shedding, internet or cloud failures, third-party outages, natural disasters, strikes, or acts of government or cyber-attack.</p>
+<p class="cl"><span class="n">26.6</span><strong>Notices.</strong> We may give you notice by email to the address on your account, by notification in the Platform or by posting on the Platform. You may give us notice at the contact details in <a href="#sec-2">clause 2</a>.</p>
+<p class="cl"><span class="n">26.7</span><strong>No partnership.</strong> Nothing in these Terms makes you our partner, agent or employee.</p>
+<p class="cl"><span class="n">26.8</span><strong>Language.</strong> These Terms are written in English. We will try to explain them in plain language on request.</p></div></section>
+<section class="card" id="sec-27" aria-labelledby="h-27"><h2 id="h-27"><span class="hn">27</span>Contact us</h2><div class="body"><p><span class="ph">[LEGAL ENTITY NAME]</span> t/a <span class="ph">[PLATFORM NAME]</span><br>Email: <span class="ph">[SUPPORT EMAIL]</span><br>Address: <span class="ph">[ADDRESS]</span>, South Africa</p></div></section>
+
+      <div class="rows">
+        <a class="row" href="PrivacyPolicy.html">
+          <span><b>Privacy Policy</b><small>Learn how we protect your data.</small></span>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="row" href="Settings.html">
+          <span><b>Back to settings</b><small>Return to billing, legal and support options.</small></span>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+  (function () {
+    var toc = document.getElementById('toc');
+    var mq = window.matchMedia('(min-width: 1000px)');
+    function sync() { toc.open = mq.matches; }
+    sync();
+    if (mq.addEventListener) mq.addEventListener('change', sync);
+  })();
+</script>
+</body>
+</html>
