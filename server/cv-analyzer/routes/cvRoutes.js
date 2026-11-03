@@ -25,7 +25,14 @@ const upload = multer({
 // user leaves the CV page. Jobs live in memory, so no database changes
 // are needed; the finished result is saved to the database as before.
 
-const STALE_JOB_MS = 3 * 60 * 1000; // a job running longer than this is treated as dead
+// Gemini itself gives up after 60s (geminiService.js's TOTAL_DEADLINE_MS,
+// across every model/retry it tries), so the real worst case here is that
+// plus file extraction and the Supabase writes - comfortably under a
+// minute in practice. 5 minutes is generous headroom above that, not a
+// tight race against it, now that finishJob() above also guards against
+// this sweep clobbering a job that genuinely finishes right around when it
+// fires.
+const STALE_JOB_MS = 5 * 60 * 1000; // a job running longer than this is treated as dead
 const FINISHED_JOB_TTL_MS = 30 * 60 * 1000; // keep finished jobs for 30 minutes
 
 const JOB_ERROR_FALLBACK =
@@ -57,6 +64,15 @@ function createJob(userId, fileName, targetRole) {
 }
 
 function finishJob(job, status, { result = null, error = null } = {}) {
+  // Once a job leaves "processing" it stays left - without this, a job that
+  // genuinely completed (saved to the database, as in runAnalysisJob) could
+  // still be flipped back to "failed" by something arriving late: the
+  // stale-job sweep in getRunningJob, or the .catch() on runAnalysisJob's
+  // detached promise if anything after the real save point throws. That
+  // flip is exactly what it would look like for the CV page to show a real,
+  // saved analysis while also reporting the job as failed.
+  if (job.status !== "processing") return;
+
   job.status = status;
   job.result = result;
   job.error = error;

@@ -1,0 +1,821 @@
+/* =========================================================
+   APPLICATION COMMAND CENTRE
+   Loads after dashboard.css + theme.css, so every color/radius/shadow
+   below is one of their existing variables - nothing new introduced,
+   same look and feel as every other page.
+========================================================= */
+
+.btn-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---------------------------------------------------------- quota strip */
+
+.quota-strip {
+  margin: 0 0 18px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--primary-light);
+  color: var(--text-dark);
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+}
+
+.quota-strip.quota-warning {
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.quota-strip.quota-blocked {
+  background: #fef2f2;
+  color: var(--danger);
+}
+
+.quota-strip.hidden {
+  display: none;
+}
+
+/* ---------------------------------------------------------- insights extras */
+
+.insights-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+#matchByCategory .category-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+#matchByCategory .category-row:last-child {
+  margin-bottom: 0;
+}
+
+#matchByCategory .category-label {
+  flex: 0 0 140px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#matchByCategory .category-bar-track {
+  flex: 1;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--border-light);
+  overflow: hidden;
+}
+
+#matchByCategory .category-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--primary), var(--cyan));
+  transition: width 0.5s ease;
+}
+
+#matchByCategory .category-pct {
+  flex: 0 0 42px;
+  text-align: right;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+#topMissingSkill .missing-skill-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+#topMissingSkill .missing-skill-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #fecaca, #fca5a5);
+  color: #991b1b;
+  flex-shrink: 0;
+}
+
+#topMissingSkill .missing-skill-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+#topMissingSkill .missing-skill-sub {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.insights-empty {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+/* ---------------------------------------------------------- board */
+
+.board-section {
+  margin-top: 8px;
+}
+
+.board-toolbar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.board-toolbar h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--text-dark);
+}
+
+.board-hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(240px, 1fr));
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+/* .kanban-board's own display:grid (loaded after dashboard.css) would
+   otherwise win a same-specificity tie against the generic .hidden there
+   and silently keep the board visible - this two-class selector guarantees
+   .hidden wins regardless of file order. */
+.kanban-board.hidden {
+  display: none;
+}
+
+.kanban-column {
+  background: var(--bg-card-hover, #f8fafc);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  min-height: 160px;
+  max-height: 72vh;
+}
+
+.kanban-column-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 14px 10px;
+}
+
+.kanban-column-head h3 {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kanban-column-head h3 i {
+  width: 15px;
+  height: 15px;
+  color: var(--text-muted);
+}
+
+.kanban-count {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  display: grid;
+  place-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.kanban-dropzone {
+  flex: 1;
+  padding: 0 10px 10px;
+  overflow-y: auto;
+  min-height: 60px;
+  transition: background 0.15s ease;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.kanban-dropzone.drag-over {
+  background: var(--primary-light);
+}
+
+.kanban-empty-hint {
+  margin: 10px 0;
+  padding: 14px;
+  border: 1.5px dashed var(--border);
+  border-radius: 12px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+/* ---------------------------------------------------------- cards */
+
+.app-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  animation: cardIn 0.3s ease;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.app-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.app-card.dragging {
+  opacity: 0.4;
+}
+
+.app-card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.app-card-title {
+  min-width: 0;
+}
+
+.app-card-title h4 {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-dark);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-card-title p {
+  margin: 2px 0 0;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.app-card-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.app-move-select {
+  font-size: 0.76rem;
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-dark);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.app-move-select:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+/* ---------------------------------------------------------- match ring */
+/* Same conic-gradient-masked-circle technique as .gauge-ring in
+   dashboard.css, sized smaller for a card and driven by the --pct custom
+   property set inline per card instead of a separate JS style.background
+   write, so one CSS rule covers every ring on the board. */
+
+.match-ring {
+  --pct: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(var(--match-ring-color, var(--primary)) calc(var(--pct) * 3.6deg), #e5e7eb 0);
+  position: relative;
+}
+
+.match-ring::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: var(--bg-card);
+}
+
+.match-ring span {
+  position: relative;
+  z-index: 1;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--text-dark);
+}
+
+.match-ring.ring-high { --match-ring-color: var(--good); }
+.match-ring.ring-mid { --match-ring-color: #f59e0b; }
+.match-ring.ring-low { --match-ring-color: var(--danger); }
+
+#detailRing {
+  width: 86px;
+  height: 86px;
+}
+
+#detailRing span {
+  font-size: 1.15rem;
+}
+
+/* ---------------------------------------------------------- deadline chip */
+
+.deadline-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--border-light);
+  color: var(--text-muted);
+}
+
+.deadline-chip.deadline-urgent {
+  background: #fef2f2;
+  color: var(--danger);
+}
+
+.deadline-chip.deadline-soon {
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.deadline-chip.deadline-ok {
+  background: #f0fdf4;
+  color: var(--good);
+}
+
+.deadline-chip:empty {
+  display: none;
+}
+
+.role-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+/* ---------------------------------------------------------- empty state */
+
+.board-empty {
+  text-align: center;
+  padding: 50px 20px;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--text-muted);
+}
+
+.board-empty.hidden {
+  display: none;
+}
+
+.board-empty i {
+  width: 38px;
+  height: 38px;
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+
+.board-empty h3 {
+  margin: 0 0 6px;
+  color: var(--text-dark);
+}
+
+.board-empty p {
+  margin: 0 0 16px;
+  font-size: 0.88rem;
+}
+
+/* ---------------------------------------------------------- modals */
+/* Mirrors .planner-overlay/.planner-panel: position:fixed relative to the
+   viewport, so nothing here can ever be clipped by an ancestor's
+   overflow:hidden the way a dropdown anchored to a button could be. */
+
+.app-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.app-overlay.hidden {
+  display: none;
+}
+
+.app-modal {
+  width: min(560px, 100%);
+  max-height: 88vh;
+  max-height: 88dvh;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  animation: modalIn 0.2s ease;
+}
+
+.app-modal-wide {
+  width: min(640px, 100%);
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.app-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.app-modal-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--text-dark);
+  overflow-wrap: anywhere;
+}
+
+.app-modal-body {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* add job */
+
+.add-job-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  background: var(--border-light);
+  padding: 4px;
+  border-radius: 12px;
+}
+
+.add-job-tab {
+  flex: 1;
+  padding: 9px;
+  border: none;
+  background: transparent;
+  border-radius: 9px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.add-job-tab.active {
+  background: var(--bg-card);
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.add-job-field {
+  display: block;
+  margin-bottom: 14px;
+}
+
+.add-job-field.hidden {
+  display: none;
+}
+
+.add-job-field span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.add-job-field textarea,
+.add-job-field input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 0.88rem;
+  color: var(--text-main);
+  resize: vertical;
+}
+
+.add-job-field textarea:focus,
+.add-job-field input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.add-job-message {
+  min-height: 1.3em;
+  margin: 0 0 12px;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+}
+
+.add-job-message.is-error {
+  color: var(--danger);
+}
+
+.add-job-message.is-loading {
+  color: var(--primary);
+}
+
+.add-job-message.is-loading::before {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  border: 2px solid var(--primary-light);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  vertical-align: -2px;
+  animation: atSpin 0.7s linear infinite;
+}
+
+@keyframes atSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* detail modal */
+
+.detail-company {
+  margin: -8px 0 16px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.detail-top-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.detail-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.detail-section {
+  margin-bottom: 18px;
+}
+
+.detail-section h4 {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip-row span {
+  background: var(--border-light);
+  color: var(--text-dark);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+}
+
+.chip-row-missing span {
+  background: #fef2f2;
+  color: var(--danger);
+}
+
+.chip-row:empty::after {
+  content: "None noted.";
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.tip-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.86rem;
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+.detail-section textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 0.86rem;
+  resize: vertical;
+  margin-bottom: 8px;
+}
+
+.btn-secondary.small {
+  padding: 7px 14px;
+  font-size: 0.8rem;
+}
+
+.notes-saved {
+  margin-left: 10px;
+  color: var(--good);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.notes-saved.hidden {
+  display: none;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.btn-link i {
+  width: 15px;
+  height: 15px;
+}
+
+.btn-link.danger {
+  color: var(--danger);
+}
+
+.btn-link.danger:hover {
+  text-decoration: underline;
+}
+
+/* ---------------------------------------------------------- onboarding hint */
+
+.onboarding-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: linear-gradient(135deg, var(--primary-light), #eef4ff);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  margin-bottom: 18px;
+}
+
+.onboarding-hint i {
+  width: 22px;
+  height: 22px;
+  color: var(--primary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.onboarding-hint p {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--text-dark);
+  line-height: 1.5;
+}
+
+.onboarding-hint button {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-top: 6px;
+  padding: 0;
+}
+
+/* ---------------------------------------------------------- responsive */
+
+@media (max-width: 1100px) {
+  .kanban-board {
+    grid-template-columns: repeat(5, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .insights-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .kanban-board {
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    grid-auto-columns: minmax(78vw, 260px);
+    max-height: none;
+  }
+
+  .kanban-column {
+    max-height: none;
+  }
+
+  .app-modal-body {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .detail-top-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .app-modal {
+    width: 100%;
+    max-height: 92vh;
+    max-height: 92dvh;
+    border-radius: 18px 18px 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-card,
+  .app-modal {
+    animation: none;
+  }
+}

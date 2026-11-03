@@ -1,3 +1,4 @@
+import "./loadEnv.mjs";
 import express from "express";
 import cors from "cors";
 import { createClient } from "@supabase/supabase-js";
@@ -13,9 +14,13 @@ import careerPathfinderRoutes from "./routes/careerPathfinder.js";
 import studyHubRoutes from "./routes/studyHub.js";
 import createNscRouter from "./routes/nscPapers.cjs";
 import createVideoDiscoveryRouter from "./routes/videoDiscovery.cjs";
+import readinessRoutes from "./routes/readiness.cjs"; 
 import { createProxyMiddleware } from "http-proxy-middleware";
 import adminRoutes from "./routes/admin.js";
 import articulationRoutes from "./routes/articulation.js";
+import applicationTrackerRoutes, {
+  generateApplicationNotifications,
+} from "./routes/applicationTracker.js";
 
 import { getOccupationSkills } from "./escoClient.mjs";
 import { computeSkillGap } from "./skillMatcher.mjs";
@@ -23,6 +28,7 @@ import { searchEscoOccupations } from "./escoClient.mjs";
 import { INDUSTRIES } from "./industries.mjs";
 import { LEARNING_MODULES } from "./learningModules.mjs";
 import englishRoutes from "./routes/english.js";
+import createSupportRouter from "./routes/support.js";
 import { buildRoadmap } from "./roadmapBuilder.mjs";
 
 
@@ -440,8 +446,15 @@ app.use("/api/career-pathfinder", careerPathfinderRoutes);
 app.use("/api/study-hub", studyHubRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/articulation", articulationRoutes);
-app.use("/api/english", englishRoutes); 
+app.use("/api/english", englishRoutes);
+app.use("/api/applications", applicationTrackerRoutes);
+app.use("/api/readiness", readinessRoutes); 
 
+if (supabaseAdmin) {
+  app.use("/api/support", createSupportRouter({ db: supabaseAdmin, requireAuth }));
+} else {
+  console.warn("⚠️ SUPABASE_SERVICE_ROLE_KEY is not set: the support inbox and rating prompts are off.");
+}
 
 const requireAuthWithUser = (req, res, next) =>
   Promise.resolve(requireAuth(req, res, () => { req.user = { id: req.userId }; next(); })).catch(next);
@@ -481,71 +494,162 @@ app.get(
 );
 
 /* =========================================================
-   TEXT-TO-SPEECH (Edge TTS — free, human neural voices)
+   TEXT-TO-SPEECH (Groq Orpheus, one distinct voice per persona)
 ========================================================= */
 
+const GROQ_TTS_URL   = "https://api.groq.com/openai/v1/audio/speech";
+const GROQ_TTS_MODEL = "canopylabs/orpheus-v1-english";
+const TTS_MAX_CHARS  = 190; // Orpheus limits input length per request
+
 const PERSONA_VOICES = {
-  "senior-engineer": { voice: "en-US-GuyNeural", rate: 1.0, pitch: "+0Hz" },
-  "hr-manager": { voice: "en-ZA-LeahNeural", rate: 0.97, pitch: "+10Hz" },
-  "product-manager": { voice: "en-GB-RyanNeural", rate: 1.0, pitch: "-5Hz" },
-  "consultant": { voice: "en-IN-NeerjaNeural", rate: 1.08, pitch: "+5Hz" },
-  "articulation-coach": { voice: "en-ZA-LukeNeural", rate: 0.95, pitch: "+0Hz" },
+  "senior-engineer":    "troy",
+  "hr-manager":         "hannah",
+  "product-manager":    "austin",
+  "consultant":         "diana",
+  "articulation-coach": "daniel",
 };
 
-const DEFAULT_VOICE = { voice: "en-US-AriaNeural", rate: 1.0, pitch: "+0Hz" };
+const ALL_VOICES = ["autumn", "diana", "hannah", "austin", "daniel", "troy"];
 
-// Any custom/unknown persona still gets a consistent, distinct voice for
-// the whole session instead of always falling back to the same default.
-const FALLBACK_VOICE_POOL = [
-  "en-US-AriaNeural",
-  "en-US-DavisNeural",
-  "en-GB-SoniaNeural",
-  "en-AU-NatashaNeural",
-  "en-ZA-LukeNeural",
-  "en-IE-ConnorNeural",
-];
-
-function pickFallbackVoice(id) {
+function voiceForPersona(personaId) {
+  if (PERSONA_VOICES[personaId]) return PERSONA_VOICES[personaId];
+  if (!personaId) return process.env.ENGLISH_TTS_VOICE || "daniel";
   let h = 0;
-  for (const ch of String(id)) h = (h * 31 + ch.charCodeAt(0)) | 0;
-  const voice = FALLBACK_VOICE_POOL[Math.abs(h) % FALLBACK_VOICE_POOL.length];
-  return { voice, rate: 1.0, pitch: "+0Hz" };
+  for (const ch of String(personaId)) h = (h * 31 + ch.charCodeAt(0)) | 0;
+  return ALL_VOICES[Math.abs(h) % ALL_VOICES.length];
+}
+
+function humanizeForSpeech(raw) {
+  return String(raw)
+    .replace(/[*_`#>]/g, "")
+    .replace(/\be\.g\.,?/gi, "for example,")
+    .replace(/\bi\.e\.,?/gi, "that is,")
+    .replace(/\bvs\.?(?=\s)/gi, "versus")
+    .replace(/\n+/g, ". ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Splits text into pieces of at most `max` characters, preferring sentence ends.
+function splitForTts(text, max = TTS_MAX_CHARS) {
+  const sentences = text.match(/[^.!?]+[.!?]*\s*/g) || [text];
+  const chunks = [];
+  let current = "";
+
+  const pushLong = (s) => {
+    let rest = s.trim();
+    while (rest.length > max) {
+      let cut = rest.lastIndexOf(",", max);
+      if (cut < max * 0.4) cut = rest.lastIndexOf(" ", max);
+      if (cut <= 0) cut = max;
+      chunks.push(rest.slice(0, cut + 1).trim());
+      rest = rest.slice(cut + 1).trim();
+    }
+    if (rest) chunks.push(rest);
+  };
+
+  for (const s of sentences) {
+    if ((current + s).length <= max) {
+      current += s;
+    } else {
+      if (current.trim()) chunks.push(current.trim());
+      current = "";
+      if (s.length > max) pushLong(s);
+      else current = s;
+    }
+  }
+  if (current.trim()) chunks.push(current.trim());
+  return chunks;
+}
+
+// Pulls the fmt and data sections out of a WAV buffer.
+function parseWav(buf) {
+  let pos = 12;
+  let fmt = null;
+  let data = null;
+  while (pos + 8 <= buf.length) {
+    const id = buf.toString("ascii", pos, pos + 4);
+    let size = buf.readUInt32LE(pos + 4);
+    const start = pos + 8;
+    if (id === "data") {
+      if (size === 0 || size === 0xffffffff || start + size > buf.length) {
+        size = buf.length - start;
+      }
+      data = buf.subarray(start, start + size);
+      break;
+    }
+    if (id === "fmt ") fmt = buf.subarray(start, start + size);
+    pos = start + size + (size % 2);
+  }
+  if (!fmt || !data) throw new Error("Unexpected WAV format from Groq.");
+  return { fmt, data };
+}
+
+function mergeWavs(buffers) {
+  if (buffers.length === 1) return buffers[0];
+  const parsed = buffers.map(parseWav);
+  const fmt = parsed[0].fmt;
+  const dataParts = parsed.map((p) => p.data);
+  const dataLen = dataParts.reduce((n, d) => n + d.length, 0);
+
+  const header = Buffer.alloc(12 + 8 + fmt.length + 8);
+  header.write("RIFF", 0, "ascii");
+  header.writeUInt32LE(4 + 8 + fmt.length + 8 + dataLen, 4);
+  header.write("WAVE", 8, "ascii");
+  header.write("fmt ", 12, "ascii");
+  header.writeUInt32LE(fmt.length, 16);
+  fmt.copy(header, 20);
+  const dataHeaderPos = 20 + fmt.length;
+  header.write("data", dataHeaderPos, "ascii");
+  header.writeUInt32LE(dataLen, dataHeaderPos + 4);
+
+  return Buffer.concat([header, ...dataParts]);
+}
+
+async function groqSpeak(text, voice) {
+  const res = await fetch(GROQ_TTS_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: GROQ_TTS_MODEL,
+      input: text,
+      voice,
+      response_format: "wav",
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Groq TTS ${res.status}: ${body.slice(0, 300)}`);
+  }
+  return Buffer.from(await res.arrayBuffer());
 }
 
 app.post("/api/tts", async (req, res) => {
-  const text = typeof req.body.text === "string" ? req.body.text.trim() : "";
+  const rawText   = typeof req.body.text === "string" ? req.body.text.trim() : "";
   const personaId = typeof req.body.personaId === "string" ? req.body.personaId : "";
 
-  if (!text) {
+  if (!rawText) {
     return res.status(400).json({ error: "text is required." });
   }
 
-  const voiceConfig =
-    PERSONA_VOICES[personaId] || (personaId ? pickFallbackVoice(personaId) : DEFAULT_VOICE);
+  const voice = voiceForPersona(personaId);
+  const text  = humanizeForSpeech(rawText);
 
-  let timer;
   try {
-    const deadline = new Promise((_, reject) => {
-      timer = setTimeout(() => reject(new Error("Edge TTS timed out after 12s")), 12000);
-    });
-
-    const { audio, contentType } = await Promise.race([
-      edgeSpeech({
-        text,
-        voice: voiceConfig.voice,
-        rate: voiceConfig.rate,
-        pitch: voiceConfig.pitch,
-      }),
-      deadline,
-    ]);
-
-    res.setHeader("Content-Type", contentType);
-    return res.send(audio);
+    const pieces  = splitForTts(text);
+    const buffers = [];
+    for (const piece of pieces) {
+      buffers.push(await groqSpeak(piece, voice));
+    }
+    res.setHeader("Content-Type", "audio/wav");
+    return res.send(mergeWavs(buffers));
   } catch (error) {
-    console.error("❌ TTS generation error:", error.message);
+    console.error(`❌ TTS generation error (voice: ${voice}):`, error.message);
     return res.status(500).json({ error: "TTS generation failed." });
-  } finally {
-    clearTimeout(timer);
   }
 });
 
@@ -1740,6 +1844,19 @@ app.post(
         }
 
         createdCount = created?.length ?? 0;
+      }
+
+      // Application Command Centre deadline/follow-up reminders land in
+      // this same sync + the same notifications table, rather than a
+      // second polling mechanism. Best-effort: a problem here shouldn't
+      // break the calendar-reminder sync above, which has already succeeded.
+      try {
+        await generateApplicationNotifications(req.userId);
+      } catch (appNotifyError) {
+        console.warn(
+          "Application notification sync failed (non-fatal):",
+          appNotifyError.message
+        );
       }
 
       return res.status(200).json({

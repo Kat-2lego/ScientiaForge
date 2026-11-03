@@ -1,0 +1,267 @@
+/* ScientiaForge · Study Hub "My readiness". Uses the --nsc-* tokens from StudyHub.css. */
+.rd-panel,
+.rd-panel * { box-sizing: border-box; }
+.rd-panel { display: grid; gap: 18px; }
+.rd-panel .nsc-head { margin-bottom: 0; }
+.rd-panel [hidden] { display: none !important; }
+
+/* ---------- headline tiles ---------- */
+.rd-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+.rd-tile {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding: 16px 16px 14px;
+  border: 1px solid var(--nsc-border, #e2e8f0);
+  border-radius: var(--nsc-radius-lg, 14px);
+  background: var(--nsc-card, #fff);
+  overflow: hidden;
+}
+.rd-tile svg {
+  width: 18px;
+  height: 18px;
+  margin-bottom: 6px;
+  color: var(--nsc-primary, #2563eb);
+}
+.rd-tile strong {
+  font-family: var(--nsc-heading, inherit);
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--nsc-text, #0f172a);
+  font-variant-numeric: tabular-nums;
+}
+.rd-tile span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--nsc-muted, #64748b);
+}
+
+/* ---------- cards ---------- */
+.rd-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.rd-card {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--nsc-border, #e2e8f0);
+  border-radius: var(--nsc-radius-lg, 14px);
+  background: var(--nsc-card, #fff);
+}
+.rd-card h4,
+.rd-h {
+  margin: 0;
+  font-family: var(--nsc-heading, inherit);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--nsc-text, #0f172a);
+}
+.rd-note {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--nsc-muted, #64748b);
+}
+
+/* ---------- heatmap: 7 rows, one column per week ---------- */
+.rd-heat {
+  display: grid;
+  grid-template-rows: repeat(7, 14px);
+  grid-auto-flow: column;
+  grid-auto-columns: 14px;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+.rd-cell {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: #eef2f7;
+}
+.rd-cell.rd-l1 { background: color-mix(in srgb, var(--nsc-primary, #2563eb) 30%, #eef2f7); }
+.rd-cell.rd-l2 { background: color-mix(in srgb, var(--nsc-primary, #2563eb) 62%, #eef2f7); }
+.rd-cell.rd-l3 { background: var(--nsc-primary, #2563eb); }
+
+/* ---------- recent list ---------- */
+.rd-recent {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rd-recent li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 4px 10px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.rd-recent strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--nsc-text, #0f172a);
+}
+.rd-recent span:not(.ex-pill),
+.rd-recent time { font-size: 12px; color: var(--nsc-muted, #64748b); }
+.rd-recent time { grid-column: 2 / -1; margin-top: -4px; }
+
+/* ---------- insights ---------- */
+.rd-insights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
+}
+.rd-insight {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--nsc-border, #e2e8f0);
+  border-radius: var(--nsc-radius-lg, 14px);
+  background: var(--nsc-card, #fff);
+}
+.rd-insight:empty { display: none; }
+.rd-insight > svg {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  padding: 9px;
+  border-radius: 11px;
+}
+.rd-insight-head {
+  margin: 0 0 2px;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--nsc-muted, #64748b);
+}
+.rd-insight h4 { margin: 0 0 4px; font-family: var(--nsc-heading, inherit); font-size: 16px; color: var(--nsc-text, #0f172a); }
+.rd-insight p:not(.rd-insight-head) { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--nsc-muted, #64748b); }
+.rd-focus > svg { background: var(--nsc-incorrect-bg, #fef2f2); color: var(--nsc-incorrect, #b91c1c); }
+.rd-strong > svg { background: var(--nsc-correct-bg, #f0fdf4); color: var(--nsc-correct, #15803d); }
+.rd-up > svg { background: var(--nsc-primary-light, #eff6ff); color: var(--nsc-primary, #2563eb); }
+
+/* ---------- subjects ---------- */
+.rd-h { margin-top: 6px; }
+.rd-subjects {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 12px;
+}
+.rd-subject {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--nsc-border, #e2e8f0);
+  border-radius: var(--nsc-radius-lg, 14px);
+  background: var(--nsc-card, #fff);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.rd-subject:hover {
+  border-color: color-mix(in srgb, var(--nsc-primary, #2563eb) 35%, var(--nsc-border, #e2e8f0));
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+.rd-subject-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.rd-subject-top h4 {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--nsc-heading, inherit);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--nsc-text, #0f172a);
+}
+.rd-subject-meta { margin: 0; font-size: 12.5px; color: var(--nsc-muted, #64748b); }
+.rd-delta { margin-left: 4px; font-weight: 700; }
+.rd-delta.is-up { color: var(--nsc-correct, #15803d); }
+.rd-delta.is-down { color: var(--nsc-incorrect, #b91c1c); }
+.rd-meter { height: 8px; border-radius: 99px; background: #eef2f7; overflow: hidden; }
+.rd-meter i { display: block; height: 100%; border-radius: 99px; }
+.rd-meter i.ex-high { background: #22c55e; }
+.rd-meter i.ex-mid { background: var(--nsc-primary, #2563eb); }
+.rd-meter i.ex-low { background: #f59e0b; }
+.rd-meter i.ex-risk { background: #ef4444; }
+.rd-subject-foot { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.rd-spark { flex-shrink: 0; }
+.rd-spark.is-up { color: var(--nsc-correct, #15803d); }
+.rd-spark.is-down { color: var(--nsc-incorrect, #b91c1c); }
+.rd-spark-empty { font-size: 12px; color: var(--nsc-muted, #64748b); }
+
+/* ex-pill is also defined by ExamMode.css; repeat the colours so this page doesn't need that file */
+.rd-panel .ex-pill {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.rd-panel .ex-pill.ex-high { background: var(--nsc-correct-bg, #f0fdf4); color: var(--nsc-correct, #15803d); }
+.rd-panel .ex-pill.ex-mid { background: var(--nsc-primary-light, #eff6ff); color: var(--nsc-primary, #2563eb); }
+.rd-panel .ex-pill.ex-low { background: var(--nsc-amber-bg, #fffbeb); color: var(--nsc-amber, #b45309); }
+.rd-panel .ex-pill.ex-risk { background: var(--nsc-incorrect-bg, #fef2f2); color: var(--nsc-incorrect, #b91c1c); }
+
+/* ---------- untouched subjects, footer, empty ---------- */
+.rd-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.rd-chips .nsc-chip { text-decoration: none; padding: 5px 12px; }
+.rd-chips .nsc-chip:hover { background: var(--nsc-primary, #2563eb); color: #fff; }
+.rd-foot { margin: 0; font-size: 12px; color: var(--nsc-muted, #64748b); }
+.rd-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--nsc-primary, #2563eb);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.rd-empty {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  max-width: 520px;
+  margin: 24px auto;
+  padding: 36px 20px;
+  text-align: center;
+}
+.rd-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: var(--nsc-primary-light, #eff6ff);
+  color: var(--nsc-primary, #2563eb);
+}
+.rd-empty-icon svg { width: 30px; height: 30px; }
+.rd-empty h3 { margin: 6px 0 0; font-family: var(--nsc-heading, inherit); font-size: 20px; color: var(--nsc-text, #0f172a); }
+.rd-empty p { margin: 0 0 8px; font-size: 14px; line-height: 1.6; color: var(--nsc-muted, #64748b); }
+
+.rd-link:focus-visible,
+.rd-subject a:focus-visible { outline: 2px solid var(--nsc-primary, #2563eb); outline-offset: 2px; }
+
+@media (max-width: 768px) {
+  .rd-two { grid-template-columns: 1fr; }
+  .rd-subjects { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rd-subject { transition: none; }
+}

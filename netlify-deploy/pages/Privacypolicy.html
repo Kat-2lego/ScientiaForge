@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy | [PLATFORM NAME]</title>
+<!--
+  Legal page. Before launch:
+  1. Search this file for class="ph" and replace every highlighted [PLACEHOLDER] with real details.
+  2. Remove the ph highlight once done (the .ph rule in the <style> block), or leave it; it only styles text that still has brackets.
+  3. Have the final wording reviewed by an attorney.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3f6fb;
+    --card: #ffffff;
+    --ink: #0f1b3a;
+    --body: #2c3754;
+    --muted: #79859e;
+    --line: #e3e9f2;
+    --tint: #eaf0fb;
+    --link: #2257d4;
+    --amber-bg: #fff8e6;
+    --amber-line: #f0b43e;
+    --amber-edge: #f6e0aa;
+    --amber-ink: #6f4600;
+    --ph-bg: #fff0a8;
+    --ph-ink: #4f3b00;
+    --radius: 14px;
+    --gutter: 3rem;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--body);
+    font: 15.5px/1.7 "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--link); text-underline-offset: 2px; }
+  a:focus-visible, summary:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; border-radius: 4px; }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 72px; }
+
+  .back {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--muted); font-weight: 600; font-size: 14px; text-decoration: none; margin-bottom: 18px;
+  }
+  .back:hover { color: var(--ink); }
+
+  h1 { margin: 0 0 8px; color: var(--ink); font-size: 32px; line-height: 1.2; font-weight: 800; letter-spacing: -0.01em; }
+  .meta { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 0 0 16px; color: var(--muted); font-size: 13.5px; font-weight: 500; }
+  .meta span + span { padding-left: 20px; border-left: 1px solid var(--line); }
+  .lead { max-width: 760px; margin: 0 0 10px; font-size: 16px; }
+
+  .layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 28px; align-items: start; margin-top: 22px; }
+
+  /* Contents */
+  .toc {
+    position: sticky; top: 20px; max-height: calc(100vh - 40px); overflow: auto;
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(15, 27, 58, .04); padding: 14px 8px 10px 16px;
+  }
+  .toc summary { font-weight: 700; color: var(--ink); font-size: 15px; cursor: pointer; padding: 2px 8px 8px 0; list-style: none; }
+  .toc summary::-webkit-details-marker { display: none; }
+  .toc ol { list-style: none; margin: 0; padding: 0; }
+  .toc li a {
+    display: flex; gap: 10px; padding: 5px 8px 5px 0; color: var(--body); text-decoration: none;
+    font-size: 13.5px; line-height: 1.4; border-radius: 6px;
+  }
+  .toc li a:hover { color: var(--link); }
+  .toc .tn { flex: 0 0 1.6em; color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 600; }
+
+  /* Cards */
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(15, 27, 58, .04); padding: 24px 28px 14px; margin: 0 0 16px;
+    scroll-margin-top: 20px;
+  }
+  .card h2 { display: flex; align-items: center; margin: 0 0 16px; color: var(--ink); font-size: 18px; line-height: 1.3; font-weight: 700; }
+  .hn {
+    flex: 0 0 36px; width: 36px; height: 36px; margin-right: 12px; display: grid; place-items: center;
+    border-radius: 10px; background: var(--tint); color: var(--ink); font-size: 14px; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .card h3 { margin: 20px 0 8px; color: var(--ink); font-size: 15.5px; font-weight: 700; }
+  .body { padding-left: var(--gutter); max-width: 100%; }
+  .body p { margin: 0 0 12px; }
+  .body .cl { position: relative; }
+  .body .cl .n {
+    position: absolute; left: calc(-1 * var(--gutter)); width: calc(var(--gutter) - .6rem); text-align: right;
+    color: var(--muted); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; padding-top: 1px;
+  }
+  .body ul { margin: 0 0 12px; padding-left: 1.2em; }
+  .body li { margin: 0 0 6px; padding-left: 2px; }
+  .body li::marker { color: var(--muted); }
+  .body strong { color: var(--ink); font-weight: 700; }
+
+  /* Important notices (CPA s49: conspicuous) */
+  .notice {
+    display: flex; align-items: center; gap: 10px; margin: 0 0 14px; padding: 10px 14px;
+    background: var(--amber-bg); border: 1px solid var(--amber-edge); border-left: 4px solid var(--amber-line);
+    border-radius: 10px; color: var(--amber-ink);
+  }
+  .notice svg { flex: 0 0 auto; }
+  .notice p { margin: 0; font-size: 14px; font-weight: 600; }
+  .notice strong { color: var(--amber-ink); font-weight: 800; }
+  .notice .sep { display: inline-block; width: 1px; height: 14px; margin: 0 10px; background: var(--amber-line); vertical-align: -2px; }
+
+  /* Read first */
+  .first { background: var(--tint); border: 1px solid #dbe5f6; border-radius: var(--radius); padding: 18px 22px 8px; margin: 0 0 16px; }
+  .first h2 { margin: 0 0 8px; color: var(--ink); font-size: 15.5px; font-weight: 700; }
+  .first ul { margin: 0 0 8px; padding-left: 1.2em; }
+  .first li { margin: 0 0 6px; }
+
+  /* Placeholders still to be completed */
+  .ph { background: var(--ph-bg); color: var(--ph-ink); border-radius: 4px; padding: 0 4px; font-weight: 600; font-size: .94em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+
+  /* Related rows (same pattern as the Settings list) */
+  .rows { margin-top: 28px; display: grid; gap: 12px; }
+  .row {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 20px;
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(15, 27, 58, .04); color: inherit; text-decoration: none;
+  }
+  .row:hover { border-color: #cdd8ec; }
+  .row b { display: block; color: var(--ink); font-size: 15px; font-weight: 700; }
+  .row small { color: var(--muted); font-size: 13.5px; }
+  .row svg { color: var(--ink); flex: 0 0 auto; }
+
+  /* Desktop: contents stay visible; mobile: collapsible */
+  @media (min-width: 1000px) {
+    .toc summary { pointer-events: none; cursor: default; }
+  }
+  @media (max-width: 999px) {
+    .layout { grid-template-columns: 1fr; gap: 16px; }
+    .toc { position: static; max-height: none; }
+  }
+  @media (max-width: 700px) {
+    .wrap { padding: 20px 14px 56px; }
+    h1 { font-size: 26px; }
+    .card { padding: 18px 18px 8px; }
+    .body { padding-left: 0; }
+    .body .cl .n { position: static; display: inline-block; width: auto; margin-right: 8px; text-align: left; }
+    .meta span + span { padding-left: 0; border-left: 0; }
+    .notice { align-items: flex-start; }
+    .notice .sep { display: none; }
+    .notice strong::after { content: ". "; }
+  }
+  @media print {
+    body { background: #fff; font-size: 12pt; }
+    .back, .toc, .rows { display: none; }
+    .layout { display: block; }
+    .card, .first { box-shadow: none; break-inside: avoid-page; }
+    .ph { background: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="Settings.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>Back to settings</a>
+  <header>
+    <h1>Privacy Policy</h1>
+    <p class="meta"><span><strong><span class="ph">[PLATFORM NAME]</span></strong></span><span>Last updated: <span class="ph">[DATE]</span></span><span>Version 1.0</span></p>
+    <p class="lead">Your privacy matters to us. This Privacy Policy explains what personal information we collect through <span class="ph">[PLATFORM NAME]</span> (the “Platform”), why we collect it, how we use, share, protect and keep it, and the rights you have. We process personal information in line with the Protection of Personal Information Act 4 of 2013 (“POPIA”) and other applicable South African law. Capitalised terms not defined here have the meaning given in our <a href="TermsOfService.html">Terms of Service</a>.</p>
+  </header>
+
+  <div class="layout">
+    <details class="toc" id="toc" open>
+      <summary>Contents</summary>
+      <nav aria-label="Contents"><ol><li><a href="#sec-1"><span class="tn">1</span>Important notice about CVs and personal details</a></li><li><a href="#sec-2"><span class="tn">2</span>Who is responsible for your information</a></li><li><a href="#sec-3"><span class="tn">3</span>Personal information we collect</a></li><li><a href="#sec-4"><span class="tn">4</span>Why we use your information</a></li><li><a href="#sec-5"><span class="tn">5</span>Consent</a></li><li><a href="#sec-6"><span class="tn">6</span>AI processing and automated analysis</a></li><li><a href="#sec-7"><span class="tn">7</span>Who we share information with</a></li><li><a href="#sec-8"><span class="tn">8</span>Transfers outside South Africa</a></li><li><a href="#sec-9"><span class="tn">9</span>How long we keep information</a></li><li><a href="#sec-10"><span class="tn">10</span>How we protect information</a></li><li><a href="#sec-11"><span class="tn">11</span>Children and learners</a></li><li><a href="#sec-12"><span class="tn">12</span>Your rights</a></li><li><a href="#sec-13"><span class="tn">13</span>Cookies and browser storage</a></li><li><a href="#sec-14"><span class="tn">14</span>Communications and marketing</a></li><li><a href="#sec-15"><span class="tn">15</span>Links to other websites</a></li><li><a href="#sec-16"><span class="tn">16</span>Changes to this Policy</a></li><li><a href="#sec-17"><span class="tn">17</span>Contact and complaints</a></li></ol></nav>
+    </details>
+
+    <main>
+      <aside class="first" aria-label="Key points">
+        <h2>Read this first</h2>
+        <ul><li>Your CV text is sent to third-party AI providers, which may keep it or use it to improve their models (<a href="#sec-6">section 6</a>).</li><li>We do not sell your information or show advertising on the Platform (<a href="#sec-4">section 4</a>).</li><li>You can ask to see, correct or delete your information, or object to how it is used (<a href="#sec-12">section 12</a>).</li></ul>
+      </aside>
+
+      <section class="card" id="sec-1" aria-labelledby="h-1"><h2 id="h-1"><span class="hn">1</span>Important notice about CVs and personal details</h2><div class="body"><p><strong>Please do not include personal details that are not needed for CV analysis.</strong> This means your ID or passport number, full home street address, date of birth, photograph, marital status, race, religion, health or disability information, criminal record, bank or card details, passwords, private contact details of referees, or any information about other people.</p>
+<p>The reason is that our AI Features work by sending the text of your CV and other Content to third-party AI Providers, which process it on their own systems, possibly outside South Africa. Those providers have their own terms. Depending on the provider and service tier, they may keep inputs for a period and may use them to improve or train their models. Once your Content has been sent, we cannot recall it or control what the provider does with it. See <a href="#sec-6">section 6</a> and clause 8 of our <a href="TermsOfService.html#sec-8">Terms of Service</a>.</p>
+<p>The safest CV to upload contains only your name (or initials), a professional email address, your city and province, your education, your skills and your work experience.</p></div></section>
+<section class="card" id="sec-2" aria-labelledby="h-2"><h2 id="h-2"><span class="hn">2</span>Who is responsible for your information</h2><div class="body"><p>For POPIA purposes, <span class="ph">[LEGAL ENTITY NAME]</span> t/a <span class="ph">[PLATFORM NAME]</span> is the “responsible party” that decides why and how your personal information is processed.</p>
+<ul><li><strong>Address:</strong> <span class="ph">[ADDRESS]</span>, South Africa</li><li><strong>Email:</strong> <span class="ph">[SUPPORT EMAIL]</span></li><li><strong>Information Officer:</strong> <span class="ph">[NAME]</span>, <span class="ph">[PRIVACY EMAIL]</span></li></ul>
+<p>The providers that process information on our behalf (for example hosting, database and AI Providers) are “operators”.</p></div></section>
+<section class="card" id="sec-3" aria-labelledby="h-3"><h2 id="h-3"><span class="hn">3</span>Personal information we collect</h2><div class="body"><h3>3.1 Information you give us</h3>
+<ul><li><strong>Account details:</strong> name and surname, email address, password (stored only in hashed form by our authentication provider), age bracket, gender, and your account role.</li><li><strong>Profile and career information:</strong> questionnaire answers, school subjects and marks you choose to enter, grade or education level, courses and careers of interest, preferred provinces, skills, goals and saved career paths.</li><li><strong>CV content:</strong> CV files you upload, text extracted from them, and the scores, skill lists, gaps and suggestions generated from them.</li><li><strong>Practice sessions:</strong> your answers in the Interview Simulator and Articulation Coach, speech you record and its transcript, and the feedback and scores generated.</li><li><strong>Applications:</strong> job titles, employers, deadlines, status, notes, job descriptions you paste and the match results.</li><li><strong>Study activity:</strong> papers you open, active-recall answers and results, and progress records.</li><li><strong>Payments:</strong> the plan or feature you bought, amount, status, date, reference number and type of payment method. We do not store full card numbers.</li><li><strong>Communications:</strong> messages you send to support and your preferences.</li></ul>
+<h3>3.2 Information collected automatically</h3>
+<ul><li><strong>Usage data:</strong> the features you use, when you use them, how long you spend on each (for example in the Interview Simulator), actions taken and quotas used.</li><li><strong>Technical data:</strong> IP address, device and browser type, operating system, language, timestamps, and log and error data.</li><li><strong>Cookies and browser storage:</strong> see <a href="#sec-13">section 13</a>.</li></ul>
+<h3>3.3 Information from others</h3>
+<p>We may receive payment confirmations from our payment provider and, for Minors, confirmation of consent from a parent or guardian.</p>
+<h3>3.4 Special personal information</h3>
+<p>POPIA gives extra protection to special personal information, such as race or ethnic origin, religious beliefs, health, sex life, trade-union membership, political persuasion, criminal behaviour and biometric information. <strong>We do not ask for it and do not need it.</strong> We do not use your voice to identify you. If you include special personal information in a CV or other Content despite our warning, <a href="#sec-6">section 6</a> and clause 8.4 of our <a href="TermsOfService.html#sec-8">Terms of Service</a> apply, and we will use it only to provide the feature you asked for.</p></div></section>
+<section class="card" id="sec-4" aria-labelledby="h-4"><h2 id="h-4"><span class="hn">4</span>Why we use your information</h2><div class="body"><p>We use personal information only for specific, lawful purposes. For each, the lawful ground under POPIA is shown in brackets.</p>
+<ul><li><strong>To provide the Platform and its features</strong> (performance of our agreement with you; your consent).</li><li><strong>To create and secure your account</strong>, including sign-in and verification (performance of our agreement; legitimate interest).</li><li><strong>To process payments</strong> and keep financial records, and to prevent fraud (performance of our agreement; legal obligation; legitimate interest).</li><li><strong>To run the AI Features</strong>: analysing CVs, generating interview and speaking feedback, matching you to careers and jobs (performance of our agreement; your consent).</li><li><strong>To send service messages</strong>, such as security alerts, receipts, deadline and follow-up reminders, and notifications in the Platform (performance of our agreement; legitimate interest).</li><li><strong>To keep the Platform safe and fair</strong>, for example to enforce usage limits and detect misuse (legitimate interest).</li><li><strong>To understand and improve the Platform</strong>, including studying which features are used and for how long, and producing aggregated statistics (such as age-bracket and gender breakdowns on our internal dashboards) that do not identify you (legitimate interest).</li><li><strong>To give support</strong> and respond to requests and complaints (legitimate interest; performance of our agreement).</li><li><strong>To comply with law</strong>, respond to lawful requests and protect our legal rights (legal obligation; legitimate interest).</li><li><strong>To send you marketing</strong>, but only if you have opted in (your consent).</li></ul>
+<p>We <strong>do not sell</strong> your personal information. We do not show advertising on the Platform. We do not use your Content to profile you for advertising.</p></div></section>
+<section class="card" id="sec-5" aria-labelledby="h-5"><h2 id="h-5"><span class="hn">5</span>Consent</h2><div class="body"><p>Where we rely on your consent (for example to process your CV with AI Providers, or to send marketing), you can withdraw it at any time by contacting us or using your account settings. Withdrawal does not affect processing already done, but we may then be unable to provide the related feature.</p></div></section>
+<section class="card" id="sec-6" aria-labelledby="h-6"><h2 id="h-6"><span class="hn">6</span>AI processing and automated analysis</h2><div class="body"><p class="cl"><span class="n">6.1</span><strong>What is sent.</strong> When you use an AI Feature, we send the Content needed for that feature to an AI Provider. This can include the text of your CV, your interview and speaking answers or transcripts, questionnaire answers, and job descriptions. We aim to send only what each feature needs.</p>
+<p class="cl"><span class="n">6.2</span><strong>AI Providers.</strong> We currently use providers such as Google (Gemini) and Groq, and may add or change providers. They process your Content for us under their own terms and our arrangements with them. Depending on their terms and the plan we use, they may retain inputs for a time (for example for security and abuse monitoring) and may use inputs to improve their services and models. We do not control this.</p>
+<p class="cl"><span class="n">6.3</span><strong>Our own use.</strong> As at the date of this Policy, we do not use your Content to train or build our own AI models. If that changes, we will tell you in advance and ask for your consent where the law requires.</p>
+<p class="cl"><span class="n">6.4</span><strong>No solely automated decisions with legal effect.</strong> CV scores, match percentages, career suggestions and similar results are information to help you. We do not use them to make decisions about you that have legal or similarly significant consequences. You may ask us to explain a result or for a person to review a concern (<a href="#sec-12">section 12</a>).</p>
+<p class="cl"><span class="n">6.5</span><strong>Limits of AI.</strong> Results can be wrong or biased. Please treat them as guidance and verify important information independently.</p>
+<p class="cl"><span class="n">6.6</span><strong>What you can do.</strong> Remove unnecessary personal details before uploading, avoid saying personal details during voice practice, delete CVs you no longer want held in your account, and contact us with any concern.</p></div></section>
+<section class="card" id="sec-7" aria-labelledby="h-7"><h2 id="h-7"><span class="hn">7</span>Who we share information with</h2><div class="body"><p>We share personal information only as needed and only with:</p>
+<ul><li><strong>Service providers (operators):</strong> database, authentication and file-storage provider (for example Supabase); hosting provider (for example Netlify); AI Providers (for example Google and Groq); payment processors; email and notification services; and error-monitoring or analytics tools. Operators are required to protect your information and use it only for our purposes, subject to <a href="#sec-6">section 6.2</a>.</li><li><strong>Our authorised staff and administrators</strong>, with role-based access limited to what they need for support, security, billing and running the Platform. Administrator access is restricted and logged where possible.</li><li><strong>Your parent or guardian</strong>, if you are a Minor, on request.</li><li><strong>Authorities and advisers</strong>, such as courts, law enforcement, regulators, auditors and legal advisers, where the law requires or to protect our legal rights or the safety of others.</li><li><strong>A successor</strong>, if our business or the Platform is transferred, with the same protections for your information.</li><li><strong>Anyone else with your consent.</strong></li></ul>
+<p>If you open links to bursary providers, institutions, employers or video platforms, those third parties have their own privacy practices and receive information according to their own terms.</p></div></section>
+<section class="card" id="sec-8" aria-labelledby="h-8"><h2 id="h-8"><span class="hn">8</span>Transfers outside South Africa</h2><div class="body"><p>Our providers store and process information in other countries, including countries where data-protection laws differ from South Africa’s. Under POPIA we transfer personal information outside South Africa only where the recipient is subject to law, binding rules or a contract that provides substantially similar protection, or where the transfer is necessary to perform our agreement with you, or where you consent. By using the AI Features you acknowledge that your Content will be processed outside South Africa.</p></div></section>
+<section class="card" id="sec-9" aria-labelledby="h-9"><h2 id="h-9"><span class="hn">9</span>How long we keep information</h2><div class="body"><p>We keep personal information only as long as needed for the purposes above, or as the law requires. Typical periods are:</p>
+<ul><li><strong>Account and profile information:</strong> while your account is active, and deleted or de-identified within 30 days after you close it.</li><li><strong>CVs and extracted text:</strong> until you delete them or close your account.</li><li><strong>Practice transcripts and feedback:</strong> for <span class="ph">[12 months]</span> or until you delete them. <span class="ph">[CONFIRM: whether voice audio is stored; by default it is processed to create a transcript and not kept.]</span></li><li><strong>Application tracker entries:</strong> until you delete them or close your account.</li><li><strong>Usage and log data:</strong> for <span class="ph">[12 to 24 months]</span>, after which it is deleted or aggregated so it no longer identifies you.</li><li><strong>Payment and accounting records:</strong> for at least five years, as tax and accounting law requires.</li><li><strong>Inactive accounts:</strong> if you have not used the Platform for <span class="ph">[24 months]</span>, we will warn you by email and then delete or anonymise the account.</li><li><strong>Backups:</strong> deleted information may remain in encrypted backups for up to <span class="ph">[35 days]</span> before being overwritten.</li><li><strong>Disputes and legal duties:</strong> we may keep information longer where needed to deal with a complaint, dispute, investigation or legal obligation.</li></ul>
+<p>Copies held by AI Providers are governed by their own retention terms (<a href="#sec-6">section 6.2</a>).</p></div></section>
+<section class="card" id="sec-10" aria-labelledby="h-10"><h2 id="h-10"><span class="hn">10</span>How we protect information</h2><div class="body"><p>We take reasonable technical and organisational steps to protect personal information against loss, damage, unauthorised access and unlawful processing, including:</p>
+<ul><li>encryption of data in transit (HTTPS) and encrypted storage by our cloud providers;</li><li>hashed passwords and secure authentication;</li><li>access controls, including row-level security and role-based administrator access;</li><li>keeping secret keys and credentials on the server rather than in your browser;</li><li>monitoring and logging, limiting staff access, and reviewing our providers.</li></ul>
+<p>No system is completely secure. If a security compromise affects your personal information, we will notify the Information Regulator and you as soon as reasonably possible, as POPIA requires. You can help by using a strong, unique password, not sharing your login, and signing out on shared devices.</p></div></section>
+<section class="card" id="sec-11" aria-labelledby="h-11"><h2 id="h-11"><span class="hn">11</span>Children and learners</h2><div class="body"><p class="cl"><span class="n">11.1</span>Some features are designed for high school learners. We process the personal information of a person under 18 only with the prior consent of a parent, guardian or other competent person. We collect that consent at sign-up <span class="ph">[CONFIRM mechanism]</span>.</p>
+<p class="cl"><span class="n">11.2</span>We try to collect only what is needed for the features a learner uses. We do not send marketing to Minors, show them advertising, or sell or share their information for commercial purposes.</p>
+<p class="cl"><span class="n">11.3</span>The Platform is not for children under 13. If we discover that we hold information about a child without the required consent, we will delete it.</p>
+<p class="cl"><span class="n">11.4</span>A parent or guardian may ask to see, correct or delete a Minor’s information, or withdraw consent, by contacting our Information Officer.</p></div></section>
+<section class="card" id="sec-12" aria-labelledby="h-12"><h2 id="h-12"><span class="hn">12</span>Your rights</h2><div class="body"><p>Under POPIA you have the right to:</p>
+<ul><li><strong>Know</strong> whether we hold your personal information and receive a copy of it (access);</li><li><strong>Correct</strong> information that is inaccurate, outdated or incomplete, and ask us to <strong>delete</strong> information we no longer need or may not lawfully keep;</li><li><strong>Object</strong> to processing based on our legitimate interests, and to direct marketing at any time;</li><li><strong>Withdraw consent</strong> where we rely on it;</li><li><strong>Not be subject</strong> to a decision based solely on automated processing that has legal or similarly significant effects;</li><li><strong>Be told</strong> if your information has been compromised;</li><li><strong>Complain</strong> to the Information Regulator (<a href="#sec-17">section 17</a>).</li></ul>
+<p><strong>How to use your rights.</strong> Email <span class="ph">[PRIVACY EMAIL]</span> or use the account settings (where available) to delete your CVs or close your account. We may need to verify your identity first. We aim to respond within 30 days. Reasonable requests are free; if a request is made under the Promotion of Access to Information Act, prescribed fees may apply. We may decline a request only where the law allows, and will explain why.</p></div></section>
+<section class="card" id="sec-13" aria-labelledby="h-13"><h2 id="h-13"><span class="hn">13</span>Cookies and browser storage</h2><div class="body"><p>The Platform uses cookies and similar browser storage for:</p>
+<ul><li><strong>Essential purposes:</strong> keeping you signed in and securing your session;</li><li><strong>Convenience:</strong> remembering preferences and saving progress or results so pages load faster (for example saved questionnaire progress);</li><li><strong><span class="ph">[Analytics, if used]</span>:</strong> understanding how features are used. <span class="ph">[CONFIRM whether any third-party analytics tool is used.]</span></li></ul>
+<p>We do not use third-party advertising cookies. You can clear or block cookies in your browser, but the Platform may not work properly without the essential ones.</p></div></section>
+<section class="card" id="sec-14" aria-labelledby="h-14"><h2 id="h-14"><span class="hn">14</span>Communications and marketing</h2><div class="body"><ul><li><strong>Service messages</strong> (account and security notices, receipts, password resets, deadline and follow-up reminders, notifications in the Platform, and notices about changes to your account or role) are part of the service and are not marketing.</li><li><strong>Marketing</strong> is sent only if you have opted in. You can unsubscribe at any time through the link in each message or in your settings. We honour opt-out requests and apply the rules on direct marketing under POPIA and the Consumer Protection Act, including the national opt-out registry where applicable.</li></ul></div></section>
+<section class="card" id="sec-15" aria-labelledby="h-15"><h2 id="h-15"><span class="hn">15</span>Links to other websites</h2><div class="body"><p>The Platform links to third-party sites (such as bursary providers, institutions, employers and video platforms). This Policy does not apply to them. Please read their privacy policies.</p></div></section>
+<section class="card" id="sec-16" aria-labelledby="h-16"><h2 id="h-16"><span class="hn">16</span>Changes to this Policy</h2><div class="body"><p>We may update this Policy. We will give at least 30 days’ notice of material changes by email, notification or a notice on the Platform. The “Last updated” date at the top shows the current version. If a change requires your consent, we will ask for it.</p></div></section>
+<section class="card" id="sec-17" aria-labelledby="h-17"><h2 id="h-17"><span class="hn">17</span>Contact and complaints</h2><div class="body"><p><strong>Information Officer:</strong> <span class="ph">[NAME]</span><br><strong>Email:</strong> <span class="ph">[PRIVACY EMAIL]</span><br><strong>Address:</strong> <span class="ph">[ADDRESS]</span>, South Africa</p>
+<p>Please contact us first so we can try to resolve your concern. If you are not satisfied, you have the right to complain to the Information Regulator (South Africa):</p>
+<ul><li><strong>Address:</strong> Woodmead North Office Park, 54 Maxwell Drive, Woodmead, Johannesburg, 2191</li><li><strong>Email:</strong> <a href="mailto:enquiries@inforegulator.org.za">enquiries@inforegulator.org.za</a></li><li><strong>Toll-free:</strong> 0800 017 160</li><li><strong>Website:</strong> <a href="https://www.inforegulator.org.za" rel="noopener" target="_blank">www.inforegulator.org.za</a></li></ul></div></section>
+
+      <div class="rows">
+        <a class="row" href="TermsOfService.html">
+          <span><b>Terms of Service</b><small>Read our terms and conditions.</small></span>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="row" href="Settings.html">
+          <span><b>Back to settings</b><small>Return to billing, legal and support options.</small></span>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+  (function () {
+    var toc = document.getElementById('toc');
+    var mq = window.matchMedia('(min-width: 1000px)');
+    function sync() { toc.open = mq.matches; }
+    sync();
+    if (mq.addEventListener) mq.addEventListener('change', sync);
+  })();
+</script>
+</body>
+</html>
