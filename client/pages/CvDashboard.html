@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -69,6 +70,8 @@
   </style>
     <link rel="stylesheet" href="../css/theme.css" />
   <script src="../js/theme.js"></script>
+  <link rel="stylesheet" href="../css/back-navigation.css">
+  <script src="../js/back-navigation.js" defer></script>
 </head>
 
 <body>
@@ -215,6 +218,12 @@
           </div>
         </div>
       </header>
+      <div class="sf-back-container">
+        <button type="button" class="sf-back-btn" aria-label="Go back to previous page">
+          <span aria-hidden="true">←</span> Back
+        </button>
+      </div>
+
 
       <!-- HERO -->
       <section class="hero">
@@ -230,6 +239,7 @@
         </div>
 
         <div class="hero-actions">
+
           <button
             class="btn btn-primary upload-button"
             id="analyzeBtn"
@@ -471,6 +481,7 @@
                 </strong>
               </div>
 
+
               <div class="progress-bar">
                 <div
                   class="progress-fill previous"
@@ -709,6 +720,7 @@
   <script src="../js/planner.js"></script>
   <script src="../js/calendar.js"></script>
   <script src="../js/notifications.js"></script>
+
 
 
   <!-- Background CV analysis (keeps running when you leave this page).
@@ -950,6 +962,7 @@
 
     const link = document.createElement("a");
     link.className = "sf-cvjob__link";
+
     link.href = CONFIG.cvPageUrl;
     link.textContent = "View results";
 
@@ -1190,6 +1203,7 @@
     },
 
     /** The running job, or null. */
+
     getActiveJob: () => activeJob,
   };
 
@@ -1429,6 +1443,7 @@
 
     function updateScoreBar(textElement, barElement, score) {
       const safeScore = clampScore(score);
+
 
       textElement.textContent = `${safeScore}%`;
       barElement.style.width = `${safeScore}%`;
@@ -1670,6 +1685,7 @@
           showModal(`⏳ ${error.message}`);
           return;
         }
+
 
         setLoading(false);
         renderOverallScore(appState.analysis ? appState.analysis.score : 0);
