@@ -67,14 +67,26 @@ function getAuthHeaders(extra = {}) {
   }
 
   // ================= CALL SKILL GAP API =================
+
   async function getSkillGap(skillNames, jobId) {
     const res = await fetch(`${API_BASE}/skillgap`, {
       method: "POST",
-      headers: getAuthHeaders({ "Content-Type": "application/json" }),
-      body: JSON.stringify({ userSkillNames: skillNames, jobId }),
+      headers: getAuthHeaders({
+        "Content-Type": "application/json",
+      }),
+      body: JSON.stringify({
+        userSkillNames: skillNames,
+        jobId,
+      }),
     });
-    if (!res.ok) throw new Error("Failed to compute skill gap.");
-    return await res.json();
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(data.error || "Failed to compute skill gap.");
+    }
+
+    return data;
   }
 
   // ================= ADD / REMOVE SKILL =================
@@ -194,60 +206,234 @@ function getAuthHeaders(extra = {}) {
 
 
   async function refreshGapForCurrentJob() {
-  if (!currentJobId) {
-    clearGapResult();
-    return;
+    if (!currentJobId) {
+      clearGapResult();
+      return;
+    }
+
+    const skillNames = currentSkills.map((s) => s.name);
+    const result = await getSkillGap(skillNames, currentJobId);
+
+    renderGapResult(result);
+
+    // Generate roadmap based on missing skills
+    await loadRoadmap(result.missing);
   }
 
-  const skillNames = currentSkills.map((s) => s.name);
-  const result = await getSkillGap(skillNames, currentJobId);
+  let roadmapRequestId = 0;
 
-  renderGapResult(result);
+  function roadmapElement(tag, text, className) {
+    const element = document.createElement(tag);
 
-  // Generate roadmap based on missing skills
-  await loadRoadmap(result.missing);
-}
+    if (text != null) {
+      element.textContent = text;
+    }
 
-async function loadRoadmap(missingSkills) {
-  const skillsParam = missingSkills.join(",");
-  const res = await fetch(`${API_BASE}/roadmap?skills=${encodeURIComponent(skillsParam)}`);
-  if (!res.ok) {
-    console.warn("Failed to load roadmap");
-    return;
+    if (className) {
+      element.className = className;
+    }
+
+    return element;
   }
 
-  const data = await res.json();
-  renderRoadmap(data.roadmap || []);
-}
-function renderRoadmap(roadmap) {
-  const container = document.querySelector(".roadmap-items");
-  if (!container) return;
+  async function loadRoadmap(missingSkills) {
+    const requestId = ++roadmapRequestId;
+    const container = document.querySelector(".roadmap-items");
 
-  container.innerHTML = "";
+    if (!container) return;
 
-  if (roadmap.length === 0) {
-    container.innerHTML = "<p style='color: var(--muted); font-size: 0.9rem;'>No specific learning recommendations available for this career yet.</p>";
-    return;
+    container.setAttribute("aria-busy", "true");
+    container.replaceChildren(
+      roadmapElement("p", "Preparing your learning roadmap…")
+    );
+
+    try {
+      const response = await fetch(`${API_BASE}/roadmap`, {
+        method: "POST",
+        headers: getAuthHeaders({
+          "Content-Type": "application/json",
+        }),
+        body: JSON.stringify({ missingSkills }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.error || "Could not load the roadmap.");
+      }
+
+      if (requestId !== roadmapRequestId) return;
+
+      renderRoadmap(data);
+    } catch (error) {
+      if (requestId !== roadmapRequestId) return;
+
+      console.error("[Roadmap]", error);
+
+      const message = roadmapElement(
+        "p",
+        error.message,
+        "roadmap-error"
+      );
+      message.setAttribute("role", "alert");
+
+      const retry = roadmapElement("button", "Try again");
+      retry.type = "button";
+      retry.addEventListener("click", () => {
+        loadRoadmap(missingSkills);
+      });
+
+      container.replaceChildren(message, retry);
+    } finally {
+      if (requestId === roadmapRequestId) {
+        container.setAttribute("aria-busy", "false");
+      }
+    }
   }
 
-  roadmap.forEach((module, idx) => {
-    const step = document.createElement("div");
-    step.className = "road-step";
+  function renderRoadmap(data) {
+    const container = document.querySelector(".roadmap-items");
 
-    step.innerHTML = `
-      <div class="step-num">${idx + 1}</div>
-      <div>
-        <h4>${module.title}</h4>
-        <p>${module.description}</p>
-        ${module.resourceUrl
-          ? `<a href="${module.resourceUrl}" target="_blank" rel="noopener" style="font-size:0.85rem; color: var(--blue);">View resource</a>`
-          : ""}
-      </div>
-    `;
+    if (!container) return;
 
-    container.appendChild(step);
-  });
-}
+    container.replaceChildren();
+
+    const roadmap = data.roadmap || [];
+    const otherSkills = data.otherSkills || [];
+    const summary = data.summary || {};
+
+    if (summary.totalMissingSkills === 0) {
+      container.appendChild(
+        roadmapElement(
+          "p",
+          "No missing essential skills were identified by the current matcher.",
+          "roadmap-summary"
+        )
+      );
+
+      container.appendChild(
+        roadmapElement(
+          "p",
+          "This comparison is based on the skills in your profile, not a formal assessment of competence.",
+          "roadmap-note"
+        )
+      );
+
+      return;
+    }
+
+    container.appendChild(
+      roadmapElement(
+        "p",
+        `${summary.totalMissingSkills} essential skills to develop for this career.`,
+        "roadmap-summary"
+      )
+    );
+
+    container.appendChild(
+      roadmapElement(
+        "p",
+        "These recommendations reflect the gap between your profile and the selected career's ESCO essential requirements. Group order is guidance, not an official skill ranking.",
+        "roadmap-note"
+      )
+    );
+
+    roadmap.forEach((area, index) => {
+      const card = roadmapElement(
+        "article",
+        null,
+        "roadmap-card"
+      );
+
+      card.append(
+        roadmapElement(
+          "p",
+          `Development area ${index + 1} · ${area.stage}`,
+          "roadmap-stage"
+        ),
+        roadmapElement("h4", area.title),
+        roadmapElement("p", area.description),
+        roadmapElement("h5", "Skills to acquire")
+      );
+
+      const skills = roadmapElement(
+        "ul",
+        null,
+        "roadmap-skill-list"
+      );
+
+      for (const skill of area.skillsToAcquire || []) {
+        skills.appendChild(
+          roadmapElement("li", skill)
+        );
+      }
+
+      card.appendChild(skills);
+
+      if (area.suggestedAction) {
+        const action = document.createElement("details");
+
+        action.append(
+          roadmapElement("summary", "Suggested development action"),
+          roadmapElement("p", area.suggestedAction)
+        );
+
+        card.appendChild(action);
+      }
+
+      if (area.note) {
+        card.appendChild(
+          roadmapElement(
+            "p",
+            area.note,
+            "roadmap-note"
+          )
+        );
+      }
+
+      container.appendChild(card);
+    });
+
+    if (otherSkills.length) {
+      const section = roadmapElement(
+        "section",
+        null,
+        "roadmap-card"
+      );
+
+      section.appendChild(
+        roadmapElement(
+          "h4",
+          roadmap.length
+            ? "Other skills to develop"
+            : "Skills to develop"
+        )
+      );
+
+      section.appendChild(
+        roadmapElement(
+          "p",
+          "These are also missing essential requirements. They are listed individually rather than grouped into development areas.",
+          "roadmap-note"
+        )
+      );
+
+      const list = roadmapElement(
+        "ul",
+        null,
+        "roadmap-skill-list"
+      );
+
+      for (const skill of otherSkills) {
+        list.appendChild(
+          roadmapElement("li", skill)
+        );
+      }
+
+      section.appendChild(list);
+      container.appendChild(section);
+    }
+  }
 
   //================== MODAL: VIEW ALL HAVE / MISSING SKILLS =================
 
@@ -311,6 +497,26 @@ function renderRoadmap(roadmap) {
       await loadRoadmap(result.missing);
     } catch (err) {
       console.error("Error refreshing skill gap:", err);
+
+      clearGapResult();
+
+      const missingContainer = document.getElementById("missingSkills");
+
+      if (missingContainer) {
+        const message = document.createElement("p");
+        message.className = "skill-load-error";
+        message.setAttribute("role", "alert");
+        message.textContent = err.message;
+        missingContainer.replaceChildren(message);
+      }
+
+      const roadmapContainer = document.querySelector(".roadmap-items");
+
+      if (roadmapContainer) {
+        roadmapContainer.textContent =
+          "The learning roadmap will be available once career skills load.";
+      }
+
     } finally {
       hideMissingLoading();
     }
@@ -484,10 +690,20 @@ loadUserGreeting();
   });
 
   function clearGapResult() {
-  document.getElementById("matchScore").textContent = "–";
-  document.getElementById("haveCount").textContent = "–";
-  document.getElementById("missingCount").textContent = "–";
-  document.getElementById("missingSkills").innerHTML = "";
+    document.getElementById("matchScore").textContent = "–";
+    document.getElementById("haveCount").textContent = "–";
+    document.getElementById("missingCount").textContent = "–";
+    document.getElementById("missingSkills").innerHTML = "";
+
+    roadmapRequestId++;
+
+    const roadmapContainer = document.querySelector(".roadmap-items");
+
+    if (roadmapContainer) {
+      roadmapContainer.setAttribute("aria-busy", "false");
+      roadmapContainer.textContent =
+        "Select a career to see your learning roadmap.";
+    }
   }
 
   // ================= INITIALIZE PAGE =================
