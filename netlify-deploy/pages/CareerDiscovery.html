@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="../css/CareerDiscovery.additions.css" />
   <link rel="stylesheet" href="../css/theme.css" />
   <script src="../js/theme.js"></script>
+  <link rel="stylesheet" href="../css/CareerShortlist.css" />
 </head>
 <body>
 
@@ -116,11 +117,18 @@
             <i data-lucide="menu"></i>
           </button>
 
-          <label class="searchbar" for="searchInput">
-            <i data-lucide="search" aria-hidden="true"></i>
-            <span class="sr-only">Search ScientiaForge</span>
-            <input type="text" id="searchInput" placeholder="Search ScientiaForge..." autocomplete="off" />
-          </label>
+          <div class="searchbar-wrap">
+            <label class="searchbar" for="searchInput">
+              <i data-lucide="search" aria-hidden="true"></i>
+              <span class="sr-only">Search careers by name</span>
+              <input type="text" id="searchInput" placeholder="Search ScientiaForge..." autocomplete="off"
+                     role="combobox" aria-expanded="false" aria-controls="searchResults" aria-autocomplete="list" />
+              <button type="button" class="search-clear" id="searchClear" hidden aria-label="Clear search">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+              </button>
+            </label>
+            <div class="search-results" id="searchResults" role="listbox" aria-label="Career search results" hidden></div>
+          </div>
         </div>
 
         <div class="topbar-right">
@@ -154,24 +162,6 @@
             <h1>Discover Your Ideal Career</h1>
             <p>Your answers are matched against the O*NET occupational database</p>
           </div>
-
-          <section class="career-search" aria-labelledby="searchHeading">
-            <div class="search-head">
-              <h3 id="searchHeading">Already know the career?</h3>
-              <p>Look it up directly. Once you have completed the questionnaire, results show your real match.</p>
-            </div>
-            <div class="search-row">
-              <label class="sr-only" for="careerSearchInput">Search careers by name</label>
-              <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
-              <input type="text" id="careerSearchInput" placeholder="e.g. actuary, radiographer, civil engineer"
-                     autocomplete="off" role="combobox" aria-expanded="false"
-                     aria-controls="careerSearchResults" aria-autocomplete="list" />
-              <button type="button" class="search-clear" id="careerSearchClear" hidden aria-label="Clear search">
-                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-              </button>
-            </div>
-            <div class="search-results" id="careerSearchResults" role="listbox" aria-label="Career search results" hidden></div>
-          </section>
 
           <section class="questionnaire-card" aria-labelledby="questionnaireHeading">
             <div class="q-header">
@@ -387,21 +377,22 @@
                   <div class="t-step">
                     <div class="t-icon bg-cyan"><i class="fa-solid fa-book-open"></i></div>
                     <div class="t-label">Study</div>
-                    <div class="t-time">3-6 months</div>
+                    <div class="t-time" id="roadmapStudyTime">--</div>
                   </div>
                   <div class="t-line"></div>
                   <div class="t-step">
                     <div class="t-icon bg-orange"><i class="fa-solid fa-certificate"></i></div>
                     <div class="t-label">Certifications</div>
-                    <div class="t-time">3-10 months</div>
+                    <div class="t-time" id="roadmapCertsTime">--</div>
                   </div>
                   <div class="t-line dotted"></div>
                   <div class="t-step">
                     <div class="t-icon bg-blue"><i class="fa-solid fa-briefcase"></i></div>
                     <div class="t-label">Projects</div>
-                    <div class="t-time">1-4 months</div>
+                    <div class="t-time" id="roadmapProjectsTime">--</div>
                   </div>
                 </div>
+                <p class="roadmap-note">ScientiaForge estimate based on this career's typical preparation level, not official course data.</p>
                 <div class="roadmap-detail" id="panelRoadmapDetail"></div>
               </div>
 
@@ -410,9 +401,9 @@
                   Save Career Path
                   <span class="action-icons"><i class="fa-regular fa-bookmark" aria-hidden="true"></i></span>
                 </button>
-                <button class="btn-primary full" id="startLearningBtn" type="button">
-                  <i class="fa-solid fa-rocket" aria-hidden="true"></i> Start Learning
-                  <span class="action-icons"><i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i></span>
+
+                <button class="btn-primary full" id="savedCareersBtn" type="button">
+                  <i class="fa-solid fa-bookmark" aria-hidden="true"></i> Saved Career Paths
                 </button>
               </div>
             </div>
@@ -420,6 +411,19 @@
         </div>
       </div>
       
+      <!-- SAVED CAREER PATHS -->
+      <div class="saved-overlay hidden" id="savedCareersOverlay">
+        <aside class="saved-panel" role="dialog" aria-modal="true" aria-label="Your saved career paths">
+          <header class="saved-header">
+            <h2>Saved Career Paths</h2>
+            <button class="icon-btn" id="closeSavedCareersBtn" type="button" aria-label="Close">
+              <i data-lucide="x"></i>
+            </button>
+          </header>
+          <div class="saved-content" id="savedCareersList"></div>
+        </aside>
+      </div>
+
       <!-- PLANNER SLIDE-OVER -->
       <div class="planner-overlay hidden" id="plannerOverlay">
         <aside class="planner-panel" role="dialog" aria-modal="true">
@@ -602,6 +606,7 @@
   <script src="../js/planner.js"></script>
   <script src="../js/calendar.js"></script>
   <script src="../js/notifications.js"></script>
+  <script src="../js/CareerShortlist.js"></script>
 
 
   <script>

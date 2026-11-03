@@ -13,7 +13,6 @@
   <link rel="stylesheet" href="../css/dashboard.css" />
     <link rel="stylesheet" href="../css/theme.css" />
   <script src="../js/theme.js"></script>
-     <link rel="stylesheet" href="../css/goals.css" />
 
 </head>
 <body>
@@ -166,169 +165,146 @@
       </section>
  
       <section class="stats-grid searchable">
-        <article class="stat-card blue-card" data-search="cv score ats cv analyzer">
+        <article class="stat-card blue-card searchable" data-search="cv score ats cv analyzer upload">
           <div class="stat-head">
             <div class="stat-icon blue"><i data-lucide="file-text"></i></div>
             <h3>CV Score</h3>
           </div>
           <div class="stat-value-row">
-            <div class="stat-value">82</div>
+            <div class="stat-value" id="statCvScore">—</div>
             <div class="stat-unit">ATS Score</div>
           </div>
-          <div class="stat-change positive">Improved +5</div>
-          <div class="mini-chart blue-line">
+          <div class="stat-change" id="statCvChange">Loading…</div>
+          <div class="mini-chart blue-line" id="statCvChart">
             <span></span><span></span><span></span><span></span><span></span>
           </div>
         </article>
  
-        <article class="stat-card searchable" data-search="interview score readiness practice interview">
+        <article class="stat-card searchable" data-search="interview score readiness practice interview simulator">
           <div class="stat-head">
             <div class="stat-icon orange"><i data-lucide="mic"></i></div>
             <h3>Interview Score</h3>
           </div>
           <div class="stat-value-row">
-            <div class="stat-value">76</div>
+            <div class="stat-value" id="statInterviewScore">—</div>
             <div class="stat-unit">Readiness</div>
           </div>
-          <div class="stat-change positive">+10% this month</div>
-          <div class="mini-chart orange-line">
+          <div class="stat-change" id="statInterviewChange">Loading…</div>
+          <div class="mini-chart orange-line" id="statInterviewChart">
             <span></span><span></span><span></span><span></span><span></span>
           </div>
         </article>
  
-        <article class="stat-card searchable" data-search="skill readiness progress skills">
+        <article class="stat-card searchable" data-search="skill readiness progress skills skill gap analysis">
           <div class="stat-head">
             <div class="stat-icon green"><i data-lucide="target"></i></div>
             <h3>Skill Readiness</h3>
           </div>
           <div class="stat-value-row">
-            <div class="stat-value">60%</div>
+            <div class="stat-value" id="statSkillReadiness">—</div>
             <div class="stat-unit">Ready</div>
           </div>
-          <div class="stat-change positive">+15% this month</div>
-          <div class="mini-chart green-line">
+          <div class="stat-change" id="statSkillChange">Loading…</div>
+          <div class="mini-chart green-line" id="statSkillChart">
             <span></span><span></span><span></span><span></span><span></span>
           </div>
         </article>
  
-        <article class="stat-card searchable" data-search="sent applications jobs submitted">
+        <article class="stat-card searchable" data-search="activities engagement this month usage">
           <div class="stat-head">
-            <div class="stat-icon soft-green"><i data-lucide="send"></i></div>
-            <h3>Sent</h3>
+            <div class="stat-icon soft-green"><i data-lucide="activity"></i></div>
+            <h3>Activities</h3>
           </div>
           <div class="stat-value-row">
-            <div class="stat-value">6</div>
+            <div class="stat-value" id="statActivity">—</div>
+            <div class="stat-unit">This Month</div>
           </div>
-          <div class="stat-change">+3 this month</div>
-          <div class="mini-chart blue-line">
+          <div class="stat-change" id="statActivityChange">Loading…</div>
+          <div class="mini-chart blue-line" id="statActivityChart">
             <span></span><span></span><span></span><span></span><span></span>
           </div>
         </article>
       </section>
  
       <section class="content-grid">
-        <article class="panel insights searchable" data-search="insights marketing manager optimize cv gain employer skills apply jobs">
-          <h2>Insights</h2>
-          <div class="muted-line">Job Match <span class="accent">699 ○</span></div>
- 
-          <div class="job-box">
-            <div class="job-left">
-              <div class="job-icon"><i data-lucide="briefcase"></i></div>
-              <div>
-                <div class="job-title">Marketing Manager</div>
-                <div class="job-sub">Aligns with your skillset</div>
-              </div>
+        <article class="panel searchable" data-search="recommended next steps optimize cv interview skill gap explore careers">
+          <h2>Recommended Next Steps</h2>
+
+          <div id="recommendList">
+            <div class="list-card">
+              <div class="list-left"><i data-lucide="loader"></i> Loading your recommendations…</div>
             </div>
-            <i data-lucide="chevron-right"></i>
-          </div>
- 
-          <h3 class="subheading">Recommended Next Steps</h3>
- 
-          <div class="list-card">
-            <div class="list-left"><i data-lucide="pencil-line"></i> Optimize Your CV</div>
-            <i data-lucide="chevron-right"></i>
-          </div>
- 
-          <div class="list-card">
-            <div class="list-left"><i data-lucide="badge-check"></i> Gain Employer Skills</div>
-            <i data-lucide="chevron-right"></i>
-          </div>
- 
-          <div class="list-card">
-            <div class="list-left"><i data-lucide="briefcase-business"></i> Apply for Entry-Level Jobs</div>
-            <i data-lucide="chevron-right"></i>
           </div>
         </article>
  
-        <article class="panel searchable" data-search="upcoming mock interview alan smith start practice">
+        <article class="panel searchable" data-search="upcoming reminders goals planner">
           <h2>Upcoming</h2>
           <div class="upcoming-box">
             <div class="upcoming-top">
-              <div class="avatar small"></div>
+              <div class="job-icon"><i data-lucide="calendar-clock"></i></div>
               <div>
-                <div class="job-title">Mock Interview</div>
-                <div class="job-sub">April 28, 2026, 3:30 PM</div>
-                <div class="job-sub">with Alan Smith</div>
+                <div class="job-title" id="upcomingTitle">Loading…</div>
+                <div class="job-sub" id="upcomingWhen"></div>
               </div>
             </div>
-            <button class="btn btn-primary full">Start Practice</button>
+            <button class="btn btn-primary full" id="upcomingActionBtn" type="button">Open Planner</button>
           </div>
         </article>
  
         <article class="panel searchable" data-search="continue development upload cv start interview explore careers">
           <h2>Continue Your Development</h2>
  
-          <button class="action-row">
+          <a class="action-row" href="cvDashboard.html">
             <span><i data-lucide="file-up"></i> Upload CV</span>
             <i data-lucide="chevron-right"></i>
-          </button>
+          </a>
  
-          <button class="action-row featured">
+          <a class="action-row featured" href="InterviewSimulator.html">
             <span><i data-lucide="mic"></i> Start Interview</span>
             <i data-lucide="chevron-right"></i>
-          </button>
+          </a>
  
-          <button class="action-row">
+          <a class="action-row" href="CareerDiscovery.html">
             <span><i data-lucide="compass"></i> Explore Careers</span>
             <i data-lucide="chevron-right"></i>
-          </button>
+          </a>
         </article>
  
-        <article class="panel searchable" data-search="goal completion progress completed 45">
+        <article class="panel searchable" data-search="goal completion career readiness progress">
           <div class="progress-wrap">
             <div>
-              <div class="progress-big">34%</div>
+              <div class="progress-big" id="goalCompletionPercent">—</div>
               <div class="job-sub">Goal Completion</div>
-              <div class="progress-bold">2 of Career Goals</div>
+              <div class="progress-bold" id="goalCompletionCount">Loading…</div>
             </div>
  
             <div class="gauge">
-              <div class="gauge-ring"></div>
+              <div class="gauge-ring" id="readinessRing"></div>
               <div class="gauge-center">
-                <div class="gauge-value">45%</div>
-                <div class="job-sub center">Progress Completed</div>
+                <div class="gauge-value" id="readinessValue">—</div>
+                <div class="job-sub center">Career Readiness</div>
               </div>
             </div>
           </div>
         </article>
         
-        <article class="panel searchable" data-search="jobs interviews jobs sent applications">
+        <article class="panel searchable" data-search="interviews completed cvs analyzed practice history">
           <div class="metrics-row">
             <div class="metric">
-              <div class="metric-icon"><i data-lucide="clock-3"></i></div>
+              <div class="metric-icon stat-icon orange"><i data-lucide="mic"></i></div>
               <div>
-                <div class="metric-value">2</div>
-                <div class="job-sub">Jobs Interviews</div>
+                <div class="metric-value" id="metricInterviewsCompleted">—</div>
+                <div class="job-sub">Interviews Completed</div>
               </div>
             </div>
  
             <div class="divider"></div>
  
             <div class="metric">
-              <div class="metric-icon"><i data-lucide="send"></i></div>
+              <div class="metric-icon stat-icon blue"><i data-lucide="file-check"></i></div>
               <div>
-                <div class="metric-value">8</div>
-                <div class="job-sub">Jobs Sent</div>
+                <div class="metric-value" id="metricCvsAnalyzed">—</div>
+                <div class="job-sub">CVs Analyzed</div>
               </div>
             </div>
           </div>
@@ -518,9 +494,6 @@
   <script src="../js/planner.js"></script>
   <script src="../js/calendar.js"></script>
   <script src="../js/notifications.js"></script>
-
-
-    <script src="../js/goals.js"></script>
 </body>
 </html>
  

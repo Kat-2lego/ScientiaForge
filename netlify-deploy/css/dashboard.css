@@ -18,6 +18,9 @@
  
   --border: #e2e8f0;
   --border-light: #f1f5f9;
+
+  --good: #15803d;
+  --danger: #b42318;
  
   --shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
   --shadow-md: 0 10px 20px rgba(0,0,0,0.04);
@@ -465,6 +468,23 @@ input {
   font-size: 1rem;
   color: var(--text-muted);
 }
+
+/* change line under each stat value — real deltas, so it needs a
+   positive/negative/neutral read at a glance */
+.stat-change {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-height: 1.2em;
+}
+
+.stat-change.positive {
+  color: var(--good);
+}
+
+.stat-change.negative {
+  color: var(--danger);
+}
  
 /* mini chart */
 .mini-chart {
@@ -529,35 +549,11 @@ input {
   font-weight: 700;
 }
  
-/* muted line and accent */
+/* muted line */
 .muted-line {
   color: #455471;
   margin-bottom: 10px;
   font-size: 0.95rem;
-}
- 
-.accent {
-  color: var(--primary);
-}
- 
-/* job box */
-.job-box {
-  padding: 14px;
-  border: 1px solid #edf2fb;
-  border-radius: 16px;
-  background: #f6f9ff;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  cursor: pointer;
-  transition: 0.25s ease;
-}
- 
-.job-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
 }
  
 .job-icon {
@@ -581,13 +577,6 @@ input {
   font-size: 0.9rem;
 }
  
-/* subheading */
-.subheading {
-  margin: 0 0 10px;
-  font-size: 1rem;
-  color: var(--text-dark);
-}
- 
 /* list items */
 .list-card {
   padding: 12px 14px;
@@ -599,7 +588,14 @@ input {
   align-items: center;
   margin-bottom: 8px;
   cursor: pointer;
+  text-decoration: none;
   transition: 0.25s ease;
+}
+
+.list-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
  
 /* upcoming box */
@@ -611,6 +607,12 @@ input {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.upcoming-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
  
 /* action row */
@@ -625,6 +627,7 @@ input {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  text-decoration: none;
   transition: 0.25s ease;
 }
  
@@ -653,11 +656,10 @@ input {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: conic-gradient(
-    #efb44f 0 20%,
-    #a8cdfd 20% 45%,
-    #dfe7f6 45% 100%
-  );
+  /* Neutral default until dashboard.js sets the real conic-gradient fill
+     from the user's actual readiness percentage. */
+  background: conic-gradient(#dfe7f6 0 100%);
+  transition: background 0.4s ease;
   -webkit-mask: radial-gradient(circle 44px, transparent 98%, #000 100%);
   mask: radial-gradient(circle 44px, transparent 98%, #000 100%);
 }

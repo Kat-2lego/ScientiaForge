@@ -5,7 +5,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!form || !list || !message) return;
 
-  const api = "/api";
+  
+  const api = "/api/planner/events";
   const fields = form.elements;
   const saveButton = form.querySelector('button[type="submit"]');
   const reminderFields = document.getElementById("reminderFields");

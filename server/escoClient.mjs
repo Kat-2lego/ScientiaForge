@@ -57,247 +57,274 @@ export function extractIscoCode(concept) {
   return null;
 }
 
-/**
- * Fetch skills for an occupation using ESCO's explicit essential/optional skill relations.
- * Falls back to search-based method if the concept call fails.
- */
+// Essential-only occupation profiles.
+// In-memory caches reset when the server restarts.
 
+const PROFILE_TTL_MS = 24 * 60 * 60 * 1000;
+const MAX_PROFILE_CACHE_ENTRIES = 500;
 
-export async function getOccupationSkills(escoUri, language = "en", options = {}) {
-  const {
-    maxSkills = 35,
-    fetchLimit = 80,
-  } = options;
+const essentialProfileCache = new Map();
+const pendingEssentialProfiles = new Map();
 
-  try {
-    // --- PRIMARY: explicit relations (Option B) ---
-    const conceptUrl = new URL(`${ESCO_BASE_URL}/resource`);
-    conceptUrl.searchParams.set("uri", escoUri);
+function makeEscoError(message, code = "ESCO_PROFILE_UNAVAILABLE") {
+  const error = new Error(message);
+  error.code = code;
+  return error;
+}
 
-    const conceptRes = await fetch(conceptUrl, {
-      headers: {
-        Accept: "application/json",
-        "User-Agent": "SkillForge/1.0",
-      },
-    });
-
-    if (!conceptRes.ok) {
-      throw new Error(
-        `ESCO concept request failed: ${conceptRes.status}. ` +
-        `Body: ${(await conceptRes.text().catch(() => "")).slice(0, 200)}`
-      );
-    }
-
-    const concept = await conceptRes.json();
-
-    const occupationTitle =
-      concept.preferredLabel?.[language] ||
-      concept.preferredLabel?.en ||
-      concept.title ||
-      "worker";
-
-    console.log(
-      `[Option B] Fetching skills for occupation: "${occupationTitle}" (${escoUri})`
+function validateOccupationUri(uri) {
+  if (
+    typeof uri !== "string" ||
+    !/^https?:\/\/data\.europa\.eu\/esco\/occupation\/[0-9a-f-]+$/i.test(uri)
+  ) {
+    throw makeEscoError(
+      "Invalid ESCO occupation URI.",
+      "INVALID_ESCO_OCCUPATION"
     );
-
-    // Extract skill URIs from essentialSkill / optionalSkill
-    const skillUris = new Set();
-
-    function collectSkillUris(field) {
-      const node = concept[field];
-      if (!node) return;
-
-      const arr = Array.isArray(node) ? node : [node];
-      for (const item of arr) {
-        const uri = item["@id"] || item.uri;
-        if (typeof uri === "string" && uri.startsWith("http://data.europa.eu/esco/skill/")) {
-          skillUris.add(uri);
-        }
-      }
-    }
-
-    collectSkillUris("http://data.europa.eu/esco/essentialSkill");
-    collectSkillUris("http://data.europa.eu/esco/optionalSkill");
-
-    if (skillUris.size === 0) {
-      collectSkillUris("http://data.europa.eu/esco/hasSkill");
-    }
-
-    console.log(
-      `[Option B] Found ${skillUris.size} explicit skill URIs for "${occupationTitle}"`
-    );
-
-    if (skillUris.size === 0) {
-      // No explicit skills; fall back to search
-      throw new Error("No explicit skills found; using fallback");
-    }
-
-    // Fetch skill concepts (batched)
-    const skillUriList = [...skillUris].slice(0, fetchLimit);
-
-    const skillPromises = skillUriList.map(async (uri) => {
-      const url = new URL(`${ESCO_BASE_URL}/resource`);
-      url.searchParams.set("uri", uri);
-
-      try {
-        const res = await fetch(url, {
-          headers: {
-            Accept: "application/json",
-            "User-Agent": "SkillForge/1.0",
-          },
-        });
-
-        if (!res.ok) return null;
-
-        const data = await res.json();
-        const label =
-          data.preferredLabel?.[language] ||
-          data.preferredLabel?.en ||
-          data.title ||
-          data.label ||
-          "Skill";
-
-        return label;
-      } catch {
-        return null;
-      }
-    });
-
-    const skillLabelsRaw = (await Promise.all(skillPromises)).filter(Boolean);
-
-    console.log(
-      `[Option B] Fetched ${skillLabelsRaw.length} skill labels for "${occupationTitle}"`
-    );
-
-    // Filter out obviously irrelevant skills
-    const { isObviouslyIrrelevant } = await import("./skillRelevance.mjs");
-
-    const filtered = skillLabelsRaw.filter(
-      (label) => !isObviouslyIrrelevant(label, occupationTitle)
-    );
-
-    console.log(
-      `[Option B] After irrelevance filter: ${filtered.length} skills for "${occupationTitle}"`
-    );
-
-    const result = filtered.slice(0, maxSkills);
-
-    console.log(
-      `[Option B] Returning ${result.length} skills for "${occupationTitle}"`
-    );
-
-    if (result.length > 0) {
-      return result;
-    }
-
-    // If filtered list is empty, fall back to search
-    throw new Error("Explicit skills filtered to empty; using fallback");
-
-  } catch (err) {
-    // --- FALLBACK: search-based method (Option A) ---
-    console.warn(
-      `[Option B] Failed for ${escoUri}: ${err.message}. Falling back to search-based skills.`
-    );
-    return getOccupationSkillsViaSearch(escoUri, language, { maxSkills, fetchLimit });
   }
 }
 
-/**
- * Fallback: fetch skills via ESCO search (Option A).
- */
-async function getOccupationSkillsViaSearch(escoUri, language = "en", options = {}) {
-  const {
-    maxSkills = 35,
-    fetchLimit = 100,
-  } = options;
+function getLabel(resource, language) {
+  const preferred = resource?.preferredLabel;
 
-  // Fetch occupation concept to get title and ISCO
-  const conceptUrl = new URL(`${ESCO_BASE_URL}/resource`);
-  conceptUrl.searchParams.set("uri", escoUri);
+  const candidates = [
+    resource?.title,
+    typeof preferred === "string" ? preferred : preferred?.[language],
+    typeof preferred === "object" ? preferred?.en : null,
+    resource?.label,
+  ];
 
-  const conceptRes = await fetch(conceptUrl, {
-    headers: {
-      Accept: "application/json",
-      "User-Agent": "SkillForge/1.0",
-    },
-  });
+  return candidates.find(
+    (value) => typeof value === "string" && value.trim()
+  )?.trim() || null;
+}
 
-  if (!conceptRes.ok) {
-    const text = await conceptRes.text().catch(() => "");
-    throw new Error(
-      `ESCO concept request failed: ${conceptRes.status}. ` +
-      `Body: ${text.slice(0, 200)}`
+function getSkillUri(link) {
+  const directUri = link?.uri || link?.["@id"];
+
+  if (
+    typeof directUri === "string" &&
+    /^https?:\/\/data\.europa\.eu\/esco\/skill\//i.test(directUri)
+  ) {
+    return directUri;
+  }
+
+  // Some links expose the concept identifier only inside their API URL.
+  if (typeof link?.href === "string") {
+    try {
+      const href = new URL(link.href, `${ESCO_BASE_URL}/`);
+      const uri = href.searchParams.get("uri");
+
+      if (
+        uri &&
+        /^https?:\/\/data\.europa\.eu\/esco\/skill\//i.test(uri)
+      ) {
+        return uri;
+      }
+    } catch {
+      // Invalid links are rejected below.
+    }
+  }
+
+  return null;
+}
+
+async function fetchEscoResource(type, uri, language) {
+  const url = new URL(`${ESCO_BASE_URL}/resource/${type}`);
+  url.searchParams.set("uri", uri);
+  url.searchParams.set("language", language);
+
+  // One retry for network failures, rate limiting and server failures.
+  for (let attempt = 0; attempt < 2; attempt++) {
+    let retryable = true;
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Accept: "application/json",
+          "User-Agent": "SkillForge/1.0",
+        },
+        signal: AbortSignal.timeout(15000),
+      });
+
+      if (!response.ok) {
+        retryable = response.status === 429 || response.status >= 500;
+
+        throw makeEscoError(
+          `ESCO ${type} request failed with status ${response.status}.`
+        );
+      }
+
+      return await response.json();
+    } catch (error) {
+      if (!retryable || attempt === 1) {
+        throw makeEscoError(
+          `Could not load ESCO ${type}: ${error.message}`
+        );
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 750));
+    }
+  }
+}
+
+async function resolveEssentialSkills(links, language) {
+  const results = new Array(links.length);
+  let nextIndex = 0;
+
+  async function worker() {
+    while (nextIndex < links.length) {
+      const index = nextIndex++;
+      const link = links[index];
+      const uri = getSkillUri(link);
+
+      if (!uri) {
+        throw makeEscoError(
+          "An essential skill relationship has no valid ESCO skill URI."
+        );
+      }
+
+      // Usually the relationship already supplies a usable label.
+      let label = getLabel(link, language);
+
+      if (!label) {
+        const resource = await fetchEscoResource("skill", uri, language);
+        label = getLabel(resource, language);
+      }
+
+      if (!label) {
+        throw makeEscoError(
+          `No label could be resolved for essential skill ${uri}.`
+        );
+      }
+
+      results[index] = {
+        uri,
+        label,
+        importance: "essential",
+      };
+    }
+  }
+
+  // Resolve missing labels with at most four concurrent requests.
+  const workers = await Promise.allSettled(
+    Array.from(
+      { length: Math.min(4, links.length) },
+      () => worker()
+    )
+  );
+
+  const failure = workers.find((result) => result.status === "rejected");
+
+  if (failure) {
+    throw failure.reason;
+  }
+
+  // Deduplicate by ESCO identifier, not by similar wording.
+  return [...new Map(results.map((skill) => [skill.uri, skill])).values()];
+}
+
+async function fetchEssentialProfile(occupationUri, language) {
+  const occupation = await fetchEscoResource(
+    "occupation",
+    occupationUri,
+    language
+  );
+
+  const rawLinks = occupation?._links?.hasEssentialSkill;
+
+  if (rawLinks == null) {
+    console.error("[ESCO] Essential relationship field missing", {
+      occupationUri,
+      topLevelKeys: Object.keys(occupation || {}),
+      linkKeys: Object.keys(occupation?._links || {}),
+    });
+
+    throw makeEscoError(
+      "ESCO did not return a readable essential-skill relationship field."
     );
   }
 
-  const concept = await conceptRes.json();
+  const links = Array.isArray(rawLinks) ? rawLinks : [rawLinks];
 
-  const iscoCode = extractIscoCode(concept);
-
-  if (!iscoCode) {
-    console.warn("No ISCO code found for occupation:", escoUri);
-    return [];
-  }
-
-  const occupationTitle =
-    concept.preferredLabel?.[language] ||
-    concept.preferredLabel?.en ||
-    concept.title ||
-    "worker";
-
-  const skillsUrl = new URL(`${ESCO_BASE_URL}/search`);
-
-  skillsUrl.searchParams.set("type", "skill");
-  skillsUrl.searchParams.set("language", language);
-  skillsUrl.searchParams.set("limit", String(fetchLimit));
-  skillsUrl.searchParams.set("text", occupationTitle);
-  skillsUrl.searchParams.set("isco", iscoCode);
-
-  console.log(
-    `[Option A] ESCO skills search: text="${occupationTitle}", isco=${iscoCode}, limit=${fetchLimit}`
-  );
-
-  const skillsRes = await fetch(skillsUrl, {
-    headers: {
-      Accept: "application/json",
-      "User-Agent": "SkillForge/1.0",
-    },
-  });
-
-  if (!skillsRes.ok) {
-    const text = await skillsRes.text().catch(() => "");
-    throw new Error(
-      `ESCO skills search failed: ${skillsRes.status}. ` +
-      `Body: ${text.slice(0, 200)}`
+  if (links.length === 0) {
+    throw makeEscoError(
+      "No essential skills were returned for this occupation."
     );
   }
 
-  const skillsData = await skillsRes.json();
-  const results = skillsData?._embedded?.results || [];
+  const skills = await resolveEssentialSkills(links, language);
 
-  console.log(
-    `[Option A] ESCO skills search returned ${results.length} raw skills for ISCO ${iscoCode} ("${occupationTitle}")`
-  );
+  const profile = {
+    occupationUri,
+    occupationTitle: getLabel(occupation, language),
+    language,
+    source: "ESCO",
+    skillScope: "essential",
+    fetchedAt: new Date().toISOString(),
+    skills,
+  };
 
-  let allSkills = results.map((s) => {
-    const label =
-      s.preferredLabel?.[language] ||
-      s.preferredLabel?.en ||
-      s.title ||
-      s.label ||
-      "Skill";
-    return label;
+  console.log("[ESCO] Essential profile loaded", {
+    occupation: profile.occupationTitle,
+    occupationUri,
+    essentialSkills: skills.length,
   });
 
-  const { isObviouslyIrrelevant } = await import("./skillRelevance.mjs");
+  return profile;
+}
 
-  const filtered = allSkills.filter(
-    (label) => !isObviouslyIrrelevant(label, occupationTitle)
+// New structured API for future roadmap mappings.
+export async function getOccupationEssentialProfile(
+  occupationUri,
+  language = "en"
+) {
+  validateOccupationUri(occupationUri);
+
+  const key = `${language}:${occupationUri}`;
+  const cached = essentialProfileCache.get(key);
+
+  if (cached && cached.expiresAt > Date.now()) {
+    console.log("[ESCO] Essential profile cache hit:", occupationUri);
+    return cached.profile;
+  }
+
+  if (cached) {
+    essentialProfileCache.delete(key);
+  }
+
+  if (pendingEssentialProfiles.has(key)) {
+    return pendingEssentialProfiles.get(key);
+  }
+
+  const pending = fetchEssentialProfile(occupationUri, language)
+    .then((profile) => {
+      if (essentialProfileCache.size >= MAX_PROFILE_CACHE_ENTRIES) {
+        const oldestKey = essentialProfileCache.keys().next().value;
+        essentialProfileCache.delete(oldestKey);
+      }
+
+      essentialProfileCache.set(key, {
+        profile,
+        expiresAt: Date.now() + PROFILE_TTL_MS,
+      });
+
+      return profile;
+    })
+    .finally(() => {
+      pendingEssentialProfiles.delete(key);
+    });
+
+  pendingEssentialProfiles.set(key, pending);
+  return pending;
+}
+
+// Compatibility wrapper: existing matcher/UI still receive string[].
+export async function getOccupationSkills(occupationUri, language = "en") {
+  const profile = await getOccupationEssentialProfile(
+    occupationUri,
+    language
   );
 
-  console.log(
-    `[Option A] After irrelevance filter: ${filtered.length} skills for "${occupationTitle}"`
-  );
-
-  return filtered.slice(0, maxSkills);
+  return profile.skills.map((skill) => skill.label);
 }
