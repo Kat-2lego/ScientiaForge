@@ -180,22 +180,6 @@ body {
   width: 220px;
   min-width: 0;
 }
-@media (max-width: 800px) {
-  .skill-dashboard-header {
-    flex-wrap: wrap;
-  }
-
-  .skill-dashboard-header > div:last-child {
-    width: 100%;
-    margin-left: 0;
-  }
-
-  .industry-select,
-  .job-select {
-    flex: 1 1 0;
-    width: auto;
-  }
-}
 /* METRICS */
 .skill-metrics {
   display: grid;
@@ -551,7 +535,63 @@ body {
   width: 14px;
   height: 14px;
 }
+.roadmap-items .roadmap-summary {
+  margin-bottom: 6px;
+  font-weight: 600;
+}
 
+.roadmap-items .roadmap-card {
+  padding: 18px;
+  margin: 16px 0;
+  border: 1px solid #dfe5ee;
+  border-radius: 14px;
+  background: var(--card, #fff);
+}
+
+.roadmap-items .roadmap-stage {
+  margin: 0 0 6px;
+  color: var(--blue, #2563eb);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.roadmap-items .roadmap-card h4 {
+  margin: 0 0 8px;
+}
+
+.roadmap-items .roadmap-card h5 {
+  margin: 12px 0 4px;
+  font-size: 0.9rem;
+}
+
+
+.roadmap-items summary {
+  cursor: pointer;
+  padding: 8px 0;
+  font-weight: 500;
+}
+
+.roadmap-items .roadmap-note {
+  color: var(--muted, #64748b);
+  font-size: 0.85rem;
+}
+.roadmap-items .roadmap-error {
+  color: #b91c1c;
+}
+.roadmap-items .roadmap-skill-list {
+  margin: 10px 0 14px;
+  padding-left: 22px;
+}
+
+.roadmap-items .roadmap-skill-list li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.roadmap-items .roadmap-card h5 {
+  margin: 14px 0 8px;
+  font-size: 0.9rem;
+}
 .modal-overlay {
   display: none;
   position: fixed;
@@ -644,17 +684,22 @@ body {
   cursor: pointer;
 }
 /* RESPONSIVE */
-/* RESPONSIVE */
-@media (max-width: 900px) {
-  .skill-metrics {
-    grid-template-columns: repeat(2, 1fr);
+
+@media (max-width: 480px) {
+  .metric-card,
+  .skill-box,
+  .roadmap {
+    padding: 14px;
   }
 
-  .skill-grid {
-    grid-template-columns: 1fr;
+  .big-number {
+    font-size: 1.6rem;
+  }
+
+  .modal-card {
+    padding: 16px;
   }
 }
-
 @media (max-width: 768px) {
   .skill-metrics {
     grid-template-columns: 1fr;
@@ -674,19 +719,29 @@ body {
     width: 100%;
   }
 }
-
-@media (max-width: 480px) {
-  .metric-card,
-  .skill-box,
-  .roadmap {
-    padding: 14px;
+@media (max-width: 800px) {
+  .skill-dashboard-header {
+    flex-wrap: wrap;
   }
 
-  .big-number {
-    font-size: 1.6rem;
+  .skill-dashboard-header > div:last-child {
+    width: 100%;
+    margin-left: 0;
   }
 
-  .modal-card {
-    padding: 16px;
+  .industry-select,
+  .job-select {
+    flex: 1 1 0;
+    width: auto;
   }
 }
+@media (max-width: 900px) {
+  .skill-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .skill-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

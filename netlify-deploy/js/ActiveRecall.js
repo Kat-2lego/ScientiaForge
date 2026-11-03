@@ -397,7 +397,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const next = fb.querySelector('[data-action="next"]');
     next && next.addEventListener("click", goNext);
     const results = fb.querySelector('[data-action="results"]');
-    results && results.addEventListener("click", renderResults);
+    results &&
+      results.addEventListener("click", () => {
+        renderResults();
+        window.SFRating?.afterUse("study_hub");
+      });
   }
 
   async function selfMark(marks) {
