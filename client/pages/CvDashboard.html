@@ -93,26 +93,36 @@
         <div class="logo">
           <span class="logo-dark">Scientia</span><span class="logo-blue">Forge</span>
         </div>
-
+ 
         <nav class="nav">
           <a class="nav-item" href="dashboard.html" data-label="Dashboard">
             <i data-lucide="layout-dashboard"></i>
             <span>Dashboard</span>
           </a>
-
+ 
           <a class="nav-item" href="CareerDiscovery.html" data-label="Career Discovery">
             <i data-lucide="compass"></i>
             <span>Career Discovery</span>
+          </a>
+ 
+          <a class="nav-item" href="ApplicationTracker.html" data-label="Job Tracker">
+            <i data-lucide="briefcase"></i>
+            <span>Job Tracker</span>
           </a>
 
           <a class="nav-item active" href="cvDashboard.html" data-label="CV Analyzer">
             <i data-lucide="file-search"></i>
             <span>CV Analyzer</span>
           </a>
-
+ 
           <a class="nav-item" href="InterviewSimulator.html" data-label="Interview Simulator">
             <i data-lucide="mic"></i>
             <span>Interview Simulator</span>
+          </a>
+
+          <a class="nav-item" href="EnglishCoach.html" data-label="English Coach">
+            <i data-lucide="messages-square"></i>
+            <span>English Coach</span>
           </a>
 
           <a class="nav-item" href="Articulation.html" data-label="Articulation Coach">
@@ -124,39 +134,34 @@
             <i data-lucide="bar-chart-3"></i>
             <span>Skill Gap Analysis</span>
           </a>
-
+ 
           <a class="nav-item" href="CareerPathfinder.html" data-label="Career Pathfinder">
             <i data-lucide="graduation-cap"></i>
             <span>Career Pathfinder</span>
           </a>
-
+ 
           <a class="nav-item" href="StudyHub.html" data-label="Study Hub">
             <i data-lucide="book-open"></i>
             <span>Study Hub</span>
           </a>
-
-          <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
-            <i data-lucide="activity"></i>
-            <span>Progress Tracker</span>
-          </a>
-
+ 
           <a class="nav-item" href="Settings.html" data-label="Settings">
             <i data-lucide="settings"></i>
             <span>Settings</span>
           </a>
-
+ 
           <a class="nav-item" href="Support.html" data-label="Help & Support">
             <i data-lucide="life-buoy"></i>
             <span>Help/Support</span>
           </a>
-
+ 
           <a class="nav-item" href="" data-label="Log Out">
             <i data-lucide="log-out"></i>
             <span>Logout</span>
           </a>
         </nav>
       </div>
-
+ 
       <div class="download-card">
         <div class="download-icon">
           <i data-lucide="smartphone"></i>
@@ -205,7 +210,7 @@
             <span class="notification-badge hidden" id="notificationBadge">0</span>
           </button>
 
-          <button class="icon-btn" mail-btn id="mailBtn" aria-label="Open mail">
+          <button class="icon-btn mail-btn" id="mailBtn" aria-label="Open mail">
             <i data-lucide="mail"></i>
           </button>
 
@@ -750,11 +755,11 @@
   // Settings - match these to your project
   // ------------------------------------------------------------
   const CONFIG = {
-    // Same base URL your CV page currently uses for /upload, /latest etc.
+    // The CV router is mounted at /api/cv in server.js
     apiBase: window.SKILLFORGE_CV_API || "/api/cv",
 
-    // Where the "View results" link goes
-    cvPageUrl: window.SKILLFORGE_CV_PAGE || "../pages/CvDashboard.html",
+    // Where the "View results" link goes (lowercase "c" matches the real filename)
+    cvPageUrl: window.SKILLFORGE_CV_PAGE || "../pages/cvDashboard.html",
 
     pollMs: 3000, // how often to check the job
     maxPollMs: 15000, // slowest polling when the network is struggling
@@ -1220,9 +1225,10 @@
 
     lucide.createIcons();
 
-    const API_BASE = "/api";
-    const LATEST_URL = `${API_BASE}/latest`;
-    const QUOTA_URL = `${API_BASE}/quota`;
+    // Named CV_API_BASE so it doesn't clash with API_BASE in auth.js
+    const CV_API_BASE = "/api/cv";
+    const LATEST_URL = `${CV_API_BASE}/latest`;
+    const QUOTA_URL = `${CV_API_BASE}/quota`;
 
     const appState = {
       analysis: null

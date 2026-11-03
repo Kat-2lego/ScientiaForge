@@ -1272,5 +1272,5 @@ window.SkillForgeDiscovery = {
   state, api, selectCareer, announce,
   openSavedCareer, closeSavedCareersOverlay
 };
- 
+
 loadUserGreeting();

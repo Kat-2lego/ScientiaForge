@@ -302,3 +302,26 @@ function activityItemHtml(entry) {
 
 document.body.classList.add("admin-auth-pending");
 const adminReady = guardAdminPage();
+
+/* SUPPORT INBOX BADGE ON THE SIDEBAR */
+(function () {
+  const s = document.createElement("style");
+  s.textContent = ".nav-item .nav-badge{margin-left:auto;min-width:18px;padding:0 6px;border-radius:999px;background:#ef4444;color:#fff;font-size:11px;font-weight:700;line-height:18px;text-align:center}";
+  document.head.appendChild(s);
+})();
+
+async function refreshSupportNavBadge() {
+  const link = document.querySelector('.nav-item[href="AdminSupport.html"]');
+  if (!link) return;
+  try {
+    const { unread } = await AdminAPI.get("/support/admin/unread");
+    let badge = link.querySelector(".nav-badge");
+    if (!unread) { if (badge) badge.remove(); return; }
+    if (!badge) { badge = document.createElement("span"); badge.className = "nav-badge"; link.appendChild(badge); }
+    badge.textContent = unread > 99 ? "99+" : String(unread);
+  } catch (_) { /* leave the badge as it was */ }
+}
+
+adminReady.then((me) => {
+  if (me) { refreshSupportNavBadge(); setInterval(refreshSupportNavBadge, 30000); }
+});

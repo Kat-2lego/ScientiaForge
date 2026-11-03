@@ -38,6 +38,11 @@
                     <span>Career Discovery</span>
                 </a>
 
+          <a class="nav-item" href="ApplicationTracker.html" data-label="Job Tracker">
+            <i data-lucide="briefcase"></i>
+            <span>Job Tracker</span>
+          </a>
+
                 <a class="nav-item" href="cvDashboard.html" data-label="CV Analyzer">
                     <i data-lucide="file-search"></i>
                     <span>CV Analyzer</span>
@@ -185,38 +190,37 @@
                     </div>
 
                     <div class="contact-form-container">
-                        <form class="skillforge-form">
+                        <form class="skillforge-form" id="supportForm">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>Full Name</label>
-                                    <input type="text" placeholder="Kevin Smith" required>
+                                <label for="supportName">Full Name</label>
+                                <input type="text" id="supportName" placeholder="Kevin Smith" required>
                                 </div>
                                 <div class="form-group">
-                                    <label>Email Address</label>
-                                    <input type="email" placeholder="kevinsmith011@gmail.com" required>
+                                <label for="supportEmail">Email Address</label>
+                                <input type="email" id="supportEmail" placeholder="kevinsmith011@gmail.com" required>
                                 </div>
                             </div>
-                            
                             <div class="form-group">
-                                <label>Subject</label>
-                                <select>
-                                    <option>General Inquiry</option>
-                                    <option>Technical Support</option>
-                                    <option>Partnership/Business</option>
-                                    <option>Feature Suggestion</option>
+                                <label for="supportCategory">Subject</label>
+                                <select id="supportCategory">
+                                <option value="general_inquiry">General Inquiry</option>
+                                <option value="technical_support">Technical Support</option>
+                                <option value="partnership_business">Partnership/Business</option>
+                                <option value="feature_suggestion">Feature Suggestion</option>
+                                <option value="feedback">Feedback</option>
                                 </select>
                             </div>
-
                             <div class="form-group">
-                                <label>How can we help?</label>
-                                <textarea rows="5" placeholder="Tell us more about your inquiry..."></textarea>
+                                <label for="supportMessage">How can we help?</label>
+                                <textarea id="supportMessage" rows="5" maxlength="4000" placeholder="Tell us more about your inquiry..." required></textarea>
                             </div>
-
+                            <p id="supportStatus" role="status" aria-live="polite"></p>
                             <button type="submit" class="submit-btn">
                                 <span>Send Message</span>
                                 <i class="fa-solid fa-paper-plane"></i>
                             </button>
-                        </form>
+                            </form> 
                     </div>
 
                 </div>
@@ -395,11 +399,13 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="../js/dashboard.js"></script>
     <script src="../js//support.js"></script>
+    <script src="../js/supportForm.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/planner-UI.js"></script>
     <script src="../js/planner.js"></script>
     <script src="../js/calendar.js"></script>
     <script src="../js/notifications.js"></script>
+    <script src="../js/supportWidgets.js"></script>
 
   
 </html>
