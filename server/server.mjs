@@ -1368,6 +1368,8 @@ app.post(
 app.patch(
   "/api/auth/reset-password",
   async (req, res) => {
+    const refreshToken = typeof req.body.refresh_token === "string" ? req.body.refresh_token.trim() : "";
+
     const accessToken =
       typeof req.body.access_token ===
         "string"
@@ -1381,7 +1383,7 @@ app.patch(
         : "";
 
     if (
-      !accessToken ||
+      !accessToken || !refreshToken ||
       !newPassword
     ) {
       return res.status(400).json({
@@ -1402,39 +1404,32 @@ app.patch(
         Create a temporary Supabase client that performs
         requests as the user represented by the reset token.
       */
-      const userSupabase =
-        createClient(
-          SUPABASE_URL,
-          SUPABASE_ANON_KEY,
-          {
-            ...supabaseOptions,
-
-            global: {
-              headers: {
-                Authorization:
-                  `Bearer ${accessToken}`,
-              },
-            },
-          }
-        );
+      const userSupabase = createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY,
+        {
+          ...supabaseOptions,
+          auth: {
+            ...supabaseOptions.auth,
+            persistSession: false,
+            autoRefreshToken: false,
+            detectSessionInUrl: false,
+          },
+        }
+      );
 
       const {
-        data: {
-          user,
-        },
-        error: userError,
-      } =
-        await userSupabase.auth
-          .getUser(accessToken);
+        data: sessionData,
+        error: sessionError,
+      } = await userSupabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
 
-      if (
-        userError ||
-        !user
-      ) {
+      if(sessionError || !sessionData.session) {
         return res.status(401).json({
-          error:
-            "The password-reset link is invalid or has expired.",
-        });
+          error: "The password-reset link is invalid or has expired"
+        })
       }
 
       const {
