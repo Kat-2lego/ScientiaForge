@@ -99,3 +99,30 @@ document.addEventListener("DOMContentLoaded", () => {
   startHeartbeat();
   revealAdminLinksIfAdmin();
 });
+
+// Load the advertisement system on every page that loads auth.js.
+(function loadAds() {
+  const css = document.createElement("link");
+  css.rel = "stylesheet";
+  css.href = "../css/ads.css";   // change to your popup CSS filename in client/css
+  document.head.appendChild(css);
+
+  const script = document.createElement("script");
+  script.src = "../js/adManager.js";
+  document.body.appendChild(script);
+})();
+
+//
+// Load the advertisement system on every page that loads auth.js.
+(function loadAds() {
+  if (window.__sfAdManagerStarted || document.querySelector('script[src*="adManager.js"]')) return;
+
+  const css = document.createElement("link");
+  css.rel = "stylesheet";
+  css.href = "../css/adPopup.css";
+  document.head.appendChild(css);
+
+  const script = document.createElement("script");
+  script.src = "../js/adManager.js";
+  document.body.appendChild(script);
+})();

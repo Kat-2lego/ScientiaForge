@@ -29,7 +29,6 @@ import { createClient } from "@supabase/supabase-js";
 
 import { logFeatureEvent } from "../services/featureEvents.js";
 import { enforceApplicationQuota, getApplicationPlanAndUsage } from "../services/applicationQuotaService.js";
-import { analyzeJobMatchWithGemini } from "../cv-analyzer/services/geminiService.js";
 import { fetchJobPostingText, JobLinkError } from "../services/jobPostingFetcher.js";
 
 const router = express.Router();
@@ -107,6 +106,192 @@ async function getLatestCv(userId) {
   return data;
 }
 
+
+/* =========================================================
+   LOCAL EMPLOYER-SPECIFIC CV MATCHING
+   No Gemini calls. Uses the CV already stored by CV Analyzer.
+========================================================= */
+
+const SKILL_DICTIONARY = [
+  ["JavaScript", ["javascript", "js"]],
+  ["TypeScript", ["typescript", "ts"]],
+  ["Python", ["python"]],
+  ["C#", ["c#", "c sharp"]],
+  [".NET", [".net", "dotnet", "asp.net"]],
+  ["Java", ["java"]],
+  ["PHP", ["php"]],
+  ["SQL", ["sql"]],
+  ["MySQL", ["mysql"]],
+  ["PostgreSQL", ["postgresql", "postgres"]],
+  ["SQL Server", ["sql server", "mssql"]],
+  ["MongoDB", ["mongodb"]],
+  ["Firebase", ["firebase"]],
+  ["React", ["react", "react.js"]],
+  ["React Native", ["react native"]],
+  ["HTML", ["html"]],
+  ["CSS", ["css"]],
+  ["Node.js", ["node.js", "nodejs"]],
+  ["Express", ["express.js", "express"]],
+  ["REST APIs", ["rest api", "restful api", "rest apis"]],
+  ["Git", ["git", "github"]],
+  ["Docker", ["docker", "containerization"]],
+  ["Kubernetes", ["kubernetes"]],
+  ["Microsoft Azure", ["azure", "microsoft azure"]],
+  ["AWS", ["aws", "amazon web services"]],
+  ["Power BI", ["power bi"]],
+  ["Tableau", ["tableau"]],
+  ["Excel", ["excel", "microsoft excel"]],
+  ["ETL", ["etl", "extract transform load"]],
+  ["Data Analysis", ["data analysis", "data analytics"]],
+  ["Data Modelling", ["data modelling", "data modeling"]],
+  ["Business Analysis", ["business analysis", "business analyst"]],
+  ["Requirements Gathering", ["requirements gathering", "requirements elicitation"]],
+  ["BPMN", ["bpmn", "business process modelling", "business process modeling"]],
+  ["Agile", ["agile", "scrum"]],
+  ["Project Management", ["project management"]],
+  ["Networking", ["networking", "computer networks"]],
+  ["Cybersecurity", ["cybersecurity", "information security"]],
+  ["Linux", ["linux"]],
+  ["Machine Learning", ["machine learning"]],
+  ["Statistics", ["statistics", "statistical analysis"]],
+  ["Communication", ["communication skills", "verbal communication"]],
+  ["Problem Solving", ["problem solving", "analytical thinking"]],
+];
+
+function containsTerm(text, term) {
+  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(^|[^a-z0-9])${escaped}([^a-z0-9]|$)`, "i").test(text);
+}
+
+function findSkills(text) {
+  const normalised = String(text || "").toLowerCase();
+
+  return SKILL_DICTIONARY
+    .filter(([, aliases]) =>
+      aliases.some((alias) => containsTerm(normalised, alias))
+    )
+    .map(([name]) => name);
+}
+
+function extractJobTitle(jobText) {
+  const lines = String(jobText || "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const labelled = jobText.match(
+    /(?:job title|position|role)\s*:\s*([^\n\r]+)/i
+  );
+
+  if (labelled?.[1]) return labelled[1].trim().slice(0, 150);
+
+  return (lines[0] || "Untitled role").slice(0, 150);
+}
+
+function extractCompany(jobText) {
+  const match = String(jobText || "").match(
+    /(?:company|employer|organisation|organization)\s*:\s*([^\n\r]+)/i
+  );
+
+  return match?.[1]?.trim().slice(0, 150) || null;
+}
+
+function extractClosingDate(jobText) {
+  const match = String(jobText || "").match(
+    /(?:closing date|application deadline|apply before|applications close|deadline)\s*[:\-]?\s*(\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4}|\d{4}-\d{2}-\d{2})/i
+  );
+
+  if (!match?.[1]) return null;
+
+  const value = match[1];
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
+
+  const parts = value.split(/[\/.-]/).map(Number);
+
+  let day;
+  let month;
+  let year;
+
+  if (parts[0] > 31) {
+    [year, month, day] = parts;
+  } else {
+    [day, month, year] = parts;
+  }
+
+  if (year < 100) year += 2000;
+
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== month - 1 ||
+    date.getUTCDate() !== day
+  ) {
+    return null;
+  }
+
+  return date.toISOString().slice(0, 10);
+}
+
+function determineRoleCategory(title, jobText) {
+  const text = `${title} ${jobText}`.toLowerCase();
+
+  if (/business analyst|business analysis/.test(text)) return "Business Analysis";
+  if (/business intelligence|\bbi analyst\b|power bi/.test(text)) return "Business Intelligence";
+  if (/data analyst|data analytics/.test(text)) return "Data Analytics";
+  if (/data engineer|analytics engineer|etl/.test(text)) return "Data Engineering";
+  if (/software developer|software engineer|full stack|frontend|backend/.test(text)) return "Software Development";
+  if (/network engineer|network administrator/.test(text)) return "Networking";
+  if (/cybersecurity|security analyst/.test(text)) return "Cybersecurity";
+  if (/cloud engineer|cloud architect/.test(text)) return "Cloud Computing";
+
+  return "Other";
+}
+
+function buildEmployerMatch(jobText, cvText) {
+  const requiredSkills = findSkills(jobText);
+  const candidateSkills = findSkills(cvText);
+
+  const matchedSkills = requiredSkills.filter((skill) =>
+    candidateSkills.includes(skill)
+  );
+
+  const missingSkills = requiredSkills.filter(
+    (skill) => !candidateSkills.includes(skill)
+  );
+
+  const matchScore = requiredSkills.length
+    ? Math.round((matchedSkills.length / requiredSkills.length) * 100)
+    : 0;
+
+  const tailoringTips = missingSkills.slice(0, 5).map(
+    (skill) =>
+      `If you have experience with ${skill}, make it clearer in your CV and include relevant evidence.`
+  );
+
+  if (!requiredSkills.length) {
+    tailoringTips.unshift(
+      "This advert did not contain enough recognised skills for a reliable automatic score. Review its requirements manually."
+    );
+  }
+
+  return {
+    jobTitle: extractJobTitle(jobText),
+    company: extractCompany(jobText),
+    closingDate: extractClosingDate(jobText),
+    roleCategory: determineRoleCategory(extractJobTitle(jobText), jobText),
+    requiredSkills,
+    matchedSkills,
+    missingSkills,
+    matchScore,
+    tailoringTips,
+  };
+}
+
+
 /* ---------- POST / : add a job (the one AI call) ---------- */
 
 router.post("/", requireUser, async (req, res) => {
@@ -147,8 +332,8 @@ router.post("/", requireUser, async (req, res) => {
       }
     }
 
-    const analysis = await analyzeJobMatchWithGemini(jobText, cv.raw_text);
-
+    const analysis = buildEmployerMatch(jobText, cv.raw_text);
+    
     const { data: inserted, error: insertError } = await supabaseAdmin
       .from("applications")
       .insert({
@@ -159,10 +344,10 @@ router.post("/", requireUser, async (req, res) => {
         job_description: jobText,
         deadline: analysis.closingDate || null,
         role_category: analysis.roleCategory || "Other",
-        required_skills: analysis.requiredSkills,
+        required_skills: analysis.requiredSkills || [],
         match_score: analysis.matchScore,
-        missing_skills: analysis.missingSkills,
-        tailoring_tips: analysis.tailoringTips,
+        missing_skills: analysis.missingSkills || [],
+        tailoring_tips: analysis.tailoringTips || [],
         status: "saved",
       })
       .select()
@@ -366,15 +551,18 @@ router.get("/insights", requireUser, async (req, res) => {
   const topMissingSkill = Array.from(skillCounts.entries()).sort((a, b) => b[1] - a[1])[0] || null;
 
   return res.status(200).json({
-    ready: true,
-    total,
-    applied: appliedOrBeyond,
-    interviews,
-    offers,
-    responseRate,
-    matchByCategory,
-    topMissingSkill: topMissingSkill ? { skill: topMissingSkill[0], count: topMissingSkill[1] } : null,
-  });
+  ready: true,
+  hasEnoughData: true,
+  total,
+  applied: appliedOrBeyond,
+  interviews,
+  offers,
+  responseRate,
+  matchByCategory,
+  topMissingSkill: topMissingSkill
+    ? { skill: topMissingSkill[0], count: topMissingSkill[1] }
+    : null,
+});
 });
 
 /* =========================================================
@@ -406,21 +594,41 @@ async function notificationExists(userId, referenceId, type) {
   return !!data;
 }
 
-async function createNotificationOnce(userId, referenceId, type, title, body) {
-  if (await notificationExists(userId, referenceId, type)) return;
-
-  const { error } = await supabaseAdmin.from("notifications").insert({
-    user_id: userId,
-    reference_id: referenceId,
-    type,
-    title,
-    body,
-    is_read: false,
-  });
+async function createNotificationOnce(
+  userId,
+  referenceId,
+  type,
+  title,
+  body
+) {
+  const { data, error } = await supabaseAdmin
+    .from("notifications")
+    .upsert(
+      {
+        user_id: userId,
+        reference_id: referenceId,
+        type,
+        title,
+        body,
+        is_read: false,
+      },
+      {
+        onConflict: "user_id,reference_id,type",
+        ignoreDuplicates: true,
+      }
+    )
+    .select("id")
+    .maybeSingle();
 
   if (error) {
-    console.warn(`Application notification insert failed (${type}):`, error.message);
+    console.error(
+      "Application notification creation failed:",
+      error.message
+    );
+    throw error;
   }
+
+  return Boolean(data);
 }
 
 /**
@@ -437,54 +645,74 @@ export async function generateApplicationNotifications(userId) {
     .in("status", ["saved", "applied"]);
 
   if (error) {
-    console.warn("Application notification sync: could not load applications:", error.message);
+    console.warn(
+      "Application notification sync: could not load applications:",
+      error.message
+    );
     return;
   }
 
-  const today = daysFromNow(0);
-  const in3Days = daysFromNow(3);
-  const in1Day = daysFromNow(1);
-  const sevenDaysAgo = new Date(Date.now() - 7 * DAY_MS).toISOString();
+  const today = new Date().toISOString().slice(0, 10);
 
   for (const row of rows || []) {
-    const label = row.company ? `${row.job_title} at ${row.company}` : row.job_title;
+    const label = row.company
+      ? `${row.job_title} at ${row.company}`
+      : row.job_title || "Your application";
 
+    // -----------------------------------------
+    // 1. APPLICATION DEADLINE NOTIFICATIONS
+    // -----------------------------------------
     if (row.status === "saved" && row.deadline) {
-      if (row.deadline === in3Days) {
-        await createNotificationOnce(
-          userId,
-          row.id,
-          "app_deadline_3d",
-          "Deadline in 3 days",
-          `${label} closes in 3 days. Apply soon so it doesn't slip past.`
-        );
-      } else if (row.deadline === in1Day) {
-        await createNotificationOnce(
-          userId,
-          row.id,
-          "app_deadline_1d",
-          "Deadline tomorrow",
-          `${label} closes tomorrow.`
-        );
-      } else if (row.deadline < today) {
+      const deadlineDate = new Date(`${row.deadline}T00:00:00Z`);
+      const todayDate = new Date(`${today}T00:00:00Z`);
+
+      const daysRemaining = Math.ceil(
+        (deadlineDate.getTime() - todayDate.getTime()) / DAY_MS
+      );
+
+      if (daysRemaining < 0) {
         await createNotificationOnce(
           userId,
           row.id,
           "app_deadline_passed",
           "Deadline passed",
-          `The deadline for ${label} has passed with no status change. Move it to Applied or Rejected to keep your board current.`
+          `The deadline for ${label} has passed. Update your application status to keep your board current.`
+        );
+      } else if (daysRemaining <= 1) {
+        await createNotificationOnce(
+          userId,
+          row.id,
+          "app_deadline_1d",
+          "Deadline tomorrow",
+          `${label} closes within 24 hours.`
+        );
+      } else if (daysRemaining <= 3) {
+        await createNotificationOnce(
+          userId,
+          row.id,
+          "app_deadline_3d",
+          `Deadline in ${daysRemaining} days`,
+          `${label} closes within ${daysRemaining} days. Apply soon so it doesn't slip past.`
         );
       }
     }
 
-    if (row.status === "applied" && row.applied_at && row.applied_at <= sevenDaysAgo) {
-      await createNotificationOnce(
-        userId,
-        row.id,
-        "app_followup_7d",
-        "Any update?",
-        `You applied to ${label} 7 days ago. Any update?`
-      );
+    // -----------------------------------------
+    // 2. SEVEN-DAY APPLICATION FOLLOW-UP
+    // -----------------------------------------
+    if (row.status === "applied" && row.applied_at) {
+      const appliedDate = new Date(row.applied_at);
+      const sevenDaysAgo = new Date(Date.now() - 7 * DAY_MS);
+
+      if (appliedDate <= sevenDaysAgo) {
+        await createNotificationOnce(
+          userId,
+          row.id,
+          "app_followup_7d",
+          "Application follow-up",
+          `It's been 7 days since you applied for ${label}. Consider following up with the employer.`
+        );
+      }
     }
   }
 }

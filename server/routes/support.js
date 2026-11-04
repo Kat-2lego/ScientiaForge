@@ -28,11 +28,17 @@ export const RATING_FEATURES = {
   study_hub: "Study Hub",
 };
 
-/* ---- Rating prompt policy: tweak these to ask more or less often ---- */
-const GLOBAL_COOLDOWN_HOURS = 24; // at most one prompt per user per day
-const FEATURE_COOLDOWN_DAYS = 14; // the same feature at most every 2 weeks
-const AFTER_USE_CHANCE = 0.6; // chance of asking right after a key feature is used
-const RANDOM_CHANCE = 0.15; // chance of asking on a random page visit
+/* ---- Rating prompt policy ----
+   After-use: every feature asks on its FIRST use each day (South African time).
+   Random:    only if the user hasn't been asked anything yet today. */
+const AFTER_USE_CHANCE = 1; // 1 = always ask on the first use of the day
+const RANDOM_CHANCE = 0.15; // chance of a random prompt on a page visit
+
+// Start of "today" in South Africa (UTC+2, no daylight saving), as a Date.
+function startOfTodaySast() {
+  const offset = 2 * 3600000;
+  return new Date(Math.floor((Date.now() + offset) / 86400000) * 86400000 - offset);
+}
 
 /* ---- Abuse limits ---- */
 const MAX_BODY = 4000;
@@ -332,28 +338,19 @@ export default function createSupportRouter({ db, requireAuth }) {
       const trigger = req.body?.trigger === "random" ? "random" : "after_use";
       if (!isFeature(feature)) return fail(res, 400, "Unknown feature.");
 
-      const globalSince = new Date(Date.now() - GLOBAL_COOLDOWN_HOURS * 3600000).toISOString();
-      const featureSince = new Date(Date.now() - FEATURE_COOLDOWN_DAYS * 86400000).toISOString();
+      // After-use: blocked if THIS feature was already asked about today.
+      // Random: blocked if the user was asked about ANYTHING today.
+      let askedToday = db
+        .from("feedback_prompt_log")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", req.userId)
+        .gte("created_at", startOfTodaySast().toISOString());
 
-      const [recentAny, recentFeature] = await Promise.all([
-        db
-          .from("feedback_prompt_log")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", req.userId)
-          .gte("created_at", globalSince),
-        db
-          .from("feedback_prompt_log")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", req.userId)
-          .eq("feature", feature)
-          .gte("created_at", featureSince),
-      ]);
-      if (recentAny.error) throw recentAny.error;
-      if (recentFeature.error) throw recentFeature.error;
+      if (trigger === "after_use") askedToday = askedToday.eq("feature", feature);
 
-      if ((recentAny.count ?? 0) > 0 || (recentFeature.count ?? 0) > 0) {
-        return res.json({ show: false });
-      }
+      const { count, error: askedError } = await askedToday;
+      if (askedError) throw askedError;
+      if ((count ?? 0) > 0) return res.json({ show: false });
 
       const chance = trigger === "random" ? RANDOM_CHANCE : AFTER_USE_CHANCE;
       if (Math.random() > chance) return res.json({ show: false });

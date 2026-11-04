@@ -1,3 +1,4 @@
+//planner.js
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("plannerEventForm");
   const list = document.getElementById("plannerEventsList");

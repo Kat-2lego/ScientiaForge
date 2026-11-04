@@ -30,6 +30,7 @@ import { LEARNING_MODULES } from "./learningModules.mjs";
 import englishRoutes from "./routes/english.js";
 import createSupportRouter from "./routes/support.js";
 import { buildRoadmap } from "./roadmapBuilder.mjs";
+import createAdsRouter from "./routes/ads.js";
 
 
 
@@ -445,6 +446,23 @@ app.use("/api/cv", cvRoutes);
 app.use("/api/career-pathfinder", careerPathfinderRoutes);
 app.use("/api/study-hub", studyHubRoutes);
 app.use("/api/admin", adminRoutes);
+
+// Advertising system
+// Uses the existing authentication middleware and Supabase admin client.
+if (supabaseAdmin) {
+  app.use(
+    "/api/ads",
+    createAdsRouter({
+      db: supabaseAdmin,
+      requireAuth,
+    })
+  );
+} else {
+  console.warn(
+    "Advertising system disabled: SUPABASE_SERVICE_ROLE_KEY is missing."
+  );
+}
+
 app.use("/api/articulation", articulationRoutes);
 app.use("/api/english", englishRoutes);
 app.use("/api/applications", applicationTrackerRoutes);
@@ -1827,9 +1845,9 @@ app.post(
         } = await supabaseAdmin
           .from("notifications")
           .upsert(notifications, {
-            onConflict: "user_id,reference_id",
-            ignoreDuplicates: true,
-          })
+          onConflict: "user_id,reference_id,type",
+          ignoreDuplicates: true,
+        })
           .select("id");
 
         if (insertError) {
@@ -1889,7 +1907,7 @@ app.get(
 
       const { data, error } = await supabaseAdmin
         .from("notifications")
-        .select("id, title, body, type, is_read, created_at")
+        .select("id, reference_id, title, body, type, is_read, created_at")
         .eq("user_id", req.userId)
         .order("created_at", { ascending: false })
         .limit(100);
