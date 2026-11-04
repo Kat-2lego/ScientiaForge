@@ -573,3 +573,51 @@ body {
     grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   }
 }
+
+.account-deleted-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  background: #eaf7ef;
+  border: 1px solid #b8e3c7;
+  border-radius: 10px;
+  color: #176b38;
+}
+
+.account-deleted-notice[hidden] {
+  display: none;
+}
+
+.notice-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  background: #c8efd5;
+  border-radius: 50%;
+  font-weight: bold;
+}
+
+.account-deleted-notice strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.account-deleted-notice p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#dismissDeletionNotice {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: #176b38;
+  font-size: 22px;
+  cursor: pointer;
+}
