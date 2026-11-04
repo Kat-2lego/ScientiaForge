@@ -293,4 +293,50 @@ async function loadUserGreeting() {
   }
 }
 
+
+async function loadUserPlan() {
+    const token =
+        localStorage.getItem("sb-access-token") ||
+        sessionStorage.getItem("sb-access-token");
+
+    const planBadge = document.getElementById("planBadge");
+
+    if (!planBadge) return;
+
+    if (!token) {
+        planBadge.textContent = "Unknown";
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/auth/me", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to retrieve account information.");
+        }
+
+        const user = await response.json();
+
+        const planType = String(user.plan_type || "free").toLowerCase();
+
+        if (planType === "premium") {
+            planBadge.textContent = "Premium User";
+            planBadge.className = "badge premium";
+        } else {
+            planBadge.textContent = "Standard User";
+            planBadge.className = "badge standard";
+        }
+
+    } catch (error) {
+        console.error("Failed to load user plan:", error);
+        planBadge.textContent = "Unavailable";
+    }
+}
+
+loadUserPlan();
+
 loadUserGreeting();

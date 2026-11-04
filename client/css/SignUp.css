@@ -621,3 +621,8 @@ body {
   font-size: 22px;
   cursor: pointer;
 }
+
+.badge.standard {
+    background-color: #e8edf3;
+    color: #475569;
+}

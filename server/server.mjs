@@ -1182,94 +1182,83 @@ app.post("/api/delete-account", requireAuth, async (req, res) => {
    AUTH: CURRENT USER
 ========================================================= */
 
-app.get(
-  "/api/auth/me",
-  async (req, res) => {
-    const authHeader =
-      req.headers.authorization;
 
-    if (
-      !authHeader ||
-      !authHeader.startsWith("Bearer ")
-    ) {
+app.get("/api/auth/me", async (req, res) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({
+      error: "No valid access token was provided.",
+    });
+  }
+
+  const accessToken = authHeader.replace("Bearer ", "").trim();
+
+  if (!accessToken) {
+    return res.status(401).json({
+      error: "No valid access token was provided.",
+    });
+  }
+
+  try {
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(accessToken);
+
+    if (error || !user) {
       return res.status(401).json({
-        error:
-          "No valid access token was provided.",
+        error: "The session is invalid or has expired.",
       });
     }
 
-    const accessToken =
-      authHeader
-        .replace("Bearer ", "")
-        .trim();
+    const firstName =
+      user.user_metadata?.first_name ||
+      user.email?.split("@")[0] ||
+      "User";
 
-    if (!accessToken) {
-      return res.status(401).json({
-        error:
-          "No valid access token was provided.",
-      });
-    }
+    // Retrieve role and subscription plan from public.users
+    const { data: userRow, error: userError } = await databaseClient
+      .from("users")
+      .select("role, plan_type")
+      .eq("id", user.id)
+      .maybeSingle();
 
-    try {
-      const {
-        data: {
-          user,
-        },
-        error,
-      } =
-        await supabase.auth
-          .getUser(accessToken);
-
-      if (
-        error ||
-        !user
-      ) {
-        return res.status(401).json({
-          error:
-            "The session is invalid or has expired.",
-        });
-      }
-
-      const firstName =
-        user.user_metadata
-          ?.first_name ||
-        user.email
-          ?.split("@")[0] ||
-        "User";
-
-      let role = "user";
-      try {
-        const { data: roleRow } = await databaseClient
-          .from("users")
-          .select("role")
-          .eq("id", user.id)
-          .maybeSingle();
-        role = roleRow?.role || "user";
-      } catch (roleError) {
-        console.warn("Could not resolve role for /api/auth/me:", roleError.message);
-      }
-
-      return res.status(200).json({
-        id: user.id,
-        firstName,
-        email: user.email,
-        role,
-        isAdmin: role === "admin",
-      });
-
-    } catch (error) {
+    if (userError) {
       console.error(
-        "❌ /api/auth/me error:",
-        error.message
+        "Could not retrieve user information:",
+        userError.message
       );
 
       return res.status(500).json({
-        error:
-          "An internal server error occurred.",
+        error: "Could not retrieve account information.",
       });
     }
+
+    const role = userRow?.role || "user";
+    const planType = userRow?.plan_type || "free";
+
+    return res.status(200).json({
+      id: user.id,
+      firstName,
+      email: user.email,
+      role,
+      isAdmin: role === "admin",
+      plan_type: planType,
+    });
+
+  } catch (error) {
+    console.error(
+      "❌ /api/auth/me error:",
+      error.message
+    );
+
+    return res.status(500).json({
+      error: "An internal server error occurred.",
+    });
   }
-);
+});
+
 
 /* =========================================================
    ACTIVITY HEARTBEAT
