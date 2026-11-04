@@ -1088,6 +1088,12 @@ select.dropdown[multiple] option {
   color: var(--text-muted);
 }
 
+/* Let .main supply the page's horizontal spacing. */
+.career-discovery-page .main > .dashboard-grid {
+  padding-left: 0;
+  padding-right: 0;
+}
+
 @media (max-width: 720px) {
   .chips-container.grouped { max-height: 220px; }
   .search-results { left: 12px; right: 12px; }
