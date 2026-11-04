@@ -24,9 +24,10 @@
   <script src="../js/theme.js"></script>
   <link rel="stylesheet" href="../css/CareerShortlist.css" />
   <link rel="stylesheet" href="../css/back-navigation.css" />
+  <link rel="stylesheet" href="../css/mobile-header.css" />
   <script src="../js/back-navigation.js" defer></script>
 </head>
-<body>
+<body class="career-discovery-page">
 
   <!-- Screen-reader announcements for state changes -->
   <div id="sfAnnouncer" class="sr-only" aria-live="polite" role="status"></div>
@@ -160,7 +161,7 @@
           </button>
 
           <div class="profile">
-            <div class="avatar" aria-hidden="true"></div>
+            <div class="avatar"></div>
             <div>
               <div class="profile-name"></div>
               <div class="profile-email"></div>
@@ -618,7 +619,8 @@
     // Point the frontend at your API. Change this for deployment.
     window.SKILLFORGE_API_BASE = "";
   </script>
-
+  <script src="../js/auth.js"></script>
+  <script src="../js/header-profile.js"></script>
   <script src="../js/CareerDiscovery.js"></script>
   <script src="../js/planner-UI.js"></script>
   <script src="../js/planner.js"></script>
@@ -626,6 +628,8 @@
   <script src="../js/CareerShortlist.js"></script>
   <script src="../js/notifications.js"></script>
   <script src="../js/supportWidgets.js"></script>
+  <script src="../js/mobile-header.js"></script>
+
 
   <script>
     lucide.createIcons();
