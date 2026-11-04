@@ -451,11 +451,12 @@
         state.profile = result.profile || null;
         state.sessionId = result.session_id || null;
 
-        if (!state.matches.length) {
+       if (!state.matches.length) {
           renderEmpty(result.result_note);
           return;
         }
         renderResults(result);
+        window.SFRating?.afterUse("career_discovery");
         return;
       }
 
@@ -1272,5 +1273,5 @@ window.SkillForgeDiscovery = {
   state, api, selectCareer, announce,
   openSavedCareer, closeSavedCareersOverlay
 };
- 
+
 loadUserGreeting();
