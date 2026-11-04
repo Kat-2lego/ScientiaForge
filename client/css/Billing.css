@@ -40,6 +40,54 @@
     align-items: center;
     justify-content: center;
 }
+/* Subtle return link above the billing content. */
+.billing-wrapper > .billing-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  min-height: 40px;
+  margin: 0 0 14px;
+  padding: 4px 0;
+
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  box-shadow: none;
+
+  color: #64748b;
+  color: color-mix(
+    in srgb,
+    var(--text-main, #334155) 75%,
+    transparent
+  );
+
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.4;
+  text-decoration: none;
+
+  transition: color 0.2s ease;
+}
+
+.billing-wrapper > .billing-back-link svg {
+  flex: 0 0 16px;
+}
+
+.billing-wrapper > .billing-back-link:hover {
+  color: var(--text-dark, #0f172a);
+}
+
+.billing-wrapper > .billing-back-link:hover span {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.billing-wrapper > .billing-back-link:focus-visible {
+  outline: 2px solid var(--primary, #2563eb);
+  outline-offset: 4px;
+}
 
 .page-title {
     font-size: 1.75rem;
@@ -1091,4 +1139,11 @@ input:checked + .slider:before {
         width: 100%;
         justify-content: flex-end;
     }
+}
+
+/* Billing page: hide the hamburger on mobile only. */
+@media (max-width: 900px) {
+  .app-layout .top-header #toggle-sidebar {
+    display: none;
+  }
 }
