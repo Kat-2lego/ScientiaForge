@@ -1,0 +1,148 @@
+/* Mobile header only — desktop remains unchanged */
+@media (max-width: 768px) {
+  .topbar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 8px 0 12px;
+    min-width: 0;
+  }
+
+  /* First row: menu + flexible search */
+  .topbar .topbar-left {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    width: 100%;
+    min-width: 0;
+    gap: 10px;
+  }
+
+  .topbar .menu-btn,
+  .topbar .icon-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    flex: 0 0 44px;
+    padding: 0;
+    border-radius: 13px;
+  }
+
+  .topbar .menu-btn {
+    display: grid;
+  }
+
+  .topbar .menu-btn svg,
+  .topbar .icon-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .topbar .searchbar {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    min-height: 44px;
+    gap: 8px;
+    padding: 0 12px;
+  }
+
+  .topbar .searchbar input {
+    width: 100%;
+    min-width: 0;
+    font-size: 16px;
+  }
+
+  /* Supports pages where search has a dropdown wrapper */
+  .topbar .topbar-left > .searchbar-wrap {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+  }
+
+  .topbar .searchbar-wrap .searchbar {
+    width: 100%;
+  }
+
+  /* Second row: actions left, avatar right */
+  .topbar .topbar-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    width: 100%;
+    min-width: 0;
+    gap: 10px;
+  }
+
+  /* Remove the white profile pill on mobile */
+  .topbar .profile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 44px;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    margin-left: auto;
+    padding: 0;
+    gap: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 50%;
+    box-shadow: none;
+  }
+
+  /* Hide the name/email wrapper, retain the avatar */
+  .topbar .profile > :not(.avatar) {
+    display: none;
+  }
+
+  .topbar .profile .avatar {
+    display: grid;
+    place-items: center;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    color: #422812;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .topbar .profile .avatar::after {
+    content: attr(data-initial);
+  }
+}
+/* =========================================================
+   Career Discovery + Interview Simulator:
+   match the shared Dashboard topbar spacing.
+========================================================= */
+
+@media (min-width: 901px) {
+  .career-discovery-page .main > .topbar,
+  .interview-simulator-page .main > .topbar {
+    padding: 12px 16px;
+  }
+}
+
+/* Match Dashboard's existing tablet spacing. */
+@media (min-width: 769px) and (max-width: 900px) {
+  .career-discovery-page .main > .topbar,
+  .interview-simulator-page .main > .topbar {
+    padding: 12px;
+    align-items: stretch;
+  }
+}
+
+/* Preserve our compact, two-row mobile header. */
+@media (max-width: 768px) {
+  .career-discovery-page .main > .topbar,
+  .interview-simulator-page .main > .topbar {
+    padding: 8px 0 12px;
+    align-items: stretch;
+  }
+}

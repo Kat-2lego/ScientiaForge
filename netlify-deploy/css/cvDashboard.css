@@ -807,3 +807,17 @@ input {
   font-weight: 600;
   cursor: pointer;
 }
+/* Align the CV heading with the cards in tablet/mobile mode. */
+@media (max-width: 900px) {
+  .main > .hero {
+    flex-direction: column;
+    align-items: stretch;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .main > .hero > div:first-child {
+    min-width: 0;
+    text-align: left;
+  }
+}
