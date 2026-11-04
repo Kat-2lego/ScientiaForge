@@ -947,6 +947,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // Fallback to old simple feedback
         _renderSimpleFeedback(data);
       }
+
+      // Show the existing rating popup after successful interview completion
+      window.SFRating?.afterUse("interview_simulator");
     } catch (err) {
       isEnding = false; // allow another attempt if ending failed
       alert("Could not end interview: " + err.message);

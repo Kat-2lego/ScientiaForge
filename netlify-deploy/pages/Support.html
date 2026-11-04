@@ -9,15 +9,17 @@
     <link rel="stylesheet" href="../css/dashboard.css" />
     <link rel="stylesheet" href="../css/Suport.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-      <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/mobile-header.css">
+
   <script src="../js/theme.js"></script>
-
-
-
   <link rel="stylesheet" href="../css/back-navigation.css">
   <script src="../js/back-navigation.js" defer></script>
+
+  <!-- Should be loaded last-->
+  <link rel="stylesheet" href="../css/app-sidebar.css">
 </head>
-<body>
+<body class="app-sidebar-page">
     
 </body> 
     <div class="layout">
@@ -37,11 +39,6 @@
                     <i data-lucide="compass"></i>
                     <span>Career Discovery</span>
                 </a>
-
-          <a class="nav-item" href="ApplicationTracker.html" data-label="Job Tracker">
-            <i data-lucide="briefcase"></i>
-            <span>Job Tracker</span>
-          </a>
 
                 <a class="nav-item" href="cvDashboard.html" data-label="CV Analyzer">
                     <i data-lucide="file-search"></i>
@@ -405,6 +402,11 @@
     <script src="../js/planner.js"></script>
     <script src="../js/calendar.js"></script>
     <script src="../js/notifications.js"></script>
+    <script src="../js/supportWidgets.js"></script>
+    <script src="../js/mobile-header.js"></script>
+
+    <!-- Must be loaded last --> 
+   <script src="../js/app-sidebar.js"></script>
     <script src="../js/supportWidgets.js"></script>
 
   

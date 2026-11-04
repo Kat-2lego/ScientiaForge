@@ -198,7 +198,7 @@ async function initAvatar() {
     let mod;
     // The simulator imports "AvatarEngine.js" but the file in git is "Avatarengine.js".
     // Trying both keeps this page working on case-sensitive hosts either way.
-    try { mod = await import("./AvatarEngine.js"); } catch { mod = await import("./Avatarengine.js"); }
+    try { mod = await import("./AvatarEngine.js"); } catch { mod = await import("../Avatarengine.js"); }
     avatar = new mod.AvatarEngine(el.canvas, COACH_ID);
     avatar.start();
   } catch (err) {

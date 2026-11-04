@@ -15,6 +15,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const contactUsBtn = document.getElementById('contactUsBtn');
+  if (contactUsBtn) {
+    contactUsBtn.addEventListener('click', () => {
+      window.location.href = 'Support.html';
+    });
+  }
+
   // ---------- Avatar Logic ----------
   const avatarContainer = document.querySelector('.avatar-container');
   const avatarCircle = document.querySelector('.avatar-circle');
