@@ -14,8 +14,11 @@
   <link rel="stylesheet" href="../css/back-navigation.css">
   <link rel="stylesheet" href="../css/mobile-header.css" />
   <script src="../js/back-navigation.js" defer></script>
+
+  <!-- Should be loaded last-->
+  <link rel="stylesheet" href="../css/app-sidebar.css">
 </head>
-<body>
+<body class="app-sidebar-page">
 <div class="layout">
 
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -453,5 +456,8 @@
 <script src="../js/notifications.js"></script>
 <script src="../js/supportWidgets.js"></script>
 <script src="../js/mobile-header.js"></script>
+
+<!-- Must be loaded last --> 
+   <script src="../js/app-sidebar.js"></script>
 </body>
 </html>
