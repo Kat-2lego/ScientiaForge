@@ -4,12 +4,11 @@
    Loaded LAST on every page so its overrides win. Nothing here applies until
    <html data-theme="dark"> is set by js/theme.js, so light mode is untouched.
 
-   Two layers:
-     1. Dark values for the CSS variables the pages already use. This covers
-        most of the UI on its own.
-     2. Targeted overrides for rules that hardcode a colour instead of using a
-        variable. These were generated from the stylesheets themselves, so the
-        list matches what is actually in the code.
+   Layers:
+     1. Dark values for the CSS variables the pages already use.
+     2. Targeted overrides for rules that hardcode a colour (generated).
+     3. Dashboard + sidebar overrides.
+     4. Settings page overrides.
 
    Adding a new page? Use the variables below and it inherits dark mode free.
    ========================================================================== */
@@ -158,8 +157,6 @@ html[data-theme="dark"] option {
   color: var(--sf-text);
 }
 
-/* Images and illustrations keep their own colours; only flatten the harsh
-   white backgrounds behind transparent logos. */
 html[data-theme="dark"] ::-webkit-scrollbar-track {
   background: var(--sf-surface-2);
 }
@@ -174,123 +171,53 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb {
    ========================================================================== */
 
 /* --- from ActiveRecall.css --- */
-html[data-theme="dark"] body.nsc-focus {
-  background-color: var(--sf-surface-2);
-}
-html[data-theme="dark"] .nsc-back:hover {
-  background-color: var(--sf-surface-2);
-}
-html[data-theme="dark"] .nsc-message {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .pp-recall.is-unavailable {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .pp-recall p {
-  color: var(--sf-text-soft);
-}
-html[data-theme="dark"] .pp-toggle button[aria-selected="true"] {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .pp-frame {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .ar-card {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .ar-context {
-  background-color: var(--sf-surface-2);
-}
-html[data-theme="dark"] .ar-context div {
-  color: var(--sf-text-soft);
-}
-html[data-theme="dark"] .ar-option {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .ar-key {
-  background-color: var(--sf-surface-2);
-}
-html[data-theme="dark"] .ar-input {
-  background-color: var(--sf-surface);
-}
+html[data-theme="dark"] body.nsc-focus { background-color: var(--sf-surface-2); }
+html[data-theme="dark"] .nsc-back:hover { background-color: var(--sf-surface-2); }
+html[data-theme="dark"] .nsc-message { background-color: var(--sf-surface); }
+html[data-theme="dark"] .pp-recall.is-unavailable { background-color: var(--sf-surface); }
+html[data-theme="dark"] .pp-recall p { color: var(--sf-text-soft); }
+html[data-theme="dark"] .pp-toggle button[aria-selected="true"] { background-color: var(--sf-surface); }
+html[data-theme="dark"] .pp-frame { background-color: var(--sf-surface); }
+html[data-theme="dark"] .ar-card { background-color: var(--sf-surface); }
+html[data-theme="dark"] .ar-context { background-color: var(--sf-surface-2); }
+html[data-theme="dark"] .ar-context div { color: var(--sf-text-soft); }
+html[data-theme="dark"] .ar-option { background-color: var(--sf-surface); }
+html[data-theme="dark"] .ar-key { background-color: var(--sf-surface-2); }
+html[data-theme="dark"] .ar-input { background-color: var(--sf-surface); }
 html[data-theme="dark"] .ar-input:disabled {
   background-color: var(--sf-surface-2);
   color: var(--sf-text-soft);
 }
-html[data-theme="dark"] .ar-result.is-skipped {
-  background-color: var(--sf-surface-2);
-}
-html[data-theme="dark"] .ar-btn-incorrect {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .ar-results-hero {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .ar-results-sub {
-  color: var(--sf-text-soft);
-}
-html[data-theme="dark"] .ar-score-meter span {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .ar-stat {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .ar-review-item {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .ar-review-context {
-  background-color: var(--sf-surface-2);
-}
-html[data-theme="dark"] .ar-review-body .ar-compare > div {
-  background-color: var(--sf-surface-2);
-}
+html[data-theme="dark"] .ar-result.is-skipped { background-color: var(--sf-surface-2); }
+html[data-theme="dark"] .ar-btn-incorrect { background-color: var(--sf-surface); }
+html[data-theme="dark"] .ar-results-hero { background-color: var(--sf-surface); }
+html[data-theme="dark"] .ar-results-sub { color: var(--sf-text-soft); }
+html[data-theme="dark"] .ar-score-meter span { background-color: var(--sf-surface); }
+html[data-theme="dark"] .ar-stat { background-color: var(--sf-surface); }
+html[data-theme="dark"] .ar-review-item { background-color: var(--sf-surface); }
+html[data-theme="dark"] .ar-review-context { background-color: var(--sf-surface-2); }
+html[data-theme="dark"] .ar-review-body .ar-compare > div { background-color: var(--sf-surface-2); }
 
 /* --- from CareerDiscovery.additions.css --- */
-html[data-theme="dark"] .result-chip {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .career-search {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .search-results {
-  background-color: var(--sf-surface);
-}
+html[data-theme="dark"] .result-chip { background-color: var(--sf-surface); }
+html[data-theme="dark"] .career-search { background-color: var(--sf-surface); }
+html[data-theme="dark"] .search-results { background-color: var(--sf-surface); }
 
 /* --- from CareerDiscovery.css --- */
-html[data-theme="dark"] .searchbar {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .profile {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .chip {
-  background-color: var(--sf-surface-2);
-}
-html[data-theme="dark"] .dropdown {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .slider:before {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .btn-secondary {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .quiz-option-btn {
-  background-color: var(--sf-surface);
-}
+html[data-theme="dark"] .searchbar { background-color: var(--sf-surface); }
+html[data-theme="dark"] .profile { background-color: var(--sf-surface); }
+html[data-theme="dark"] .chip { background-color: var(--sf-surface-2); }
+html[data-theme="dark"] .dropdown { background-color: var(--sf-surface); }
+html[data-theme="dark"] .slider:before { background-color: var(--sf-surface); }
+html[data-theme="dark"] .btn-secondary { background-color: var(--sf-surface); }
+html[data-theme="dark"] .quiz-option-btn { background-color: var(--sf-surface); }
 
 /* --- from CareerPathfinder.css --- */
-html[data-theme="dark"] .status-closed {
-  background-color: var(--sf-surface-2);
-}
+html[data-theme="dark"] .status-closed { background-color: var(--sf-surface-2); }
 
-/* --- from ContactUs.css --- */
-html[data-theme="dark"] .social-icons a {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .contact-form-container {
-  background-color: var(--sf-surface);
-}
+/* --- from ContactUs.css / Suport.css --- */
+html[data-theme="dark"] .social-icons a { background-color: var(--sf-surface); }
+html[data-theme="dark"] .contact-form-container { background-color: var(--sf-surface); }
 html[data-theme="dark"] input,
 html[data-theme="dark"] select,
 html[data-theme="dark"] textarea {
@@ -302,97 +229,41 @@ html[data-theme="dark"] select:focus,
 html[data-theme="dark"] textarea:focus {
   background-color: var(--sf-surface);
 }
-html[data-theme="dark"] .faq-card {
-  background-color: var(--sf-surface-2);
-}
+html[data-theme="dark"] .faq-card { background-color: var(--sf-surface-2); }
 
 /* --- from Features.css --- */
-html[data-theme="dark"] .ui-window {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .voice-module {
-  background-color: var(--sf-surface);
-}
+html[data-theme="dark"] .ui-window { background-color: var(--sf-surface); }
+html[data-theme="dark"] .voice-module { background-color: var(--sf-surface); }
 
 /* --- from InterviewSimulator.css --- */
-html[data-theme="dark"] .duration-control input[type="range"]::-webkit-slider-thumb {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .duration-control input[type="range"]::-moz-range-thumb {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .question-count-control input[type="number"] {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .role-search-input {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .role-suggestions {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .persona-canvas {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .speaking-indicator span {
-  background-color: var(--sf-surface);
-}
+html[data-theme="dark"] .duration-control input[type="range"]::-webkit-slider-thumb { background-color: var(--sf-surface); }
+html[data-theme="dark"] .duration-control input[type="range"]::-moz-range-thumb { background-color: var(--sf-surface); }
+html[data-theme="dark"] .question-count-control input[type="number"] { background-color: var(--sf-surface); }
+html[data-theme="dark"] .role-search-input { background-color: var(--sf-surface); }
+html[data-theme="dark"] .role-suggestions { background-color: var(--sf-surface); }
+html[data-theme="dark"] .persona-canvas { background-color: var(--sf-surface); }
+html[data-theme="dark"] .speaking-indicator span { background-color: var(--sf-surface); }
 
 /* --- from Interviewreport.css --- */
-html[data-theme="dark"] .webcam-placeholder i {
-  color: var(--sf-text-soft);
-}
-html[data-theme="dark"] .webcam-toggle-btn {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .rpt-score-band {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .rpt-section {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .rpt-kpi-card {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .rpt-tips-list li {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .rpt-actions {
-  background-color: var(--sf-surface);
-}
+html[data-theme="dark"] .webcam-placeholder i { color: var(--sf-text-soft); }
+html[data-theme="dark"] .webcam-toggle-btn { background-color: var(--sf-surface); }
+html[data-theme="dark"] .rpt-score-band { background-color: var(--sf-surface); }
+html[data-theme="dark"] .rpt-section { background-color: var(--sf-surface); }
+html[data-theme="dark"] .rpt-kpi-card { background-color: var(--sf-surface); }
+html[data-theme="dark"] .rpt-tips-list li { background-color: var(--sf-surface); }
+html[data-theme="dark"] .rpt-actions { background-color: var(--sf-surface); }
 
 /* --- from Settings.css --- */
-html[data-theme="dark"] .hamburger-btn {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .slider:before {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .btn-secondary {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .setting-select {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .font-size-btn {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .modal-content {
-  background-color: var(--sf-surface);
-}
+html[data-theme="dark"] .hamburger-btn { background-color: var(--sf-surface); }
+html[data-theme="dark"] .setting-select { background-color: var(--sf-surface); }
+html[data-theme="dark"] .font-size-btn { background-color: var(--sf-surface); }
+html[data-theme="dark"] .modal-content { background-color: var(--sf-surface); }
 
 /* --- from SignUp.css --- */
-html[data-theme="dark"] body {
-  background-color: var(--sf-surface-2);
-}
-html[data-theme="dark"] .interface-deck {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .sector-left {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .field-wrapper p {
-  color: var(--sf-text-soft);
-}
+html[data-theme="dark"] body { background-color: var(--sf-surface-2); }
+html[data-theme="dark"] .interface-deck { background-color: var(--sf-surface); }
+html[data-theme="dark"] .sector-left { background-color: var(--sf-surface); }
+html[data-theme="dark"] .field-wrapper p { color: var(--sf-text-soft); }
 html[data-theme="dark"] .input {
   background-color: var(--sf-surface);
   color: var(--sf-text);
@@ -401,78 +272,27 @@ html[data-theme="dark"] .roles-checkbox-grid {
   background-color: var(--sf-surface-2);
   border-color: var(--sf-border);
 }
-html[data-theme="dark"] .checkbox-lbl-item {
-  color: var(--sf-text-soft);
-}
-html[data-theme="dark"] .skill-chip-btn {
-  background-color: var(--sf-surface-2);
-}
-html[data-theme="dark"] .skill-chip-btn:hover {
-  color: var(--sf-text);
-}
-html[data-theme="dark"] .tags-input-master-container {
-  background-color: var(--sf-surface);
-}
+html[data-theme="dark"] .checkbox-lbl-item { color: var(--sf-text-soft); }
+html[data-theme="dark"] .skill-chip-btn { background-color: var(--sf-surface-2); }
+html[data-theme="dark"] .skill-chip-btn:hover { color: var(--sf-text); }
+html[data-theme="dark"] .tags-input-master-container { background-color: var(--sf-surface); }
 html[data-theme="dark"] .back-step-btn:hover {
   background-color: var(--sf-surface-2);
   color: var(--sf-text);
 }
-html[data-theme="dark"] .auth-titles h2 {
-  color: var(--sf-text);
-}
-html[data-theme="dark"] .divider-line span {
-  background-color: var(--sf-surface);
-}
+html[data-theme="dark"] .auth-titles h2 { color: var(--sf-text); }
+html[data-theme="dark"] .divider-line span { background-color: var(--sf-surface); }
 
 /* --- from SkillGapAnalysis.css --- */
-html[data-theme="dark"] .industry-select {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .skill-spinner {
-  border-color: var(--sf-border);
-}
-html[data-theme="dark"] .modal-card {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .modal-card {
-  background-color: var(--sf-surface);
-}
+html[data-theme="dark"] .industry-select { background-color: var(--sf-surface); }
+html[data-theme="dark"] .skill-spinner { border-color: var(--sf-border); }
+html[data-theme="dark"] .modal-card { background-color: var(--sf-surface); }
 
 /* --- from StudyHub.css --- */
-html[data-theme="dark"] .nsc-field select {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .nsc-chip-plain {
-  background-color: var(--sf-surface-2);
-}
-html[data-theme="dark"] .nsc-btn-ghost {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .nsc-more {
-  background-color: var(--sf-surface);
-}
-
-/* --- from Suport.css --- */
-html[data-theme="dark"] .social-icons a {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .contact-form-container {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] input,
-html[data-theme="dark"] select,
-html[data-theme="dark"] textarea {
-  background-color: var(--sf-surface-2);
-  border-color: var(--sf-border);
-}
-html[data-theme="dark"] input:focus,
-html[data-theme="dark"] select:focus,
-html[data-theme="dark"] textarea:focus {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .faq-card {
-  background-color: var(--sf-surface-2);
-}
+html[data-theme="dark"] .nsc-field select { background-color: var(--sf-surface); }
+html[data-theme="dark"] .nsc-chip-plain { background-color: var(--sf-surface-2); }
+html[data-theme="dark"] .nsc-btn-ghost { background-color: var(--sf-surface); }
+html[data-theme="dark"] .nsc-more { background-color: var(--sf-surface); }
 
 /* --- from VideoDiscovery.css --- */
 html[data-theme="dark"] .vd-badge {
@@ -481,129 +301,973 @@ html[data-theme="dark"] .vd-badge {
 }
 
 /* --- from about.css --- */
-html[data-theme="dark"] .stat-box {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .mv-card {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .value-item {
-  background-color: var(--sf-surface);
-}
+html[data-theme="dark"] .stat-box { background-color: var(--sf-surface); }
+html[data-theme="dark"] .mv-card { background-color: var(--sf-surface); }
+html[data-theme="dark"] .value-item { background-color: var(--sf-surface); }
 html[data-theme="dark"] .team-card {
   background-color: var(--sf-surface);
   border-color: var(--sf-border);
 }
-html[data-theme="dark"] .social-links a {
-  background-color: var(--sf-surface-2);
-}
+html[data-theme="dark"] .social-links a { background-color: var(--sf-surface-2); }
 
 /* --- from admin.css --- */
-html[data-theme="dark"] .date-range-presets button.active {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .date-range-custom input[type="date"] {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .admin-tab {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .chart-range-toggle button.active {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .table-filter-select {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .btn-chip {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .pagination-controls button {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .switch .slider:before {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .modal-box {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .toast {
-  background-color: var(--sf-surface);
-}
+html[data-theme="dark"] .date-range-presets button.active { background-color: var(--sf-surface); }
+html[data-theme="dark"] .date-range-custom input[type="date"] { background-color: var(--sf-surface); }
+html[data-theme="dark"] .admin-tab { background-color: var(--sf-surface); }
+html[data-theme="dark"] .chart-range-toggle button.active { background-color: var(--sf-surface); }
+html[data-theme="dark"] .table-filter-select { background-color: var(--sf-surface); }
+html[data-theme="dark"] .btn-chip { background-color: var(--sf-surface); }
+html[data-theme="dark"] .pagination-controls button { background-color: var(--sf-surface); }
+html[data-theme="dark"] .switch .slider:before { background-color: var(--sf-surface); }
+html[data-theme="dark"] .modal-box { background-color: var(--sf-surface); }
+html[data-theme="dark"] .toast { background-color: var(--sf-surface); }
 
 /* --- from billing.css --- */
-html[data-theme="dark"] .hamburger-btn {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .btn-secondary-outline {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .plan-card-btn {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .history-filter-select {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .btn-export {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .btn-method-action {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .btn-add-payment {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .form-input {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .slider:before {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .btn-cancel {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .paywall-content {
-  background-color: var(--sf-surface);
-}
+html[data-theme="dark"] .btn-secondary-outline { background-color: var(--sf-surface); }
+html[data-theme="dark"] .plan-card-btn { background-color: var(--sf-surface); }
+html[data-theme="dark"] .history-filter-select { background-color: var(--sf-surface); }
+html[data-theme="dark"] .btn-export { background-color: var(--sf-surface); }
+html[data-theme="dark"] .btn-method-action { background-color: var(--sf-surface); }
+html[data-theme="dark"] .btn-add-payment { background-color: var(--sf-surface); }
+html[data-theme="dark"] .form-input { background-color: var(--sf-surface); }
+html[data-theme="dark"] .btn-cancel { background-color: var(--sf-surface); }
+html[data-theme="dark"] .paywall-content { background-color: var(--sf-surface); }
 
 /* --- from cvDashboard.css --- */
-html[data-theme="dark"] .cv-score-circle-inner {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .modal-box {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .modal-box button {
-  background-color: var(--sf-surface);
-}
+html[data-theme="dark"] .cv-score-circle-inner { background-color: var(--sf-surface); }
+html[data-theme="dark"] .modal-box button { background-color: var(--sf-surface); }
 
 /* --- from dashboard.css --- */
-html[data-theme="dark"] .download-btn {
-  background-color: var(--sf-surface);
-}
+html[data-theme="dark"] .download-btn { background-color: var(--sf-surface); }
 html[data-theme="dark"] .menu-btn,
-html[data-theme="dark"] .icon-btn {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .searchbar {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .profile {
-  background-color: var(--sf-surface);
-}
-html[data-theme="dark"] .search-empty {
-  background-color: var(--sf-surface);
-}
+html[data-theme="dark"] .icon-btn { background-color: var(--sf-surface); }
+html[data-theme="dark"] .search-empty { background-color: var(--sf-surface); }
 
 /* --- from payments.css --- */
-html[data-theme="dark"] .back-btn {
-  color: var(--sf-text);
-}
-html[data-theme="dark"] .back-btn:hover {
-  background-color: var(--sf-surface);
-}
+html[data-theme="dark"] .back-btn { color: var(--sf-text); }
+html[data-theme="dark"] .back-btn:hover { background-color: var(--sf-surface); }
 
 /* --- from styles.css --- */
 html[data-theme="dark"] .why-us-section {
   background-color: var(--sf-surface);
   border-color: var(--sf-border);
+}
+
+/* ==========================================================================
+   Dashboard + sidebar dark overrides — paste at the END of css/theme.css
+   Uses the --sf-* tokens already defined at the top of that file.
+   `background:` shorthand is used on purpose so it also clears any
+   gradient or image set by dashboard.css.
+   ========================================================================== */
+
+/* --- from dashboard.html: SIDEBAR ---------------------------------------- */
+html[data-theme="dark"] .sidebar {
+  background: var(--sf-surface) !important;
+  color: var(--sf-text-soft) !important;
+  border-color: var(--sf-border) !important;
+  box-shadow: none;
+}
+html[data-theme="dark"] .logo,
+html[data-theme="dark"] .logo-dark {
+  color: var(--sf-text) !important;
+}
+html[data-theme="dark"] .logo-blue {
+  color: var(--primary) !important;
+}
+
+html[data-theme="dark"] .nav-item {
+  background: transparent !important;
+  color: var(--sf-text-dim) !important;
+}
+html[data-theme="dark"] .nav-item i,
+html[data-theme="dark"] .nav-item svg {
+  color: inherit !important;
+  stroke: currentColor;
+}
+html[data-theme="dark"] .nav-item:hover {
+  background: var(--sf-surface-2) !important;
+  color: var(--sf-text) !important;
+}
+html[data-theme="dark"] .nav-item.active {
+  background: var(--primary-light) !important;
+  color: var(--primary) !important;
+}
+
+html[data-theme="dark"] .download-card {
+  background: var(--sf-surface-2) !important;
+  border: 1px solid var(--sf-border) !important;
+}
+html[data-theme="dark"] .download-card h3 {
+  color: var(--sf-text) !important;
+}
+html[data-theme="dark"] .download-card p {
+  color: var(--sf-text-dim) !important;
+}
+html[data-theme="dark"] .download-icon {
+  background: var(--primary-light) !important;
+  color: var(--primary) !important;
+}
+html[data-theme="dark"] .download-btn {
+  color: var(--primary);
+  border-color: var(--sf-border);
+}
+html[data-theme="dark"] .sidebar-overlay {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+/* --- from dashboard.html: TOP BAR, HERO, CARDS, PANELS ------------------- */
+html[data-theme="dark"] .topbar {
+  background: transparent;
+  border-color: var(--sf-border);
+}
+html[data-theme="dark"] .searchbar input {
+  background: transparent;
+  color: var(--sf-text);
+}
+html[data-theme="dark"] .menu-btn,
+html[data-theme="dark"] .icon-btn,
+html[data-theme="dark"] .profile {
+  border-color: var(--sf-border);
+  color: var(--sf-text);
+}
+
+html[data-theme="dark"] .hero,
+html[data-theme="dark"] .stat-card,
+html[data-theme="dark"] .panel,
+html[data-theme="dark"] .list-card,
+html[data-theme="dark"] .upcoming-box,
+html[data-theme="dark"] .metric {
+  background: var(--sf-surface);
+  border-color: var(--sf-border);
+  color: var(--sf-text);
+  box-shadow: none;
+}
+html[data-theme="dark"] .action-row {
+  background: var(--sf-surface-2);
+  border-color: var(--sf-border);
+  color: var(--sf-text);
+}
+html[data-theme="dark"] .action-row:hover,
+html[data-theme="dark"] .list-card:hover {
+  background: var(--sf-surface-3);
+}
+html[data-theme="dark"] .action-row.featured {
+  background: var(--blue-600);
+  border-color: var(--blue-600);
+  color: #fff;
+}
+html[data-theme="dark"] .divider {
+  background: var(--sf-border);
+}
+html[data-theme="dark"] .job-icon {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+html[data-theme="dark"] .gauge-center {
+  background: var(--sf-surface);
+}
+
+html[data-theme="dark"] .main h1,
+html[data-theme="dark"] .main h2,
+html[data-theme="dark"] .main h3,
+html[data-theme="dark"] .main h4,
+html[data-theme="dark"] .job-title,
+html[data-theme="dark"] .profile-name,
+html[data-theme="dark"] .stat-value,
+html[data-theme="dark"] .metric-value,
+html[data-theme="dark"] .progress-big,
+html[data-theme="dark"] .progress-bold,
+html[data-theme="dark"] .gauge-value {
+  color: var(--sf-text);
+}
+html[data-theme="dark"] .main p,
+html[data-theme="dark"] .job-sub,
+html[data-theme="dark"] .stat-unit,
+html[data-theme="dark"] .stat-change,
+html[data-theme="dark"] .profile-email {
+  color: var(--sf-text-dim);
+}
+
+html[data-theme="dark"] .btn-primary {
+  background: var(--blue-600);
+  border-color: var(--blue-600);
+  color: #fff;
+}
+html[data-theme="dark"] .btn-secondary {
+  background: var(--sf-surface-2);
+  border: 1px solid var(--sf-border);
+  color: var(--sf-text);
+}
+
+/* --- from dashboard.html: PLANNER SLIDE-OVER ----------------------------- */
+html[data-theme="dark"] .planner-overlay {
+  background: rgba(0, 0, 0, 0.6);
+}
+html[data-theme="dark"] .planner-panel {
+  background: var(--sf-surface);
+  color: var(--sf-text);
+  border-color: var(--sf-border);
+}
+html[data-theme="dark"] .planner-header {
+  border-color: var(--sf-border);
+}
+html[data-theme="dark"] .planner-tab {
+  background: var(--sf-surface-2);
+  color: var(--sf-text-dim);
+  border: 1px solid var(--sf-border);
+}
+html[data-theme="dark"] .planner-tab.active {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+html[data-theme="dark"] .planner-calendar,
+html[data-theme="dark"] .planner-fieldset {
+  background: var(--sf-surface-2);
+  border-color: var(--sf-border);
+}
+html[data-theme="dark"] .calendar-weekdays {
+  color: var(--sf-text-dim);
+}
+html[data-theme="dark"] .calendar-days button {
+  background: transparent;
+  color: var(--sf-text);
+}
+html[data-theme="dark"] .calendar-days button:hover {
+  background: var(--sf-surface-3);
+}
+html[data-theme="dark"] .planner-panel label,
+html[data-theme="dark"] .planner-panel legend {
+  color: var(--sf-text-soft);
+}
+/* ==========================================================================
+   Settings page dark overrides — paste at the END of css/theme.css,
+   after theme-dashboard-additions.css.
+   Uses the --sf-* tokens and brand variables already defined in theme.css.
+   ========================================================================== */
+
+/* --- Layout wrappers (these were staying light) -------------------------- */
+html[data-theme="dark"] .app-layout,
+html[data-theme="dark"] .main-content,
+html[data-theme="dark"] .scroll-container,
+html[data-theme="dark"] .settings-wrapper {
+  background: var(--sf-bg) !important;
+  color: var(--sf-text);
+}
+html[data-theme="dark"] .top-header {
+  background: var(--sf-bg) !important;
+  border-color: var(--sf-border) !important;
+}
+html[data-theme="dark"] .page-title,
+html[data-theme="dark"] .section-title {
+  color: var(--sf-text) !important;
+}
+html[data-theme="dark"] .section-subtitle {
+  color: var(--sf-text-dim) !important;
+}
+html[data-theme="dark"] .hamburger-btn {
+  background: var(--sf-surface) !important;
+  border: 1px solid var(--sf-border) !important;
+  color: var(--sf-text) !important;
+}
+
+/* --- Cards ---------------------------------------------------------------- */
+html[data-theme="dark"] .settings-card,
+html[data-theme="dark"] .profile-card-large,
+html[data-theme="dark"] .support-card {
+  background: var(--sf-surface) !important;
+  border: 1px solid var(--sf-border) !important;
+  color: var(--sf-text);
+  box-shadow: none !important;
+}
+html[data-theme="dark"] .click-card:hover,
+html[data-theme="dark"] .support-card:hover {
+  background: var(--sf-surface-2) !important;
+}
+html[data-theme="dark"] .profile-bg-pattern {
+  opacity: 0.12;
+}
+html[data-theme="dark"] .divider {
+  background: var(--sf-border) !important;
+}
+
+/* --- Text inside cards ----------------------------------------------------- */
+html[data-theme="dark"] .setting-info h4,
+html[data-theme="dark"] .support-card h4,
+html[data-theme="dark"] .about-info h4,
+html[data-theme="dark"] .profile-text h3,
+html[data-theme="dark"] .user-name,
+html[data-theme="dark"] .toggle-text span {
+  color: var(--sf-text) !important;
+}
+html[data-theme="dark"] .setting-info p,
+html[data-theme="dark"] .support-card p,
+html[data-theme="dark"] .about-info p,
+html[data-theme="dark"] .build-info,
+html[data-theme="dark"] .profile-text p,
+html[data-theme="dark"] .user-email {
+  color: var(--sf-text-dim) !important;
+}
+html[data-theme="dark"] .toggle-text i,
+html[data-theme="dark"] .toggle-text svg {
+  color: var(--primary);
+  stroke: currentColor;
+}
+
+/* --- Icons, links, badges --------------------------------------------------- */
+html[data-theme="dark"] .setting-icon,
+html[data-theme="dark"] .support-icon {
+  background: var(--primary-light) !important;
+  color: var(--primary) !important;
+}
+html[data-theme="dark"] .delete-icon {
+  background: var(--admin-red-light) !important;
+  color: var(--red) !important;
+}
+html[data-theme="dark"] .delete-info h4 {
+  color: var(--red) !important;
+}
+html[data-theme="dark"] .arrow-icon {
+  color: var(--sf-text-dim) !important;
+}
+html[data-theme="dark"] .link-row {
+  color: inherit;
+}
+html[data-theme="dark"] .badge.premium {
+  background: var(--primary-light) !important;
+  color: var(--primary) !important;
+}
+html[data-theme="dark"] .badge.active-status {
+  background: var(--admin-green-light) !important;
+  color: var(--green) !important;
+}
+html[data-theme="dark"] .avatar-circle {
+  border-color: var(--sf-border);
+}
+
+/* --- Dark mode box in the profile card ------------------------------------- */
+html[data-theme="dark"] .theme-toggle-box {
+  background: var(--sf-surface-2) !important;
+  border: 1px solid var(--sf-border) !important;
+}
+
+/* --- Toggle switches --------------------------------------------------------- */
+html[data-theme="dark"] .switch .slider {
+  background-color: var(--sf-surface-3);
+}
+html[data-theme="dark"] .switch .slider:before {
+  background-color: #e8edf7;
+}
+html[data-theme="dark"] .switch input:checked + .slider {
+  background-color: var(--blue-600);
+}
+
+/* --- Buttons and selects ----------------------------------------------------- */
+html[data-theme="dark"] .btn-secondary,
+html[data-theme="dark"] .secondary-btn {
+  background: var(--sf-surface-2) !important;
+  border: 1px solid var(--sf-border) !important;
+  color: var(--sf-text) !important;
+}
+html[data-theme="dark"] .btn-secondary:hover,
+html[data-theme="dark"] .secondary-btn:hover {
+  background: var(--sf-surface-3) !important;
+}
+html[data-theme="dark"] .danger-btn {
+  background: #dc2626 !important;
+  color: #fff !important;
+  border: 0;
+}
+html[data-theme="dark"] .setting-select {
+  background-color: var(--sf-surface-2) !important;
+  color: var(--sf-text) !important;
+  border: 1px solid var(--sf-border) !important;
+}
+
+/* --- Delete account modal ---------------------------------------------------- */
+html[data-theme="dark"] .modal-backdrop {
+  background: rgba(0, 0, 0, 0.65) !important;
+}
+html[data-theme="dark"] .modal-content {
+  background: var(--sf-surface) !important;
+  border: 1px solid var(--sf-border);
+  color: var(--sf-text);
+}
+html[data-theme="dark"] .modal-content h2 {
+  color: var(--sf-text);
+}
+html[data-theme="dark"] .modal-content p {
+  color: var(--sf-text-soft);
+}
+html[data-theme="dark"] .error-text {
+  color: var(--red) !important;
+}
+
+/* --- Back button (from back-navigation.css) ---------------------------------- */
+html[data-theme="dark"] .sf-back-btn {
+  background: var(--sf-surface) !important;
+  border: 1px solid var(--sf-border) !important;
+  color: var(--sf-text) !important;
+}
+html[data-theme="dark"] .sf-back-btn:hover {
+  background: var(--sf-surface-2) !important;
+}
+
+/* --- Scrollbar inside the settings area -------------------------------------- */
+html[data-theme="dark"] .custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--sf-bg);
+}
+html[data-theme="dark"] .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--sf-surface-3);
+}
+/* ==========================================================================
+   English Coach + Articulation Coach dark overrides
+   Paste at the END of css/theme.css (after the Settings block).
+   ========================================================================== */
+
+/* --- 1. The pages' own colour tokens, darkened ------------------------------
+   Their CSS defines these on :root; html[data-theme="dark"] is more specific,
+   so these win no matter which stylesheet loads first. */
+html[data-theme="dark"] {
+  /* Articulation Coach */
+  --art-good: #4ade80;
+  --art-good-soft: #11291f;
+  --art-good-line: #1f5138;
+  --art-warn: #fbbf24;
+  --art-warn-soft: #33280f;
+  --art-bad: #f87171;
+  --art-bad-soft: #331818;
+  --art-rec: #ef4444;
+  --art-focus: 0 0 0 3px rgba(96, 165, 250, 0.45);
+
+  /* English Coach */
+  --eng-good: #4ade80;
+  --eng-good-soft: #11291f;
+  --eng-warn: #fbbf24;
+  --eng-warn-soft: #33280f;
+  --eng-bad: #f87171;
+  --eng-bad-soft: #331818;
+  --eng-care-soft: #33220f;
+  --eng-rec: #ef4444;
+  --eng-focus: 0 0 0 3px rgba(96, 165, 250, 0.45);
+}
+
+/* ==========================================================================
+   ARTICULATION COACH — hard-coded whites
+   ========================================================================== */
+html[data-theme="dark"] .art-tabs {
+  background: var(--sf-surface-2);
+}
+html[data-theme="dark"] .art-tab[aria-selected="true"] {
+  background: var(--sf-surface-3);
+  color: var(--primary);
+}
+html[data-theme="dark"] .art-chip:not([aria-pressed="true"]) {
+  background: var(--sf-surface);
+  border-color: var(--sf-border);
+  color: var(--sf-text-soft);
+}
+html[data-theme="dark"] .art-chip[aria-pressed="true"] {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+html[data-theme="dark"] .art-btn-quiet {
+  background: var(--sf-surface);
+  border-color: var(--sf-border);
+  color: var(--sf-text-soft);
+}
+html[data-theme="dark"] .art-btn-quiet:hover {
+  background: var(--sf-surface-2);
+}
+html[data-theme="dark"] .art-btn-primary,
+html[data-theme="dark"] .art-record {
+  background: var(--blue-600);
+  color: #fff;
+}
+html[data-theme="dark"] .art-record[data-state="recording"] {
+  background: var(--art-rec);
+}
+html[data-theme="dark"] .art-coach canvas,
+html[data-theme="dark"] .art-coach-badge {
+  background: var(--primary-light);
+}
+html[data-theme="dark"] .art-pace-sweet {
+  border-color: var(--art-good-line);
+  background: var(--art-good-soft);
+}
+html[data-theme="dark"] .art-meter {
+  background: var(--sf-surface-3);
+}
+html[data-theme="dark"] .art-followup,
+html[data-theme="dark"] .art-error {
+  color: var(--sf-text);
+}
+html[data-theme="dark"] .art-error {
+  color: var(--art-bad);
+}
+
+/* ==========================================================================
+   ENGLISH COACH — hard-coded whites, tints and pastel borders
+   ========================================================================== */
+
+/* Buttons: exclude primary / danger / ghost so they keep their own colours */
+html[data-theme="dark"] .eng-btn:not(.eng-btn-primary):not(.eng-btn-danger):not(.eng-btn-ghost) {
+  background: var(--sf-surface);
+  border-color: var(--sf-border);
+  color: var(--sf-text);
+}
+html[data-theme="dark"] .eng-btn:not(.eng-btn-primary):not(.eng-btn-danger):not(.eng-btn-ghost):hover:not(:disabled) {
+  background: var(--sf-surface-2);
+}
+html[data-theme="dark"] .eng-btn-ghost {
+  background: transparent;
+  border-color: var(--sf-border);
+  color: var(--sf-text-soft);
+}
+html[data-theme="dark"] .eng-btn-primary {
+  background: var(--blue-600);
+  border-color: var(--blue-600);
+  color: #fff;
+}
+html[data-theme="dark"] .eng-btn-primary:hover:not(:disabled) {
+  background: var(--blue-500);
+}
+html[data-theme="dark"] .eng-btn-danger {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}
+html[data-theme="dark"] .eng-link {
+  color: var(--sf-text-soft);
+}
+
+/* Set-up choices */
+html[data-theme="dark"] .eng-choice {
+  background: var(--sf-surface);
+  border-color: var(--sf-border);
+}
+html[data-theme="dark"] .eng-choice:hover {
+  background: var(--sf-surface-2);
+}
+html[data-theme="dark"] .eng-choice:has(input:checked) {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+html[data-theme="dark"] .eng-choice-code {
+  background: var(--sf-surface-3);
+  color: var(--sf-text);
+}
+html[data-theme="dark"] .eng-choice input:checked ~ .eng-choice-code {
+  background: var(--blue-600);
+  color: #fff;
+}
+html[data-theme="dark"] .eng-summary-list,
+html[data-theme="dark"] .eng-chip,
+html[data-theme="dark"] .eng-stat,
+html[data-theme="dark"] .eng-stats li,
+html[data-theme="dark"] .eng-vocab li {
+  background: var(--sf-surface-2);
+  color: var(--sf-text-soft);
+}
+html[data-theme="dark"] .eng-chip {
+  color: var(--sf-text);
+}
+
+/* Level ladder */
+html[data-theme="dark"] .eng-rung-bar {
+  background: var(--sf-surface-3);
+}
+html[data-theme="dark"] .eng-rung.is-passed .eng-rung-fill {
+  background: #3b5fa8;
+}
+html[data-theme="dark"] .eng-tag-you {
+  background: var(--blue-600);
+  color: #fff;
+}
+html[data-theme="dark"] .eng-tag-goal {
+  background: var(--eng-good-soft);
+  color: var(--eng-good);
+  border-color: #1f5138;
+}
+
+/* Coach column and live conversation */
+html[data-theme="dark"] .eng-coach canvas {
+  background: var(--primary-light);
+}
+html[data-theme="dark"] .eng-coach-badge {
+  background: var(--blue-600);
+  color: #fff;
+}
+html[data-theme="dark"] .eng-status {
+  background: var(--sf-surface-2);
+  color: var(--sf-text-soft);
+}
+html[data-theme="dark"] .eng-status[data-state="listening"] {
+  background: var(--eng-bad-soft);
+  color: var(--eng-bad);
+}
+html[data-theme="dark"] .eng-status[data-state="thinking"] {
+  background: var(--eng-warn-soft);
+  color: var(--eng-warn);
+}
+html[data-theme="dark"] .eng-status[data-state="speaking"] {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+html[data-theme="dark"] .eng-log {
+  background: var(--sf-bg);
+  border-color: var(--sf-border);
+}
+html[data-theme="dark"] .eng-line-coach {
+  background: var(--sf-surface);
+  border-color: var(--sf-border);
+}
+html[data-theme="dark"] .eng-line-learner {
+  background: var(--primary-light);
+}
+html[data-theme="dark"] .eng-line-care {
+  background: var(--eng-care-soft);
+  border-color: #6b4a1f;
+}
+html[data-theme="dark"] .eng-retry {
+  background: var(--eng-warn-soft);
+  color: var(--eng-warn);
+}
+html[data-theme="dark"] .eng-idea {
+  background: var(--eng-good-soft);
+  border-color: #1f5138;
+}
+html[data-theme="dark"] .eng-mic {
+  background: var(--blue-600);
+  color: #fff;
+}
+html[data-theme="dark"] .eng-mic[data-state="recording"] {
+  background: var(--eng-rec);
+}
+html[data-theme="dark"] .eng-meter,
+html[data-theme="dark"] .eng-goalbar,
+html[data-theme="dark"] .eng-skill-meter span {
+  background: var(--sf-surface-3);
+}
+html[data-theme="dark"] .eng-skill-meter span.is-on {
+  background: var(--primary);
+}
+
+/* Result, feedback cards, progress */
+html[data-theme="dark"] .eng-fix {
+  background: var(--sf-surface);
+  border-color: var(--sf-border);
+  border-left-color: var(--primary);
+}
+html[data-theme="dark"] .eng-recent-item {
+  border-color: var(--sf-border);
+}
+html[data-theme="dark"] .eng-note,
+html[data-theme="dark"] .eng-badge {
+  background: var(--primary-light);
+}
+html[data-theme="dark"] .eng-next {
+  background: var(--eng-good-soft);
+  color: var(--sf-text);
+}
+html[data-theme="dark"] .eng-error,
+html[data-theme="dark"] .eng-delete {
+  background: var(--eng-bad-soft);
+  border-color: #6b2626;
+}
+html[data-theme="dark"] .eng-chart-svg .eng-dot {
+  fill: var(--sf-surface);
+}
+html[data-theme="dark"] .eng-chart-svg .eng-grid,
+html[data-theme="dark"] .eng-tabs {
+  stroke: var(--sf-border);
+  border-color: var(--sf-border);
+}
+
+/* Panels should not lift on hover in dark mode either */
+html[data-theme="dark"] .eng-coach.panel:hover,
+html[data-theme="dark"] .eng-talk.panel:hover,
+html[data-theme="dark"] .eng-setup.panel:hover,
+html[data-theme="dark"] .eng-result.panel:hover,
+html[data-theme="dark"] .eng-progress.panel:hover,
+html[data-theme="dark"] .eng-center.panel:hover {
+  box-shadow: none;
+}
+
+/* ==========================================================================
+   English Coach + Articulation Coach dark overrides
+   Paste at the END of css/theme.css (after the Settings block).
+   ========================================================================== */
+
+/* --- 1. The pages' own colour tokens, darkened ------------------------------
+   Their CSS defines these on :root; html[data-theme="dark"] is more specific,
+   so these win no matter which stylesheet loads first. */
+html[data-theme="dark"] {
+  /* Articulation Coach */
+  --art-good: #4ade80;
+  --art-good-soft: #11291f;
+  --art-good-line: #1f5138;
+  --art-warn: #fbbf24;
+  --art-warn-soft: #33280f;
+  --art-bad: #f87171;
+  --art-bad-soft: #331818;
+  --art-rec: #ef4444;
+  --art-focus: 0 0 0 3px rgba(96, 165, 250, 0.45);
+
+  /* English Coach */
+  --eng-good: #4ade80;
+  --eng-good-soft: #11291f;
+  --eng-warn: #fbbf24;
+  --eng-warn-soft: #33280f;
+  --eng-bad: #f87171;
+  --eng-bad-soft: #331818;
+  --eng-care-soft: #33220f;
+  --eng-rec: #ef4444;
+  --eng-focus: 0 0 0 3px rgba(96, 165, 250, 0.45);
+}
+
+/* ==========================================================================
+   ARTICULATION COACH — hard-coded whites
+   ========================================================================== */
+html[data-theme="dark"] .art-tabs {
+  background: var(--sf-surface-2);
+}
+html[data-theme="dark"] .art-tab[aria-selected="true"] {
+  background: var(--sf-surface-3);
+  color: var(--primary);
+}
+html[data-theme="dark"] .art-chip:not([aria-pressed="true"]) {
+  background: var(--sf-surface);
+  border-color: var(--sf-border);
+  color: var(--sf-text-soft);
+}
+html[data-theme="dark"] .art-chip[aria-pressed="true"] {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+html[data-theme="dark"] .art-btn-quiet {
+  background: var(--sf-surface);
+  border-color: var(--sf-border);
+  color: var(--sf-text-soft);
+}
+html[data-theme="dark"] .art-btn-quiet:hover {
+  background: var(--sf-surface-2);
+}
+html[data-theme="dark"] .art-btn-primary,
+html[data-theme="dark"] .art-record {
+  background: var(--blue-600);
+  color: #fff;
+}
+html[data-theme="dark"] .art-record[data-state="recording"] {
+  background: var(--art-rec);
+}
+html[data-theme="dark"] .art-coach canvas,
+html[data-theme="dark"] .art-coach-badge {
+  background: var(--primary-light);
+}
+html[data-theme="dark"] .art-pace-sweet {
+  border-color: var(--art-good-line);
+  background: var(--art-good-soft);
+}
+html[data-theme="dark"] .art-meter {
+  background: var(--sf-surface-3);
+}
+html[data-theme="dark"] .art-followup,
+html[data-theme="dark"] .art-error {
+  color: var(--sf-text);
+}
+html[data-theme="dark"] .art-error {
+  color: var(--art-bad);
+}
+
+/* ==========================================================================
+   ENGLISH COACH — hard-coded whites, tints and pastel borders
+   ========================================================================== */
+
+/* Buttons: exclude primary / danger / ghost so they keep their own colours */
+html[data-theme="dark"] .eng-btn:not(.eng-btn-primary):not(.eng-btn-danger):not(.eng-btn-ghost) {
+  background: var(--sf-surface);
+  border-color: var(--sf-border);
+  color: var(--sf-text);
+}
+html[data-theme="dark"] .eng-btn:not(.eng-btn-primary):not(.eng-btn-danger):not(.eng-btn-ghost):hover:not(:disabled) {
+  background: var(--sf-surface-2);
+}
+html[data-theme="dark"] .eng-btn-ghost {
+  background: transparent;
+  border-color: var(--sf-border);
+  color: var(--sf-text-soft);
+}
+html[data-theme="dark"] .eng-btn-primary {
+  background: var(--blue-600);
+  border-color: var(--blue-600);
+  color: #fff;
+}
+html[data-theme="dark"] .eng-btn-primary:hover:not(:disabled) {
+  background: var(--blue-500);
+}
+html[data-theme="dark"] .eng-btn-danger {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}
+html[data-theme="dark"] .eng-link {
+  color: var(--sf-text-soft);
+}
+
+/* Set-up choices */
+html[data-theme="dark"] .eng-choice {
+  background: var(--sf-surface);
+  border-color: var(--sf-border);
+}
+html[data-theme="dark"] .eng-choice:hover {
+  background: var(--sf-surface-2);
+}
+html[data-theme="dark"] .eng-choice:has(input:checked) {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+html[data-theme="dark"] .eng-choice-code {
+  background: var(--sf-surface-3);
+  color: var(--sf-text);
+}
+html[data-theme="dark"] .eng-choice input:checked ~ .eng-choice-code {
+  background: var(--blue-600);
+  color: #fff;
+}
+html[data-theme="dark"] .eng-summary-list,
+html[data-theme="dark"] .eng-chip,
+html[data-theme="dark"] .eng-stat,
+html[data-theme="dark"] .eng-stats li,
+html[data-theme="dark"] .eng-vocab li {
+  background: var(--sf-surface-2);
+  color: var(--sf-text-soft);
+}
+html[data-theme="dark"] .eng-chip {
+  color: var(--sf-text);
+}
+
+/* Level ladder */
+html[data-theme="dark"] .eng-rung-bar {
+  background: var(--sf-surface-3);
+}
+html[data-theme="dark"] .eng-rung.is-passed .eng-rung-fill {
+  background: #3b5fa8;
+}
+html[data-theme="dark"] .eng-tag-you {
+  background: var(--blue-600);
+  color: #fff;
+}
+html[data-theme="dark"] .eng-tag-goal {
+  background: var(--eng-good-soft);
+  color: var(--eng-good);
+  border-color: #1f5138;
+}
+
+/* Coach column and live conversation */
+html[data-theme="dark"] .eng-coach canvas {
+  background: var(--primary-light);
+}
+html[data-theme="dark"] .eng-coach-badge {
+  background: var(--blue-600);
+  color: #fff;
+}
+html[data-theme="dark"] .eng-status {
+  background: var(--sf-surface-2);
+  color: var(--sf-text-soft);
+}
+html[data-theme="dark"] .eng-status[data-state="listening"] {
+  background: var(--eng-bad-soft);
+  color: var(--eng-bad);
+}
+html[data-theme="dark"] .eng-status[data-state="thinking"] {
+  background: var(--eng-warn-soft);
+  color: var(--eng-warn);
+}
+html[data-theme="dark"] .eng-status[data-state="speaking"] {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+html[data-theme="dark"] .eng-log {
+  background: var(--sf-bg);
+  border-color: var(--sf-border);
+}
+html[data-theme="dark"] .eng-line-coach {
+  background: var(--sf-surface);
+  border-color: var(--sf-border);
+}
+html[data-theme="dark"] .eng-line-learner {
+  background: var(--primary-light);
+}
+html[data-theme="dark"] .eng-line-care {
+  background: var(--eng-care-soft);
+  border-color: #6b4a1f;
+}
+html[data-theme="dark"] .eng-retry {
+  background: var(--eng-warn-soft);
+  color: var(--eng-warn);
+}
+html[data-theme="dark"] .eng-idea {
+  background: var(--eng-good-soft);
+  border-color: #1f5138;
+}
+html[data-theme="dark"] .eng-mic {
+  background: var(--blue-600);
+  color: #fff;
+}
+html[data-theme="dark"] .eng-mic[data-state="recording"] {
+  background: var(--eng-rec);
+}
+html[data-theme="dark"] .eng-meter,
+html[data-theme="dark"] .eng-goalbar,
+html[data-theme="dark"] .eng-skill-meter span {
+  background: var(--sf-surface-3);
+}
+html[data-theme="dark"] .eng-skill-meter span.is-on {
+  background: var(--primary);
+}
+
+/* Result, feedback cards, progress */
+html[data-theme="dark"] .eng-fix {
+  background: var(--sf-surface);
+  border-color: var(--sf-border);
+  border-left-color: var(--primary);
+}
+html[data-theme="dark"] .eng-recent-item {
+  border-color: var(--sf-border);
+}
+html[data-theme="dark"] .eng-note,
+html[data-theme="dark"] .eng-badge {
+  background: var(--primary-light);
+}
+html[data-theme="dark"] .eng-next {
+  background: var(--eng-good-soft);
+  color: var(--sf-text);
+}
+html[data-theme="dark"] .eng-error,
+html[data-theme="dark"] .eng-delete {
+  background: var(--eng-bad-soft);
+  border-color: #6b2626;
+}
+html[data-theme="dark"] .eng-chart-svg .eng-dot {
+  fill: var(--sf-surface);
+}
+html[data-theme="dark"] .eng-chart-svg .eng-grid,
+html[data-theme="dark"] .eng-tabs {
+  stroke: var(--sf-border);
+  border-color: var(--sf-border);
+}
+
+/* Panels should not lift on hover in dark mode either */
+html[data-theme="dark"] .eng-coach.panel:hover,
+html[data-theme="dark"] .eng-talk.panel:hover,
+html[data-theme="dark"] .eng-setup.panel:hover,
+html[data-theme="dark"] .eng-result.panel:hover,
+html[data-theme="dark"] .eng-progress.panel:hover,
+html[data-theme="dark"] .eng-center.panel:hover {
+  box-shadow: none;
 }
