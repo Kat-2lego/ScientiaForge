@@ -1,0 +1,127 @@
+/* Shared sidebar behaviour only.
+   Load AFTER page-specific responsive styles. */
+
+body.app-sidebar-page .main,
+body.app-sidebar-page .main-content {
+  min-width: 0;
+}
+
+body.app-sidebar-page .sidebar-overlay {
+  display: none;
+}
+
+body.app-sidebar-page.app-sidebar-open {
+  overflow: hidden;
+}
+
+/* Tablet and phone navigation */
+@media (max-width: 900px) {
+  body.app-sidebar-page .layout,
+  body.app-sidebar-page .app-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body.app-sidebar-page #sidebar {
+    position: fixed;
+    inset: 10px auto 10px 10px;
+
+    width: min(260px, calc(100vw - 20px));
+    height: calc(100vh - 20px);
+    height: calc(100dvh - 20px);
+    max-height: none;
+    margin: 0;
+
+    z-index: 301;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    transform: translateX(calc(-100% - 20px));
+    visibility: hidden;
+    pointer-events: none;
+
+    transition:
+      transform 0.25s ease,
+      visibility 0.25s;
+  }
+
+  body.app-sidebar-page.app-sidebar-open #sidebar {
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  body.app-sidebar-page .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+
+    background: rgba(15, 23, 42, 0.45);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transition:
+      opacity 0.25s ease,
+      visibility 0.25s;
+  }
+
+  body.app-sidebar-page.app-sidebar-open .sidebar-overlay {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  body.app-sidebar-page #menuBtn,
+  body.app-sidebar-page #toggle-sidebar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.app-sidebar-page #sidebar,
+  body.app-sidebar-page .sidebar-overlay {
+    transition: none;
+  }
+}
+
+/* Should be loaded last */
+
+/* Tablet/phone drawers should show full navigation labels,
+   even when a page has an older icon-only sidebar breakpoint. */
+@media (max-width: 900px) {
+  body.app-sidebar-page #sidebar {
+    padding: 20px 16px;
+  }
+
+  body.app-sidebar-page #sidebar .logo {
+    overflow: visible;
+    font-size: clamp(1.5rem, 2vw, 2rem);
+  }
+
+  body.app-sidebar-page #sidebar .logo-blue {
+    display: inline;
+  }
+
+  body.app-sidebar-page #sidebar .nav-item {
+    justify-content: flex-start;
+    padding: 0 12px;
+    gap: 10px;
+    text-align: left;
+  }
+
+  body.app-sidebar-page #sidebar .nav-item > span {
+    display: inline;
+    min-width: 0;
+  }
+
+  body.app-sidebar-page #sidebar .nav-item > svg,
+  body.app-sidebar-page #sidebar .nav-item > i {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+}

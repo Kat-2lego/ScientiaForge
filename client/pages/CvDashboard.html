@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,6 +21,7 @@
 
   <link rel="stylesheet" href="../css/dashboard.css" />
   <link rel="stylesheet" href="../css/cvDashboard.css" />
+  <link rel="stylesheet" href="../css/mobile-header.css" />
 
   <style>
     .modal-overlay {
@@ -69,9 +71,14 @@
   </style>
     <link rel="stylesheet" href="../css/theme.css" />
   <script src="../js/theme.js"></script>
+  <link rel="stylesheet" href="../css/back-navigation.css">
+  <script src="../js/back-navigation.js" defer></script>
+
+  <!-- Should be loaded last-->
+  <link rel="stylesheet" href="../css/app-sidebar.css">
 </head>
 
-<body>
+<body class="app-sidebar-page">
 
   <!-- CUSTOM MODAL -->
   <div id="customModalOverlay" class="modal-overlay" style="display:none;">
@@ -90,18 +97,18 @@
         <div class="logo">
           <span class="logo-dark">Scientia</span><span class="logo-blue">Forge</span>
         </div>
-
+ 
         <nav class="nav">
           <a class="nav-item" href="dashboard.html" data-label="Dashboard">
             <i data-lucide="layout-dashboard"></i>
             <span>Dashboard</span>
           </a>
-
+ 
           <a class="nav-item" href="CareerDiscovery.html" data-label="Career Discovery">
             <i data-lucide="compass"></i>
             <span>Career Discovery</span>
           </a>
-
+ 
           <a class="nav-item" href="ApplicationTracker.html" data-label="Job Tracker">
             <i data-lucide="briefcase"></i>
             <span>Job Tracker</span>
@@ -111,10 +118,15 @@
             <i data-lucide="file-search"></i>
             <span>CV Analyzer</span>
           </a>
-
+ 
           <a class="nav-item" href="InterviewSimulator.html" data-label="Interview Simulator">
             <i data-lucide="mic"></i>
             <span>Interview Simulator</span>
+          </a>
+
+          <a class="nav-item" href="EnglishCoach.html" data-label="English Coach">
+            <i data-lucide="messages-square"></i>
+            <span>English Coach</span>
           </a>
 
           <a class="nav-item" href="Articulation.html" data-label="Articulation Coach">
@@ -126,39 +138,34 @@
             <i data-lucide="bar-chart-3"></i>
             <span>Skill Gap Analysis</span>
           </a>
-
+ 
           <a class="nav-item" href="CareerPathfinder.html" data-label="Career Pathfinder">
             <i data-lucide="graduation-cap"></i>
             <span>Career Pathfinder</span>
           </a>
-
+ 
           <a class="nav-item" href="StudyHub.html" data-label="Study Hub">
             <i data-lucide="book-open"></i>
             <span>Study Hub</span>
           </a>
-
-          <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
-            <i data-lucide="activity"></i>
-            <span>Progress Tracker</span>
-          </a>
-
+ 
           <a class="nav-item" href="Settings.html" data-label="Settings">
             <i data-lucide="settings"></i>
             <span>Settings</span>
           </a>
-
+ 
           <a class="nav-item" href="Support.html" data-label="Help & Support">
             <i data-lucide="life-buoy"></i>
             <span>Help/Support</span>
           </a>
-
+ 
           <a class="nav-item" href="" data-label="Log Out">
             <i data-lucide="log-out"></i>
             <span>Logout</span>
           </a>
         </nav>
       </div>
-
+ 
       <div class="download-card">
         <div class="download-icon">
           <i data-lucide="smartphone"></i>
@@ -220,6 +227,12 @@
           </div>
         </div>
       </header>
+      <div class="sf-back-container">
+        <button type="button" class="sf-back-btn" aria-label="Go back to previous page">
+          <span aria-hidden="true">←</span> Back
+        </button>
+      </div>
+
 
       <!-- HERO -->
       <section class="hero">
@@ -235,6 +248,7 @@
         </div>
 
         <div class="hero-actions">
+
           <button
             class="btn btn-primary upload-button"
             id="analyzeBtn"
@@ -476,6 +490,7 @@
                 </strong>
               </div>
 
+
               <div class="progress-bar">
                 <div
                   class="progress-fill previous"
@@ -714,6 +729,11 @@
   <script src="../js/planner.js"></script>
   <script src="../js/calendar.js"></script>
   <script src="../js/notifications.js"></script>
+  <script src="../js/supportWidgets.js"></script>
+  <script src="../js/mobile-header.js"></script>
+
+  
+
 
 
   <!-- Background CV analysis (keeps running when you leave this page).
@@ -955,6 +975,7 @@
 
     const link = document.createElement("a");
     link.className = "sf-cvjob__link";
+
     link.href = CONFIG.cvPageUrl;
     link.textContent = "View results";
 
@@ -1195,6 +1216,7 @@
     },
 
     /** The running job, or null. */
+
     getActiveJob: () => activeJob,
   };
 
@@ -1280,47 +1302,48 @@
 
     /* ================= SIDEBAR ================= */
 
-    function openSidebar() {
+    
       elements.sidebar.classList.add("open");
       elements.overlay?.classList.add("visible");
       elements.menuBtn.setAttribute("aria-expanded", "true");
-      document.body.classList.add("no-scroll");
-    }
+      // document.body.classList.add("no-scroll");
 
-    function closeSidebar() {
-      elements.sidebar.classList.remove("open");
-      elements.overlay?.classList.remove("visible");
-      elements.menuBtn.setAttribute("aria-expanded", "false");
-      document.body.classList.remove("no-scroll");
-    }
+    // function openSidebar() {}
 
-    if (elements.menuBtn && elements.sidebar) {
+    // function closeSidebar() {
+    //   elements.sidebar.classList.remove("open");
+    //   elements.overlay?.classList.remove("visible");
+    //   elements.menuBtn.setAttribute("aria-expanded", "false");
+    //   document.body.classList.remove("no-scroll");
+    // }
 
-      elements.menuBtn.addEventListener("click", () => {
-        elements.sidebar.classList.contains("open") ? closeSidebar() : openSidebar();
-      });
+    //  if (elements.menuBtn && elements.sidebar) {
 
-      elements.overlay?.addEventListener("click", closeSidebar);
+    //   elements.menuBtn.addEventListener("click", () => {
+    //     elements.sidebar.classList.contains("open") ? closeSidebar() : openSidebar();
+    //   });
 
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && elements.sidebar.classList.contains("open")) {
-          closeSidebar();
-        }
-      });
+    //   elements.overlay?.addEventListener("click", closeSidebar);
 
-      // close the drawer when a nav link is tapped on mobile
-      elements.sidebar.querySelectorAll(".nav-item").forEach(link => {
-        link.addEventListener("click", () => {
-          if (window.innerWidth <= 768) closeSidebar();
-        });
-      });
+    //   document.addEventListener("keydown", (e) => {
+    //     if (e.key === "Escape" && elements.sidebar.classList.contains("open")) {
+    //       closeSidebar();
+    //     }
+    //   });
 
-      // if the viewport grows back to desktop, reset state
-      window.addEventListener("resize", () => {
-        if (window.innerWidth > 768) closeSidebar();
-      });
+    //   // close the drawer when a nav link is tapped on mobile
+    //   elements.sidebar.querySelectorAll(".nav-item").forEach(link => {
+    //     link.addEventListener("click", () => {
+    //       if (window.innerWidth <= 768) closeSidebar();
+    //     });
+    //   });
 
-    }
+    //   // if the viewport grows back to desktop, reset state
+    //   window.addEventListener("resize", () => {
+    //     if (window.innerWidth > 768) closeSidebar();
+    //   });
+
+    // }
 
     function getAuthToken() {
       return localStorage.getItem("sb-access-token");
@@ -1435,6 +1458,7 @@
 
     function updateScoreBar(textElement, barElement, score) {
       const safeScore = clampScore(score);
+
 
       textElement.textContent = `${safeScore}%`;
       barElement.style.width = `${safeScore}%`;
@@ -1677,6 +1701,7 @@
           return;
         }
 
+
         setLoading(false);
         renderOverallScore(appState.analysis ? appState.analysis.score : 0);
         showModal(`❌ ${error.message}`);
@@ -1882,6 +1907,9 @@ loadUserGreeting();
   </script>
   <script src="../js/auth.js"></script>
   <script src="../js/supportWidgets.js"></script>
+
+  <!-- Must be loaded last --> 
+   <script src="../js/app-sidebar.js"></script>
 </body>
 
 </html>

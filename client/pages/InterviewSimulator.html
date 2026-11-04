@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,9 +15,19 @@
   <link rel="stylesheet" href="../css/InterviewSimulator.css" />
   <link rel="stylesheet" href="../css/InterviewReport.css" />
     <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/mobile-header.css" />
   <script src="../js/theme.js"></script>
+  <link rel="stylesheet" href="../css/back-navigation.css">
+
+  <!-- Should be the last css file to load so that it can override any other styles if needed -->
+  <link rel="stylesheet" href="../css/interview-setup-fixes.css" />
+
+  <script src="../js/back-navigation.js" defer></script>
+
+  <!-- Should be loaded last-->
+  <link rel="stylesheet" href="../css/app-sidebar.css">
 </head>
-<body>
+<body class="interview-simulator-page app-sidebar-page">
 <div class="layout">
 
   <!-- ── Sidebar (unchanged) ─────────────────────────────────────────────── -->
@@ -44,7 +55,7 @@
             <span>Job Tracker</span>
           </a>
  
-          <a class="nav-item" href="cvDashboard.html" data-label="CV Analyzer">
+          <a class="nav-item " href="cvDashboard.html" data-label="CV Analyzer">
             <i data-lucide="file-search"></i>
             <span>CV Analyzer</span>
           </a>
@@ -55,9 +66,9 @@
           </a>
 
           <a class="nav-item" href="EnglishCoach.html" data-label="English Coach">
-  <i data-lucide="messages-square"></i>
-  <span>English Coach</span>
-</a>
+            <i data-lucide="messages-square"></i>
+            <span>English Coach</span>
+          </a>
 
           <a class="nav-item" href="Articulation.html" data-label="Articulation Coach">
             <i data-lucide="audio-waveform"></i>
@@ -77,11 +88,6 @@
           <a class="nav-item" href="StudyHub.html" data-label="Study Hub">
             <i data-lucide="book-open"></i>
             <span>Study Hub</span>
-          </a>
- 
-          <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
-            <i data-lucide="activity"></i>
-            <span>Progress Tracker</span>
           </a>
  
           <a class="nav-item" href="Settings.html" data-label="Settings">
@@ -147,6 +153,12 @@
         </div>
       </div>
     </header>
+      <div class="sf-back-container">
+        <button type="button" class="sf-back-btn" aria-label="Go back to previous page">
+          <span aria-hidden="true">←</span> Back
+        </button>
+      </div>
+
 
     <div class="interview-dashboard">
       <div class="page-header">
@@ -215,6 +227,7 @@
                     min="5"
                     step="1"
                     placeholder="No limit"
+
                   />
                   <button type="button" class="stepper-btn" id="questionCountIncrement" aria-label="Increase number of questions">
                     <i class="fa-solid fa-plus"></i>
@@ -450,6 +463,7 @@
                   <i class="fa-solid fa-stop"></i><span>Stop</span>
                 </button>
               </div>
+
               <textarea id="transcript" rows="6"
                 placeholder="Your spoken or typed answer, or show your working here…"></textarea>
 
@@ -690,6 +704,11 @@
   <script src="../js/planner.js"></script>
   <script src="../js/calendar.js"></script>
   <script src="../js/notifications.js"></script>
+  <script src="../js/supportWidgets.js"></script>
+  <script src="../js/mobile-header.js"></script>
+
+  <!-- Must be loaded last --> 
+   <script src="../js/app-sidebar.js"></script>
 
 </body>
 </html>

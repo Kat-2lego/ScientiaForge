@@ -1246,7 +1246,7 @@
   }
 
   // Exposed for the console and for future pages that reuse the engine.
-  window.SkillForgeDiscovery = { state, api, selectCareer };
+  window.SkillForgeDiscovery = { state, api, selectCareer, announce, openSavedCareer, closeSavedCareersOverlay };
 })();
 
 async function loadUserGreeting() {
@@ -1269,9 +1269,5 @@ async function loadUserGreeting() {
     console.error("Failed to load user:", err);
   }
 }
-window.SkillForgeDiscovery = {
-  state, api, selectCareer, announce,
-  openSavedCareer, closeSavedCareersOverlay
-};
 
 loadUserGreeting();

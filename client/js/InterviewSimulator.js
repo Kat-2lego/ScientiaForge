@@ -1,9 +1,11 @@
 /**
- * InterviewSimulator.js  (upgraded)
+ * InterviewSimulator.js  (upgraded + pause/resume)
  * Integrates:
  *  - AvatarEngine   : canvas-based talking avatar with lipsync + eye contact
  *  - BehaviorAnalyzer: webcam face analysis (eye contact, head tilt, presence)
  *  - ReportGenerator : detailed HTML + PDF report
+ *  - Pause/resume    : interview freezes when the user leaves the page and
+ *                      offers a resume screen when they come back
  */
 
 import { AvatarEngine }                        from "./AvatarEngine.js";
@@ -57,52 +59,52 @@ document.addEventListener("DOMContentLoaded", () => {
   const finalAnswerWrap      = document.getElementById("finalAnswerWrap");
   const finalAnswerInput     = document.getElementById("finalAnswerInput");
 
-    const menuBtn = document.getElementById("menuBtn");
+  const menuBtn = document.getElementById("menuBtn");
   const sidebar = document.getElementById("sidebar");
   const overlay = document.getElementById("sidebarOverlay");
- 
+
   /* ================= SIDEBAR ================= */
- 
+
   function openSidebar() {
     sidebar.classList.add("open");
     overlay?.classList.add("visible");
     menuBtn.setAttribute("aria-expanded", "true");
     document.body.classList.add("no-scroll");
   }
- 
+
   function closeSidebar() {
     sidebar.classList.remove("open");
     overlay?.classList.remove("visible");
     menuBtn.setAttribute("aria-expanded", "false");
     document.body.classList.remove("no-scroll");
   }
- 
+
   if (menuBtn && sidebar) {
- 
+
     menuBtn.addEventListener("click", () => {
       sidebar.classList.contains("open") ? closeSidebar() : openSidebar();
     });
- 
+
     overlay?.addEventListener("click", closeSidebar);
- 
+
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && sidebar.classList.contains("open")) {
         closeSidebar();
       }
     });
- 
+
     // close the drawer when a nav link is tapped on mobile
     sidebar.querySelectorAll(".nav-item").forEach(link => {
       link.addEventListener("click", () => {
         if (window.innerWidth <= 768) closeSidebar();
       });
     });
- 
+
     // if the viewport grows back to desktop, reset state
     window.addEventListener("resize", () => {
       if (window.innerWidth > 768) closeSidebar();
     });
- 
+
   }
 
   // ── State ──────────────────────────────────────────────────────────────────
@@ -124,6 +126,16 @@ document.addEventListener("DOMContentLoaded", () => {
   let isSpeaking       = false;
   let webcamActive     = false;
   let fetchingNextQuestion = false; // guards against duplicate top-up calls
+  let questionToken    = 0;     // invalidates auto-record callbacks from old questions
+  let endTime          = null;  // wall-clock deadline, so the timer survives tab switches
+  let isEnding         = false; // stops endInterview from running twice
+
+  // Pause / resume state
+  const PAUSE_KEY        = "skillforge_paused_interview";
+  const PAUSE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // discard saved sessions after 24h
+  let isPaused      = false;
+  let pausedDraft   = { transcript: "", finalAnswer: "" };
+  let pausedOverlay = null;
 
   let currentPersona = {
     id:    "senior-engineer",
@@ -184,17 +196,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
       await currentAudio.play();
     } catch (err) {
-      console.warn("Edge TTS failed:", err.message);
+      console.warn("TTS failed, using browser voice:", err.message);
       isSpeaking = false;
       fallbackSpeak(text, onEndCallback);
     }
   }
 
+  // Browsers load their voice list asynchronously, so warm it up early.
+  if (window.speechSynthesis) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.addEventListener?.("voiceschanged", () => {
+      window.speechSynthesis.getVoices();
+    });
+  }
+
+  function pickBestBrowserVoice() {
+    const english = window.speechSynthesis.getVoices()
+      .filter(v => v.lang && v.lang.toLowerCase().startsWith("en"));
+    return (
+      english.find(v => /natural/i.test(v.name)) ||
+      english.find(v => /online/i.test(v.name)) ||
+      english.find(v => /google/i.test(v.name)) ||
+      english.find(v => v.lang === "en-ZA") ||
+      english[0] || null
+    );
+  }
+
   function fallbackSpeak(text, onEndCallback = null) {
     if (!window.speechSynthesis) { if (onEndCallback) onEndCallback(); return; }
     window.speechSynthesis.cancel();
-    const u   = new SpeechSynthesisUtterance(text);
-    u.rate    = 0.9; u.pitch = 1.0; u.volume = 1.0;
+    const u = new SpeechSynthesisUtterance(text);
+    const best = pickBestBrowserVoice();
+    if (best) { u.voice = best; u.lang = best.lang; }
+    u.rate = 1.0; u.pitch = 1.0; u.volume = 1.0;
     u.onend   = () => { isSpeaking = false; if (onEndCallback) onEndCallback(); };
     u.onerror = () => { isSpeaking = false; if (onEndCallback) onEndCallback(); };
     window.speechSynthesis.speak(u);
@@ -453,13 +487,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // ── Voice recording (Web Speech API) ──────────────────────────────────────
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  function startRecording() {
+  function startRecording({ auto = false } = {}) {
     if (!SpeechRecognition) {
-      alert("Speech recognition not supported. Please type your answer.");
+      if (!auto) alert("Speech recognition not supported. Please type your answer.");
       return;
     }
+    if (isRecording) return;
+
     stopAudio();
-    finalTranscript = "";
+    // Keep anything already typed instead of wiping it
+    finalTranscript = transcript.value.trim() ? transcript.value.trim() + " " : "";
+
     recognition = new SpeechRecognition();
     recognition.lang           = "en-ZA";
     recognition.continuous     = true;
@@ -475,9 +513,27 @@ document.addEventListener("DOMContentLoaded", () => {
       transcript.value = finalTranscript + interim;
     };
 
-    recognition.onerror = (e) => { console.warn("Speech error:", e.error); stopRecording(); };
-    recognition.onend   = () => { if (isRecording) recognition.start(); };
-    recognition.start();
+    recognition.onerror = (e) => {
+      console.warn("Speech error:", e.error);
+      // Silence and brief interruptions are normal while someone thinks.
+      // Let onend restart it instead of switching the mic off.
+      if (e.error === "no-speech" || e.error === "aborted") return;
+      stopRecording();
+    };
+
+    recognition.onend = () => {
+      if (!isRecording || !recognition) return;
+      try { recognition.start(); }
+      catch (err) { console.warn("Could not restart recognition:", err.message); }
+    };
+
+    try {
+      recognition.start();
+    } catch (err) {
+      console.warn("Could not start recognition:", err.message);
+      recognition = null;
+      return;
+    }
 
     isRecording = true;
     recordBtn.classList.add("recording");
@@ -503,9 +559,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // The server derives the authenticated user from this Bearer token
     // (via requireAuth on /api/interview/start) — it no longer trusts a
-    // user_id sent in the request body. Previously this handler sent no
-    // Authorization header at all, so every request was rejected with
-    // "Not authenticated." before the interview could ever start.
+    // user_id sent in the request body.
     const token = localStorage.getItem("sb-access-token");
 
     if (!token) {
@@ -531,6 +585,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!res.ok) throw new Error(data.error || "Failed to start");
 
       session_id    = data.session_id;
+      clearPausedState(); // a brand-new session replaces any saved paused one
+      isPaused      = false;
       questions     = data.questions;
       answers       = [];
       sessionAnswers= [];
@@ -553,6 +609,7 @@ document.addEventListener("DOMContentLoaded", () => {
       interviewUI.classList.remove("hidden");
       interviewUI.scrollIntoView({ behavior: "smooth" });
 
+      isEnding = false; // new session can end normally
       updateQuestion();
       startTimer();
     } catch (err) {
@@ -565,17 +622,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ── Timer ──────────────────────────────────────────────────────────────────
   // timeLeft is set by the start-interview handler from the server's
-  // (clamped 10-30 min) duration_seconds before this is called.
-  function startTimer() {
-    if (timerInterval) clearInterval(timerInterval);
-    renderTimer();
-    timerInterval = setInterval(() => {
-      timeLeft--;
-      if (timeLeft <= 0) { clearInterval(timerInterval); endInterview(); return; }
-      renderTimer();
-    }, 1000);
-  }
-
+  // (clamped) duration_seconds before this is called. The countdown uses a
+  // wall-clock deadline (endTime) so it stays accurate when the tab is in
+  // the background and the browser throttles setInterval.
   function renderTimer() {
     const m = Math.floor(timeLeft / 60).toString().padStart(2, "0");
     const s = (timeLeft % 60).toString().padStart(2, "0");
@@ -583,13 +632,51 @@ document.addEventListener("DOMContentLoaded", () => {
     timerEl.style.color = timeLeft <= 60 ? "#dc2626" : timeLeft <= 120 ? "#ea580c" : "";
   }
 
+  function tick() {
+    if (isPaused || endTime === null) return;
+    timeLeft = Math.max(0, Math.round((endTime - Date.now()) / 1000));
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      renderTimer();
+      endInterview();
+      return;
+    }
+    renderTimer();
+  }
+
+  function startTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    endTime = Date.now() + timeLeft * 1000;
+    renderTimer();
+    timerInterval = setInterval(tick, 1000);
+  }
+
+  // When the candidate returns to the tab, catch the timer up and make sure
+  // the mic is still listening.
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden || isPaused) return;
+    if (endTime && timerInterval) tick();
+    if (isRecording && recognition) {
+      try { recognition.start(); } catch (_) { /* already running */ }
+    }
+  });
+
   // ── Display & speak question ───────────────────────────────────────────────
   function updateQuestion() {
     if (currentQIndex >= questions.length) return;
     finalTranscript  = "";
     const q          = questions[currentQIndex];
     currentQuestionEl.textContent = q.text;
-    speakText(q.text);
+
+    // Once the interviewer finishes speaking, start the mic automatically.
+    // The token makes sure a callback from an old question can't fire.
+    const myToken = ++questionToken;
+    speakText(q.text, () => {
+      if (myToken !== questionToken) return;                // question already changed
+      if (interviewUI.classList.contains("hidden")) return; // interview not on screen
+      startRecording({ auto: true });
+    });
 
     // Suggested time budget — longer for quant/engineering questions that
     // need real calculation, shorter for icebreaker/soft ones.
@@ -676,6 +763,7 @@ document.addEventListener("DOMContentLoaded", () => {
     submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Evaluating…';
     if (isRecording) stopRecording();
     stopAudio();
+    questionToken++; // cancel any pending auto-record for this question
 
     const q = questions[currentQIndex];
     const finalAnswer = finalAnswerInput && !finalAnswerWrap.classList.contains("hidden")
@@ -706,6 +794,7 @@ document.addEventListener("DOMContentLoaded", () => {
   skipBtn.addEventListener("click", async () => {
     if (isRecording) stopRecording();
     stopAudio();
+    questionToken++; // cancel any pending auto-record for this question
     sessionAnswers.push({ question_id: questions[currentQIndex].id,
       question_text: questions[currentQIndex].text, answer: null, score: null, feedback: null });
     answers.push({ question_id: questions[currentQIndex].id,
@@ -769,12 +858,36 @@ document.addEventListener("DOMContentLoaded", () => {
     return data;
   }
 
-  // ── End Interview ──────────────────────────────────────────────────────────
-  async function endInterview() {
-    if (timerInterval) clearInterval(timerInterval);
+  // ── Dead / expired session handling ────────────────────────────────────────
+  // Called when the server no longer recognises the session (404), e.g. after
+  // a server restart. Clears every trace of it so it cannot be re-saved or
+  // restored, and returns the user to the setup screen.
+  function discardDeadSession() {
+    clearPausedState();
+    hidePausedOverlay();
+    isEnding   = false;
+    isPaused   = false;
+    session_id = null;
+    questionToken++;
+    endTime    = null;
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
     if (isRecording) stopRecording();
     stopAudio();
-    if (!session_id) return;
+    interviewUI.classList.add("hidden");
+    setupPanel.classList.remove("hidden");
+    alert("That interview session has expired, so it was discarded. You can start a new one.");
+  }
+
+  // ── End Interview ──────────────────────────────────────────────────────────
+  async function endInterview() {
+    if (isEnding || !session_id) return;
+    isEnding = true;
+    clearPausedState(); // finished sessions must not be resumable
+    questionToken++;
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    endTime = null;
+    if (isRecording) stopRecording();
+    stopAudio();
 
     try {
       const res  = await fetch("/api/interview/end", {
@@ -782,6 +895,11 @@ document.addEventListener("DOMContentLoaded", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ session_id, answers }),
       });
+
+      // Server doesn't know this session (e.g. it restarted): drop it cleanly
+      // instead of leaving a half-active interview that gets re-saved.
+      if (res.status === 404) { discardDeadSession(); return; }
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
@@ -833,6 +951,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Show the existing rating popup after successful interview completion
       window.SFRating?.afterUse("interview_simulator");
     } catch (err) {
+      isEnding = false; // allow another attempt if ending failed
       alert("Could not end interview: " + err.message);
     }
   }
@@ -842,9 +961,159 @@ document.addEventListener("DOMContentLoaded", () => {
     if (overallEl) overallEl.textContent = data.overallScore ?? "–";
   }
 
+  // ── Pause / resume across page navigation ──────────────────────────────────
+  function isInterviewActive() {
+    return !!session_id && !isEnding && !interviewUI.classList.contains("hidden");
+  }
+
+  // Stops everything that runs "live": timer, mic, audio.
+  function freezeInterview() {
+    if (endTime !== null) {
+      timeLeft = Math.max(0, Math.round((endTime - Date.now()) / 1000));
+    }
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    endTime = null;
+
+    // Capture the draft BEFORE stopping the mic
+    pausedDraft = {
+      transcript:  transcript.value,
+      finalAnswer: finalAnswerInput ? finalAnswerInput.value : "",
+    };
+
+    if (isRecording) stopRecording();
+    stopAudio();
+    questionToken++; // cancel any pending auto-record
+    isPaused = true;
+  }
+
+  function savePausedState() {
+    try {
+      localStorage.setItem(PAUSE_KEY, JSON.stringify({
+        savedAt: Date.now(),
+        session_id, questions, answers, sessionAnswers, currentQIndex,
+        timeLeft, totalDurationSeconds, interviewMinutes, targetQuestionCount,
+        currentType, currentRole, currentPersona,
+        draft: pausedDraft,
+      }));
+    } catch (err) {
+      console.warn("Could not save paused interview:", err.message);
+    }
+  }
+
+  function clearPausedState() {
+    try { localStorage.removeItem(PAUSE_KEY); } catch (_) {}
+  }
+
+  function showPausedOverlay() {
+    if (pausedOverlay) return;
+    const m = Math.floor(timeLeft / 60), s = String(timeLeft % 60).padStart(2, "0");
+
+    pausedOverlay = document.createElement("div");
+    pausedOverlay.style.cssText =
+      "position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.85);" +
+      "display:flex;align-items:center;justify-content:center;padding:16px;";
+    pausedOverlay.innerHTML = `
+      <div style="background:#fff;color:#0f172a;border-radius:16px;padding:32px;
+                  max-width:380px;width:100%;text-align:center;">
+        <h2 style="margin:0 0 8px;">Interview paused</h2>
+        <p style="margin:0 0 20px;">Time remaining: <strong>${m}:${s}</strong></p>
+        <button id="resumeInterviewBtn" style="width:100%;padding:12px;border:0;border-radius:10px;
+                background:#2563eb;color:#fff;font-size:1rem;cursor:pointer;margin-bottom:10px;">
+          <i class="fa-solid fa-play"></i> Resume interview
+        </button>
+        <button id="endPausedBtn" style="width:100%;padding:12px;border:1px solid #cbd5e1;
+                border-radius:10px;background:#fff;font-size:1rem;cursor:pointer;">
+          End now &amp; see feedback
+        </button>
+      </div>`;
+    document.body.appendChild(pausedOverlay);
+
+    pausedOverlay.querySelector("#resumeInterviewBtn").addEventListener("click", resumeInterview);
+    pausedOverlay.querySelector("#endPausedBtn").addEventListener("click", () => {
+      hidePausedOverlay();
+      isPaused = false;
+      clearPausedState();
+      endInterview();
+    });
+  }
+
+  function hidePausedOverlay() {
+    pausedOverlay?.remove();
+    pausedOverlay = null;
+  }
+
+  function resumeInterview() {
+    hidePausedOverlay();
+    clearPausedState();
+    isPaused = false;
+
+    updateQuestion(); // re-reads the question aloud, then auto-starts the mic
+    // updateQuestion() clears the inputs, so put the saved draft back
+    transcript.value = pausedDraft.transcript || "";
+    if (finalAnswerInput) finalAnswerInput.value = pausedDraft.finalAnswer || "";
+    startTimer();     // continues from the saved timeLeft
+  }
+
+  // Fires on sidebar links, back/forward, URL changes and tab close
+  window.addEventListener("pagehide", () => {
+    if (!isInterviewActive() || isPaused) return;
+    freezeInterview();
+    // An interview with no time left is over: never save it as resumable
+    if (timeLeft <= 0) { clearPausedState(); return; }
+    savePausedState();
+  });
+
+  // Page restored from the back/forward cache — it's still frozen, so show the overlay
+  window.addEventListener("pageshow", (e) => {
+    if (e.persisted && isPaused && isInterviewActive()) showPausedOverlay();
+  });
+
+  // Page loaded fresh — restore a saved session if there is one
+  function restorePausedInterview() {
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(PAUSE_KEY)); } catch (_) {}
+    if (!saved || !saved.session_id || !(saved.timeLeft > 0) ||
+        Date.now() - saved.savedAt > PAUSE_MAX_AGE_MS) {
+      clearPausedState();
+      return;
+    }
+
+    session_id           = saved.session_id;
+    questions            = saved.questions || [];
+    answers              = saved.answers || [];
+    sessionAnswers       = saved.sessionAnswers || [];
+    currentQIndex        = saved.currentQIndex || 0;
+    timeLeft             = saved.timeLeft;
+    totalDurationSeconds = saved.totalDurationSeconds;
+    interviewMinutes     = saved.interviewMinutes;
+    targetQuestionCount  = saved.targetQuestionCount;
+    currentType          = saved.currentType;
+    currentRole          = saved.currentRole;
+    currentPersona       = saved.currentPersona;
+    pausedDraft          = saved.draft || pausedDraft;
+    isEnding             = false;
+    isPaused             = true;
+
+    if (avatarEngine) avatarEngine.switchPersona(currentPersona.id);
+    if (interviewerName)  interviewerName.textContent  = currentPersona.name;
+    if (interviewerTitle) interviewerTitle.textContent = currentPersona.title;
+    if (aiLabel)          aiLabel.textContent          = currentPersona.name;
+
+    setupPanel.classList.add("hidden");
+    interviewUI.classList.remove("hidden");
+    currentQuestionEl.textContent = questions[currentQIndex]?.text || "";
+    renderTimer();
+    showPausedOverlay();
+  }
+
+  restorePausedInterview();
+
   // ── Practice Again ─────────────────────────────────────────────────────────
   practiceAgainBtn?.addEventListener("click", () => {
     stopAudio();
+    questionToken++;
+    clearPausedState();
+    isPaused        = false;
     session_id      = null;
     questions       = [];
     answers         = [];

@@ -78,46 +78,19 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   async function handleFollowupAction(applicationId, status, actionsRow) {
-  const buttons = actionsRow.querySelectorAll("button");
-
-  buttons.forEach((button) => {
-    button.disabled = true;
-  });
-
-  try {
-    if (status) {
-      const result = await request(
-        `/applications/${encodeURIComponent(applicationId)}/status`,
-        {
+    actionsRow.querySelectorAll("button").forEach((b) => (b.disabled = true));
+    try {
+      if (status) {
+        await request(`/applications/${applicationId}/status`, {
           method: "PATCH",
           body: JSON.stringify({ status }),
-        }
-      );
-
-      // Notify the Application Command Centre that its data changed.
-      document.dispatchEvent(
-        new CustomEvent("application:updated", {
-          detail: {
-            application: result.application,
-          },
-        })
-      );
-
-      actionsRow.textContent = "Application status updated.";
-    } else {
-      actionsRow.textContent = "Marked as still waiting.";
+        });
+      }
+      actionsRow.textContent = status ? "Updated on your board." : "Thanks, noted.";
+    } catch (error) {
+      actionsRow.textContent = "Couldn't update - try again from the Job Tracker.";
     }
-  } catch (error) {
-    console.error("Follow-up action failed:", error);
-
-    actionsRow.textContent =
-      error.message || "Couldn't update. Please try again.";
-
-    buttons.forEach((button) => {
-      button.disabled = false;
-    });
   }
-}
 
   function renderNotifications(items) {
     list.replaceChildren();

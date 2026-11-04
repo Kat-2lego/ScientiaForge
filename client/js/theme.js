@@ -1,12 +1,13 @@
 /* ==========================================================================
- * SkillForge — theme controller
+ * ScientiaForge — theme controller
  *
  * Loaded in <head> on EVERY page, before the stylesheets paint. It sets
  * data-theme on <html> synchronously so a dark-mode user never sees a white
  * flash while the rest of the page loads.
  *
- * The choice lives in localStorage under "sf-theme", so it survives reloads
- * and applies across every screen. "system" follows the operating system.
+ * First-time users (nothing saved yet) get LIGHT mode. Their choice is saved
+ * in localStorage under "sf-theme" and applies across every screen.
+ * "system" follows the operating system, but only if the user picks it.
  *
  * Public API (used by Settings.html, available anywhere):
  *   SkillForgeTheme.get()          -> "light" | "dark" | "system"
@@ -21,6 +22,7 @@
 
   var STORAGE_KEY = "sf-theme";
   var VALID = ["light", "dark", "system"];
+  var DEFAULT_CHOICE = "light"; // what first-time users see
   var listeners = [];
 
   function systemPrefersDark() {
@@ -33,10 +35,10 @@
   function readStored() {
     try {
       var stored = localStorage.getItem(STORAGE_KEY);
-      return VALID.indexOf(stored) !== -1 ? stored : "system";
+      return VALID.indexOf(stored) !== -1 ? stored : DEFAULT_CHOICE;
     } catch (error) {
-      // Private browsing or storage disabled: fall back to the OS setting.
-      return "system";
+      // Private browsing or storage disabled: use the default.
+      return DEFAULT_CHOICE;
     }
   }
 
@@ -82,7 +84,7 @@
     },
 
     set: function (choice) {
-      if (VALID.indexOf(choice) === -1) choice = "system";
+      if (VALID.indexOf(choice) === -1) choice = DEFAULT_CHOICE;
       current = choice;
       try {
         localStorage.setItem(STORAGE_KEY, choice);
@@ -112,7 +114,15 @@
     notify(apply(current));
   });
 
-  // Following the OS setting means reacting when the OS setting changes.
+  // Back/forward navigation can restore a stale page from the browser cache:
+  // re-read the saved choice so every screen shows the current theme.
+  window.addEventListener("pageshow", function (event) {
+    if (!event.persisted) return;
+    current = readStored();
+    notify(apply(current));
+  });
+
+  // Only react to OS changes if the user chose "system".
   if (window.matchMedia) {
     var query = window.matchMedia("(prefers-color-scheme: dark)");
     var onSystemChange = function () {
@@ -121,7 +131,7 @@
     if (query.addEventListener) {
       query.addEventListener("change", onSystemChange);
     } else if (query.addListener) {
-      query.addListener(onSystemChange);   // older browsers
+      query.addListener(onSystemChange); // older browsers
     }
   }
 

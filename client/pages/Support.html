@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,13 +9,17 @@
     <link rel="stylesheet" href="../css/dashboard.css" />
     <link rel="stylesheet" href="../css/Suport.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-      <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/mobile-header.css">
+
   <script src="../js/theme.js"></script>
+  <link rel="stylesheet" href="../css/back-navigation.css">
+  <script src="../js/back-navigation.js" defer></script>
 
-
-
+  <!-- Should be loaded last-->
+  <link rel="stylesheet" href="../css/app-sidebar.css">
 </head>
-<body>
+<body class="app-sidebar-page">
     
 </body> 
     <div class="layout">
@@ -50,6 +55,11 @@
                     <span>Interview Simulator</span>
                 </a>
 
+                <a class="nav-item" href="EnglishCoach.html" data-label="English Coach">
+                    <i data-lucide="messages-square"></i>
+                    <span>English Coach</span>
+                </a>
+
                 <a class="nav-item" href="Articulation.html" data-label="Articulation Coach">
                   <i data-lucide="audio-waveform"></i>
                   <span>Articulation Coach</span>
@@ -68,11 +78,6 @@
                 <a class="nav-item" href="StudyHub.html" data-label="Study Hub">
                 <i data-lucide="book-open"></i>
                 <span>Study Hub</span>
-                </a>
-
-                <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
-                    <i data-lucide="activity"></i>
-                    <span>Progress Tracker</span>
                 </a>
 
                 <a class="nav-item" href="Settings.html" data-label="Settings">
@@ -138,6 +143,12 @@
                 </div>
                 </div>
             </header>
+      <div class="sf-back-container">
+        <button type="button" class="sf-back-btn" aria-label="Go back to previous page">
+          <span aria-hidden="true">←</span> Back
+        </button>
+      </div>
+
 
             <div class="container" style="padding : 0.7%">
                 <div class="contact-grid">
@@ -397,6 +408,10 @@
     <script src="../js/calendar.js"></script>
     <script src="../js/notifications.js"></script>
     <script src="../js/supportWidgets.js"></script>
+    <script src="../js/mobile-header.js"></script>
+
+    <!-- Must be loaded last --> 
+   <script src="../js/app-sidebar.js"></script>
 
   
 </html>

@@ -175,10 +175,6 @@
     renderBoard();
   }
 
-  document.addEventListener("application:updated", async () => {
-  await loadApplications();
-  await loadInsights();
-});
   async function loadQuota() {
     const strip = $("#quotaStrip");
     if (!strip) return;
