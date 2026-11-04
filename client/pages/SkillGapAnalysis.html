@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,6 +12,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/theme.css" />
   <script src="../js/theme.js"></script>
+  <link rel="stylesheet" href="../css/back-navigation.css">
+  <script src="../js/back-navigation.js" defer></script>
 </head>
 
 <body>
@@ -50,6 +53,11 @@
             <span>Interview Simulator</span>
           </a>
 
+          <a class="nav-item" href="EnglishCoach.html" data-label="English Coach">
+            <i data-lucide="messages-square"></i>
+            <span>English Coach</span>
+          </a>
+
           <a class="nav-item" href="Articulation.html" data-label="Articulation Coach">
             <i data-lucide="audio-waveform"></i>
             <span>Articulation Coach</span>
@@ -68,11 +76,6 @@
           <a class="nav-item" href="StudyHub.html" data-label="Study Hub">
             <i data-lucide="book-open"></i>
             <span>Study Hub</span>
-          </a>
- 
-          <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
-            <i data-lucide="activity"></i>
-            <span>Progress Tracker</span>
           </a>
  
           <a class="nav-item" href="Settings.html" data-label="Settings">
@@ -143,6 +146,13 @@
           </div>
         </div>
       </header>
+      <div class="sf-back-container">
+        <button type="button" class="sf-back-btn" aria-label="Go back to previous page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+          <span>Back</span>
+        </button>
+      </div>
+
     <section class="skill-dashboard">
 
       <div class="skill-dashboard-header">

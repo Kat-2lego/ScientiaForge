@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,6 +16,8 @@
   <link rel="stylesheet" href="../css/ProgressTracker.css" />
     <link rel="stylesheet" href="../css/theme.css" />
   <script src="../js/theme.js"></script>
+  <link rel="stylesheet" href="../css/back-navigation.css">
+  <script src="../js/back-navigation.js" defer></script>
 </head>
 <body>
   <div class="layout">
@@ -35,11 +38,6 @@
           <a class="nav-item" href="CareerDiscovery.html" data-label="Career Discovery">
             <i data-lucide="compass"></i>
             <span>Career Discovery</span>
-          </a>
-
-          <a class="nav-item" href="ApplicationTracker.html" data-label="Job Tracker">
-            <i data-lucide="briefcase"></i>
-            <span>Job Tracker</span>
           </a>
  
           <a class="nav-item" href="cvDashboard.html" data-label="CV Analyzer">
@@ -145,6 +143,12 @@
           </div>
         </div>
       </header>
+      <div class="sf-back-container">
+        <button type="button" class="sf-back-btn" aria-label="Go back to previous page">
+          <span aria-hidden="true">←</span> Back
+        </button>
+      </div>
+
 
       <!-- HERO -->
       <section class="hero">
