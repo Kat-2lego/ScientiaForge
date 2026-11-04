@@ -1,0 +1,181 @@
+/* =========================================================
+   Skill Gap Analysis: responsive layout corrections
+   Sidebar appearance and topbar design remain unchanged.
+========================================================= */
+
+/* Allow the main grid track to shrink safely on desktop. */
+.skill-gap-page .layout {
+  grid-template-columns: 260px minmax(0, 1fr);
+}
+
+.skill-gap-page .main,
+.skill-gap-page .skill-dashboard,
+.skill-gap-page .skill-dashboard-header,
+.skill-gap-page .skill-dashboard-header > div,
+.skill-gap-page .metric-card,
+.skill-gap-page .skill-box,
+.skill-gap-page .roadmap {
+  min-width: 0;
+}
+
+/* Avoid content-based minimum widths expanding grid tracks. */
+.skill-gap-page .skill-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.skill-gap-page .skill-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* Let the heading and filters wrap on smaller laptops. */
+@media (max-width: 1100px) {
+  .skill-gap-page .skill-dashboard-header {
+    flex-wrap: wrap;
+  }
+
+  .skill-gap-page .skill-dashboard-header > .header-selects {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    margin-left: 0;
+    flex-wrap: wrap;
+  }
+
+  .skill-gap-page .header-selects > select {
+    flex: 1 1 200px;
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+/* Tablet content layout. */
+@media (max-width: 900px) {
+  .skill-gap-page .skill-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .skill-gap-page .skill-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Mobile: restore the shared app's single-column layout. */
+@media (max-width: 768px) {
+  .skill-gap-page .layout {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .skill-gap-page .main {
+    padding: 14px;
+  }
+
+  .skill-gap-page .skill-dashboard {
+    width: 100%;
+  }
+
+  .skill-gap-page .skill-dashboard-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .skill-gap-page .skill-dashboard-header > div:first-child {
+    width: 100%;
+  }
+
+  .skill-gap-page .skill-dashboard-header > .header-selects {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    flex: none;
+    width: 100%;
+    margin-left: 0;
+    gap: 10px;
+  }
+
+  .skill-gap-page .header-selects > select {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .skill-gap-page .skill-dashboard-header h1 {
+    margin: 0;
+    font-size: clamp(1.25rem, 5vw, 1.6rem);
+    line-height: 1.3;
+  }
+
+  .skill-gap-page .skill-dashboard-header p {
+    margin: 8px 0 0;
+    line-height: 1.5;
+  }
+
+  .skill-gap-page .skill-dashboard-header h1 svg,
+  .skill-gap-page .skill-box h2 svg,
+  .skill-gap-page .roadmap h2 svg {
+    flex-shrink: 0;
+  }
+
+  /* This must remain after the tablet metric rule. */
+  .skill-gap-page .skill-metrics,
+  .skill-gap-page .skill-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .skill-gap-page .skill-box-header {
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .skill-gap-page .skill-box-header h2 {
+    margin-bottom: 0;
+  }
+
+  /* Replace uneven wrapped-row margins with normal gaps. */
+  .skill-gap-page .skill-list {
+    gap: 12px;
+  }
+
+  .skill-gap-page .skill-item,
+  .skill-gap-page .skill-item:not(:first-child) {
+    min-width: 0;
+    max-width: 100%;
+    margin-left: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .skill-gap-page .skill-item:not(:first-child)::before {
+    display: none;
+  }
+
+  .skill-gap-page .skill-loading {
+    flex-wrap: wrap;
+    text-align: center;
+  }
+
+  .skill-gap-page .step-num {
+    flex: 0 0 30px;
+  }
+
+  .skill-gap-page .road-step > div:last-child {
+    min-width: 0;
+  }
+
+  .skill-gap-page .roadmap,
+  .skill-gap-page .metric-card,
+  .skill-gap-page .skill-box {
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Small phones: match the shared main-container spacing. */
+@media (max-width: 480px) {
+  .skill-gap-page .main {
+    padding: 12px;
+  }
+}

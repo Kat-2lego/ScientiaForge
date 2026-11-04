@@ -12,10 +12,14 @@
   />
   <link rel="stylesheet" href="../css/dashboard.css" />
     <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/mobile-header.css" />
   <script src="../js/theme.js"></script>
 
+  
+  <!-- Should be loaded last-->
+  <link rel="stylesheet" href="../css/app-sidebar.css">
 </head>
-<body>
+<body class="app-sidebar-page">
   <div class="layout">
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
  
@@ -52,9 +56,9 @@
           </a>
 
           <a class="nav-item" href="EnglishCoach.html" data-label="English Coach">
-  <i data-lucide="messages-square"></i>
-  <span>English Coach</span>
-</a>
+            <i data-lucide="messages-square"></i>
+            <span>English Coach</span>
+          </a>
 
           <a class="nav-item" href="Articulation.html" data-label="Articulation Coach">
             <i data-lucide="audio-waveform"></i>
@@ -74,11 +78,6 @@
           <a class="nav-item" href="StudyHub.html" data-label="Study Hub">
             <i data-lucide="book-open"></i>
             <span>Study Hub</span>
-          </a>
- 
-          <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
-            <i data-lucide="activity"></i>
-            <span>Progress Tracker</span>
           </a>
  
           <a class="nav-item" href="Settings.html" data-label="Settings">
@@ -499,6 +498,12 @@
   <script src="../js/planner.js"></script>
   <script src="../js/calendar.js"></script>
   <script src="../js/notifications.js"></script>
+  <script src="../js/supportWidgets.js"></script>
+  <script src="../js/mobile-header.js"></script>
+
+  <!-- Must be loaded last --> 
+   <script src="../js/app-sidebar.js"></script>
+  
 </body>
 </html>
  

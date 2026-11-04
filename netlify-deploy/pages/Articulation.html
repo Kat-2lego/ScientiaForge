@@ -12,9 +12,13 @@
   <link rel="stylesheet" href="../css/dashboard.css" />
   <link rel="stylesheet" href="../css/Articulation.css" />
   <link rel="stylesheet" href="../css/back-navigation.css">
+  <link rel="stylesheet" href="../css/mobile-header.css" />
   <script src="../js/back-navigation.js" defer></script>
+
+  <!-- Should be loaded last-->
+  <link rel="stylesheet" href="../css/app-sidebar.css">
 </head>
-<body>
+<body class="app-sidebar-page">
 <div class="layout">
 
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -51,6 +55,11 @@
           <span>Interview Simulator</span>
         </a>
 
+        <a class="nav-item" href="EnglishCoach.html" data-label="English Coach">
+            <i data-lucide="messages-square"></i>
+            <span>English Coach</span>
+        </a>
+
         <a class="nav-item active" href="Articulation.html" data-label="Articulation Coach" aria-current="page">
           <i data-lucide="audio-waveform"></i>
           <span>Articulation Coach</span>
@@ -69,11 +78,6 @@
         <a class="nav-item" href="StudyHub.html" data-label="Study Hub">
           <i data-lucide="book-open"></i>
           <span>Study Hub</span>
-        </a>
-
-        <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
-          <i data-lucide="activity"></i>
-          <span>Progress Tracker</span>
         </a>
 
         <a class="nav-item" href="Settings.html" data-label="Settings">
@@ -102,6 +106,20 @@
         </button>
       </div>
       <div class="topbar-right">
+
+        <button class="icon-btn planner-btn" id="plannerBtn" aria-label="Open calendar and notifications">
+          <i data-lucide="calendar-days"></i>
+        </button>
+
+        <button class="icon-btn notification-btn" id="notificationBtn" aria-label="Open notifications">
+          <i data-lucide="bell"></i>
+          <span class="notification-badge hidden" id="notificationBadge">0</span>
+        </button>
+
+        <button class="icon-btn" mail-btn id="mailBtn" aria-label="Open mail">
+          <i data-lucide="mail"></i>
+        </button> 
+
         <div class="profile">
           <div class="avatar"></div>
           <div>
@@ -256,11 +274,190 @@
 
       </section>
     </div>
+
+    <!-- PLANNER SLIDE-OVER -->
+      <div class="planner-overlay hidden" id="plannerOverlay">
+        <aside class="planner-panel" role="dialog" aria-modal="true">
+          <header class="planner-header">
+            <h2>Planner</h2>
+            <button class="icon-btn" id="closePlannerBtn" type="button" aria-label="Close planner">
+              <i data-lucide="x"></i>
+            </button>
+          </header>
+
+          <div class="planner-tabs">
+            <button class="planner-tab active" data-tab="calendar" type="button">Calendar</button>
+            <button class="planner-tab" data-tab="notifications" type="button">Notifications</button>
+          </div>
+
+          <section class="planner-content" id="calendarTab">
+            <div class="planner-calendar">
+              <div class="calendar-toolbar">
+                <button
+                  class="icon-btn"
+                  id="previousMonthBtn"
+                  type="button"
+                  aria-label="Previous month"
+                >
+                  ‹
+                </button>
+
+                <h3 id="calendarMonthLabel" aria-live="polite"></h3>
+
+                <button
+                  class="icon-btn"
+                  id="nextMonthBtn"
+                  type="button"
+                  aria-label="Next month"
+                >
+                  ›
+                </button>
+              </div>
+
+              <button class="planner-tab" id="calendarTodayBtn" type="button">
+                Today
+              </button>
+
+              <div class="calendar-weekdays" aria-hidden="true">
+                <span>Mon</span>
+                <span>Tue</span>
+                <span>Wed</span>
+                <span>Thu</span>
+                <span>Fri</span>
+                <span>Sat</span>
+                <span>Sun</span>
+              </div>
+
+              <div
+                class="calendar-days"
+                id="calendarDays"
+                role="group"
+                aria-label="Choose a date"
+              ></div>
+
+              <p id="calendarLoadStatus" role="status"></p>
+
+              <h4 id="selectedDateLabel"></h4>
+              <div id="selectedDateEvents"></div>
+            </div>
+            
+
+            <h3>Your reminders & goals</h3>
+            <div id="plannerEventsList"></div>
+
+            <h3>Add a reminder or goal</h3>
+
+            <form id="plannerEventForm" class="planner-form">
+              <label>
+                Type
+                <select name="type" required>
+                  <option value="reminder">Reminder</option>
+                  <option value="goal">Goal</option>
+                </select>
+              </label>
+
+              <label>
+                Title
+                <input
+                  name="title"
+                  type="text"
+                  maxlength="150"
+                  required
+                  placeholder="What do you want to do?"
+                />
+              </label>
+
+              <label>
+                Description
+                <textarea
+                  name="description"
+                  rows="3"
+                  maxlength="2000"
+                  placeholder="Optional details..."
+                ></textarea>
+              </label>
+
+              <fieldset id="reminderFields" class="planner-fieldset">
+                <legend>Reminder deadline</legend>
+
+                <div class="planner-form-row">
+                  <label>
+                    Due date
+                    <input name="event_date" type="date" required />
+                  </label>
+
+                  <label>
+                    Due time — optional
+                    <input name="event_time" type="time" />
+                  </label>
+                </div>
+              </fieldset>
+
+              <fieldset
+                id="goalFields"
+                class="planner-fieldset"
+                hidden
+                disabled
+              >
+                <legend>Goal schedule</legend>
+
+                <label>
+                  Start date and time
+                  <input name="starts_at" type="datetime-local" />
+                </label>
+
+                <label>
+                  End date and time
+                  <input name="ends_at" type="datetime-local" />
+                </label>
+              </fieldset>
+
+              <label>
+                <span id="notifyFieldLabel">Notify me at — required</span>
+                <input name="remind_at" type="datetime-local" required />
+              </label>
+
+              <small>
+                Times use your device’s local timezone.
+                Date-only reminders become overdue after the due date ends.
+              </small>
+
+              <button class="btn btn-primary" type="submit">
+                Save entry
+              </button>
+            </form>
+
+            <p id="plannerMessage" role="status" aria-live="polite"></p>
+          </section>
+
+          <section class="planner-content hidden" id="notificationsTab">
+            <h3>Notifications</h3>
+
+            <p
+              class="notification-status"
+              id="notificationStatus"
+              role="status"
+              aria-live="polite"
+            ></p>
+
+            <div id="notificationsList"></div>
+          </section>
+        </aside>
+      </div>
   </main>
 </div>
 
 <script>lucide.createIcons();</script>
 <script src="../js/auth.js"></script>
 <script type="module" src="../js/Articulation.js"></script>
+<script src="../js/planner-UI.js"></script>
+<script src="../js/planner.js"></script>
+<script src="../js/calendar.js"></script>
+<script src="../js/notifications.js"></script>
+<script src="../js/supportWidgets.js"></script>
+<script src="../js/mobile-header.js"></script>
+
+<!-- Must be loaded last --> 
+   <script src="../js/app-sidebar.js"></script>
 </body>
 </html>

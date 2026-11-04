@@ -1,0 +1,200 @@
+/* =========================================================
+   Interview Simulator: pre-interview setup only
+   Does not affect #interviewUI, reports, header or sidebar.
+========================================================= */
+
+/* Measure the actual setup area, excluding sidebar/padding. */
+#setupPanel {
+  container-name: interview-setup;
+  container-type: inline-size;
+  min-width: 0;
+}
+
+/* Keep a flexible main column and a bounded summary column. */
+#setupPanel .setup-grid {
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 24px;
+}
+
+#setupPanel .setup-main,
+#setupPanel .setup-card-row,
+#setupPanel .setup-card,
+#setupPanel .setup-summary,
+#setupPanel .preview-card {
+  min-width: 0;
+}
+
+/* Keep the summary sticky when displayed beside the setup cards. */
+#setupPanel .setup-summary {
+  position: sticky;
+  top: 24px;
+  align-self: start;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+}
+
+/* Avoid a separately height-constrained summary card. */
+#setupPanel .preview-card {
+  height: auto;
+  max-height: none;
+}
+
+/*
+   The duration/question cards need more room than they
+   currently receive inside the main column.
+   Stack them rather than squeezing two controls side by side.
+*/
+#setupPanel .setup-card-row {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Let the question badge wrap instead of forcing overflow. */
+#setupPanel .question-count-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+#setupPanel .question-count-control input[type="number"] {
+  flex: 0 1 100px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+#setupPanel .question-count-value {
+  max-width: 100%;
+  white-space: normal;
+}
+
+/* Allow the slider to shrink inside its flex row. */
+#setupPanel .duration-control {
+  min-width: 0;
+}
+
+#setupPanel .duration-control input[type="range"] {
+  flex: 1 1 0;
+  min-width: 0;
+  width: 100%;
+}
+
+#setupPanel .duration-value {
+  flex-shrink: 0;
+}
+
+/* Prevent long labels and selected roles forcing card width. */
+#setupPanel .setup-card h3,
+#setupPanel .setup-card > label {
+  flex-wrap: wrap;
+}
+
+#setupPanel .summary-label,
+#setupPanel .summary-row strong,
+#setupPanel .persona-preview-text,
+#setupPanel .role-selected-chip {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+#setupPanel .role-selected-chip {
+  max-width: 100%;
+}
+
+#setupPanel .role-selected-chip button {
+  flex-shrink: 0;
+}
+
+/* Safe default: two persona cards per row. */
+#setupPanel .persona-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#setupPanel .interview-types {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+#setupPanel .interview-type,
+#setupPanel .persona-card {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Remove the extra horizontal inset inside .main.
+   Preserve existing top/bottom spacing. */
+.main > .interview-dashboard {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Narrow content area: summary moves below the setup cards. */
+@container interview-setup (max-width: 1000px) {
+  #setupPanel .setup-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #setupPanel .setup-summary {
+    position: static;
+    top: auto;
+  }
+}
+
+/* Compact setup area: reduce padding and simplify choices. */
+@container interview-setup (max-width: 600px) {
+  #setupPanel .setup-grid {
+    gap: 18px;
+  }
+
+  #setupPanel .setup-card {
+    padding: 20px;
+  }
+
+  #setupPanel .preview-card {
+    padding: 22px;
+  }
+
+  #setupPanel .interview-types {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #setupPanel .persona-preview {
+    flex-wrap: wrap;
+  }
+}
+
+@container interview-setup (max-width: 400px) {
+  #setupPanel .persona-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #setupPanel .question-count-value {
+    flex-basis: 100%;
+    margin-left: 0;
+    text-align: center;
+  }
+}
+
+/* Fallback for browsers without container-query support. */
+@supports not (container-type: inline-size) {
+  @media (max-width: 1400px) {
+    #setupPanel .setup-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    #setupPanel .setup-summary {
+        position: static;
+        top: auto;
+    }
+  }
+
+  @media (max-width: 768px) {
+    #setupPanel .setup-card {
+      padding: 20px;
+    }
+
+    #setupPanel .interview-types,
+    #setupPanel .persona-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}

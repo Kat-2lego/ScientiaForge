@@ -8,15 +8,21 @@
 
   <link rel="stylesheet" href="../css/dashboard.css">
 
-  <link rel="stylesheet" href="../css/skillGapAnalysis.css">
+  <link rel="stylesheet" href="../css/SkillGapAnalysis.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/theme.css" />
   <script src="../js/theme.js"></script>
   <link rel="stylesheet" href="../css/back-navigation.css">
+  <link rel="stylesheet" href="../css/mobile-header.css" />
+
+  <!-- Must be loaded after the other CSS files-->
+   <link rel="stylesheet" href="../css/skill-gap-responsive.css">
+   <!-- Should be loaded last-->
+  <link rel="stylesheet" href="../css/app-sidebar.css">
   <script src="../js/back-navigation.js" defer></script>
 </head>
 
-<body>
+<body class="skill-gap-page app-sidebar-page">
 
   <div class="layout">
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -53,6 +59,11 @@
             <span>Interview Simulator</span>
           </a>
 
+          <a class="nav-item" href="EnglishCoach.html" data-label="English Coach">
+            <i data-lucide="messages-square"></i>
+            <span>English Coach</span>
+          </a>
+
           <a class="nav-item" href="Articulation.html" data-label="Articulation Coach">
             <i data-lucide="audio-waveform"></i>
             <span>Articulation Coach</span>
@@ -71,11 +82,6 @@
           <a class="nav-item" href="StudyHub.html" data-label="Study Hub">
             <i data-lucide="book-open"></i>
             <span>Study Hub</span>
-          </a>
- 
-          <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
-            <i data-lucide="activity"></i>
-            <span>Progress Tracker</span>
           </a>
  
           <a class="nav-item" href="Settings.html" data-label="Settings">
@@ -530,6 +536,11 @@ lucide.createIcons();
 <script src="../js/planner.js"></script>
 <script src="../js/calendar.js"></script>
 <script src="../js/notifications.js"></script>
+<script src="../js/supportWidgets.js"></script>
+<script src="../js/mobile-header.js"></script>
+
+<!-- Must be loaded last --> 
+   <script src="../js/app-sidebar.js"></script>
 
 
 </body>

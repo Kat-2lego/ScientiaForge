@@ -13,8 +13,12 @@
   <script src="../js/theme.js"></script>
   <link rel="stylesheet" href="../css/back-navigation.css">
   <script src="../js/back-navigation.js" defer></script>
+  <link rel="stylesheet" href="../css/mobile-header.css" />
+
+  <!-- Should be loaded last-->
+  <link rel="stylesheet" href="../css/app-sidebar.css">
 </head>
-<body>
+<body class="app-sidebar-page">
 
     <div class="app-layout">
         
@@ -50,6 +54,11 @@
             <span>Interview Simulator</span>
           </a>
 
+          <a class="nav-item" href="EnglishCoach.html" data-label="English Coach">
+            <i data-lucide="messages-square"></i>
+            <span>English Coach</span>
+          </a>
+
           <a class="nav-item" href="Articulation.html" data-label="Articulation Coach">
             <i data-lucide="audio-waveform"></i>
             <span>Articulation Coach</span>
@@ -70,25 +79,20 @@
             <span>Study Hub</span>
             </a>
 
-          <a class="nav-item" href="ProgressTracker.html" data-label="Progress Tracker">
-            <i data-lucide="activity"></i>
-            <span>Progress Tracker</span>
-          </a>
+            <a class="nav-item active" href="../pages/Settings.html" data-label="Settings">
+                <i data-lucide="settings"></i>
+                <span>Settings</span>
+            </a>
 
-          <a class="nav-item active" href="../pages/Settings.html" data-label="Settings">
-            <i data-lucide="settings"></i>
-            <span>Settings</span>
-          </a>
+            <a class="nav-item" href="Support.html" data-label="Help & Support">
+                <i data-lucide="life-buoy"></i>
+                <span>Help/Support</span>
+            </a>
 
-          <a class="nav-item" href="Support.html" data-label="Help & Support">
-            <i data-lucide="life-buoy"></i>
-            <span>Help/Support</span>
-          </a>
-
-          <a class="nav-item" href="" data-label="Log Out">
-            <i data-lucide="log-out"></i>
-            <span>Logout</span>
-          </a>
+            <a class="nav-item" href="" data-label="Log Out">
+                <i data-lucide="log-out"></i>
+                <span>Logout</span>
+            </a>
         </nav>
       </div>
 
@@ -324,11 +328,13 @@
                                 <h4>Documentation</h4>
                                 <p>Read detailed guides.</p>
                             </div>
-                            <div class="support-card">
+
+                            <div class="support-card" id="contactUsBtn">
                                 <div class="support-icon"><i data-lucide="mail"></i></div>
                                 <h4>Contact Us</h4>
                                 <p>Submit a support ticket.</p>
                             </div>
+
                             <div class="support-card">
                                 <div class="support-icon"><i data-lucide="message-circle"></i></div>
                                 <h4>Live Chat</h4>
@@ -428,5 +434,9 @@
     </script>
     <script src="../js/settings.js"></script>
     <script src="../js/auth.js"></script>
+    <script src="../js/mobile-header.js"></script>
+
+    <!-- Must be loaded last --> 
+   <script src="../js/app-sidebar.js"></script>
 </body>
 </html>
