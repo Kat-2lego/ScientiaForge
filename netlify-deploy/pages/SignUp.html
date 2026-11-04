@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,14 +9,29 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="../auth/signupUser.js" defer></script>
 </head>
-<body>
 
+<body>
+    <div id="accountDeletedNotice" class="account-deleted-notice" role="status" hidden>
+        <span class="notice-icon">✓</span>
+
+        <div>
+            <strong>Account successfully deleted</strong>
+            <p>
+                Your ScientiaForge account has been deleted.
+                You're welcome to join us again anytime.
+            </p>
+        </div>
+
+        <button type="button" id="dismissDeletionNotice" aria-label="Dismiss notification">
+            &times;
+        </button>
+    </div>
     <div class="master-viewport">
         <div class="chassis-outer-shell">
             <div class="chassis-inner-recess">
-                
+
                 <main class="interface-deck">
-                    
+
                     <section class="sector sector-left">
                         <div class="brand-header">
                             <h1 class="brand-name">Scientia<span>Forge</span></h1>
@@ -29,7 +45,7 @@
 
                         <div class="form-viewport">
                             <form class="cyber-form-strip" id="onboardingForm" onsubmit="event.preventDefault();">
-                                
+
                                 <div class="form-step-panel active-panel" id="panel-1">
                                     <div class="auth-titles">
                                         <h2>Create your account</h2>
@@ -38,18 +54,21 @@
 
                                     <div class="field-wrapper email">
                                         <p>Full Names:</p>
-                                        <input type="text" id="sf-names" placeholder="Enter full names" class="input" required />
+                                        <input type="text" id="sf-names" placeholder="Enter full names" class="input"
+                                            required />
                                     </div>
 
                                     <div class="field-wrapper email">
                                         <p>Email:</p>
-                                        <input type="email" id="sf-email" placeholder="Email address" class="input" required />
+                                        <input type="email" id="sf-email" placeholder="Email address" class="input"
+                                            required />
                                     </div>
 
                                     <div class="field-wrapper pass" style="position: relative;">
                                         <p>Password:</p>
                                         <input type="password" id="sf-pass" placeholder="••••" class="input" required />
-                                        <button type="button" id="sf-eye-icon-btn" onclick="togglePw()" style="position: absolute; right: 15px; bottom: 12px; background: none; border: none; cursor: pointer; color: #64748b;">
+                                        <button type="button" id="sf-eye-icon-btn" onclick="togglePw()"
+                                            style="position: absolute; right: 15px; bottom: 12px; background: none; border: none; cursor: pointer; color: #64748b;">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
@@ -60,7 +79,8 @@
 
                                     <div class="auth-switch">
                                         <div class="divider-line"><span>OR</span></div>
-                                        <p>Already have an account? <a href="LogIn.html" class="link-forgot">Login</a></p>
+                                        <p>Already have an account? <a href="LogIn.html" class="link-forgot">Login</a>
+                                        </p>
                                     </div>
                                 </div>
 
@@ -72,7 +92,8 @@
 
                                     <div class="field-wrapper">
                                         <p>Target Industry:</p>
-                                        <select id="sf-industry" class="input select-input" onchange="handleIndustryChange()">
+                                        <select id="sf-industry" class="input select-input"
+                                            onchange="handleIndustryChange()">
                                             <option value="" disabled selected>Select an industry...</option>
                                             <option value="IT">Technology & IT</option>
                                             <option value="RealEstate">Real Estate & Property</option>
@@ -85,7 +106,7 @@
                                             <option value="Entrepreneurship">Entrepreneurship & Startups</option>
                                             <option value="Agriculture">Agriculture & Farming</option>
                                             <option value="Hospitality">Hospitality & Tourism</option>
-                                            <option value="Marketing">Media, Marketing & Communications</option>  
+                                            <option value="Marketing">Media, Marketing & Communications</option>
                                             <option value="Management">Project & Product Management</option>
                                             <option value="Sales">Sales & Customer Success</option>
                                             <option value="Other">Other...</option>
@@ -94,7 +115,8 @@
 
                                     <div class="field-wrapper hidden-element" id="custom-industry-wrapper">
                                         <p>Specify Industry:</p>
-                                        <input type="text" id="sf-custom-industry" placeholder="Type your industry track" class="input" />
+                                        <input type="text" id="sf-custom-industry"
+                                            placeholder="Type your industry track" class="input" />
                                     </div>
 
                                     <div class="field-wrapper">
@@ -118,7 +140,8 @@
 
                                     <div class="step-navigation-actions">
                                         <button type="button" class="back-step-btn" onclick="goToStep(1)">Back</button>
-                                        <button type="button" class="secure-submit next-step-btn" onclick="goToStep(3)">Next</button>
+                                        <button type="button" class="secure-submit next-step-btn"
+                                            onclick="goToStep(3)">Next</button>
                                     </div>
                                 </div>
 
@@ -131,16 +154,19 @@
                                     <div class="field-wrapper">
                                         <p>Suggested Skill Chips (Click to select):</p>
                                         <div id="suggested-chips-container" class="chips-flex-wrapper">
-                                            </div>
+                                        </div>
                                     </div>
 
                                     <div class="field-wrapper">
                                         <p>Your Selected Track Skills:</p>
                                         <div class="tags-input-master-container">
-                                            <div id="selected-tags-wrapper" class="chips-flex-wrapper dynamic-selections">
-                                                </div>
+                                            <div id="selected-tags-wrapper"
+                                                class="chips-flex-wrapper dynamic-selections">
+                                            </div>
                                             <div class="autocomplete-inline-wrapper">
-                                                <input type="text" id="sf-skills-autocomplete" placeholder="Type skill and press Enter..." class="input chip-input-field" />
+                                                <input type="text" id="sf-skills-autocomplete"
+                                                    placeholder="Type skill and press Enter..."
+                                                    class="input chip-input-field" />
                                             </div>
                                         </div>
                                     </div>
@@ -163,7 +189,8 @@
 
                                     <div class="field-wrapper">
                                         <p>Location (optional):</p>
-                                        <input type="text" id="sf-location" placeholder="e.g. Johannesburg, Gauteng" class="input" />
+                                        <input type="text" id="sf-location" placeholder="e.g. Johannesburg, Gauteng"
+                                            class="input" />
                                     </div>
 
                                     <div class="field-wrapper">
@@ -180,9 +207,10 @@
 
                                     <div class="field-wrapper">
                                         <p>LinkedIn Profile URL (optional):</p>
-                                        <input type="text" id="sf-linkedin" placeholder="https://linkedin.com/in/..." class="input" />
+                                        <input type="text" id="sf-linkedin" placeholder="https://linkedin.com/in/..."
+                                            class="input" />
                                     </div>
-                                                                        <div class="field-wrapper">
+                                    <div class="field-wrapper">
                                         <p>Age Group (optional):</p>
                                         <select id="sf-age-bracket" class="input select-input">
                                             <option value="" selected>Prefer not to say</option>
@@ -206,7 +234,8 @@
 
                                     <div class="step-navigation-actions">
                                         <button type="button" class="back-step-btn" onclick="goToStep(2)">Back</button>
-                                        <button type="button" class="secure-submit final-submit-btn" onclick="handleSignUp()">
+                                        <button type="button" class="secure-submit final-submit-btn"
+                                            onclick="handleSignUp()">
                                             <span class="btn-inner-text">Sign Up</span>
                                             <div class="btn-lighting-overlay"></div>
                                         </button>
@@ -223,7 +252,11 @@
 
                     <section class="sector sector-right">
                         <div class="welcome-copy">
-                            <h3><p style="color: #000; font-weight: bold; margin-bottom: 5px;">Welcome To ScientiaForge!</p>Please sign up for your<br><span class="navy">Skill</span><span class="cyan">Forge</span> account.</h3>
+                            <h3>
+                                <p style="color: #000; font-weight: bold; margin-bottom: 5px;">Welcome To ScientiaForge!
+                                </p>Please sign up for your<br><span class="navy">Skill</span><span
+                                    class="cyan">Forge</span> account.
+                            </h3>
                             <p class="tagline">Forge Your Future. Master Your Career.</p>
                         </div>
 
@@ -241,4 +274,5 @@
         </footer>
     </div>
 </body>
+
 </html>
