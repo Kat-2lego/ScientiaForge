@@ -1269,9 +1269,5 @@ async function loadUserGreeting() {
     console.error("Failed to load user:", err);
   }
 }
-window.SkillForgeDiscovery = {
-  state, api, selectCareer, announce,
-  openSavedCareer, closeSavedCareersOverlay
-};
 
 loadUserGreeting();

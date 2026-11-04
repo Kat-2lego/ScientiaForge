@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScientiaForge Admin — Support &amp; Feedback</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/admin.css" />
+  <link rel="stylesheet" href="../css/adminSupport.css" />
+  <link rel="stylesheet" href="../css/theme.css" />
+  <script src="../js/theme.js"></script>
+</head>
+<body class="admin-auth-pending">
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div>
+        <div class="logo">
+          <span class="logo-dark">Scientia</span><span class="logo-blue">Forge</span>
+        </div>
+
+                <nav class="nav">
+          <a class="nav-item active" href="Admin.html" data-label="Dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+
+          <a class="nav-item" href="AdminUsers.html" data-label="Users">
+            <i data-lucide="users"></i>
+            <span>Users</span>
+          </a>
+
+          <a class="nav-item" href="AdminSupport.html" data-label="Support & Feedback">
+            <i data-lucide="messages-square"></i>
+            <span>Support &amp; Feedback</span>
+          </a>
+
+          <a class="nav-item" href="AdminAds.html" data-label="Advertisements">
+            <i data-lucide="megaphone"></i>
+            <span>Advertisements</span>
+          </a>
+
+          <a class="nav-item" href="AdminSettings.html" data-label="Settings">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+          </a>
+
+          <a class="nav-item" href="Dashboard.html" data-label="Back to App">
+            <i data-lucide="arrow-left-circle"></i>
+            <span>Back to App</span>
+          </a>
+
+          <a class="nav-item" href="" data-label="Log Out">
+            <i data-lucide="log-out"></i>
+            <span>Logout</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="download-card">
+        <div class="download-icon"><i data-lucide="shield"></i></div>
+        <h3>You're in Admin Mode</h3>
+        <p>Actions here affect real user accounts.</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+            <i data-lucide="menu"></i>
+          </button>
+          <div class="admin-pill"><i data-lucide="shield-check"></i>Admin Panel</div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="profile">
+            <div class="avatar"></div>
+            <div>
+              <div class="profile-name" data-admin-name>&hellip;</div>
+              <div class="profile-email" data-admin-email>&hellip;</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="admin-header">
+        <div>
+          <h1><i data-lucide="messages-square"></i> Support &amp; Feedback</h1>
+          <p>Reply to what users send from Help &amp; Support, and see how they rate each feature.</p>
+        </div>
+      </section>
+
+      <div class="sp-tabs" role="tablist">
+        <button class="sp-tab active" role="tab" aria-selected="true" data-tab="inbox" type="button">
+          Inbox <span class="sp-badge" id="inboxBadge" hidden></span>
+        </button>
+        <button class="sp-tab" role="tab" aria-selected="false" data-tab="ratings" type="button">Ratings</button>
+      </div>
+
+      <!-- ===================== INBOX ===================== -->
+      <section id="tabInbox">
+        <div class="sp-categories" id="categoryTiles" aria-label="Filter by category">
+          <div class="table-empty">Loading&hellip;</div>
+        </div>
+
+        <div class="sp-inbox">
+          <div class="panel sp-list-pane">
+            <div class="table-toolbar">
+              <label class="table-search">
+                <i data-lucide="search"></i>
+                <input type="text" id="threadSearch" placeholder="Search by email or subject&hellip;" autocomplete="off" />
+              </label>
+              <select class="table-filter-select" id="statusFilter" aria-label="Filter by status">
+                <option value="">All statuses</option>
+                <option value="open">Needs reply</option>
+                <option value="answered">Answered</option>
+                <option value="closed">Closed</option>
+              </select>
+            </div>
+
+            <div class="sp-thread-list" id="threadList">
+              <div class="table-empty">Loading&hellip;</div>
+            </div>
+
+            <div class="pagination">
+              <span class="pagination-info" id="threadPageInfo"></span>
+              <div class="pagination-controls">
+                <button id="threadPrev" disabled aria-label="Previous page"><i data-lucide="chevron-left"></i></button>
+                <button id="threadNext" disabled aria-label="Next page"><i data-lucide="chevron-right"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel sp-chat-pane" id="chatPane">
+            <div class="sp-chat-empty" id="chatEmpty">
+              <i data-lucide="messages-square"></i>
+              <p>Pick a conversation to read it and reply.</p>
+            </div>
+
+            <div class="sp-chat-body" id="chatBody" hidden>
+              <div class="sp-chat-head" id="chatHead"></div>
+              <div class="sp-chat-messages" id="chatMessages" aria-live="polite"></div>
+              <div class="sp-chat-composer">
+                <textarea id="replyInput" rows="3" maxlength="4000" placeholder="Write a reply. Ctrl+Enter sends."></textarea>
+                <div class="sp-composer-row">
+                  <span class="sp-hint">Users see your reply as &ldquo;Support Team&rdquo;.</span>
+                  <button id="replySend" class="btn-chip promote" type="button">Send reply</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== RATINGS ===================== -->
+      <section id="tabRatings" hidden>
+        <section class="date-range-bar">
+          <div class="date-range-presets" id="ratingRangePresets">
+            <button data-days="7" type="button">7d</button>
+            <button data-days="30" type="button" class="active">30d</button>
+            <button data-days="90" type="button">90d</button>
+          </div>
+          <span class="date-range-label" id="ratingRangeLabel"></span>
+        </section>
+
+        <section class="kpi-grid">
+          <article class="stat-card kpi-card">
+            <div class="stat-head">
+              <div class="stat-icon orange"><i data-lucide="star"></i></div>
+              <h3>Average rating</h3>
+            </div>
+            <div class="stat-value-row"><div class="stat-value" id="kpiAvgRating">&mdash;</div></div>
+            <span class="stat-delta neutral sp-stars" id="kpiAvgStars"></span>
+          </article>
+
+          <article class="stat-card kpi-card">
+            <div class="stat-head">
+              <div class="stat-icon blue"><i data-lucide="message-square-text"></i></div>
+              <h3>Ratings received</h3>
+            </div>
+            <div class="stat-value-row"><div class="stat-value" id="kpiRatingTotal">0</div></div>
+            <span class="stat-delta neutral">In the selected range</span>
+          </article>
+
+          <article class="stat-card kpi-card">
+            <div class="stat-head">
+              <div class="stat-icon green"><i data-lucide="mouse-pointer-click"></i></div>
+              <h3>Response rate</h3>
+            </div>
+            <div class="stat-value-row"><div class="stat-value" id="kpiResponseRate">&mdash;</div></div>
+            <span class="stat-delta neutral" id="kpiResponseSub">Prompts answered</span>
+          </article>
+
+          <article class="stat-card kpi-card">
+            <div class="stat-head">
+              <div class="stat-icon soft-green"><i data-lucide="triangle-alert"></i></div>
+              <h3>Low ratings</h3>
+            </div>
+            <div class="stat-value-row"><div class="stat-value" id="kpiLowRatings">0</div></div>
+            <span class="stat-delta neutral">1 and 2 stars</span>
+          </article>
+        </section>
+
+        <section class="chart-grid">
+          <div class="chart-panel">
+            <div class="chart-panel-head"><h3>Rating distribution</h3><span>Selected range</span></div>
+            <div class="chart-canvas-wrap"><canvas id="ratingDistChart"></canvas></div>
+          </div>
+          <div class="chart-panel">
+            <div class="chart-panel-head"><h3>Average rating over time</h3><span>Selected range</span></div>
+            <div class="chart-canvas-wrap"><canvas id="ratingTrendChart"></canvas></div>
+          </div>
+        </section>
+
+        <section class="chart-grid">
+          <div class="chart-panel">
+            <div class="chart-panel-head"><h3>Rating by feature</h3><span>Selected range</span></div>
+            <div class="chart-canvas-wrap"><canvas id="ratingFeatureChart"></canvas></div>
+          </div>
+
+          <div class="panel">
+            <h2>Recent ratings</h2>
+            <div class="table-toolbar">
+              <select class="table-filter-select" id="ratingFeatureFilter" aria-label="Filter by feature">
+                <option value="">All features</option>
+              </select>
+              <select class="table-filter-select" id="ratingValueFilter" aria-label="Filter by stars">
+                <option value="">All ratings</option>
+                <option value="5">5 stars</option>
+                <option value="4">4 stars</option>
+                <option value="3">3 stars</option>
+                <option value="2">2 stars</option>
+                <option value="1">1 star</option>
+              </select>
+              <label class="sp-check">
+                <input type="checkbox" id="ratingCommentsOnly" /> Comments only
+              </label>
+            </div>
+
+            <div id="ratingList"><div class="table-empty">Loading&hellip;</div></div>
+
+            <div class="pagination">
+              <span class="pagination-info" id="ratingPageInfo"></span>
+              <div class="pagination-controls">
+                <button id="ratingPrev" disabled aria-label="Previous page"><i data-lucide="chevron-left"></i></button>
+                <button id="ratingNext" disabled aria-label="Next page"><i data-lucide="chevron-right"></i></button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div id="toastHost"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../js/adminGuard.js"></script>
+  <script src="../js/adminSupport.js"></script>
+  <script src="../js/auth.js"></script>
+</body>
+</html>

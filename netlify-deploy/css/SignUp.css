@@ -500,3 +500,8 @@ button, input, select { font: inherit; }
   }
   .sample-track i { transform: none; }
 }
+
+.badge.standard {
+    background-color: #e8edf3;
+    color: #475569;
+}
