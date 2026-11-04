@@ -1,9 +1,13 @@
 // Get access_token from URL hash (Supabase puts it there after clicking the reset link)
 const params = new URLSearchParams(window.location.hash.substring(1));
+
 const access_token = params.get('access_token');
+const refresh_token = params.get('refresh_token');
+const token_type = params.get('token_type')
+const recoveryType = params.get('type');
 
 // If no token found, the user shouldn't be on this page
-if (!access_token) {
+if (!access_token || !refresh_token || token_type !== 'bearer' || recoveryType !== 'recovery') {
     alert('Invalid or expired reset link. Please request a new one.');
     window.location.href = '/forgot-password';
 }
@@ -81,7 +85,8 @@ async function handleReset() {
         const response = await fetch('/api/auth/reset-password', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ access_token, new_password: newPassword })
+            body: JSON.stringify({ access_token, refresh_token,
+            new_password: newPassword })
         });
 
         const data = await response.json();
