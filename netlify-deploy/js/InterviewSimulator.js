@@ -202,11 +202,33 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Browsers load their voice list asynchronously, so warm it up early.
+  if (window.speechSynthesis) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.addEventListener?.("voiceschanged", () => {
+      window.speechSynthesis.getVoices();
+    });
+  }
+
+  function pickBestBrowserVoice() {
+    const english = window.speechSynthesis.getVoices()
+      .filter(v => v.lang && v.lang.toLowerCase().startsWith("en"));
+    return (
+      english.find(v => /natural/i.test(v.name)) ||
+      english.find(v => /online/i.test(v.name)) ||
+      english.find(v => /google/i.test(v.name)) ||
+      english.find(v => v.lang === "en-ZA") ||
+      english[0] || null
+    );
+  }
+
   function fallbackSpeak(text, onEndCallback = null) {
     if (!window.speechSynthesis) { if (onEndCallback) onEndCallback(); return; }
     window.speechSynthesis.cancel();
-    const u   = new SpeechSynthesisUtterance(text);
-    u.rate    = 0.9; u.pitch = 1.0; u.volume = 1.0;
+    const u = new SpeechSynthesisUtterance(text);
+    const best = pickBestBrowserVoice();
+    if (best) { u.voice = best; u.lang = best.lang; }
+    u.rate = 1.0; u.pitch = 1.0; u.volume = 1.0;
     u.onend   = () => { isSpeaking = false; if (onEndCallback) onEndCallback(); };
     u.onerror = () => { isSpeaking = false; if (onEndCallback) onEndCallback(); };
     window.speechSynthesis.speak(u);
@@ -836,6 +858,26 @@ document.addEventListener("DOMContentLoaded", () => {
     return data;
   }
 
+  // ── Dead / expired session handling ────────────────────────────────────────
+  // Called when the server no longer recognises the session (404), e.g. after
+  // a server restart. Clears every trace of it so it cannot be re-saved or
+  // restored, and returns the user to the setup screen.
+  function discardDeadSession() {
+    clearPausedState();
+    hidePausedOverlay();
+    isEnding   = false;
+    isPaused   = false;
+    session_id = null;
+    questionToken++;
+    endTime    = null;
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    if (isRecording) stopRecording();
+    stopAudio();
+    interviewUI.classList.add("hidden");
+    setupPanel.classList.remove("hidden");
+    alert("That interview session has expired, so it was discarded. You can start a new one.");
+  }
+
   // ── End Interview ──────────────────────────────────────────────────────────
   async function endInterview() {
     if (isEnding || !session_id) return;
@@ -853,6 +895,11 @@ document.addEventListener("DOMContentLoaded", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ session_id, answers }),
       });
+
+      // Server doesn't know this session (e.g. it restarted): drop it cleanly
+      // instead of leaving a half-active interview that gets re-saved.
+      if (res.status === 404) { discardDeadSession(); return; }
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
@@ -1008,6 +1055,8 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("pagehide", () => {
     if (!isInterviewActive() || isPaused) return;
     freezeInterview();
+    // An interview with no time left is over: never save it as resumable
+    if (timeLeft <= 0) { clearPausedState(); return; }
     savePausedState();
   });
 
@@ -1020,7 +1069,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function restorePausedInterview() {
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem(PAUSE_KEY)); } catch (_) {}
-    if (!saved || !saved.session_id || Date.now() - saved.savedAt > PAUSE_MAX_AGE_MS) {
+    if (!saved || !saved.session_id || !(saved.timeLeft > 0) ||
+        Date.now() - saved.savedAt > PAUSE_MAX_AGE_MS) {
       clearPausedState();
       return;
     }

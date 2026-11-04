@@ -495,11 +495,35 @@ app.get(
 
 /* =========================================================
    TEXT-TO-SPEECH (Groq Orpheus, one distinct voice per persona)
+   Replace your whole existing TTS section with this file's contents.
+
+   .env keys (add as many as you have, the first is required):
+     GROQ_API_KEY=...
+     GROQ_API_KEY_2=...
+     GROQ_API_KEY_3=...
+     GROQ_API_KEY_4=...
+
+   NOTE: Groq's daily limit is per ORGANIZATION. Extra keys only add
+   quota if they belong to different organizations. Keys from the same
+   org share one limit, and the code below simply notices that and moves on.
 ========================================================= */
 
 const GROQ_TTS_URL   = "https://api.groq.com/openai/v1/audio/speech";
 const GROQ_TTS_MODEL = "canopylabs/orpheus-v1-english";
 const TTS_MAX_CHARS  = 190; // Orpheus limits input length per request
+
+// ── API keys (rotation) ──────────────────────────────────────────────────────
+const GROQ_KEYS = [
+  process.env.GROQ_API_KEY,
+  process.env.GROQ_API_KEY_2,
+  process.env.GROQ_API_KEY_3,
+  process.env.GROQ_API_KEY_4,
+].filter(Boolean);
+
+const keyBlockedUntil = new Map(); // key -> timestamp when it may be tried again
+let keyCursor = 0;                 // start with the last key that worked
+
+const DEFAULT_BLOCK_MS = 10 * 60 * 1000; // used if Groq doesn't say how long to wait
 
 const PERSONA_VOICES = {
   "senior-engineer":    "troy",
@@ -606,12 +630,31 @@ function mergeWavs(buffers) {
   return Buffer.concat([header, ...dataParts]);
 }
 
-async function groqSpeak(text, voice) {
+// Reads "try again in 20m24s" (or the Retry-After header) and returns milliseconds.
+function parseRetryMs(body, retryAfterHeader) {
+  const headerSecs = Number(retryAfterHeader);
+  if (Number.isFinite(headerSecs) && headerSecs > 0) return headerSecs * 1000;
+
+  const m = /try again in\s+([0-9hms.\s]+)/i.exec(body || "");
+  if (!m) return DEFAULT_BLOCK_MS;
+  const t = m[1];
+  const h = /(\d+(?:\.\d+)?)h/.exec(t);
+  const min = /(\d+(?:\.\d+)?)m(?!s)/.exec(t);
+  const s = /(\d+(?:\.\d+)?)s/.exec(t);
+  const ms =
+    (h ? parseFloat(h[1]) * 3600000 : 0) +
+    (min ? parseFloat(min[1]) * 60000 : 0) +
+    (s ? parseFloat(s[1]) * 1000 : 0);
+  return ms > 0 ? Math.ceil(ms) + 5000 : DEFAULT_BLOCK_MS;
+}
+
+// One request to Groq with one specific key.
+async function groqSpeakWithKey(text, voice, apiKey) {
   const res = await fetch(GROQ_TTS_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
       model: GROQ_TTS_MODEL,
@@ -623,34 +666,117 @@ async function groqSpeak(text, voice) {
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");
-    throw new Error(`Groq TTS ${res.status}: ${body.slice(0, 300)}`);
+    const err = new Error(`Groq TTS ${res.status}: ${body.slice(0, 300)}`);
+    err.status = res.status;
+    if (res.status === 429) {
+      err.retryAfterMs = parseRetryMs(body, res.headers.get("retry-after"));
+    }
+    throw err;
   }
   return Buffer.from(await res.arrayBuffer());
 }
+
+// Tries each available key in turn. A 429 puts that key on cooldown and moves on.
+async function groqSpeak(text, voice) {
+  if (GROQ_KEYS.length === 0) throw new Error("No GROQ_API_KEY configured.");
+
+  let lastError = null;
+  for (let i = 0; i < GROQ_KEYS.length; i++) {
+    const idx = (keyCursor + i) % GROQ_KEYS.length;
+    const key = GROQ_KEYS[idx];
+
+    if (Date.now() < (keyBlockedUntil.get(key) || 0)) continue; // still cooling down
+
+    try {
+      const audio = await groqSpeakWithKey(text, voice, key);
+      keyCursor = idx; // keep using the key that works
+      return audio;
+    } catch (error) {
+      lastError = error;
+      if (error.status === 429) {
+        keyBlockedUntil.set(key, Date.now() + (error.retryAfterMs || DEFAULT_BLOCK_MS));
+        console.warn(`⚠️ Groq key #${idx + 1} rate limited, trying the next one.`);
+        continue;
+      }
+      throw error; // a non-rate-limit error won't be fixed by another key
+    }
+  }
+
+  const err = lastError || new Error("All Groq keys are rate limited.");
+  err.allKeysBlocked = true;
+  throw err;
+}
+
+function groqAvailable() {
+  const now = Date.now();
+  return GROQ_KEYS.some((k) => now >= (keyBlockedUntil.get(k) || 0));
+}
+
+const EDGE_FALLBACK_VOICES = {
+  "senior-engineer":    "en-US-GuyNeural",
+  "hr-manager":         "en-ZA-LeahNeural",
+  "product-manager":    "en-GB-RyanNeural",
+  "consultant":         "en-IN-NeerjaNeural",
+  "articulation-coach": "en-ZA-LukeNeural",
+};
+
+const ttsCache = new Map();   // same text + voice is only generated once
 
 app.post("/api/tts", async (req, res) => {
   const rawText   = typeof req.body.text === "string" ? req.body.text.trim() : "";
   const personaId = typeof req.body.personaId === "string" ? req.body.personaId : "";
 
-  if (!rawText) {
-    return res.status(400).json({ error: "text is required." });
-  }
+  if (!rawText) return res.status(400).json({ error: "text is required." });
 
   const voice = voiceForPersona(personaId);
   const text  = humanizeForSpeech(rawText);
+  const key   = `${voice}|${text}`;
 
-  try {
-    const pieces  = splitForTts(text);
-    const buffers = [];
-    for (const piece of pieces) {
-      buffers.push(await groqSpeak(piece, voice));
-    }
-    res.setHeader("Content-Type", "audio/wav");
-    return res.send(mergeWavs(buffers));
-  } catch (error) {
-    console.error(`❌ TTS generation error (voice: ${voice}):`, error.message);
-    return res.status(500).json({ error: "TTS generation failed." });
+  // 0) Cache: costs zero tokens
+  const cached = ttsCache.get(key);
+  if (cached) {
+    res.setHeader("Content-Type", cached.contentType);
+    return res.send(cached.audio);
   }
+
+  const remember = (audio, contentType) => {
+    if (ttsCache.size > 200) ttsCache.delete(ttsCache.keys().next().value);
+    ttsCache.set(key, { audio, contentType });
+  };
+
+  // 1) Groq Orpheus: best voices, small daily quota, rotates across your keys
+  if (groqAvailable()) {
+    try {
+      const buffers = [];
+      for (const piece of splitForTts(text)) buffers.push(await groqSpeak(piece, voice));
+      const audio = mergeWavs(buffers);
+      remember(audio, "audio/wav");
+      res.setHeader("Content-Type", "audio/wav");
+      return res.send(audio);
+    } catch (error) {
+      console.warn(`⚠️ Groq TTS failed (${voice}): ${error.message.slice(0, 120)}`);
+    }
+  }
+
+  // 2) Edge voice: only works if Microsoft accepts this server
+  if (typeof edgeSpeech === "function") {
+    try {
+      const result = await edgeSpeech({
+        text,
+        voice: EDGE_FALLBACK_VOICES[personaId] || "en-US-AriaNeural",
+        rate: 1.0,
+        pitch: "+0Hz",
+      });
+      remember(result.audio, result.contentType);
+      res.setHeader("Content-Type", result.contentType);
+      return res.send(result.audio);
+    } catch (error) {
+      console.warn(`⚠️ Edge TTS fallback failed: ${error.message}`);
+    }
+  }
+
+  // 3) Tell the client to use the browser voice
+  return res.status(503).json({ error: "TTS unavailable." });
 });
 
 /* =========================================================

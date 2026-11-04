@@ -1,10 +1,13 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>English Coach | SkillForge AI</title>
+
+  <!-- Theme script first: sets data-theme before the page paints -->
+  <script src="../js/theme.js"></script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -12,6 +15,8 @@
   <link rel="stylesheet" href="../css/dashboard.css" />
   <link rel="stylesheet" href="../css/EnglishCoach.css" />
   <link rel="stylesheet" href="../css/back-navigation.css">
+  <!-- theme.css must be the LAST stylesheet so its dark overrides win -->
+  <link rel="stylesheet" href="../css/theme.css" />
   <script src="../js/back-navigation.js" defer></script>
 </head>
 <body>
@@ -75,7 +80,7 @@
           <i data-lucide="book-open"></i>
           <span>Study Hub</span>
         </a>
-        
+
         <a class="nav-item" href="Settings.html" data-label="Settings">
           <i data-lucide="settings"></i>
           <span>Settings</span>
