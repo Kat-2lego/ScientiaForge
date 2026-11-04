@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScientiaForge Admin — Ads</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/admin.css" />
+  <link rel="stylesheet" href="../css/theme.css" />
+
+  <script src="../js/theme.js"></script>
+</head>
+
+<body class="admin-auth-pending">
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div>
+      <div class="logo">
+        <span class="logo-dark">Scientia</span><span class="logo-blue">Forge</span>
+      </div>
+
+      <nav class="nav">
+        <a class="nav-item" href="Admin.html" data-label="Dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a class="nav-item" href="AdminUsers.html" data-label="Users">
+          <i data-lucide="users"></i>
+          <span>Users</span>
+        </a>
+
+        <a class="nav-item" href="AdminSupport.html" data-label="Support & Feedback">
+          <i data-lucide="messages-square"></i>
+          <span>Support &amp; Feedback</span>
+        </a>
+
+        <a class="nav-item active" href="AdminAds.html" data-label="Advertisements">
+          <i data-lucide="megaphone"></i>
+          <span>Advertisements</span>
+        </a>
+
+        <a class="nav-item" href="AdminSettings.html" data-label="Settings">
+          <i data-lucide="settings"></i>
+          <span>Settings</span>
+        </a>
+
+        <a class="nav-item" href="Dashboard.html" data-label="Back to App">
+          <i data-lucide="arrow-left-circle"></i>
+          <span>Back to App</span>
+        </a>
+
+        <a class="nav-item" href="" data-label="Log Out">
+          <i data-lucide="log-out"></i>
+          <span>Logout</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="download-card">
+      <div class="download-icon">
+        <i data-lucide="shield"></i>
+      </div>
+      <h3>You're in Admin Mode</h3>
+      <p>Actions here affect real user accounts.</p>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+          <i data-lucide="menu"></i>
+        </button>
+
+        <div class="admin-pill">
+          <i data-lucide="shield-check"></i>
+          Admin Panel
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="profile">
+          <div class="avatar"></div>
+          <div>
+            <div class="profile-name" data-admin-name>&hellip;</div>
+            <div class="profile-email" data-admin-email>&hellip;</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="admin-header">
+      <div>
+        <h1><i data-lucide="megaphone"></i> Advertisement Management</h1>
+        <p>Manage campaigns, monitor engagement and control advertisements across ScientiaForge.</p>
+      </div>
+
+      <button class="btn-primary" id="createAdBtn">
+        <i data-lucide="plus"></i>
+        Create Advertisement
+      </button>
+    </section>
+
+    <!-- AD PERFORMANCE -->
+    <section class="kpi-grid ads-kpi-grid">
+
+      <article class="stat-card kpi-card">
+        <div class="stat-head">
+          <div class="stat-icon blue"><i data-lucide="eye"></i></div>
+          <h3>Impressions</h3>
+        </div>
+        <div class="stat-value" id="adsImpressions">0</div>
+        <span class="stat-delta neutral">Ads displayed</span>
+      </article>
+
+      <article class="stat-card kpi-card">
+        <div class="stat-head">
+          <div class="stat-icon green"><i data-lucide="mouse-pointer-click"></i></div>
+          <h3>Clicks</h3>
+        </div>
+        <div class="stat-value" id="adsClicks">0</div>
+        <span class="stat-delta neutral">Destination visits recorded</span>
+      </article>
+
+      <article class="stat-card kpi-card">
+        <div class="stat-head">
+          <div class="stat-icon orange"><i data-lucide="x-circle"></i></div>
+          <h3>Closes</h3>
+        </div>
+        <div class="stat-value" id="adsCloses">0</div>
+        <span class="stat-delta neutral">Ads dismissed</span>
+      </article>
+
+      <article class="stat-card kpi-card">
+        <div class="stat-head">
+          <div class="stat-icon soft-green"><i data-lucide="trending-up"></i></div>
+          <h3>Click-through Rate</h3>
+        </div>
+        <div class="stat-value" id="adsCtr">0%</div>
+        <span class="stat-delta neutral">Clicks ÷ impressions</span>
+      </article>
+
+    </section>
+
+    <section class="kpi-grid secondary ads-secondary-kpi">
+
+      <article class="stat-card kpi-card">
+        <div class="stat-head">
+          <div class="stat-icon blue"><i data-lucide="users"></i></div>
+          <h3>Unique Users</h3>
+        </div>
+        <div class="stat-value" id="adsUniqueUsers">0</div>
+        <span class="stat-delta neutral">Users with recorded ad events</span>
+      </article>
+
+      <article class="stat-card kpi-card">
+        <div class="stat-head">
+          <div class="stat-icon green"><i data-lucide="radio"></i></div>
+          <h3>Active Campaigns</h3>
+        </div>
+        <div class="stat-value" id="adsActiveCount">0</div>
+        <span class="stat-delta neutral">Currently enabled campaigns</span>
+      </article>
+
+      <article class="stat-card kpi-card">
+        <div class="stat-head">
+          <div class="stat-icon orange"><i data-lucide="layers"></i></div>
+          <h3>Total Campaigns</h3>
+        </div>
+        <div class="stat-value" id="adsTotalCount">0</div>
+        <span class="stat-delta neutral">All campaigns created</span>
+      </article>
+
+    </section>
+
+    <!-- GLOBAL SETTINGS -->
+    <section class="panel ads-settings-panel">
+      <div class="ads-section-heading">
+        <div>
+          <h2>Advertising Settings</h2>
+          <p>Control whether advertisements are displayed and how frequently they appear.</p>
+        </div>
+      </div>
+
+      <div class="ads-settings-controls">
+
+        <label class="ads-toggle-row">
+          <span>
+            <strong>Enable Advertisements</strong>
+            <small>Globally enable or disable advertisements for eligible users.</small>
+          </span>
+
+          <input type="checkbox" id="adsEnabled" checked>
+        </label>
+
+        <div class="ads-frequency">
+          <label for="adsInterval">Display frequency</label>
+
+          <div class="ads-frequency-input">
+            <input type="number" id="adsInterval" min="1" max="1440" value="15">
+            <span>minutes</span>
+          </div>
+
+          <small>Default: 15 minutes. Minimum: 5 minutes.</small>
+        </div>
+
+        <button class="btn-primary" id="saveAdsSettingsBtn">
+          Save Settings
+        </button>
+
+      </div>
+    </section>
+
+    <!-- DAILY PERFORMANCE -->
+    <section class="panel ads-performance-panel">
+      <div class="ads-section-heading">
+        <div>
+          <h2>Daily Performance</h2>
+          <p>Daily impressions, clicks and dismissals.</p>
+        </div>
+      </div>
+
+      <div id="adsDailyPerformance" class="ads-daily-list">
+        <div class="table-empty">Loading performance data...</div>
+      </div>
+    </section>
+
+    <!-- CAMPAIGN LIST -->
+    <section class="panel ads-campaign-panel">
+
+      <div class="ads-section-heading">
+        <div>
+          <h2>Advertisement Campaigns</h2>
+          <p>Upload, edit, activate or remove your advertising campaigns.</p>
+        </div>
+
+        <button class="btn-chip promote" id="refreshAdsBtn">
+          <i data-lucide="refresh-cw"></i>
+          Refresh
+        </button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="ads-table">
+          <thead>
+            <tr>
+              <th>Advertisement</th>
+              <th>Type</th>
+              <th>Schedule</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody id="adsTableBody">
+            <tr>
+              <td colspan="5" class="table-empty">Loading advertisements...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<!-- CREATE / EDIT MODAL -->
+<div class="ads-modal-overlay" id="adsModal">
+  <div class="ads-modal">
+
+    <div class="ads-modal-header">
+      <div>
+        <h2 id="adsModalTitle">Create Advertisement</h2>
+        <p>Configure the media, destination and campaign schedule.</p>
+      </div>
+
+      <button type="button" class="ads-modal-close" id="closeAdsModal" aria-label="Close">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+
+    <form id="adsForm">
+
+      <input type="hidden" id="adsEditId">
+      <input type="hidden" id="adsMediaUrl">
+      <input type="hidden" id="adsMediaPath">
+
+      <div class="ads-form-field">
+        <label for="adsTitle">Advertisement title</label>
+        <input type="text" id="adsTitle" maxlength="150" required placeholder="e.g. Partner university campaign">
+      </div>
+
+      <div class="ads-form-field">
+        <label for="adsMediaFile">Upload image or video</label>
+        <input
+          type="file"
+          id="adsMediaFile"
+          accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm"
+        >
+        <small>Maximum file size: 50 MB. Supported: JPG, PNG, WEBP, GIF, MP4 and WEBM.</small>
+      </div>
+
+      <div id="adsMediaPreview" class="ads-media-preview">
+        <span>No media selected</span>
+      </div>
+
+      <div class="ads-form-field">
+        <label for="adsDestination">Destination URL</label>
+        <input type="url" id="adsDestination" required placeholder="https://example.com">
+        <small>Users will be directed here when they click the advertisement.</small>
+      </div>
+
+      <div class="ads-form-grid">
+
+        <div class="ads-form-field">
+          <label for="adsCloseDelay">Close button delay</label>
+          <select id="adsCloseDelay">
+            <option value="10">10 seconds</option>
+            <option value="12" selected>12 seconds</option>
+            <option value="15">15 seconds</option>
+            <option value="20">20 seconds</option>
+            <option value="30">30 seconds</option>
+          </select>
+        </div>
+
+        <div class="ads-form-field">
+          <label for="adsCampaignStatus">Campaign status</label>
+          <select id="adsCampaignStatus">
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="ads-form-grid">
+
+        <div class="ads-form-field">
+          <label for="adsStartsAt">Start date (optional)</label>
+          <input type="datetime-local" id="adsStartsAt">
+        </div>
+
+        <div class="ads-form-field">
+          <label for="adsEndsAt">End date (optional)</label>
+          <input type="datetime-local" id="adsEndsAt">
+        </div>
+
+      </div>
+
+      <div class="ads-modal-actions">
+        <button type="button" class="btn-chip" id="cancelAdsBtn">Cancel</button>
+        <button type="submit" class="btn-primary" id="saveAdBtn">Save Advertisement</button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<div id="toastHost"></div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="../js/adminGuard.js"></script>
+<script src="../js/adminAds.js"></script>
+<script src="../js/auth.js"></script>
+
+</body>
+</html>

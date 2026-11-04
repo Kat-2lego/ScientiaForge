@@ -1,3 +1,4 @@
+//notifications.js
 document.addEventListener("DOMContentLoaded", () => {
   const overlay = document.getElementById("plannerOverlay");
   const tab = document.getElementById("notificationsTab");

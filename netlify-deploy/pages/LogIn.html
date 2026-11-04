@@ -1,106 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ScientiaForge Login</title>
+    <title>Log in | ScientiaForge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/shared-nav.css">
     <link rel="stylesheet" href="../css/SignUp.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- change this path to wherever your login script lives -->
     <script src="../auth/loginUser.js" defer></script>
 </head>
+
 <body>
+    <!-- Top bar (same as index) -->
+    <nav class="site-nav">
+        <div class="nav-inner">
+            <a href="index.html" class="nav-logo">
+                <img src="../assets/logo-symbol.png" alt="ScientiaForge Logo" class="nav-logo-img"/>
+                <span class="logo-text"><strong><span class="logo-dark">Scientia</span><span class="logo-blue">Forge</span></strong></span>
+            </a>
 
-    <div class="master-viewport">
-        <div class="chassis-outer-shell">
-            <div class="chassis-inner-recess">
-                
-                <main class="interface-deck">
-                    
-                    <section class="sector sector-left">
-                        <div class="brand-header">
-                            <h1 class="brand-name">Scientia<span>Forge</span></h1>
-                        </div>
+            <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+                <i class="fa-solid fa-bars"></i>
+            </button>
 
-                        <div class="auth-titles" style="margin-top: 15px; margin-bottom: 30px;">
-                            <h2>Welcome back</h2>
-                            <p>Continue To "Forge Your Future. Master Your Career."</p>
-                        </div>
+            <div class="nav-menu">
+                <ul class="page-tabs">
+                    <li><a href="index.html" class="tab">Home</a></li>
+                    <li><a href="Features.html" class="tab">Features</a></li>
+                    <li><a href="about.html" class="tab">About</a></li>
+                    <li><a href="ContactUs.html" class="tab">Contact Us</a></li>
+                </ul>
 
-                        <form class="cyber-form" id="loginForm" onsubmit="event.preventDefault(); handleSignIn();">
-                            
-                            <div class="field-wrapper email" style="width: 100%;">
-                                <p>Email Address:</p>
-                                <input 
-                                    type="email" 
-                                    id="sf-email" 
-                                    placeholder="name@company.com" 
-                                    class="input" 
-                                    required 
-                                />
-                            </div>
-
-                            <div class="field-wrapper pass" style="position: relative; margin-bottom: 12px;">
-                                <p>Password:</p>
-                                <input 
-                                    type="password" 
-                                    id="sf-pass" 
-                                    placeholder="••••••••" 
-                                    class="input" 
-                                    required 
-                                />
-                                <button 
-                                    type="button" 
-                                    id="sf-eye-icon-btn" 
-                                    onclick="togglePw()" 
-                                    style="position: absolute; right: 16px; bottom: 12px; background: none; border: none; cursor: pointer; color: #64748b;"
-                                >
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-
-                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 25px; padding: 0 4px;">
-                                <label class="checkbox-lbl-item" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                    <input type="checkbox" id="sf-remember" style="cursor: pointer;">
-                                    <span style="font-size: 13px; color: #475569; font-weight: 600;">Remember me</span>
-                                </label>
-                                <a href="ForgotPassword.html" class="link-forgot" style="font-size: 13px; color: #058c95; text-decoration: none; font-weight: 700;">Forgot Password?</a>
-                            </div>
-
-                            <div class="field-wrapper" style="width: 100%; margin-top: 10px;">
-                                <button type="submit" class="secure-submit btn-primary final-login-btn">
-                                    <span class="btn-inner-text">Sign In</span>
-                                </button>
-                            </div>
-
-                            <div class="auth-switch">
-                                <div class="divider-line"><span>OR</span></div>
-                                <p>Don't have an account yet? <a href="SignUp.html" class="link-forgot">Sign Up</a></p>
-                            </div>
-                        </form>
-                    </section>
-
-                    <div class="kinetic-divider">
-                        <div class="divider-glow-core"></div>
-                    </div>
-
-                    <section class="sector sector-right">
-                        <div class="welcome-copy">
-                            <h3><p style="color: #000; font-weight: bold; margin-bottom: 5px;">Welcome Back To ScientiaForge!</p>Please log in to your<br><span class="navy">Scientia</span><span class="cyan">Forge</span> account.</h3>
-                            <p></p>
-                        </div>
-
-                        <div class="visual-stage">
-                            <img src="../assets/handshake1.png" alt="Handshake" class="handshake-img">
-                        </div>
-                    </section>
-
-                </main>
+                <div class="nav-actions">
+                    <a href="LogIn.html" class="nav-link">Log In</a>
+                    <a href="SignUp.html" class="nav-cta">Get Started</a>
+                </div>
             </div>
         </div>
+    </nav>
 
-        <footer class="global-footer">
-            © 2026 ScientiaForge AI - ScriptSquad SECURE SIGN IN ACCESS
-        </footer>
+    <div class="master-viewport">
+        <main class="interface-deck">
+
+            <section class="sector sector-left" style="justify-content:center">
+                <a href="index.html" class="mobile-brand" style="text-decoration:none">
+                    <img src="../assets/logo-symbol.png" alt="">
+                    <span class="brand-name"><span class="logo-dark">Scientia</span><span class="logo-blue">Forge</span></span>
+                </a>
+
+                <form id="loginForm" onsubmit="event.preventDefault(); handleSignIn();">
+                    <div class="auth-titles">
+                        <h2>Welcome back</h2>
+                        <p>Log in to pick up where you left off.</p>
+                    </div>
+
+                    <div class="field-wrapper">
+                        <label for="sf-email">Email</label>
+                        <input type="email" id="sf-email" placeholder="you@example.com" class="input" autocomplete="email" required>
+                    </div>
+
+                    <div class="field-wrapper pass">
+                        <label for="sf-pass">Password</label>
+                        <input type="password" id="sf-pass" placeholder="Your password" class="input" autocomplete="current-password" required>
+                        <button type="button" id="sf-eye-icon-btn" onclick="togglePw()" aria-label="Show or hide password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+
+                    <div class="form-meta">
+                        <label class="remember-label"><input type="checkbox" id="sf-remember"> Remember my email</label>
+                        <a href="#">Forgot password?</a>
+                    </div>
+
+                    <div class="step-navigation-actions">
+                        <button type="submit" class="secure-submit final-login-btn">
+                            <span class="btn-inner-text">Sign In</span>
+                        </button>
+                    </div>
+
+                    <p class="auth-switch">New to ScientiaForge? <a href="SignUp.html">Create an account</a></p>
+                </form>
+            </section>
+
+            <aside class="sector sector-right">
+                <a href="index.html" class="brand" style="text-decoration:none">
+                    <img src="../assets/logo-symbol.png" alt="ScientiaForge logo">
+                    <span class="brand-name"><span class="logo-dark">Scientia</span><span class="logo-blue">Forge</span></span>
+                </a>
+
+                <div class="aside-copy">
+                    <h2>Your career plan is waiting.</h2>
+                    <p>Your skill gaps, saved applications and interview practice are right where you left them.</p>
+                </div>
+
+                <div class="aside-sample">
+                    <div class="sample-head"><span>Skill readiness</span><strong>Sample</strong></div>
+                    <div class="sample-row"><span>SQL</span><div class="sample-track"><i style="width:80%"></i></div><b>80%</b></div>
+                    <div class="sample-row"><span>Communication</span><div class="sample-track"><i style="width:65%"></i></div><b>65%</b></div>
+                    <div class="sample-row"><span>Data analysis</span><div class="sample-track"><i style="width:40%"></i></div><b>40%</b></div>
+                    <p class="sample-note">Illustration only.</p>
+                </div>
+            </aside>
+
+        </main>
+
+        <footer class="global-footer">© 2026 ScientiaForge AI · ScriptSquad</footer>
     </div>
+
+    <script src="../js/landing-nav.js"></script>
 </body>
+
 </html>

@@ -1,0 +1,185 @@
+/* =====================================================
+   SCIENTIAFORGE ADVERTISEMENT POPUP
+===================================================== */
+
+.sf-ad-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(8, 15, 30, 0.88);
+  backdrop-filter: blur(5px);
+
+  opacity: 0;
+  visibility: hidden;
+
+  transition:
+    opacity 0.25s ease,
+    visibility 0.25s ease;
+}
+
+.sf-ad-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Main popup */
+
+.sf-ad-container {
+  width: 100%;
+  max-width: 1050px;
+  max-height: 92vh;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #ffffff;
+  border-radius: 14px;
+  overflow: hidden;
+
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.35);
+
+  transform: translateY(15px);
+  transition: transform 0.25s ease;
+}
+
+.sf-ad-overlay.visible .sf-ad-container {
+  transform: translateY(0);
+}
+
+/* Header */
+
+.sf-ad-header {
+  min-height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 8px 15px;
+
+  background: #ffffff;
+}
+
+.sf-ad-header > span {
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+
+.sf-ad-close {
+  width: 34px;
+  height: 34px;
+
+  display: grid;
+  place-items: center;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: #f1f5f9;
+  color: #1e293b;
+
+  font-size: 25px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.sf-ad-close:hover {
+  background: #e2e8f0;
+  transform: rotate(90deg);
+}
+
+.sf-ad-close[hidden] {
+  display: none;
+}
+
+/* Advertisement media */
+
+.sf-ad-media-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  min-height: 250px;
+  max-height: calc(92vh - 105px);
+
+  overflow: hidden;
+  background: #0f172a;
+
+  cursor: pointer;
+}
+
+.sf-ad-media-link img,
+.sf-ad-media-link video {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  max-height: calc(92vh - 105px);
+
+  object-fit: contain;
+}
+
+/* Footer */
+
+.sf-ad-footer {
+  min-height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+  padding: 10px 16px;
+
+  background: #ffffff;
+}
+
+.sf-ad-footer span:first-child {
+  color: #1e293b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sf-ad-footer span:last-child {
+  color: #64748b;
+  font-size: 11px;
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  .sf-ad-overlay {
+    padding: 10px;
+  }
+
+  .sf-ad-container {
+    max-height: 88vh;
+    border-radius: 10px;
+  }
+
+  .sf-ad-media-link {
+    min-height: 180px;
+    max-height: calc(88vh - 100px);
+  }
+
+  .sf-ad-media-link img,
+  .sf-ad-media-link video {
+    max-height: calc(88vh - 100px);
+  }
+}

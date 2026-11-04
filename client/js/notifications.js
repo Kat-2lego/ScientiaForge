@@ -1,3 +1,4 @@
+//notifications.js
 document.addEventListener("DOMContentLoaded", () => {
   const overlay = document.getElementById("plannerOverlay");
   const tab = document.getElementById("notificationsTab");
@@ -77,19 +78,46 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   async function handleFollowupAction(applicationId, status, actionsRow) {
-    actionsRow.querySelectorAll("button").forEach((b) => (b.disabled = true));
-    try {
-      if (status) {
-        await request(`/applications/${applicationId}/status`, {
+  const buttons = actionsRow.querySelectorAll("button");
+
+  buttons.forEach((button) => {
+    button.disabled = true;
+  });
+
+  try {
+    if (status) {
+      const result = await request(
+        `/applications/${encodeURIComponent(applicationId)}/status`,
+        {
           method: "PATCH",
           body: JSON.stringify({ status }),
-        });
-      }
-      actionsRow.textContent = status ? "Updated on your board." : "Thanks, noted.";
-    } catch (error) {
-      actionsRow.textContent = "Couldn't update - try again from the Job Tracker.";
+        }
+      );
+
+      // Notify the Application Command Centre that its data changed.
+      document.dispatchEvent(
+        new CustomEvent("application:updated", {
+          detail: {
+            application: result.application,
+          },
+        })
+      );
+
+      actionsRow.textContent = "Application status updated.";
+    } else {
+      actionsRow.textContent = "Marked as still waiting.";
     }
+  } catch (error) {
+    console.error("Follow-up action failed:", error);
+
+    actionsRow.textContent =
+      error.message || "Couldn't update. Please try again.";
+
+    buttons.forEach((button) => {
+      button.disabled = false;
+    });
   }
+}
 
   function renderNotifications(items) {
     list.replaceChildren();
